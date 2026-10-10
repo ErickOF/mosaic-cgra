@@ -1,8 +1,10 @@
-"""Starter PyUVM test for the counter's default parameter configuration."""
+"""Starter PyUVM test for the counter, including delayed gate-level outputs."""
+
+import os
 
 import cocotb
 from cocotb.clock import Clock
-from cocotb.triggers import FallingEdge, ReadOnly, RisingEdge
+from cocotb.triggers import FallingEdge, ReadOnly, RisingEdge, Timer
 from pyuvm import test, uvm_test
 
 
@@ -11,6 +13,12 @@ class CounterTest(uvm_test):
     async def run_phase(self):
         self.raise_objection()
         dut = cocotb.top
+        clock_period_ns = float(os.environ.get("TEST_CLOCK_PERIOD_NS", "10"))
+        settle_ns = float(os.environ.get("TEST_SETTLE_NS", "0"))
+        assert clock_period_ns > 0, "TEST_CLOCK_PERIOD_NS must be positive"
+        assert 0 <= settle_ns < clock_period_ns / 2, (
+            "TEST_SETTLE_NS must be nonnegative and less than half the clock period"
+        )
         dut.i_clk.value = 0
         dut.i_rstb.value = 0
         dut.i_enable.value = 0
@@ -18,13 +26,15 @@ class CounterTest(uvm_test):
         dut.i_load.value = 0
         dut.i_direction.value = 0
         dut.i_load_value.value = 0
-        cocotb.start_soon(Clock(dut.i_clk, 10, unit="ns").start())
+        cocotb.start_soon(Clock(dut.i_clk, clock_period_ns, unit="ns").start())
 
         async def cycle(count, *, overflow=0, underflow=0, terminal=0, **inputs):
             await FallingEdge(dut.i_clk)
             for name, value in inputs.items():
                 getattr(dut, f"i_{name}").value = value
             await RisingEdge(dut.i_clk)
+            if settle_ns:
+                await Timer(settle_ns, unit="ns")
             await ReadOnly()
             for name, expected in {
                 "count": count,
