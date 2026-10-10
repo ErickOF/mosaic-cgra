@@ -43,6 +43,35 @@ Build products and the JUnit report are stored in
 the selected build and report. Clean before changing compiler options or the
 source list to force recompilation. `make help` lists the main options.
 
+Generate a SAIF activity file from the PyUVM simulation with VCS:
+
+```sh
+make saif
+```
+
+The target records activity from time zero through the end of the selected
+tests and writes `build/vcs/<top>/<top>.saif`. It uses the VCS UCLI `power`
+commands in `verif/vcs/saif.tcl` to collect activity directly, including
+SystemVerilog signals and memories. It keeps UCLI active after cocotb finishes
+so the report is written before exiting. No changes to the RTL or Python
+tests are required.
+
+Configure the output path, captured hierarchy, and report time unit (in
+seconds) as needed:
+
+```sh
+make saif SAIF_FILE="$(pwd)/build/activity.saif" \
+  SAIF_SCOPE=counter SAIF_TIME_UNIT=1e-9
+```
+
+`SAIF_SCOPE` defaults to `COCOTB_TOPLEVEL`; it can also select a child instance,
+such as `my_top.dut`. `SAIF_TIME_UNIT` defaults to `1e-9` (1 ns) and controls
+the report units, not the simulation clock. The usual source, test, compiler,
+and runtime overrides also apply. This target requires `SIM=vcs`, removes any
+previous output before running, and fails if the simulation fails or no
+nonempty SAIF file is produced. `make clean` also removes `SAIF_FILE`, including
+when its path is outside the selected build directory.
+
 The simulator can be overridden, for example:
 
 ```sh
