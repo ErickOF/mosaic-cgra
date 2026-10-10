@@ -82,7 +82,10 @@ if {![link]} { error "Link failed; check the technology libraries." }
 # =============================================================
 # Preliminary checks
 # =============================================================
-set design_ok [check_design > $PROJECT_HOME_SYN/reports/${DESIGN_NAME}_check_design.rpt]
+# Capture the command status inside redirect; redirection itself returns "".
+redirect -file "$PROJECT_HOME_SYN/reports/${DESIGN_NAME}_check_design.rpt" {
+    set design_ok [check_design]
+}
 if {!$design_ok} { error "Pre-synthesis check_design failed." }
 report_reference > $PROJECT_HOME_SYN/reports/${DESIGN_NAME}_reference.rpt
 report_design    > $PROJECT_HOME_SYN/reports/${DESIGN_NAME}_design.rpt
@@ -128,7 +131,9 @@ if {[llength [info commands optimize_leakage]] > 0} {
 if {![compile_ultra -gate_clock -retime -incremental {*}$::env(MOSAIC_SYNTH_COMPILE_ARGS)]} {
     error "Incremental compile_ultra pass failed."
 }
-set design_ok [check_design > $PROJECT_HOME_SYN/reports/${DESIGN_NAME}_check_design_post.rpt]
+redirect -file "$PROJECT_HOME_SYN/reports/${DESIGN_NAME}_check_design_post.rpt" {
+    set design_ok [check_design]
+}
 if {!$design_ok} { error "Post-synthesis check_design failed." }
 
 # =============================================================
