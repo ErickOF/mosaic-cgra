@@ -45,6 +45,7 @@ pyuvm:
 
 # Pass values through the environment so Tcl treats paths and hierarchy names
 # as data. Keep existing runtime options when enabling the UCLI capture script.
+# The script's config endofsim noexit command requires -ucli2Proc at runtime.
 saif: export MOSAIC_SAIF_FILE = $(abspath $(SAIF_FILE))
 saif: export MOSAIC_SAIF_SCOPE = $(SAIF_SCOPE)
 saif: export MOSAIC_SAIF_TIME_UNIT = $(SAIF_TIME_UNIT)
@@ -54,7 +55,7 @@ saif:
 	@mkdir -p "$(dir $(abspath $(SAIF_FILE)))"
 	$(RM) -- "$(abspath $(SAIF_FILE))"
 	+$(MAKE) --no-print-directory -C "$(PROJECT_ROOT)" -f Makefile \
-		pyuvm SIM_ARGS="$(SIM_ARGS) -ucli -i $(SAIF_SCRIPT)"
+		pyuvm SIM_ARGS="$(SIM_ARGS) -ucli -ucli2Proc -i $(SAIF_SCRIPT)"
 	@test -s "$(abspath $(SAIF_FILE))" || { \
 		echo 'VCS did not generate a nonempty SAIF file.' >&2; exit 2; }
 	@printf 'SAIF generated: %s\n' "$(abspath $(SAIF_FILE))"

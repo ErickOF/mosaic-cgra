@@ -52,9 +52,10 @@ make saif
 The target records activity from time zero through the end of the selected
 tests and writes `build/vcs/<top>/<top>.saif`. It uses the VCS UCLI `power`
 commands in `verif/vcs/saif.tcl` to collect activity directly, including
-SystemVerilog signals and memories. It keeps UCLI active after cocotb finishes
-so the report is written before exiting. No changes to the RTL or Python
-tests are required.
+SystemVerilog signals and memories. It enables `-ucli2Proc`, required by
+`config endofsim noexit`, to keep UCLI active after cocotb finishes so the
+report is written before exiting. No changes to the RTL or Python tests are
+required.
 
 Configure the output path, captured hierarchy, and report time unit (in
 seconds) as needed:

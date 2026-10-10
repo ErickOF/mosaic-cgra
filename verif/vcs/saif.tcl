@@ -1,4 +1,5 @@
 # Retain UCLI after cocotb finishes the simulation so activity can be reported.
+# Requires the -ucli2Proc runtime option supplied by the saif target.
 config endofsim noexit
 power -gate_level all mda sv
 power $env(MOSAIC_SAIF_SCOPE)
