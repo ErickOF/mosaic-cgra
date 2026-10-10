@@ -57,6 +57,10 @@ SystemVerilog signals and memories. It enables `-ucli2Proc`, required by
 report is written before exiting. No changes to the RTL or Python tests are
 required.
 
+The target also passes `-lca` to `simv` to enable SystemVerilog SAIF monitoring
+in VCS releases that gate the SV-SAIF flow as a Limited Customer Availability
+feature. This prevents `LCA_FEATURES_NEED_OPTION` at `power -gate_level`.
+
 Configure the output path, captured hierarchy, and report time unit (in
 seconds) as needed:
 
