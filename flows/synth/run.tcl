@@ -25,7 +25,7 @@ if {[catch {
 # Locate the repository from this script, independently of DC's working
 # directory. Keep generated files in the build directory supplied by Make.
 set SCRIPT_DIR          [file dirname [file normalize [info script]]]
-set PROJECT_HOME        [file normalize "$SCRIPT_DIR/.."]
+set PROJECT_HOME        [file normalize "$SCRIPT_DIR/../.."]
 set PROJECT_HOME_SYN    $::env(MOSAIC_SYNTH_BUILD)
 
 # ----------- Design -----------
@@ -134,7 +134,7 @@ set CLOCK_PERIOD $::env(MOSAIC_SYNTH_CLOCK_PERIOD)
 if {$::env(MOSAIC_SYNTH_CONSTRAINTS) ne ""} {
     source $::env(MOSAIC_SYNTH_CONSTRAINTS)
 } else {
-    source $PROJECT_HOME/constraints/timing.sdc
+    source $PROJECT_HOME/src/constraints/timing.sdc
 }
 
 # Request separate port connections and buffered constants during compilation
@@ -184,7 +184,7 @@ if {!$design_ok} { error "Post-synthesis check_design failed." }
 # =============================================================
 # Preserve QoR, area, timing, and constraint diagnostics for budget review.
 # This flow does not import test activity, so its power report uses estimated
-# activity. power/run.tcl consumes the gate simulation's SAIF for test power.
+# activity. flows/power/run.tcl consumes the gate simulation's SAIF for test power.
 report_qor             > $PROJECT_HOME_SYN/reports/${DESIGN_NAME}_qor.rpt
 report_area            > $PROJECT_HOME_SYN/reports/${DESIGN_NAME}_area.rpt
 report_area -hierarchy > $PROJECT_HOME_SYN/reports/${DESIGN_NAME}_area_hier.rpt

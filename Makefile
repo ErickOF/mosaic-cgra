@@ -10,23 +10,26 @@ SIM ?= vcs
 TOPLEVEL_LANG ?= verilog
 COCOTB_TOPLEVEL ?= counter
 COCOTB_TEST_MODULES ?= test_$(COCOTB_TOPLEVEL)
-# Add the selected test directory to the Python import path used by cocotb.
-PYUVM_TEST_DIR ?= $(PROJECT_ROOT)/verif/pyuvm
-COUNTER_TEST_DIR := $(PROJECT_ROOT)/verif/pyuvm
-VERILOG_SOURCES ?= $(PROJECT_ROOT)/src/rtl/common/$(COCOTB_TOPLEVEL).sv
+# Discover validation modules by top name across common/basic categories.
+# Override the directory when a top has multiple suites or lives elsewhere.
+PYUVM_TEST_DIR ?= $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/$(COCOTB_TOPLEVEL)))
+COUNTER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/counter))
+# Locate the selected RTL top using the same category layout as validation.
+# Designs with dependencies still provide an ordered VERILOG_SOURCES list.
+VERILOG_SOURCES ?= $(or $(firstword $(wildcard $(PROJECT_ROOT)/src/rtl/*/$(COCOTB_TOPLEVEL).sv)),$(PROJECT_ROOT)/src/rtl/common/$(COCOTB_TOPLEVEL).sv)
 SIM_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/$(COCOTB_TOPLEVEL)
 COCOTB_RESULTS_FILE ?= $(SIM_BUILD)/results.xml
 SAIF_FILE ?= $(SIM_BUILD)/$(COCOTB_TOPLEVEL).saif
 SAIF_SCOPE ?= $(COCOTB_TOPLEVEL)
 SAIF_TIME_UNIT ?= 1e-9
-SAIF_SCRIPT := $(PROJECT_ROOT)/verif/vcs/saif.tcl
+SAIF_SCRIPT := $(PROJECT_ROOT)/flows/vcs/saif.tcl
 
 DC_SHELL ?= dc_shell
 DC_ARGS ?=
 TECH_SETUP_TCL ?=
 DC_SETUP_TCL ?=
-SYNTH_SCRIPT := $(PROJECT_ROOT)/synth/run.tcl
-SYNTH_CONSTRAINTS ?= $(PROJECT_ROOT)/constraints/timing.sdc
+SYNTH_SCRIPT := $(PROJECT_ROOT)/flows/synth/run.tcl
+SYNTH_CONSTRAINTS ?= $(PROJECT_ROOT)/src/constraints/timing.sdc
 SYNTH_BUILD ?= $(PROJECT_ROOT)/build/synth/$(COCOTB_TOPLEVEL)
 SYNTH_CLOCK_PORT ?= i_clk
 SYNTH_CLOCK_PERIOD ?= 4.0
@@ -49,8 +52,8 @@ POWER_SHELL ?= pt_shell
 POWER_ARGS ?=
 POWER_TECH_SETUP_TCL ?= $(TECH_SETUP_TCL)
 POWER_TOOL_SETUP_TCL ?=
-POWER_SCRIPT := $(PROJECT_ROOT)/power/run.tcl
-POWER_SUMMARY_SCRIPT := $(PROJECT_ROOT)/power/summarize.py
+POWER_SCRIPT := $(PROJECT_ROOT)/flows/power/run.tcl
+POWER_SUMMARY_SCRIPT := $(PROJECT_ROOT)/flows/power/summarize.py
 POWER_BUILD ?= $(PROJECT_ROOT)/build/power/$(COCOTB_TOPLEVEL)/$(if $(strip $(SDF_FILE)),timing,functional)
 POWER_SDC_FILE ?= $(SYNTH_BUILD)/netlist/$(COCOTB_TOPLEVEL).sdc
 SPEF_FILE ?=
@@ -107,7 +110,7 @@ counter-regression:
 	@test -x "$(PYTHON_BIN)" || { \
 		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
 	@test -r "$(COUNTER_TEST_DIR)/run_counter_regression.py" || { \
-		echo 'Counter regression missing under verif/pyuvm.' >&2; exit 2; }
+		echo 'Counter regression missing under src/val/<category>/counter.' >&2; exit 2; }
 	@"$(PYTHON_BIN)" "$(COUNTER_TEST_DIR)/run_counter_regression.py" \
 		--sim "$(SIM)" --build-dir "$(COUNTER_REGRESSION_BUILD)" \
 		--seed "$(COUNTER_SEED)" --random-cycles "$(COUNTER_RANDOM_CYCLES)" \
@@ -124,6 +127,8 @@ saif: export MOSAIC_SAIF_TIME_UNIT = $(SAIF_TIME_UNIT)
 saif:
 	@test "$(SIM)" = vcs || { \
 		echo 'SAIF generation requires SIM=vcs.' >&2; exit 2; }
+	@test -r "$(SAIF_SCRIPT)" || { \
+		echo 'SAIF_SCRIPT must point to a readable VCS capture script.' >&2; exit 2; }
 	@mkdir -p "$(dir $(abspath $(SAIF_FILE)))"
 	$(RM) -- "$(abspath $(SAIF_FILE))"
 	+$(MAKE) --no-print-directory -C "$(PROJECT_ROOT)" -f Makefile \

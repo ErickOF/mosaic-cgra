@@ -1,6 +1,8 @@
 .venv/
 build/
+tests/
 __pycache__/
 *.pyc
 ucli.key
 cm.log
+flows/synth/setup.sh

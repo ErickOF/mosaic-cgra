@@ -5,7 +5,7 @@
 # Invoked by make power-report, either directly on an existing gate SAIF or
 # after make power runs the selected PyUVM test with VCS. This driver loads
 # the simulated netlist, annotates its activity, and writes average power.
-# power/summarize.py then combines that report with the SAIF capture duration
+# flows/power/summarize.py then combines that report with the SAIF capture duration
 # to calculate interval energy in joules.
 #
 # Environment inputs exported by Make:

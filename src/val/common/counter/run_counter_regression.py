@@ -15,9 +15,9 @@ import sys
 import xml.etree.ElementTree as ET
 
 
-# verif/pyuvm is two directory levels below the project root.
+# src/val/<category>/counter is four directory levels below the project root.
 # Resolve from the script so direct invocations work from any directory.
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[4]
 PROFILES = (
     ("minimum_saturating", 1, 1, 0, 0),
     ("minimum_wrapping", 1, 0, 0, 0),

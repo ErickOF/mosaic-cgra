@@ -40,7 +40,7 @@ Set `COUNTER_REGRESSION_BUILD` to relocate the reports; the default is
 `build/<simulator>/counter/regression`. A missing coverage bin, scoreboard
 mismatch, absent result, or simulator failure makes the target fail. The
 aggregate `summary.json` records missing simulator tools as `NOT_RUN`.
-See the [verification details and local results](verif/pyuvm/README.md)
+See the [verification details and local results](src/val/common/counter/README.md)
 for requirement mapping, artifacts, and limits of the simulation campaign.
 
 Choose a different HDL top and Python test module:
@@ -50,13 +50,17 @@ make pyuvm COCOTB_TOPLEVEL=my_top COCOTB_TEST_MODULES=test_my_top \
   VERILOG_SOURCES="$(pwd)/src/rtl/my_top.sv $(pwd)/src/rtl/common/counter.sv"
 ```
 
-Place tests in `verif/pyuvm`, or set `PYUVM_TEST_DIR` to another test directory.
-Additional import directories can be supplied through `PYTHONPATH`. Set
+Place tests in `src/val/<category>/<top>`; the Makefile discovers the directory
+matching `COCOTB_TOPLEVEL`. The counter suite is in `src/val/common/counter`.
+Set `PYUVM_TEST_DIR=/absolute/path/to/tests` to select another location or
+choose between multiple suites for the same top. Additional import directories
+can be supplied through `PYTHONPATH`. Set
 `COCOTB_TEST_MODULES` to importable module names without `.py`; multiple modules
 are comma-separated. It defaults to `test_<COCOTB_TOPLEVEL>`. When
-`VERILOG_SOURCES` is omitted, it defaults to
-`src/rtl/common/<COCOTB_TOPLEVEL>.sv`. Package sources must precede sources
-that import them.
+`VERILOG_SOURCES` is omitted, the Makefile discovers the selected top under
+`src/rtl/<category>/<COCOTB_TOPLEVEL>.sv`. Provide an ordered source list for
+designs that instantiate other modules or import packages. Package sources
+must precede sources that import them.
 
 Pass additional compiler options with `COMPILE_ARGS`, runtime options with
 `SIM_ARGS`, and HDL plusargs with `COCOTB_PLUSARGS`. The cocotb VCS backend
@@ -70,7 +74,10 @@ Build products and the JUnit report are stored in
 the selected build and report. Clean before changing compiler options or the
 source list to force recompilation. `make help` lists the main options.
 
-`make -n counter-regression` prints its command without changing reports.
+The shared flow drivers are under `flows/synth`, `flows/power`, and `flows/vcs`;
+the reusable timing budget is `src/constraints/timing.sdc`. Machine-specific
+synthesis setup files can live at `flows/synth/setup.sh`, which is ignored by
+Git. `make -n counter-regression` prints its command without changing reports.
 
 Generate a SAIF activity file from the PyUVM simulation with VCS:
 
@@ -80,7 +87,7 @@ make saif
 
 The target records activity from time zero through the end of the selected
 tests and writes `build/vcs/<top>/<top>.saif`. It uses the VCS UCLI `power`
-commands in `verif/vcs/saif.tcl` to collect activity directly, including
+commands in `flows/vcs/saif.tcl` to collect activity directly, including
 SystemVerilog signals and memories. It enables `-ucli2Proc`, required by
 `config endofsim noexit`, to keep UCLI active after cocotb finishes so the
 report is written before exiting. No changes to the RTL or Python tests are
@@ -133,11 +140,11 @@ server. Override `DC_SHELL` with an absolute executable path when `dc_shell` is
 not on `PATH`, and use `DC_ARGS` for shell options. Python is not needed for
 `make synth`.
 
-The driver `synth/run.tcl` follows the sections and commands in the
+The driver `flows/synth/run.tcl` follows the sections and commands in the
 reference screenshots: base paths (`PROJECT_HOME`, `PROJECT_HOME_SYN`), design, RTL,
 technology setup, directories, debug output, read/elaborate, checks, constraints,
 compile, reports, and outputs. It analyzes `VERILOG_SOURCES` in order,
-elaborates `COCOTB_TOPLEVEL`, and sources the shared `constraints/timing.sdc`
+elaborates `COCOTB_TOPLEVEL`, and sources the shared `src/constraints/timing.sdc`
 budget. Script comments and diagnostics are in English. Output paths remain
 under `SYNTH_BUILD`:
 
@@ -164,7 +171,7 @@ capacitance unit. `SYNTH_CLOCK_PORT=i_clk` selects the counter's actual port;
 set it to `clk` for the port in the screenshots. The synthesis driver maps
 these Make options to the SDC's `CLOCK_PERIOD` and `CLOCK_PORT` variables.
 As in the reference, sequential constraints are skipped when that port is
-absent. `SYNTH_CONSTRAINTS` defaults to `constraints/timing.sdc`; set it to
+absent. `SYNTH_CONSTRAINTS` defaults to `src/constraints/timing.sdc`; set it to
 `/server/path/design.sdc` to replace this budget, including for combinational
 designs.
 
@@ -177,7 +184,7 @@ set CLOCK_PORT clk
 set CLOCK_PERIOD 4.0
 set CLOCK_NAME CLK
 set OUTPUT_LOAD 0.04
-source /absolute/path/mosaic-cgra/constraints/timing.sdc
+source /absolute/path/mosaic-cgra/src/constraints/timing.sdc
 ```
 
 Defaults are `CLOCK_PORT=i_clk`, `CLOCK_PERIOD=4.0`, `CLOCK_NAME=CLK`, and

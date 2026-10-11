@@ -1,7 +1,7 @@
 # Counter functional verification with PyUVM
 
 The verification contract is the
-[MOSAIC counter specification](../../../specs/common/mosaic-counter/README.md),
+[MOSAIC counter specification](../../../../../specs/common/mosaic-counter/README.md),
 especially its Functional Verification, Required Assertions, and Coverage
 Requirements sections. `test_counter_spec.CounterSpecTest` verifies the
 unmodified `src/rtl/common/counter.sv` against that contract.
@@ -34,13 +34,20 @@ from another configuration.
 For a focused diagnostic run, use the same runner directly:
 
 ```sh
-.venv/bin/python verif/pyuvm/run_counter_regression.py \
+.venv/bin/python src/val/common/counter/run_counter_regression.py \
   --sim icarus --build-dir build/icarus/counter/focused --case async_reset
 ```
 
 A focused run is recorded as `selected_profiles`, rather than a complete
 recommended matrix. `--rtl` can select a temporary faulty RTL copy to check
 whether the verification environment detects a defect.
+
+The Makefile discovers counter tests under `src/val/<category>/counter`, so
+moving the suite between `common` and `basic` keeps both the smoke test and
+regression targets working. Set `PYUVM_TEST_DIR` explicitly for other test
+locations or when multiple suites share a top name. The regression always
+uses the test directory containing its runner. Shared VCS SAIF commands live
+in `flows/vcs/saif.tcl`.
 
 ## Recommended configurations
 
@@ -138,6 +145,10 @@ with 20,283 checked cycles and 16,000 random cycles using the default seeds.
 Every functional coverage goal and every matrix cross passed. Reset-state
 coverage was exhaustive for the 1-, 4-, and 8-bit profiles. X and Z were
 observed on every control in every profile.
+
+After moving the suite to `src/val/common/counter`, the smoke test, full matrix,
+and all 31 synthesis/power flow checks passed again. A focused asynchronous
+reset run invoked directly from outside `mosaic-cgra` also passed.
 
 The verified RTL SHA-256 was
 `d02f311941ef1fc913b80ab2bb5d66cdc35c817dddacb459e7400b9597d8806f`.
