@@ -76,6 +76,23 @@ cases must fail elaboration. Set `DECODER_SEED`, `DECODER_RANDOM_CYCLES`, and
 [decoder verification details](src/val/common/decoder/README.md)
 for requirement mapping and verification scope.
 
+Run the DFF's specification-based sequential regression:
+
+```sh
+make dff-regression
+make dff-regression SIM=icarus
+```
+
+The PyUVM suite covers all seven recommended configurations and four additional
+profiles, including all reset/enable branches, widths from 1 to 128 bits,
+nonzero reset patterns, short reset pulses, capture/hold sequences, and X/Z
+control assertions. A passive waveform monitor also checks output transitions
+between clock edges. Configure the campaign with `DFF_SEED`,
+`DFF_RANDOM_CYCLES`, and `DFF_REGRESSION_BUILD`; reports default to
+`build/<simulator>/dff/regression`. See the
+[DFF verification details](src/val/common/dff/README.md) for coverage mapping
+and the existing RTL's parameter-validation limitations.
+
 Choose a different HDL top and Python test module:
 
 ```sh
@@ -110,7 +127,7 @@ source list to force recompilation. `make help` lists the main options.
 The shared flow drivers are under `flows/synth`, `flows/power`, and `flows/vcs`;
 the reusable timing budget is `src/constraints/timing.sdc`. Machine-specific
 synthesis setup files can live at `flows/synth/setup.sh`, which is ignored by
-Git. Dry runs of the counter, clock gate, and decoder regression targets print
+Git. Dry runs of the counter, clock gate, decoder, and DFF regression targets print
 their commands without changing reports.
 
 Generate a SAIF activity file from the PyUVM simulation with VCS:
