@@ -17,6 +17,7 @@ COUNTER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/counter))
 CLOCK_GATE_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/clock_gate))
 DECODER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/decoder))
 DFF_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/dff))
+ISOLATION_CELL_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/isolation_cell))
 # Locate the selected RTL top using the same category layout as validation.
 # Designs with dependencies still provide an ordered VERILOG_SOURCES list.
 VERILOG_SOURCES ?= $(or $(firstword $(wildcard $(PROJECT_ROOT)/src/rtl/*/$(COCOTB_TOPLEVEL).sv)),$(PROJECT_ROOT)/src/rtl/common/$(COCOTB_TOPLEVEL).sv)
@@ -89,6 +90,11 @@ DFF_RANDOM_CYCLES ?= 2000
 DFF_SEED ?= 20261010
 _DFF_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
 _DFF_MAKE := $(MAKE)
+ISOLATION_CELL_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/isolation_cell/regression
+ISOLATION_CELL_RANDOM_CYCLES ?= 2000
+ISOLATION_CELL_SEED ?= 20261011
+_ISOLATION_CELL_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_ISOLATION_CELL_MAKE := $(MAKE)
 
 export PYTHONPATH := $(PYUVM_TEST_DIR)$(if $(PYTHONPATH),:$(PYTHONPATH))
 CUSTOM_COMPILE_DEPS += $(PROJECT_ROOT)/Makefile
@@ -110,7 +116,7 @@ endif
 endif
 include $(shell "$(PYTHON_BIN)" -m cocotb_tools.config --makefiles)/Makefile.sim
 else
-.PHONY: all sim pyuvm counter-regression clock-gate-regression decoder-regression dff-regression saif synth gate-sim gate-saif gate-check power power-report power-check power-invalidate setup clean clean-gate clean-synth clean-power help
+.PHONY: all sim pyuvm counter-regression clock-gate-regression decoder-regression dff-regression isolation-cell-regression saif synth gate-sim gate-saif gate-check power power-report power-check power-invalidate setup clean clean-gate clean-synth clean-power help
 
 all sim: pyuvm
 
@@ -170,6 +176,18 @@ dff-regression:
 		--seed "$(DFF_SEED)" --random-cycles "$(DFF_RANDOM_CYCLES)" \
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_DFF_MAKE)" \
 		$(if $(strip $(_DFF_SIM_BIN_DIR)),--sim-bin-dir "$(_DFF_SIM_BIN_DIR)")
+
+# Cross widths, clamp classes, and polarities using four-state source data.
+isolation-cell-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(ISOLATION_CELL_TEST_DIR)/run_isolation_cell_regression.py" || { \
+		echo 'Isolation cell regression missing under src/val/<category>/isolation_cell.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(ISOLATION_CELL_TEST_DIR)/run_isolation_cell_regression.py" \
+		--sim "$(SIM)" --build-dir "$(ISOLATION_CELL_REGRESSION_BUILD)" \
+		--seed "$(ISOLATION_CELL_SEED)" --random-cycles "$(ISOLATION_CELL_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_ISOLATION_CELL_MAKE)" \
+		$(if $(strip $(_ISOLATION_CELL_SIM_BIN_DIR)),--sim-bin-dir "$(_ISOLATION_CELL_SIM_BIN_DIR)")
 
 # Pass values through the environment so Tcl treats paths and hierarchy names
 # as data. Keep existing runtime options when enabling the UCLI capture script.
@@ -328,6 +346,7 @@ help:
 		'make clock-gate-regression  Check clock gate edges, pulses, and coverage' \
 		'make decoder-regression  Check all decoder encodings and legal pairs' \
 		'make dff-regression  Check DFF reset/enable variants and output events' \
+		'make isolation-cell-regression  Check isolation, clamp, and X/Z behavior' \
 		'make saif            Run PyUVM with VCS and write switching activity' \
 		'make synth           Synthesize RTL with Design Compiler' \
 		'make gate-sim        Run PyUVM on NETLIST_FILE with CELL_MODELS' \
@@ -357,5 +376,7 @@ help:
 		'Counter:   COUNTER_REGRESSION_BUILD, COUNTER_RANDOM_CYCLES, COUNTER_SEED' \
 		'Clock gate: CLOCK_GATE_REGRESSION_BUILD, CLOCK_GATE_RANDOM_CYCLES, CLOCK_GATE_SEED' \
 		'Decoder:   DECODER_REGRESSION_BUILD, DECODER_RANDOM_CYCLES, DECODER_SEED' \
-		'DFF:       DFF_REGRESSION_BUILD, DFF_RANDOM_CYCLES, DFF_SEED'
+		'DFF:       DFF_REGRESSION_BUILD, DFF_RANDOM_CYCLES, DFF_SEED' \
+		'Isolation: ISOLATION_CELL_REGRESSION_BUILD, ISOLATION_CELL_RANDOM_CYCLES,' \
+		'           ISOLATION_CELL_SEED'
 endif

@@ -93,6 +93,25 @@ between clock edges. Configure the campaign with `DFF_SEED`,
 [DFF verification details](src/val/common/dff/README.md) for coverage mapping
 and the existing RTL's parameter-validation limitations.
 
+Run the isolation cell's specification-based four-state regression:
+
+```sh
+make isolation-cell-regression
+make isolation-cell-regression SIM=icarus
+```
+
+The PyUVM suite crosses widths `1, 2, 4, 8, 16, 32, 64`, both control polarities,
+and zero, one, and mixed clamps in 40 configurations. It checks transparent X/Z
+data, known isolated outputs, conservative unknown-control merging, repeated
+assertion/release, and continuous output inactivity while isolated. Small widths
+also run exhaustive four-state truth tables. Configure the campaign with
+`ISOLATION_CELL_SEED`, `ISOLATION_CELL_RANDOM_CYCLES`, and
+`ISOLATION_CELL_REGRESSION_BUILD`; reports default to
+`build/<simulator>/isolation_cell/regression`. This suite requires Python 3.10
+or newer. See the [isolation cell verification details](src/val/common/isolation_cell/README.md)
+for requirement mapping, parameter-validation gaps, and the separate UPF and
+technology requirements for power-aware signoff.
+
 Choose a different HDL top and Python test module:
 
 ```sh
@@ -127,8 +146,8 @@ source list to force recompilation. `make help` lists the main options.
 The shared flow drivers are under `flows/synth`, `flows/power`, and `flows/vcs`;
 the reusable timing budget is `src/constraints/timing.sdc`. Machine-specific
 synthesis setup files can live at `flows/synth/setup.sh`, which is ignored by
-Git. Dry runs of the counter, clock gate, decoder, and DFF regression targets print
-their commands without changing reports.
+Git. Dry runs of the counter, clock gate, decoder, DFF, and isolation cell
+regression targets print their commands without changing reports.
 
 Generate a SAIF activity file from the PyUVM simulation with VCS:
 
