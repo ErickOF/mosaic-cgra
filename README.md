@@ -166,6 +166,24 @@ This suite requires Python 3.10 or newer. See the
 [mux verification details](src/val/common/mux/README.md) for coverage mapping,
 parameter guards, report locations, and physical/integration verification limits.
 
+Run the architectural operand isolation regression:
+
+```sh
+make operand-isolation-regression
+make operand-isolation-regression SIM=icarus
+```
+
+The PyUVM suite crosses widths 1, 8, 16, 32, 64, 128, and 256 with zero,
+all-one, and mixed clamps where representable, for 20 profiles. It checks
+four-state pass-through, constant isolation, data/control transitions, output
+inactivity while isolated, and short/long holds. X/Z controls must produce an
+all-X operand and trigger the active testbench known-control assertion;
+two negative probes verify that unacknowledged illegal controls fail the test.
+Configure `OPERAND_ISOLATION_SEED`, `OPERAND_ISOLATION_RANDOM_CYCLES`, and
+`OPERAND_ISOLATION_REGRESSION_BUILD`. See the
+[operand isolation verification details](src/val/common/operand_isolation/README.md)
+for coverage, reports, and downstream power/integration requirements.
+
 Choose a different HDL top and Python test module:
 
 ```sh
@@ -201,7 +219,8 @@ The shared flow drivers are under `flows/synth`, `flows/power`, and `flows/vcs`;
 the reusable timing budget is `src/constraints/timing.sdc`. Machine-specific
 synthesis setup files can live at `flows/synth/setup.sh`, which is ignored by
 Git. Dry runs of the counter, clock gate, decoder, DFF, isolation cell, lane mask,
-level shifter, and mux regression targets print their commands without changing reports.
+level shifter, mux, and operand isolation regression targets print their commands
+without changing reports.
 
 Generate a SAIF activity file from the PyUVM simulation with VCS:
 
