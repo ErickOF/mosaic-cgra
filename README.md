@@ -60,6 +60,22 @@ campaign. Reports default to `build/<simulator>/clock_gate/regression`.
 See the [clock gate verification details](src/val/common/clock_gate/README.md)
 for the specification mapping and limits of the RTL simulation.
 
+Run the decoder's specification-based functional regression:
+
+```sh
+make decoder-regression
+make decoder-regression SIM=icarus
+```
+
+The PyUVM suite tests all eight recommended output counts (`1, 2, 3, 4, 5, 8,
+16, 32`), every binary encoding, every legal transition pair, enable behavior,
+fail-closed X/Z handling, and disabled output inactivity. Four invalid-parameter
+cases must fail elaboration. Set `DECODER_SEED`, `DECODER_RANDOM_CYCLES`, and
+`DECODER_REGRESSION_BUILD` to configure the campaign. Reports default to
+`build/<simulator>/decoder/regression`. See the
+[decoder verification details](src/val/common/decoder/README.md)
+for requirement mapping and verification scope.
+
 Choose a different HDL top and Python test module:
 
 ```sh
@@ -94,8 +110,8 @@ source list to force recompilation. `make help` lists the main options.
 The shared flow drivers are under `flows/synth`, `flows/power`, and `flows/vcs`;
 the reusable timing budget is `src/constraints/timing.sdc`. Machine-specific
 synthesis setup files can live at `flows/synth/setup.sh`, which is ignored by
-Git. `make -n counter-regression` and `make -n clock-gate-regression` print their
-commands without changing reports.
+Git. Dry runs of the counter, clock gate, and decoder regression targets print
+their commands without changing reports.
 
 Generate a SAIF activity file from the PyUVM simulation with VCS:
 
