@@ -129,6 +129,25 @@ truth tables. Configure the campaign with `LANE_MASK_SEED`,
 See the [lane mask verification details](src/val/common/lane_mask/README.md)
 for coverage mapping, parameter rejection, and the downstream integration checks.
 
+Run the level shifter's specification-based four-state regression:
+
+```sh
+make level-shifter-regression
+make level-shifter-regression SIM=icarus
+```
+
+The PyUVM suite covers widths `1, 2, 4, 8, 16, 32, 64` in both static directions,
+checking exact bit ordering and propagation of zero, one, X, and Z. It exercises
+independent bit transitions, mixed patterns, seeded random data, and short/long
+stable intervals with a continuous output monitor. Both directions receive the
+same input history at each width. Configure the campaign with
+`LEVEL_SHIFTER_SEED`, `LEVEL_SHIFTER_RANDOM_CYCLES`, and
+`LEVEL_SHIFTER_REGRESSION_BUILD`; reports default to
+`build/<simulator>/level_shifter/regression`. This suite requires Python 3.10 or
+newer. See the [level shifter verification details](src/val/common/level_shifter/README.md)
+for parameter guards, coverage mapping, and the separate UPF/technology signoff
+requirements for physical voltage translation.
+
 Choose a different HDL top and Python test module:
 
 ```sh
@@ -163,8 +182,8 @@ source list to force recompilation. `make help` lists the main options.
 The shared flow drivers are under `flows/synth`, `flows/power`, and `flows/vcs`;
 the reusable timing budget is `src/constraints/timing.sdc`. Machine-specific
 synthesis setup files can live at `flows/synth/setup.sh`, which is ignored by
-Git. Dry runs of the counter, clock gate, decoder, DFF, isolation cell, and lane mask
-regression targets print their commands without changing reports.
+Git. Dry runs of the counter, clock gate, decoder, DFF, isolation cell, lane mask,
+and level shifter regression targets print their commands without changing reports.
 
 Generate a SAIF activity file from the PyUVM simulation with VCS:
 
