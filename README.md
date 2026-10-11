@@ -17,6 +17,32 @@ working license and its `vcs` executable on `PATH`; alternatively, pass
 increment/decrement, disabled hold, clear/load priority, saturating boundaries,
 and event pulses. A failing test makes the command fail.
 
+Run the counter's specification-based functional regression:
+
+```sh
+make counter-regression
+# Local alternative when VCS is unavailable:
+make counter-regression SIM=icarus
+```
+
+This runs `CounterSpecTest` in a PyUVM environment with a sequencer, driver,
+passive monitor, independent reference model, scoreboard, and functional
+coverage checks. It exercises the eight recommended configurations from the
+[counter specification](../specs/common/mosaic-counter/README.md), including
+wrapping arithmetic, asynchronous reset, nonzero reset values, and widths
+from 1 to 64 bits. Each configuration runs directed tests, at least 1000
+randomized cycles, and X/Z control tests. `CounterTest` remains the quick
+smoke test used by the default simulation and power targets.
+
+`COUNTER_SEED` defaults to `20261010`; `COUNTER_RANDOM_CYCLES` defaults to
+`2000` per configuration. Each profile adds its matrix index to the seed.
+Set `COUNTER_REGRESSION_BUILD` to relocate the reports; the default is
+`build/<simulator>/counter/regression`. A missing coverage bin, scoreboard
+mismatch, absent result, or simulator failure makes the target fail. The
+aggregate `summary.json` records missing simulator tools as `NOT_RUN`.
+See the [verification details and local results](verif/pyuvm/README.md)
+for requirement mapping, artifacts, and limits of the simulation campaign.
+
 Choose a different HDL top and Python test module:
 
 ```sh
@@ -24,7 +50,8 @@ make pyuvm COCOTB_TOPLEVEL=my_top COCOTB_TEST_MODULES=test_my_top \
   VERILOG_SOURCES="$(pwd)/src/rtl/my_top.sv $(pwd)/src/rtl/common/counter.sv"
 ```
 
-Place tests in `verif/pyuvm`, or add their directory to `PYTHONPATH`. Set
+Place tests in `verif/pyuvm`, or set `PYUVM_TEST_DIR` to another test directory.
+Additional import directories can be supplied through `PYTHONPATH`. Set
 `COCOTB_TEST_MODULES` to importable module names without `.py`; multiple modules
 are comma-separated. It defaults to `test_<COCOTB_TOPLEVEL>`. When
 `VERILOG_SOURCES` is omitted, it defaults to
@@ -42,6 +69,8 @@ Build products and the JUnit report are stored in
 `build/<simulator>/<top>/`, with results in `results.xml`. `make clean` removes
 the selected build and report. Clean before changing compiler options or the
 source list to force recompilation. `make help` lists the main options.
+
+`make -n counter-regression` prints its command without changing reports.
 
 Generate a SAIF activity file from the PyUVM simulation with VCS:
 

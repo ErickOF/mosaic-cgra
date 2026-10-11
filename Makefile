@@ -10,6 +10,9 @@ SIM ?= vcs
 TOPLEVEL_LANG ?= verilog
 COCOTB_TOPLEVEL ?= counter
 COCOTB_TEST_MODULES ?= test_$(COCOTB_TOPLEVEL)
+# Add the selected test directory to the Python import path used by cocotb.
+PYUVM_TEST_DIR ?= $(PROJECT_ROOT)/verif/pyuvm
+COUNTER_TEST_DIR := $(PROJECT_ROOT)/verif/pyuvm
 VERILOG_SOURCES ?= $(PROJECT_ROOT)/src/rtl/common/$(COCOTB_TOPLEVEL).sv
 SIM_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/$(COCOTB_TOPLEVEL)
 COCOTB_RESULTS_FILE ?= $(SIM_BUILD)/results.xml
@@ -58,8 +61,15 @@ POWER_ACTIVITY_REPORT := $(abspath $(POWER_BUILD))/reports/activity.rpt
 POWER_SUMMARY := $(abspath $(POWER_BUILD))/summary.json
 export TEST_CLOCK_PERIOD_NS ?= $(SYNTH_CLOCK_PERIOD)
 export TEST_SETTLE_NS ?= 0
+COUNTER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/counter/regression
+COUNTER_RANDOM_CYCLES ?= 2000
+COUNTER_SEED ?= 20261010
+_COUNTER_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+# GNU make treats a direct MAKE reference as recursive, even inside a Python
+# command. Indirection keeps -n from running the wrapper and deleting reports.
+_COUNTER_MAKE := $(MAKE)
 
-export PYTHONPATH := $(PROJECT_ROOT)/verif/pyuvm$(if $(PYTHONPATH),:$(PYTHONPATH))
+export PYTHONPATH := $(PYUVM_TEST_DIR)$(if $(PYTHONPATH),:$(PYTHONPATH))
 CUSTOM_COMPILE_DEPS += $(PROJECT_ROOT)/Makefile
 
 # Load cocotb only in the simulation subprocess so setup/help/clean work
@@ -79,7 +89,7 @@ endif
 endif
 include $(shell "$(PYTHON_BIN)" -m cocotb_tools.config --makefiles)/Makefile.sim
 else
-.PHONY: all sim pyuvm saif synth gate-sim gate-saif gate-check power power-report power-check power-invalidate setup clean clean-gate clean-synth clean-power help
+.PHONY: all sim pyuvm counter-regression saif synth gate-sim gate-saif gate-check power power-report power-check power-invalidate setup clean clean-gate clean-synth clean-power help
 
 all sim: pyuvm
 
@@ -90,6 +100,19 @@ pyuvm:
 		echo 'PyUVM/cocotb missing. Run make setup first.' >&2; exit 2; }
 	+$(MAKE) --no-print-directory -C "$(PROJECT_ROOT)" -f Makefile \
 		_COCOTB_RUN=1 PYTHON_BIN="$(PYTHON_BIN)" sim
+
+# Run the specification matrix with real PyUVM components and coverage gates.
+# Each profile uses its own build directory and elaboration-time parameters.
+counter-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(COUNTER_TEST_DIR)/run_counter_regression.py" || { \
+		echo 'Counter regression missing under verif/pyuvm.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(COUNTER_TEST_DIR)/run_counter_regression.py" \
+		--sim "$(SIM)" --build-dir "$(COUNTER_REGRESSION_BUILD)" \
+		--seed "$(COUNTER_SEED)" --random-cycles "$(COUNTER_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_COUNTER_MAKE)" \
+		$(if $(strip $(_COUNTER_SIM_BIN_DIR)),--sim-bin-dir "$(_COUNTER_SIM_BIN_DIR)")
 
 # Pass values through the environment so Tcl treats paths and hierarchy names
 # as data. Keep existing runtime options when enabling the UCLI capture script.
@@ -242,6 +265,7 @@ help:
 	@printf '%s\n' \
 		'make setup           Install pinned PyUVM and cocotb into .venv' \
 		'make [pyuvm|sim]     Run PyUVM with VCS (default: counter)' \
+		'make counter-regression  Run the counter specification matrix with PyUVM' \
 		'make saif            Run PyUVM with VCS and write switching activity' \
 		'make synth           Synthesize RTL with Design Compiler' \
 		'make gate-sim        Run PyUVM on NETLIST_FILE with CELL_MODELS' \
@@ -256,6 +280,7 @@ help:
 		'Overrides: SIM, VCS_BIN_DIR, COCOTB_TOPLEVEL, COCOTB_TEST_MODULES,' \
 		'           VERILOG_SOURCES, COMPILE_ARGS, SIM_ARGS, COCOTB_PLUSARGS,' \
 		'           COCOTB_TEST_FILTER, VENV, PYTHON_BIN, SIM_BUILD,' \
+		'           PYUVM_TEST_DIR,' \
 		'           SAIF_FILE, SAIF_SCOPE, SAIF_TIME_UNIT, VERILOG_INCLUDE_DIRS' \
 		'Synthesis: DC_SHELL, DC_ARGS, TECH_SETUP_TCL, DC_SETUP_TCL,' \
 		'           SYNTH_BUILD, SYNTH_CONSTRAINTS, SYNTH_CLOCK_PORT,' \
@@ -266,5 +291,6 @@ help:
 		'           GATE_SETTLE_NS, TEST_CLOCK_PERIOD_NS' \
 		'Power:     POWER_SHELL, POWER_ARGS, POWER_TECH_SETUP_TCL,' \
 		'           POWER_TOOL_SETUP_TCL, POWER_SDC_FILE, SPEF_FILE,' \
-		'           POWER_SAIF_FILE, POWER_SAIF_STRIP_PATH, POWER_BUILD'
+		'           POWER_SAIF_FILE, POWER_SAIF_STRIP_PATH, POWER_BUILD' \
+		'Counter:   COUNTER_REGRESSION_BUILD, COUNTER_RANDOM_CYCLES, COUNTER_SEED'
 endif
