@@ -43,6 +43,23 @@ aggregate `summary.json` records missing simulator tools as `NOT_RUN`.
 See the [verification details and local results](src/val/common/counter/README.md)
 for requirement mapping, artifacts, and limits of the simulation campaign.
 
+Run the clock gate's specification-based waveform regression:
+
+```sh
+make clock-gate-regression
+make clock-gate-regression SIM=icarus
+```
+
+The PyUVM suite checks enabled and disabled startup in separate simulations,
+every observable output edge, complete pulse widths, control changes in both
+half-cycles and near both edges, test override, long active/idle intervals,
+seeded random activity, and illegal X/Z controls. Coverage distinguishes
+requested transitions from their effect on source pulses. Set `CLOCK_GATE_SEED`,
+`CLOCK_GATE_RANDOM_CYCLES`, and `CLOCK_GATE_REGRESSION_BUILD` to configure the
+campaign. Reports default to `build/<simulator>/clock_gate/regression`.
+See the [clock gate verification details](src/val/common/clock_gate/README.md)
+for the specification mapping and limits of the RTL simulation.
+
 Choose a different HDL top and Python test module:
 
 ```sh
@@ -77,7 +94,8 @@ source list to force recompilation. `make help` lists the main options.
 The shared flow drivers are under `flows/synth`, `flows/power`, and `flows/vcs`;
 the reusable timing budget is `src/constraints/timing.sdc`. Machine-specific
 synthesis setup files can live at `flows/synth/setup.sh`, which is ignored by
-Git. `make -n counter-regression` prints its command without changing reports.
+Git. `make -n counter-regression` and `make -n clock-gate-regression` print their
+commands without changing reports.
 
 Generate a SAIF activity file from the PyUVM simulation with VCS:
 

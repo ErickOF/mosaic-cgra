@@ -14,6 +14,7 @@ COCOTB_TEST_MODULES ?= test_$(COCOTB_TOPLEVEL)
 # Override the directory when a top has multiple suites or lives elsewhere.
 PYUVM_TEST_DIR ?= $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/$(COCOTB_TOPLEVEL)))
 COUNTER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/counter))
+CLOCK_GATE_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/clock_gate))
 # Locate the selected RTL top using the same category layout as validation.
 # Designs with dependencies still provide an ordered VERILOG_SOURCES list.
 VERILOG_SOURCES ?= $(or $(firstword $(wildcard $(PROJECT_ROOT)/src/rtl/*/$(COCOTB_TOPLEVEL).sv)),$(PROJECT_ROOT)/src/rtl/common/$(COCOTB_TOPLEVEL).sv)
@@ -71,6 +72,11 @@ _COUNTER_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR
 # GNU make treats a direct MAKE reference as recursive, even inside a Python
 # command. Indirection keeps -n from running the wrapper and deleting reports.
 _COUNTER_MAKE := $(MAKE)
+CLOCK_GATE_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/clock_gate/regression
+CLOCK_GATE_RANDOM_CYCLES ?= 2000
+CLOCK_GATE_SEED ?= 20261010
+_CLOCK_GATE_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_CLOCK_GATE_MAKE := $(MAKE)
 
 export PYTHONPATH := $(PYUVM_TEST_DIR)$(if $(PYTHONPATH),:$(PYTHONPATH))
 CUSTOM_COMPILE_DEPS += $(PROJECT_ROOT)/Makefile
@@ -92,7 +98,7 @@ endif
 endif
 include $(shell "$(PYTHON_BIN)" -m cocotb_tools.config --makefiles)/Makefile.sim
 else
-.PHONY: all sim pyuvm counter-regression saif synth gate-sim gate-saif gate-check power power-report power-check power-invalidate setup clean clean-gate clean-synth clean-power help
+.PHONY: all sim pyuvm counter-regression clock-gate-regression saif synth gate-sim gate-saif gate-check power power-report power-check power-invalidate setup clean clean-gate clean-synth clean-power help
 
 all sim: pyuvm
 
@@ -116,6 +122,18 @@ counter-regression:
 		--seed "$(COUNTER_SEED)" --random-cycles "$(COUNTER_RANDOM_CYCLES)" \
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_COUNTER_MAKE)" \
 		$(if $(strip $(_COUNTER_SIM_BIN_DIR)),--sim-bin-dir "$(_COUNTER_SIM_BIN_DIR)")
+
+# Use fresh simulator processes to check both reset-free startup states.
+clock-gate-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(CLOCK_GATE_TEST_DIR)/run_clock_gate_regression.py" || { \
+		echo 'Clock gate regression missing under src/val/<category>/clock_gate.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(CLOCK_GATE_TEST_DIR)/run_clock_gate_regression.py" \
+		--sim "$(SIM)" --build-dir "$(CLOCK_GATE_REGRESSION_BUILD)" \
+		--seed "$(CLOCK_GATE_SEED)" --random-cycles "$(CLOCK_GATE_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_CLOCK_GATE_MAKE)" \
+		$(if $(strip $(_CLOCK_GATE_SIM_BIN_DIR)),--sim-bin-dir "$(_CLOCK_GATE_SIM_BIN_DIR)")
 
 # Pass values through the environment so Tcl treats paths and hierarchy names
 # as data. Keep existing runtime options when enabling the UCLI capture script.
@@ -271,6 +289,7 @@ help:
 		'make setup           Install pinned PyUVM and cocotb into .venv' \
 		'make [pyuvm|sim]     Run PyUVM with VCS (default: counter)' \
 		'make counter-regression  Run the counter specification matrix with PyUVM' \
+		'make clock-gate-regression  Check clock gate edges, pulses, and coverage' \
 		'make saif            Run PyUVM with VCS and write switching activity' \
 		'make synth           Synthesize RTL with Design Compiler' \
 		'make gate-sim        Run PyUVM on NETLIST_FILE with CELL_MODELS' \
@@ -297,5 +316,6 @@ help:
 		'Power:     POWER_SHELL, POWER_ARGS, POWER_TECH_SETUP_TCL,' \
 		'           POWER_TOOL_SETUP_TCL, POWER_SDC_FILE, SPEF_FILE,' \
 		'           POWER_SAIF_FILE, POWER_SAIF_STRIP_PATH, POWER_BUILD' \
-		'Counter:   COUNTER_REGRESSION_BUILD, COUNTER_RANDOM_CYCLES, COUNTER_SEED'
+		'Counter:   COUNTER_REGRESSION_BUILD, COUNTER_RANDOM_CYCLES, COUNTER_SEED' \
+		'Clock gate: CLOCK_GATE_REGRESSION_BUILD, CLOCK_GATE_RANDOM_CYCLES, CLOCK_GATE_SEED'
 endif
