@@ -148,6 +148,24 @@ newer. See the [level shifter verification details](src/val/common/level_shifter
 for parameter guards, coverage mapping, and the separate UPF/technology signoff
 requirements for physical voltage translation.
 
+Run the mux's specification-based four-state regression:
+
+```sh
+make mux-regression
+make mux-regression SIM=icarus
+```
+
+The PyUVM suite covers all six recommended input-count/data-width configurations
+with zero, all-one, and mixed defaults where representable, for 17 profiles.
+It checks every legal selection, unused binary encoding, four-state unknown
+selection, legal transition pair, selected/unselected input activity, and exact
+data bit ordering. Both outputs are monitored during unselected-input and stable
+intervals. Configure the campaign with `MUX_SEED`, `MUX_RANDOM_CYCLES`, and
+`MUX_REGRESSION_BUILD`; reports default to `build/<simulator>/mux/regression`.
+This suite requires Python 3.10 or newer. See the
+[mux verification details](src/val/common/mux/README.md) for coverage mapping,
+parameter guards, report locations, and physical/integration verification limits.
+
 Choose a different HDL top and Python test module:
 
 ```sh
@@ -183,7 +201,7 @@ The shared flow drivers are under `flows/synth`, `flows/power`, and `flows/vcs`;
 the reusable timing budget is `src/constraints/timing.sdc`. Machine-specific
 synthesis setup files can live at `flows/synth/setup.sh`, which is ignored by
 Git. Dry runs of the counter, clock gate, decoder, DFF, isolation cell, lane mask,
-and level shifter regression targets print their commands without changing reports.
+level shifter, and mux regression targets print their commands without changing reports.
 
 Generate a SAIF activity file from the PyUVM simulation with VCS:
 
