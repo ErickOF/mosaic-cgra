@@ -93,11 +93,11 @@ Synthesize the selected RTL with Synopsys Design Compiler on the licensed server
 ```sh
 make synth \
   TECH_SETUP_TCL=/server/tech/lib_setup.tcl \
-  TOOL_SETUP_TCL=/server/scripts/dc_setup.tcl
+  DC_SETUP_TCL=/server/scripts/dc_setup.tcl
 ```
 
 `TECH_SETUP_TCL` is required and must configure `target_library` with the
-technology `.db` libraries and their search paths. `TOOL_SETUP_TCL` is an optional
+technology `.db` libraries and their search paths. `DC_SETUP_TCL` is an optional
 second setup script, sourced after the technology script. Use absolute paths in
 these scripts; DC runs from `SYNTH_BUILD`. The PDK and cell models remain on the
 server. Override `DC_SHELL` with an absolute executable path when `dc_shell` is
@@ -105,7 +105,7 @@ not on `PATH`, and use `DC_ARGS` for shell options. Python is not needed for
 `make synth`.
 
 The driver `synth/run.tcl` follows the sections and commands in the
-reference screenshots: base paths (`PROY_HOME`, `PROY_HOME_SYN`), design, RTL,
+reference screenshots: base paths (`PROJECT_HOME`, `PROJECT_HOME_SYN`), design, RTL,
 technology setup, directories, debug output, read/elaborate, checks, constraints,
 compile, reports, and outputs. It analyzes `VERILOG_SOURCES` in order,
 elaborates `COCOTB_TOPLEVEL`, and sources the shared `constraints/timing.sdc`
@@ -234,8 +234,138 @@ corner, or compiler flags to force a fresh compilation. Pass the same
 `SDF_FILE`/`GATE_SIM_BUILD` overrides when cleaning the timing build.
 `make clean-synth` removes the selected synthesis output directory.
 
+## Test-driven power and energy
+
+Run a selected PyUVM test on the gate netlist, capture its activity with VCS,
+and analyze average power with PrimeTime PX/PrimePower in one command:
+
+```sh
+make power \
+  COCOTB_TOPLEVEL=counter COCOTB_TEST_MODULES=test_counter \
+  COCOTB_TEST_FILTER=CounterTest \
+  POWER_TECH_SETUP_TCL=/server/tech/pt_lib_setup.tcl \
+  CELL_MODELS=/server/tech/cells.v \
+  NETLIST_FILE=/server/route/counter.v \
+  POWER_SDC_FILE=/server/route/counter.sdc \
+  SDF_FILE=/server/route/counter.sdf \
+  SPEF_FILE=/server/route/counter.spef \
+  TEST_CLOCK_PERIOD_NS=4 GATE_SETTLE_NS=1
+```
+
+Use matching netlist, SDF, SPEF, and constraints exported by the physical
+implementation flow. SDF supplies the simulation delays; SPEF supplies the
+extracted capacitances for power analysis. The technology libraries need
+internal and leakage power models, and should match the selected process,
+voltage, temperature, and parasitic corner. This target consumes physical
+implementation outputs; it does not run placement and routing.
+Synopsys describes this combination in its [post-route power analysis
+overview](https://qacf-www.synopsys.com/blogs/chip-design/software-enabled-full-chip-power-signoff-soc-verification.html).
+
+`POWER_SHELL` defaults to `pt_shell` and requires a PrimeTime PX/PrimePower
+license in addition to the VCS simulation license. Set it to an absolute
+executable path when needed; `POWER_ARGS` adds shell options.
+`POWER_TECH_SETUP_TCL` defaults to `TECH_SETUP_TCL`. It must be compatible with
+PrimeTime and configure `link_library` with power-characterized `.db`
+libraries and their search paths. If only `target_library` is supplied, the
+driver builds `link_library` from it. An optional `POWER_TOOL_SETUP_TCL` is
+sourced after the technology script and configures PrimeTime PX/PrimePower
+independently of the synthesis setup. The DC-only `DC_SETUP_TCL` is not used
+by this analysis. Python 3.12+ is needed to generate the energy summary, using
+`PYTHON` (for example, `PYTHON=python3.12`); this script has no third-party
+dependencies.
+
+For a synthesis-stage estimate, first run `make synth` and then use its
+default netlist and SDC:
+
+```sh
+make power TECH_SETUP_TCL=/server/tech/pt_compatible_lib_setup.tcl \
+  CELL_MODELS=/server/tech/cells.v \
+  SDF_FILE="$(pwd)/build/synth/counter/netlist/counter.sdf" \
+  COCOTB_TEST_FILTER=CounterTest
+```
+
+`POWER_SDC_FILE` defaults to `build/synth/<top>/netlist/<top>.sdc`. When no
+`SPEF_FILE` is supplied, the log and JSON identify the result as a
+`mapped_netlist_estimate`. Supply post-route inputs for an analysis including
+the physical interconnect. `SDF_FILE` is optional for functional simulation,
+but timing simulation captures additional transitions caused by gate delays.
+
+`make power` always runs a fresh gate simulation, rebuilding the simulator
+to pick up the selected netlist, models, SDF, and options. It uses the usual
+`COCOTB_TEST_MODULES`, `COCOTB_TEST_FILTER`, and plusarg selection. Without a
+filter, power and energy cover the whole selected test campaign. The SAIF
+capture starts at time zero and includes reset, initialization, and idle time
+through the end of the test. To characterize a workload, select a test whose
+simulation interval represents that workload.
+
+The analyzer reads the same netlist used by the simulator and annotates the
+gate SAIF with `read_saif -strip_path`. `POWER_SAIF_STRIP_PATH` defaults to
+`SAIF_SCOPE`, with dots replaced by slashes. Override it to match the hierarchy
+inside the SAIF, for example `tb/dut`, corresponding to the analysis top.
+The summary requires at least one net annotated from the file. Inspect
+`activity.rpt` and `activity_unannotated.rpt` to assess coverage; remaining
+activity can be propagated or estimated by the tool. The flow uses the
+[vendor's averaged SAIF analysis](https://pdfcoffee.com/primetimepxptpxuserguidepdf-pdf-free.html)
+and keeps clock scaling disabled to retain the test's measured activity.
+
+Results go under `build/power/<top>/timing/` when `SDF_FILE` is set, or
+`build/power/<top>/functional/` otherwise. Set `POWER_BUILD` to keep separate
+results for different tests or corners.
+
+| Output under `POWER_BUILD` | Contents |
+| --- | --- |
+| `summary.json` | Capture duration in seconds, average power in watts, energy in joules, activity coverage, and input/test selection |
+| `reports/power.rpt` | Average power and its units |
+| `reports/power_hierarchy.rpt` | Power by hierarchy |
+| `reports/activity.rpt`, `reports/activity_unannotated.rpt` | SAIF annotation coverage and unannotated objects |
+| `reports/check_timing.rpt` | Timing checks |
+| `reports/parasitics.rpt` | Parasitic annotation report when SPEF is supplied |
+| `power.log` | Power tool log |
+
+The console prints total, dynamic, and leakage power in mW and energy in pJ.
+The JSON also includes separate internal and net-switching components.
+Energy is computed over the complete captured interval:
+
+```text
+duration_s = SAIF DURATION * SAIF TIMESCALE in seconds
+dynamic_power_w = internal_power_w + switching_power_w
+total_power_w = dynamic_power_w + leakage_power_w
+energy_j = average_power_w * duration_s
+```
+
+Power units come from the verbose report, including separate dynamic and
+leakage units; the summary does not assume that bare numbers are watts.
+SAIF provides average activity, so these results describe average power and
+interval energy. Peak power and a power waveform require an event-based
+analysis with VCD/FSDB.
+
+To analyze an existing gate SAIF without rerunning its test:
+
+```sh
+make power-report \
+  POWER_TECH_SETUP_TCL=/server/tech/pt_lib_setup.tcl \
+  NETLIST_FILE=/server/route/counter.v \
+  POWER_SDC_FILE=/server/route/counter.sdc \
+  SPEF_FILE=/server/route/counter.spef \
+  POWER_SAIF_FILE=/server/activity/CounterTest.saif
+```
+
+`POWER_SAIF_FILE` defaults to `GATE_SAIF_FILE`; `make power` also writes its
+fresh capture to this path. For `power-report`, input/test selection recorded
+in JSON comes from the supplied Make options; use values matching the
+original simulation. A failed test, tool error, invalid duration, ambiguous
+power units, or zero SAIF annotation makes the target fail. Previous power
+reports and summaries are removed before each attempt. `make clean-power`
+removes the selected `POWER_BUILD`; the simulation and SAIF are cleaned with
+`make clean-gate`. If `POWER_SAIF_FILE` uses a custom path, also pass that
+path as `GATE_SAIF_FILE` when cleaning.
+
 Run the flow checks without DC/VCS licenses with
 `python3 -m unittest discover -s tests -v` (requires `make` and `tclsh`). They
 exercise the real synthesis Tcl with stubbed DC commands and check error
 propagation, stale-output removal, and gate simulation prerequisites. The VCS
 command check uses the Python dependencies from `make setup` or `PYTHON_BIN`.
+Power checks also exercise the real Make/Tcl flow with stubbed licensed
+commands, unit conversions, SAIF duration, coverage, and simulation failures.
+Local checks do not validate the technology models or native licensed power
+analysis; run the command above on the server to obtain design power values.

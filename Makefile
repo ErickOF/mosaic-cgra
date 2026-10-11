@@ -21,7 +21,7 @@ SAIF_SCRIPT := $(PROJECT_ROOT)/verif/vcs/saif.tcl
 DC_SHELL ?= dc_shell
 DC_ARGS ?=
 TECH_SETUP_TCL ?=
-TOOL_SETUP_TCL ?=
+DC_SETUP_TCL ?=
 SYNTH_SCRIPT := $(PROJECT_ROOT)/synth/run.tcl
 SYNTH_CONSTRAINTS ?= $(PROJECT_ROOT)/constraints/timing.sdc
 SYNTH_BUILD ?= $(PROJECT_ROOT)/build/synth/$(COCOTB_TOPLEVEL)
@@ -42,6 +42,20 @@ GATE_SIM_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/$(COCOTB_TOPLEVEL)/gate/$(if $(st
 GATE_RESULTS_FILE ?= $(GATE_SIM_BUILD)/results.xml
 GATE_SAIF_FILE ?= $(GATE_SIM_BUILD)/$(COCOTB_TOPLEVEL).saif
 GATE_SETTLE_NS ?= 1
+POWER_SHELL ?= pt_shell
+POWER_ARGS ?=
+POWER_TECH_SETUP_TCL ?= $(TECH_SETUP_TCL)
+POWER_TOOL_SETUP_TCL ?=
+POWER_SCRIPT := $(PROJECT_ROOT)/power/run.tcl
+POWER_SUMMARY_SCRIPT := $(PROJECT_ROOT)/power/summarize.py
+POWER_BUILD ?= $(PROJECT_ROOT)/build/power/$(COCOTB_TOPLEVEL)/$(if $(strip $(SDF_FILE)),timing,functional)
+POWER_SDC_FILE ?= $(SYNTH_BUILD)/netlist/$(COCOTB_TOPLEVEL).sdc
+SPEF_FILE ?=
+POWER_SAIF_FILE ?= $(GATE_SAIF_FILE)
+POWER_SAIF_STRIP_PATH ?= $(subst .,/,$(SAIF_SCOPE))
+POWER_REPORT := $(abspath $(POWER_BUILD))/reports/power.rpt
+POWER_ACTIVITY_REPORT := $(abspath $(POWER_BUILD))/reports/activity.rpt
+POWER_SUMMARY := $(abspath $(POWER_BUILD))/summary.json
 export TEST_CLOCK_PERIOD_NS ?= $(SYNTH_CLOCK_PERIOD)
 export TEST_SETTLE_NS ?= 0
 
@@ -65,7 +79,7 @@ endif
 endif
 include $(shell "$(PYTHON_BIN)" -m cocotb_tools.config --makefiles)/Makefile.sim
 else
-.PHONY: all sim pyuvm saif synth gate-sim gate-saif gate-check setup clean clean-gate clean-synth help
+.PHONY: all sim pyuvm saif synth gate-sim gate-saif gate-check power power-report power-check power-invalidate setup clean clean-gate clean-synth clean-power help
 
 all sim: pyuvm
 
@@ -100,7 +114,7 @@ synth: export MOSAIC_SYNTH_TOP = $(COCOTB_TOPLEVEL)
 synth: export MOSAIC_SYNTH_RTL = $(foreach source,$(VERILOG_SOURCES),{$(abspath $(source))})
 synth: export MOSAIC_SYNTH_INCLUDES = $(foreach path,$(VERILOG_INCLUDE_DIRS),{$(abspath $(path))})
 synth: export MOSAIC_SYNTH_TECH_SETUP = $(if $(strip $(TECH_SETUP_TCL)),$(abspath $(TECH_SETUP_TCL)))
-synth: export MOSAIC_SYNTH_DC_SETUP = $(if $(strip $(TOOL_SETUP_TCL)),$(abspath $(TOOL_SETUP_TCL)))
+synth: export MOSAIC_SYNTH_DC_SETUP = $(if $(strip $(DC_SETUP_TCL)),$(abspath $(DC_SETUP_TCL)))
 synth: export MOSAIC_SYNTH_CONSTRAINTS = $(if $(strip $(SYNTH_CONSTRAINTS)),$(abspath $(SYNTH_CONSTRAINTS)))
 synth: export MOSAIC_SYNTH_BUILD = $(abspath $(SYNTH_BUILD))
 synth: export MOSAIC_SYNTH_CLOCK_PORT = $(SYNTH_CLOCK_PORT)
@@ -147,6 +161,65 @@ gate-sim gate-saif: gate-check
 		SIM_BUILD="$(GATE_SIM_BUILD)" COCOTB_RESULTS_FILE="$(GATE_RESULTS_FILE)" \
 		SAIF_FILE="$(GATE_SAIF_FILE)" TEST_SETTLE_NS="$(GATE_SETTLE_NS)"
 
+# Invalidate results even if prerequisites or the new simulation fail.
+power-invalidate:
+	$(RM) -- "$(POWER_SUMMARY)" "$(POWER_REPORT)" "$(POWER_ACTIVITY_REPORT)"
+	$(RM) -- "$(abspath $(POWER_BUILD))/reports/power_hierarchy.rpt" \
+		"$(abspath $(POWER_BUILD))/reports/activity_unannotated.rpt" \
+		"$(abspath $(POWER_BUILD))/reports/parasitics.rpt" \
+		"$(abspath $(POWER_BUILD))/reports/check_timing.rpt" \
+		"$(abspath $(POWER_BUILD))/power.log"
+
+power-check:
+	@test -n "$(POWER_TECH_SETUP_TCL)" && test -r "$(POWER_TECH_SETUP_TCL)" || { \
+		echo 'Set POWER_TECH_SETUP_TCL (or TECH_SETUP_TCL) to a readable PrimeTime library setup script.' >&2; exit 2; }
+	@command -v "$(POWER_SHELL)" >/dev/null || { \
+		echo 'PrimeTime PX/PrimePower missing. Set POWER_SHELL or add pt_shell to PATH.' >&2; exit 2; }
+	@for source in "$(NETLIST_FILE)" "$(POWER_SDC_FILE)"; do \
+		test -r "$$source" && test -s "$$source" || { \
+			echo "Power input missing or empty: $$source" >&2; exit 2; }; \
+	 done
+	@if test -n "$(SPEF_FILE)"; then \
+		test -r "$(SPEF_FILE)" && test -s "$(SPEF_FILE)" || { \
+			echo 'SPEF_FILE missing or empty.' >&2; exit 2; }; \
+	fi
+	@if test -n "$(POWER_TOOL_SETUP_TCL)"; then \
+		test -r "$(POWER_TOOL_SETUP_TCL)" || { echo 'POWER_TOOL_SETUP_TCL not readable.' >&2; exit 2; }; \
+	fi
+
+# Run one selected test/campaign and analyze precisely that gate-level activity.
+# Rebuild the simulator so changes in netlist/models/SDF/options cannot reuse it.
+power: power-invalidate
+	@test "$(SIM)" = vcs || { echo 'make power requires SIM=vcs for SAIF capture.' >&2; exit 2; }
+	+$(MAKE) --no-print-directory -C "$(PROJECT_ROOT)" -f Makefile power-check gate-check
+	+$(MAKE) --no-print-directory -C "$(PROJECT_ROOT)" -f Makefile clean-gate
+	+$(MAKE) --no-print-directory -C "$(PROJECT_ROOT)" -f Makefile gate-saif GATE_SAIF_FILE="$(POWER_SAIF_FILE)"
+	+$(MAKE) --no-print-directory -C "$(PROJECT_ROOT)" -f Makefile power-report
+
+# Analyze an existing gate SAIF without repeating the simulation.
+power-report: export MOSAIC_POWER_TOP = $(COCOTB_TOPLEVEL)
+power-report: export MOSAIC_POWER_NETLIST = $(abspath $(NETLIST_FILE))
+power-report: export MOSAIC_POWER_TECH_SETUP = $(abspath $(POWER_TECH_SETUP_TCL))
+power-report: export MOSAIC_POWER_TOOL_SETUP = $(if $(strip $(POWER_TOOL_SETUP_TCL)),$(abspath $(POWER_TOOL_SETUP_TCL)))
+power-report: export MOSAIC_POWER_SDC = $(abspath $(POWER_SDC_FILE))
+power-report: export MOSAIC_POWER_SPEF = $(if $(strip $(SPEF_FILE)),$(abspath $(SPEF_FILE)))
+power-report: export MOSAIC_POWER_SAIF = $(abspath $(POWER_SAIF_FILE))
+power-report: export MOSAIC_POWER_STRIP_PATH = $(POWER_SAIF_STRIP_PATH)
+power-report: export MOSAIC_POWER_BUILD = $(abspath $(POWER_BUILD))
+power-report: power-invalidate
+	+$(MAKE) --no-print-directory -C "$(PROJECT_ROOT)" -f Makefile power-check
+	@test -r "$(POWER_SAIF_FILE)" && test -s "$(POWER_SAIF_FILE)" || { \
+		echo 'POWER_SAIF_FILE missing or empty. Run make power or make gate-saif first.' >&2; exit 2; }
+	@mkdir -p "$(abspath $(POWER_BUILD))"
+	@set -o pipefail; cd "$(abspath $(POWER_BUILD))" && \
+		"$(POWER_SHELL)" $(POWER_ARGS) -f "$(POWER_SCRIPT)" | tee power.log
+	@"$(PYTHON)" "$(POWER_SUMMARY_SCRIPT)" \
+		--report "$(POWER_REPORT)" --activity-report "$(POWER_ACTIVITY_REPORT)" \
+		--saif "$(abspath $(POWER_SAIF_FILE))" --output "$(POWER_SUMMARY)" \
+		--design "$(COCOTB_TOPLEVEL)" --netlist "$(abspath $(NETLIST_FILE))" \
+		--sdc "$(abspath $(POWER_SDC_FILE))" --spef "$(SPEF_FILE)" --sdf "$(SDF_FILE)" \
+		--test-modules "$(COCOTB_TEST_MODULES)" --test-filter "$(COCOTB_TEST_FILTER)"
+
 setup:
 	"$(PYTHON)" -m venv "$(VENV)"
 	"$(VENV)/bin/python" -m pip install -r "$(PROJECT_ROOT)/requirements.txt"
@@ -162,6 +235,9 @@ clean-gate:
 clean-synth:
 	$(RM) -r -- "$(SYNTH_BUILD)"
 
+clean-power:
+	$(RM) -r -- "$(POWER_BUILD)"
+
 help:
 	@printf '%s\n' \
 		'make setup           Install pinned PyUVM and cocotb into .venv' \
@@ -170,19 +246,25 @@ help:
 		'make synth           Synthesize RTL with Design Compiler' \
 		'make gate-sim        Run PyUVM on NETLIST_FILE with CELL_MODELS' \
 		'make gate-saif       Run the gate simulation and write its SAIF' \
+		'make power           Run a gate test, capture SAIF, report power and energy' \
+		'make power-report    Analyze POWER_SAIF_FILE without rerunning the test' \
 		'make clean           Remove the selected build, results, and SAIF file' \
 		'make clean-gate      Remove the selected gate simulation outputs' \
 		'make clean-synth     Remove the selected synthesis outputs' \
+		'make clean-power     Remove the selected power reports and summary' \
 		'' \
 		'Overrides: SIM, VCS_BIN_DIR, COCOTB_TOPLEVEL, COCOTB_TEST_MODULES,' \
 		'           VERILOG_SOURCES, COMPILE_ARGS, SIM_ARGS, COCOTB_PLUSARGS,' \
 		'           COCOTB_TEST_FILTER, VENV, PYTHON_BIN, SIM_BUILD,' \
 		'           SAIF_FILE, SAIF_SCOPE, SAIF_TIME_UNIT, VERILOG_INCLUDE_DIRS' \
-		'Synthesis: DC_SHELL, DC_ARGS, TECH_SETUP_TCL, TOOL_SETUP_TCL,' \
+		'Synthesis: DC_SHELL, DC_ARGS, TECH_SETUP_TCL, DC_SETUP_TCL,' \
 		'           SYNTH_BUILD, SYNTH_CONSTRAINTS, SYNTH_CLOCK_PORT,' \
 		'           SYNTH_CLOCK_PERIOD, SYNTH_CPUS, SYNTH_PARAMETERS,' \
 		'           SYNTH_COMPILE_ARGS' \
 		'Gate sim:  NETLIST_FILE, CELL_MODELS, SDF_FILE, SDF_SCOPE, SDF_CORNER,' \
 		'           GATE_SIM_BUILD, GATE_RESULTS_FILE, GATE_SAIF_FILE,' \
-		'           GATE_SETTLE_NS, TEST_CLOCK_PERIOD_NS'
+		'           GATE_SETTLE_NS, TEST_CLOCK_PERIOD_NS' \
+		'Power:     POWER_SHELL, POWER_ARGS, POWER_TECH_SETUP_TCL,' \
+		'           POWER_TOOL_SETUP_TCL, POWER_SDC_FILE, SPEF_FILE,' \
+		'           POWER_SAIF_FILE, POWER_SAIF_STRIP_PATH, POWER_BUILD'
 endif
