@@ -112,6 +112,23 @@ or newer. See the [isolation cell verification details](src/val/common/isolation
 for requirement mapping, parameter-validation gaps, and the separate UPF and
 technology requirements for power-aware signoff.
 
+Run the lane mask's specification-based four-state regression:
+
+```sh
+make lane-mask-regression
+make lane-mask-regression SIM=icarus
+```
+
+The PyUVM suite checks the required lane counts `1, 2, 4, 8, 16` and an additional
+three-lane configuration. It verifies every lane independently, all three output
+vectors, source suppression, tail and alternating masks, population transitions,
+mask crosses, and X/Z controls. Small configurations also run exhaustive vector
+truth tables. Configure the campaign with `LANE_MASK_SEED`,
+`LANE_MASK_RANDOM_CYCLES`, and `LANE_MASK_REGRESSION_BUILD`; reports default to
+`build/<simulator>/lane_mask/regression`. This suite requires Python 3.10 or newer.
+See the [lane mask verification details](src/val/common/lane_mask/README.md)
+for coverage mapping, parameter rejection, and the downstream integration checks.
+
 Choose a different HDL top and Python test module:
 
 ```sh
@@ -146,7 +163,7 @@ source list to force recompilation. `make help` lists the main options.
 The shared flow drivers are under `flows/synth`, `flows/power`, and `flows/vcs`;
 the reusable timing budget is `src/constraints/timing.sdc`. Machine-specific
 synthesis setup files can live at `flows/synth/setup.sh`, which is ignored by
-Git. Dry runs of the counter, clock gate, decoder, DFF, and isolation cell
+Git. Dry runs of the counter, clock gate, decoder, DFF, isolation cell, and lane mask
 regression targets print their commands without changing reports.
 
 Generate a SAIF activity file from the PyUVM simulation with VCS:

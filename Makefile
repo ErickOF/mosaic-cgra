@@ -18,6 +18,7 @@ CLOCK_GATE_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/clock_ga
 DECODER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/decoder))
 DFF_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/dff))
 ISOLATION_CELL_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/isolation_cell))
+LANE_MASK_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/lane_mask))
 # Locate the selected RTL top using the same category layout as validation.
 # Designs with dependencies still provide an ordered VERILOG_SOURCES list.
 VERILOG_SOURCES ?= $(or $(firstword $(wildcard $(PROJECT_ROOT)/src/rtl/*/$(COCOTB_TOPLEVEL).sv)),$(PROJECT_ROOT)/src/rtl/common/$(COCOTB_TOPLEVEL).sv)
@@ -95,6 +96,11 @@ ISOLATION_CELL_RANDOM_CYCLES ?= 2000
 ISOLATION_CELL_SEED ?= 20261011
 _ISOLATION_CELL_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
 _ISOLATION_CELL_MAKE := $(MAKE)
+LANE_MASK_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/lane_mask/regression
+LANE_MASK_RANDOM_CYCLES ?= 2000
+LANE_MASK_SEED ?= 20261011
+_LANE_MASK_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_LANE_MASK_MAKE := $(MAKE)
 
 export PYTHONPATH := $(PYUVM_TEST_DIR)$(if $(PYTHONPATH),:$(PYTHONPATH))
 CUSTOM_COMPILE_DEPS += $(PROJECT_ROOT)/Makefile
@@ -116,7 +122,7 @@ endif
 endif
 include $(shell "$(PYTHON_BIN)" -m cocotb_tools.config --makefiles)/Makefile.sim
 else
-.PHONY: all sim pyuvm counter-regression clock-gate-regression decoder-regression dff-regression isolation-cell-regression saif synth gate-sim gate-saif gate-check power power-report power-check power-invalidate setup clean clean-gate clean-synth clean-power help
+.PHONY: all sim pyuvm counter-regression clock-gate-regression decoder-regression dff-regression isolation-cell-regression lane-mask-regression saif synth gate-sim gate-saif gate-check power power-report power-check power-invalidate setup clean clean-gate clean-synth clean-power help
 
 all sim: pyuvm
 
@@ -188,6 +194,18 @@ isolation-cell-regression:
 		--seed "$(ISOLATION_CELL_SEED)" --random-cycles "$(ISOLATION_CELL_RANDOM_CYCLES)" \
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_ISOLATION_CELL_MAKE)" \
 		$(if $(strip $(_ISOLATION_CELL_SIM_BIN_DIR)),--sim-bin-dir "$(_ISOLATION_CELL_SIM_BIN_DIR)")
+
+# Check lane independence and all derived masks across the specification sizes.
+lane-mask-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(LANE_MASK_TEST_DIR)/run_lane_mask_regression.py" || { \
+		echo 'Lane mask regression missing under src/val/<category>/lane_mask.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(LANE_MASK_TEST_DIR)/run_lane_mask_regression.py" \
+		--sim "$(SIM)" --build-dir "$(LANE_MASK_REGRESSION_BUILD)" \
+		--seed "$(LANE_MASK_SEED)" --random-cycles "$(LANE_MASK_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_LANE_MASK_MAKE)" \
+		$(if $(strip $(_LANE_MASK_SIM_BIN_DIR)),--sim-bin-dir "$(_LANE_MASK_SIM_BIN_DIR)")
 
 # Pass values through the environment so Tcl treats paths and hierarchy names
 # as data. Keep existing runtime options when enabling the UCLI capture script.
@@ -347,6 +365,7 @@ help:
 		'make decoder-regression  Check all decoder encodings and legal pairs' \
 		'make dff-regression  Check DFF reset/enable variants and output events' \
 		'make isolation-cell-regression  Check isolation, clamp, and X/Z behavior' \
+		'make lane-mask-regression  Check lane activity, isolation, and write masks' \
 		'make saif            Run PyUVM with VCS and write switching activity' \
 		'make synth           Synthesize RTL with Design Compiler' \
 		'make gate-sim        Run PyUVM on NETLIST_FILE with CELL_MODELS' \
@@ -378,5 +397,6 @@ help:
 		'Decoder:   DECODER_REGRESSION_BUILD, DECODER_RANDOM_CYCLES, DECODER_SEED' \
 		'DFF:       DFF_REGRESSION_BUILD, DFF_RANDOM_CYCLES, DFF_SEED' \
 		'Isolation: ISOLATION_CELL_REGRESSION_BUILD, ISOLATION_CELL_RANDOM_CYCLES,' \
-		'           ISOLATION_CELL_SEED'
+		'           ISOLATION_CELL_SEED' \
+		'Lane mask: LANE_MASK_REGRESSION_BUILD, LANE_MASK_RANDOM_CYCLES, LANE_MASK_SEED'
 endif
