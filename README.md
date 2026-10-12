@@ -201,6 +201,22 @@ widths through five exhaust all four-state vectors. Configure
 [priority encoder verification details](src/val/common/priority_encoder/README.md)
 for coverage mapping, elaboration guards, and integration/signoff requirements.
 
+Run the reset synchronizer regression:
+
+```sh
+make reset-synchronizer-regression
+make reset-synchronizer-regression SIM=icarus
+```
+
+The PyUVM suite checks depths 2, 3, and 4, asynchronous assertion in both clock
+phases, exact rising-edge release latency, near-edge transitions, stopped/restarted
+clocks, reassertion at every intermediate stage, short modeled pulses, and X/Z
+reset detection. It checks the portable stage vector and continuously monitors
+output/stage changes. Configure `RESET_SYNCHRONIZER_SEED`,
+`RESET_SYNCHRONIZER_RANDOM_CYCLES`, and `RESET_SYNCHRONIZER_REGRESSION_BUILD`.
+See the [reset synchronizer verification details](src/val/common/reset_synchronizer/README.md)
+for timing controls and the separate metastability, CDC/RDC, and physical checks.
+
 Choose a different HDL top and Python test module:
 
 ```sh
@@ -236,8 +252,8 @@ The shared flow drivers are under `flows/synth`, `flows/power`, and `flows/vcs`;
 the reusable timing budget is `src/constraints/timing.sdc`. Machine-specific
 synthesis setup files can live at `flows/synth/setup.sh`, which is ignored by
 Git. Dry runs of the counter, clock gate, decoder, DFF, isolation cell, lane mask,
-level shifter, mux, operand isolation, and priority encoder regression targets
-print their commands without changing reports.
+level shifter, mux, operand isolation, priority encoder, and reset synchronizer
+regression targets print their commands without changing reports.
 
 Generate a SAIF activity file from the PyUVM simulation with VCS:
 

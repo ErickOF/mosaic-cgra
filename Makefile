@@ -23,6 +23,7 @@ LEVEL_SHIFTER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/level
 MUX_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/mux))
 OPERAND_ISOLATION_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/operand_isolation))
 PRIORITY_ENCODER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/priority_encoder))
+RESET_SYNCHRONIZER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/reset_synchronizer))
 # Locate the selected RTL top using the same category layout as validation.
 # Designs with dependencies still provide an ordered VERILOG_SOURCES list.
 VERILOG_SOURCES ?= $(or $(firstword $(wildcard $(PROJECT_ROOT)/src/rtl/*/$(COCOTB_TOPLEVEL).sv)),$(PROJECT_ROOT)/src/rtl/common/$(COCOTB_TOPLEVEL).sv)
@@ -125,6 +126,11 @@ PRIORITY_ENCODER_RANDOM_CYCLES ?= 2000
 PRIORITY_ENCODER_SEED ?= 20261011
 _PRIORITY_ENCODER_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
 _PRIORITY_ENCODER_MAKE := $(MAKE)
+RESET_SYNCHRONIZER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/reset_synchronizer/regression
+RESET_SYNCHRONIZER_RANDOM_CYCLES ?= 2000
+RESET_SYNCHRONIZER_SEED ?= 20261011
+_RESET_SYNCHRONIZER_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_RESET_SYNCHRONIZER_MAKE := $(MAKE)
 
 export PYTHONPATH := $(PYUVM_TEST_DIR)$(if $(PYTHONPATH),:$(PYTHONPATH))
 CUSTOM_COMPILE_DEPS += $(PROJECT_ROOT)/Makefile
@@ -146,7 +152,7 @@ endif
 endif
 include $(shell "$(PYTHON_BIN)" -m cocotb_tools.config --makefiles)/Makefile.sim
 else
-.PHONY: all sim pyuvm counter-regression clock-gate-regression decoder-regression dff-regression isolation-cell-regression lane-mask-regression level-shifter-regression mux-regression operand-isolation-regression priority-encoder-regression saif synth gate-sim gate-saif gate-check power power-report power-check power-invalidate setup clean clean-gate clean-synth clean-power help
+.PHONY: all sim pyuvm counter-regression clock-gate-regression decoder-regression dff-regression isolation-cell-regression lane-mask-regression level-shifter-regression mux-regression operand-isolation-regression priority-encoder-regression reset-synchronizer-regression saif synth gate-sim gate-saif gate-check power power-report power-check power-invalidate setup clean clean-gate clean-synth clean-power help
 
 all sim: pyuvm
 
@@ -278,6 +284,18 @@ priority-encoder-regression:
 		--seed "$(PRIORITY_ENCODER_SEED)" --random-cycles "$(PRIORITY_ENCODER_RANDOM_CYCLES)" \
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_PRIORITY_ENCODER_MAKE)" \
 		$(if $(strip $(_PRIORITY_ENCODER_SIM_BIN_DIR)),--sim-bin-dir "$(_PRIORITY_ENCODER_SIM_BIN_DIR)")
+
+# Check asynchronous assertion and exact edge-count release at each depth.
+reset-synchronizer-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(RESET_SYNCHRONIZER_TEST_DIR)/run_reset_synchronizer_regression.py" || { \
+		echo 'Reset synchronizer regression missing under src/val/<category>/reset_synchronizer.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(RESET_SYNCHRONIZER_TEST_DIR)/run_reset_synchronizer_regression.py" \
+		--sim "$(SIM)" --build-dir "$(RESET_SYNCHRONIZER_REGRESSION_BUILD)" \
+		--seed "$(RESET_SYNCHRONIZER_SEED)" --random-cycles "$(RESET_SYNCHRONIZER_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_RESET_SYNCHRONIZER_MAKE)" \
+		$(if $(strip $(_RESET_SYNCHRONIZER_SIM_BIN_DIR)),--sim-bin-dir "$(_RESET_SYNCHRONIZER_SIM_BIN_DIR)")
 
 # Pass values through the environment so Tcl treats paths and hierarchy names
 # as data. Keep existing runtime options when enabling the UCLI capture script.
@@ -442,6 +460,7 @@ help:
 		'make mux-regression  Check selected data, invalid defaults, and coverage' \
 		'make operand-isolation-regression  Check operand clamps, activity, and X/Z' \
 		'make priority-encoder-regression  Check priority, contention, and X/Z requests' \
+		'make reset-synchronizer-regression  Check reset assertion and synchronized release' \
 		'make saif            Run PyUVM with VCS and write switching activity' \
 		'make synth           Synthesize RTL with Design Compiler' \
 		'make gate-sim        Run PyUVM on NETLIST_FILE with CELL_MODELS' \
@@ -481,5 +500,7 @@ help:
 		'Operand isolation: OPERAND_ISOLATION_REGRESSION_BUILD,' \
 		'                   OPERAND_ISOLATION_RANDOM_CYCLES, OPERAND_ISOLATION_SEED' \
 		'Priority encoder: PRIORITY_ENCODER_REGRESSION_BUILD,' \
-		'                  PRIORITY_ENCODER_RANDOM_CYCLES, PRIORITY_ENCODER_SEED'
+		'                  PRIORITY_ENCODER_RANDOM_CYCLES, PRIORITY_ENCODER_SEED' \
+		'Reset synchronizer: RESET_SYNCHRONIZER_REGRESSION_BUILD,' \
+		'                    RESET_SYNCHRONIZER_RANDOM_CYCLES, RESET_SYNCHRONIZER_SEED'
 endif

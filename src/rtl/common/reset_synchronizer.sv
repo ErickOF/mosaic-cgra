@@ -9,20 +9,25 @@ module reset_synchronizer #(
     output logic o_rstb
 );
     if (STAGES < 2) begin : gen_invalid_stages
-        initial $fatal(1, "STAGES must be greater than or equal to two");
+        reset_synchronizer_stages_must_be_at_least_two invalid_stages ();
     end
 
     // Preserve the stage chain for CDC recognition and metastability containment.
     (* ASYNC_REG = "TRUE", SHREG_EXTRACT = "NO", DONT_TOUCH = "TRUE" *)
     logic [STAGES-1:0] sync_stages;
 
-    always_ff @(posedge i_clk or negedge i_async_rstb) begin
-        if (!i_async_rstb) begin
-            sync_stages <= '0;
-        end else begin
-            sync_stages <= {sync_stages[STAGES-2:0], 1'b1};
+    // Exclude invalid part-selects so the elaboration guard reports the cause.
+    if (STAGES >= 2) begin : gen_synchronizer
+        always_ff @(posedge i_clk or negedge i_async_rstb) begin
+            // X/Z reset is illegal. Expose it instead of treating an unknown
+            // reset as deasserted and clocking known ones through the chain.
+            case (i_async_rstb)
+                1'b0: sync_stages <= '0;
+                1'b1: sync_stages <= {sync_stages[STAGES-2:0], 1'b1};
+                default: sync_stages <= 'x;
+            endcase
         end
-    end
 
-    assign o_rstb = sync_stages[STAGES-1];
+        assign o_rstb = sync_stages[STAGES-1];
+    end
 endmodule
