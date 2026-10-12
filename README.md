@@ -184,6 +184,23 @@ Configure `OPERAND_ISOLATION_SEED`, `OPERAND_ISOLATION_RANDOM_CYCLES`, and
 [operand isolation verification details](src/val/common/operand_isolation/README.md)
 for coverage, reports, and downstream power/integration requirements.
 
+Run the fixed-priority encoder regression:
+
+```sh
+make priority-encoder-regression
+make priority-encoder-regression SIM=icarus
+```
+
+The PyUVM suite crosses widths 1, 2, 3, 4, 5, 8, 16, and 32 with both priority
+directions, for 16 profiles. It checks every single/pair request, all requests,
+population and selection crosses, output consistency, four-state ambiguity,
+and held-input stability. Widths through eight exhaust all binary vectors;
+widths through five exhaust all four-state vectors. Configure
+`PRIORITY_ENCODER_SEED`, `PRIORITY_ENCODER_RANDOM_CYCLES`, and
+`PRIORITY_ENCODER_REGRESSION_BUILD`. See the
+[priority encoder verification details](src/val/common/priority_encoder/README.md)
+for coverage mapping, elaboration guards, and integration/signoff requirements.
+
 Choose a different HDL top and Python test module:
 
 ```sh
@@ -219,8 +236,8 @@ The shared flow drivers are under `flows/synth`, `flows/power`, and `flows/vcs`;
 the reusable timing budget is `src/constraints/timing.sdc`. Machine-specific
 synthesis setup files can live at `flows/synth/setup.sh`, which is ignored by
 Git. Dry runs of the counter, clock gate, decoder, DFF, isolation cell, lane mask,
-level shifter, mux, and operand isolation regression targets print their commands
-without changing reports.
+level shifter, mux, operand isolation, and priority encoder regression targets
+print their commands without changing reports.
 
 Generate a SAIF activity file from the PyUVM simulation with VCS:
 

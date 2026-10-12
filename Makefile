@@ -22,6 +22,7 @@ LANE_MASK_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/lane_mask
 LEVEL_SHIFTER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/level_shifter))
 MUX_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/mux))
 OPERAND_ISOLATION_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/operand_isolation))
+PRIORITY_ENCODER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/priority_encoder))
 # Locate the selected RTL top using the same category layout as validation.
 # Designs with dependencies still provide an ordered VERILOG_SOURCES list.
 VERILOG_SOURCES ?= $(or $(firstword $(wildcard $(PROJECT_ROOT)/src/rtl/*/$(COCOTB_TOPLEVEL).sv)),$(PROJECT_ROOT)/src/rtl/common/$(COCOTB_TOPLEVEL).sv)
@@ -119,6 +120,11 @@ OPERAND_ISOLATION_RANDOM_CYCLES ?= 2000
 OPERAND_ISOLATION_SEED ?= 20261011
 _OPERAND_ISOLATION_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
 _OPERAND_ISOLATION_MAKE := $(MAKE)
+PRIORITY_ENCODER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/priority_encoder/regression
+PRIORITY_ENCODER_RANDOM_CYCLES ?= 2000
+PRIORITY_ENCODER_SEED ?= 20261011
+_PRIORITY_ENCODER_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_PRIORITY_ENCODER_MAKE := $(MAKE)
 
 export PYTHONPATH := $(PYUVM_TEST_DIR)$(if $(PYTHONPATH),:$(PYTHONPATH))
 CUSTOM_COMPILE_DEPS += $(PROJECT_ROOT)/Makefile
@@ -140,7 +146,7 @@ endif
 endif
 include $(shell "$(PYTHON_BIN)" -m cocotb_tools.config --makefiles)/Makefile.sim
 else
-.PHONY: all sim pyuvm counter-regression clock-gate-regression decoder-regression dff-regression isolation-cell-regression lane-mask-regression level-shifter-regression mux-regression operand-isolation-regression saif synth gate-sim gate-saif gate-check power power-report power-check power-invalidate setup clean clean-gate clean-synth clean-power help
+.PHONY: all sim pyuvm counter-regression clock-gate-regression decoder-regression dff-regression isolation-cell-regression lane-mask-regression level-shifter-regression mux-regression operand-isolation-regression priority-encoder-regression saif synth gate-sim gate-saif gate-check power power-report power-check power-invalidate setup clean clean-gate clean-synth clean-power help
 
 all sim: pyuvm
 
@@ -260,6 +266,18 @@ operand-isolation-regression:
 		--seed "$(OPERAND_ISOLATION_SEED)" --random-cycles "$(OPERAND_ISOLATION_RANDOM_CYCLES)" \
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_OPERAND_ISOLATION_MAKE)" \
 		$(if $(strip $(_OPERAND_ISOLATION_SIM_BIN_DIR)),--sim-bin-dir "$(_OPERAND_ISOLATION_SIM_BIN_DIR)")
+
+# Check every specified request width with both static priority directions.
+priority-encoder-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(PRIORITY_ENCODER_TEST_DIR)/run_priority_encoder_regression.py" || { \
+		echo 'Priority encoder regression missing under src/val/<category>/priority_encoder.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(PRIORITY_ENCODER_TEST_DIR)/run_priority_encoder_regression.py" \
+		--sim "$(SIM)" --build-dir "$(PRIORITY_ENCODER_REGRESSION_BUILD)" \
+		--seed "$(PRIORITY_ENCODER_SEED)" --random-cycles "$(PRIORITY_ENCODER_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_PRIORITY_ENCODER_MAKE)" \
+		$(if $(strip $(_PRIORITY_ENCODER_SIM_BIN_DIR)),--sim-bin-dir "$(_PRIORITY_ENCODER_SIM_BIN_DIR)")
 
 # Pass values through the environment so Tcl treats paths and hierarchy names
 # as data. Keep existing runtime options when enabling the UCLI capture script.
@@ -423,6 +441,7 @@ help:
 		'make level-shifter-regression  Check four-state buses in both directions' \
 		'make mux-regression  Check selected data, invalid defaults, and coverage' \
 		'make operand-isolation-regression  Check operand clamps, activity, and X/Z' \
+		'make priority-encoder-regression  Check priority, contention, and X/Z requests' \
 		'make saif            Run PyUVM with VCS and write switching activity' \
 		'make synth           Synthesize RTL with Design Compiler' \
 		'make gate-sim        Run PyUVM on NETLIST_FILE with CELL_MODELS' \
@@ -460,5 +479,7 @@ help:
 		'               LEVEL_SHIFTER_SEED' \
 		'Mux:       MUX_REGRESSION_BUILD, MUX_RANDOM_CYCLES, MUX_SEED' \
 		'Operand isolation: OPERAND_ISOLATION_REGRESSION_BUILD,' \
-		'                   OPERAND_ISOLATION_RANDOM_CYCLES, OPERAND_ISOLATION_SEED'
+		'                   OPERAND_ISOLATION_RANDOM_CYCLES, OPERAND_ISOLATION_SEED' \
+		'Priority encoder: PRIORITY_ENCODER_REGRESSION_BUILD,' \
+		'                  PRIORITY_ENCODER_RANDOM_CYCLES, PRIORITY_ENCODER_SEED'
 endif
