@@ -2,17 +2,18 @@
 
 from __future__ import annotations
 
-import argparse
 from datetime import datetime, timezone
 import hashlib
 from itertools import product
 import json
-import os
 from pathlib import Path
-import shutil
-import subprocess
 import sys
 import xml.etree.ElementTree as ET
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "lib"))
+from mosaic_uvm.regression import (
+    finish_summary, parse_args, passed_test, require_simulator, run_simulation, verification_hashes,
+)
 
 
 # src/val/<category>/counter is four directory levels below the project root.
@@ -31,20 +32,7 @@ PROFILES = (
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--sim", choices=("vcs", "icarus"), default="vcs")
-    parser.add_argument("--build-dir", type=Path, required=True)
-    parser.add_argument("--rtl", type=Path, default=ROOT / "src/rtl/common/counter.sv")
-    parser.add_argument("--seed", type=int, default=20261010)
-    parser.add_argument("--random-cycles", type=int, default=2000)
-    parser.add_argument("--compile-args", default="")
-    parser.add_argument("--sim-args", default="")
-    parser.add_argument("--sim-bin-dir", type=Path)
-    parser.add_argument("--make", default="make")
-    parser.add_argument("--case", action="append", choices=[profile[0] for profile in PROFILES])
-    args = parser.parse_args()
-    if args.random_cycles < 1000:
-        parser.error("--random-cycles must be at least 1000")
+    args = parse_args('counter', __doc__, profiles=[profile[0] for profile in PROFILES], seed=20261010)
     build = args.build_dir.resolve()
     build.mkdir(parents=True, exist_ok=True)
     summary_file = build / "summary.json"
@@ -67,75 +55,41 @@ def main() -> int:
     }
     try:
         summary["rtl_sha256"] = hashlib.sha256(rtl.read_bytes()).hexdigest()
-        summary["verification_sha256"] = {
-            name: hashlib.sha256((Path(__file__).parent / name).read_bytes()).hexdigest()
-            for name in ("counter_env.py", "test_counter_spec.py", "run_counter_regression.py")
-        }
+        summary["verification_sha256"] = verification_hashes(Path(__file__).resolve().parent)
         # Missing tools are NOT_RUN, rather than successful verification or
         # an RTL failure. Respect the same executable directory as cocotb.
-        binaries = ("vcs",) if args.sim == "vcs" else ("iverilog", "vvp")
-        missing = [
-            binary for binary in binaries
-            if shutil.which(binary, path=str(args.sim_bin_dir) if args.sim_bin_dir else None) is None
-        ]
-        if missing:
-            raise FileNotFoundError(f"Simulator executable(s) missing: {', '.join(missing)}")
+        require_simulator(args)
         for index, (name, width, saturate, async_reset, reset_value) in enumerate(PROFILES):
             if args.case and name not in args.case:
                 continue
             case_build = build / name
-            case_build.mkdir(parents=True, exist_ok=True)
-            coverage_file = case_build / "coverage.json"
-            results_file = case_build / "results.xml"
-            log_file = case_build / "simulation.log"
-            coverage_file.unlink(missing_ok=True)
-            results_file.unlink(missing_ok=True)
             parameters = {
                 "WIDTH": width, "SATURATE": saturate,
                 "ASYNC_RESET": async_reset, "RESET_VALUE": reset_value,
             }
             # Rewriting this dependency forces recompilation when parameter
             # overrides change, even if the same build directory is reused.
-            parameter_file = case_build / "parameters.json"
-            parameter_file.write_text(json.dumps(parameters) + "\n", encoding="utf-8")
             overrides = " ".join(
                 f"-Pcounter.{key}={value}" if args.sim == "icarus"
                 else f"-pvalue+counter.{key}={value}"
                 for key, value in parameters.items()
             )
-            command = [
-                args.make, "--no-print-directory", "-C", str(ROOT), "-f", "Makefile", "pyuvm",
-                f"SIM={args.sim}", f"PYTHON_BIN={sys.executable}",
-                "COCOTB_TOPLEVEL=counter", "COCOTB_TEST_MODULES=test_counter_spec",
-                f"PYUVM_TEST_DIR={Path(__file__).resolve().parent}",
-                r"COCOTB_TEST_FILTER=^test_counter_spec\.CounterSpecTest$", "COCOTB_TESTCASE=",
-                f"VERILOG_SOURCES={rtl}", f"SIM_BUILD={case_build}",
-                f"COCOTB_RESULTS_FILE={results_file}",
-                f"CUSTOM_COMPILE_DEPS={parameter_file}",
-                f"COMPILE_ARGS={args.compile_args} {overrides}", f"SIM_ARGS={args.sim_args}",
-            ]
-            if args.sim_bin_dir:
-                binary_variable = "VCS_BIN_DIR" if args.sim == "vcs" else "ICARUS_BIN_DIR"
-                command.append(f"{binary_variable}={args.sim_bin_dir.resolve()}")
-            environment = os.environ.copy()
-            environment.update(
-                COUNTER_WIDTH=str(width), COUNTER_RESET_VALUE=str(reset_value),
-                COUNTER_SATURATE=str(saturate), COUNTER_ASYNC_RESET=str(async_reset),
-                COUNTER_SEED=str(args.seed + index), COUNTER_RANDOM_CYCLES=str(args.random_cycles),
-                COUNTER_COVERAGE_FILE=str(coverage_file),
+            print(f'Running {name}: {parameters}, seed={args.seed + index}', flush=True)
+            (result, log_file, results_file, coverage_file) = run_simulation(
+                args, ROOT, Path(__file__).resolve().parent, 'counter', 'test_counter_spec', 'CounterSpecTest', case_build, rtl,
+                environment={
+                    'COUNTER_WIDTH': str(width), 'COUNTER_RESET_VALUE': str(reset_value),
+                    'COUNTER_SATURATE': str(saturate), 'COUNTER_ASYNC_RESET': str(async_reset),
+                    'COUNTER_SEED': str(args.seed + index), 'COUNTER_RANDOM_CYCLES': str(args.random_cycles),
+                },
+                compile_args=f'{args.compile_args} {overrides}',
+                parameters=parameters,
             )
-            print(f"Running {name}: {parameters}, seed={args.seed + index}", flush=True)
-            with log_file.open("w", encoding="utf-8") as log:
-                result = subprocess.run(command, env=environment, stdout=log, stderr=subprocess.STDOUT)
             report = {"status": "FAIL", "name": name, "parameters": parameters, "log": str(log_file)}
             try:
                 if result.returncode:
                     raise ValueError(f"make exited with status {result.returncode}")
-                cases = ET.parse(results_file).findall(".//testcase")
-                if len(cases) != 1 or cases[0].get("name") != "CounterSpecTest":
-                    raise ValueError("The expected PyUVM test did not run exactly once")
-                if cases[0].find("failure") is not None or cases[0].find("error") is not None:
-                    raise ValueError("The PyUVM test failed")
+                passed_test(results_file, 'CounterSpecTest', 'test_counter_spec')
                 coverage = json.loads(coverage_file.read_text(encoding="utf-8"))
                 if coverage["status"] != "PASS" or coverage["parameters"] != parameters:
                     raise ValueError("Functional coverage or parameter matching failed")
@@ -182,9 +136,7 @@ def main() -> int:
         summary["error"] = str(error)
         print(f"Counter regression could not run: {error}", file=sys.stderr)
     finally:
-        summary["finished_at_utc"] = datetime.now(timezone.utc).isoformat()
-        summary_file.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
-        print(f"Counter regression {summary['status']}: {summary_file}", flush=True)
+        finish_summary(summary_file, summary, 'Counter')
     return 0 if summary["status"] == "PASS" else 1
 
 

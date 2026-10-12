@@ -144,7 +144,8 @@ WRITE_GATE_SEED ?= 20261011
 _WRITE_GATE_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
 _WRITE_GATE_MAKE := $(MAKE)
 
-export PYTHONPATH := $(PYUVM_TEST_DIR)$(if $(PYTHONPATH),:$(PYTHONPATH))
+# Component imports use suite packages; shared infrastructure lives under lib.
+export PYTHONPATH := $(PYUVM_TEST_DIR):$(patsubst %/,%,$(dir $(PYUVM_TEST_DIR))):$(PROJECT_ROOT)/src/val/lib$(if $(PYTHONPATH),:$(PYTHONPATH))
 CUSTOM_COMPILE_DEPS += $(PROJECT_ROOT)/Makefile
 
 # Load cocotb only in the simulation subprocess so setup/help/clean work

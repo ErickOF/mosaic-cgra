@@ -73,7 +73,8 @@ reads actual DUT inputs and outputs between edges and after rising edges,
 then publishes observations through a UVM analysis port.
 `CounterScoreboard` checks those observations against bounded integer
 arithmetic in `next_state`, rather than deriving expected values from the
-DUT's outputs. The scoreboard owns the functional coverage collector.
+DUT's outputs. The environment owns a separate functional coverage collector;
+the scoreboard supplies its checked samples.
 
 Between-edge sampling checks that registered outputs remain stable when no
 asynchronous reset occurs. A short reset pulse asserted and released entirely

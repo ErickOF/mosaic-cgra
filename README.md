@@ -259,6 +259,11 @@ make pyuvm COCOTB_TOPLEVEL=my_top COCOTB_TEST_MODULES=test_my_top \
 
 Place tests in `src/val/<category>/<top>`; the Makefile discovers the directory
 matching `COCOTB_TOPLEVEL`. The counter suite is in `src/val/common/counter`.
+Specification suites separate their configuration, transactions, agent, driver,
+monitor, model, scoreboard, coverage, environment and sequences. Shared utilities
+and regression infrastructure live in `src/val/lib/mosaic_uvm`. See the
+[PyUVM structure](src/val/README.md) for component roles, imports and sampling
+coordination.
 Set `PYUVM_TEST_DIR=/absolute/path/to/tests` to select another location or
 choose between multiple suites for the same top. Additional import directories
 can be supplied through `PYTHONPATH`. Set

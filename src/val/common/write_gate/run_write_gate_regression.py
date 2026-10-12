@@ -2,17 +2,18 @@
 
 from __future__ import annotations
 
-import argparse
 from datetime import datetime, timezone
 import hashlib
 import json
-import os
 from pathlib import Path
 import shlex
-import shutil
-import subprocess
 import sys
 import xml.etree.ElementTree as ET
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "lib"))
+from mosaic_uvm.regression import (
+    campaign_status, finish_summary, license_unavailable, parameter_guard, parse_args, passed_test, require_simulator, run_simulation, verification_hashes,
+)
 
 ROOT = Path(__file__).resolve().parents[4]
 TEST_DIR = Path(__file__).resolve().parent
@@ -28,14 +29,6 @@ PROBES = (
 )
 
 
-def license_unavailable(diagnostic: str) -> bool:
-    """Record license checkout failures as unavailable execution, never PASS."""
-    return any(fragment in diagnostic.lower() for fragment in (
-        "license checkout failed", "license check out failed", "no valid license",
-        "cannot connect to license server", "unable to checkout a license",
-    ))
-
-
 def test_case(results: Path):
     cases = ET.parse(results).findall(".//testcase")
     if len(cases) != 1 or cases[0].get("name") != "WriteGateTest" or cases[0].get("classname") != "test_write_gate":
@@ -45,61 +38,26 @@ def test_case(results: Path):
 
 def simulate(args, case: Path, rtl: Path, width: int, integration: bool, seed: int, probe=""):
     """Invalidate stale reports and compile each profile with explicit parameters."""
-    case.mkdir(parents=True, exist_ok=True)
-    coverage, results = case / "coverage.json", case / "results.xml"
-    coverage.unlink(missing_ok=True)
-    results.unlink(missing_ok=True)
-    parameter_file = case / "parameters.json"
-    parameter_file.write_text(json.dumps(dict(WIDTH=width, integration=integration)) + "\n", encoding="utf-8")
     top = "write_gate_destinations" if integration else "write_gate"
     prefix = f"-P{top}." if args.sim == "icarus" else f"-pvalue+{top}."
     sources = str(rtl) + (f" {TEST_DIR / 'write_gate_destinations.sv'}" if integration else "")
-    command = [
-        args.make, "--no-print-directory", "-C", str(ROOT), "-f", "Makefile", "pyuvm",
-        f"SIM={args.sim}", f"PYTHON_BIN={sys.executable}", f"COCOTB_TOPLEVEL={top}",
-        "COCOTB_TEST_MODULES=test_write_gate", f"PYUVM_TEST_DIR={TEST_DIR}",
-        r"COCOTB_TEST_FILTER=^test_write_gate\.WriteGateTest$", "COCOTB_TESTCASE=",
-        f"VERILOG_SOURCES={sources}", f"SIM_BUILD={case}", f"COCOTB_RESULTS_FILE={results}",
-        f"CUSTOM_COMPILE_DEPS={parameter_file}", f"COMPILE_ARGS={args.compile_args} {shlex.quote(prefix + 'WIDTH=' + str(width))}",
-        f"SIM_ARGS={args.sim_args}",
-    ]
-    if args.sim_bin_dir:
-        variable = "VCS_BIN_DIR" if args.sim == "vcs" else "ICARUS_BIN_DIR"
-        command.append(f"{variable}={args.sim_bin_dir}")
-    environment = os.environ.copy()
-    environment.update(
-        WRITE_GATE_WIDTH=str(width), WRITE_GATE_INTEGRATION=str(int(integration)),
-        WRITE_GATE_SEED=str(seed), WRITE_GATE_RANDOM_CYCLES=str(args.random_cycles),
-        WRITE_GATE_COVERAGE_FILE=str(coverage),
-        WRITE_GATE_CONTROL_PROBE=probe if not integration else "",
-        WRITE_GATE_INTEGRATION_PROBE=probe if integration else "",
+    (result, log_file, results, coverage) = run_simulation(
+        args, ROOT, TEST_DIR, top, 'test_write_gate', 'WriteGateTest', case, sources,
+        environment={
+            'WRITE_GATE_WIDTH': str(width), 'WRITE_GATE_INTEGRATION': str(int(integration)),
+            'WRITE_GATE_SEED': str(seed), 'WRITE_GATE_RANDOM_CYCLES': str(args.random_cycles),
+            'WRITE_GATE_CONTROL_PROBE': probe if not integration else '',
+            'WRITE_GATE_INTEGRATION_PROBE': probe if integration else '',
+        },
+        compile_args=f"{args.compile_args} {shlex.quote(prefix + 'WIDTH=' + str(width))}",
+        parameters=dict(WIDTH=width, integration=integration),
     )
-    log_file = case / "simulation.log"
-    with log_file.open("w", encoding="utf-8") as log:
-        result = subprocess.run(command, env=environment, stdout=log, stderr=subprocess.STDOUT)
     return result.returncode, log_file, results, coverage
 
 
 def invalid_width(args, build: Path, rtl: Path) -> dict:
-    """Require the RTL's named elaboration guard, not an unrelated compile error."""
-    compiler = shutil.which("vcs" if args.sim == "vcs" else "iverilog",
-                            path=str(args.sim_bin_dir) if args.sim_bin_dir else None)
-    case = build / "invalid_parameters" / "zero_width"
-    case.mkdir(parents=True, exist_ok=True)
-    wrapper = case / "invalid_width.sv"
-    wrapper.write_text("module write_gate_invalid_width;\nwrite_gate #(.WIDTH(0)) dut ();\nendmodule\n", encoding="utf-8")
-    command = ([compiler, "-g2012", "-s", "write_gate_invalid_width", "-tnull"] if args.sim == "icarus" else
-               [compiler, "-full64", "-sverilog", "-top", "write_gate_invalid_width", "-o", str(case / "simv")])
-    log_file = case / "elaboration.log"
-    with log_file.open("w", encoding="utf-8") as log:
-        result = subprocess.run([*command, *shlex.split(args.compile_args), str(rtl), str(wrapper)],
-                                cwd=case, stdout=log, stderr=subprocess.STDOUT)
-    diagnostic = log_file.read_text(encoding="utf-8")
-    guard = "write_gate_width_must_be_greater_than_zero"
-    rejected = result.returncode != 0 and guard in diagnostic
-    return dict(name="zero_width", parameters={"WIDTH": 0}, expected_guard=guard,
-                status="PASS" if rejected else "NOT_RUN" if license_unavailable(diagnostic) else "FAIL",
-                stage="elaboration" if rejected else None, compiler_returncode=result.returncode, log=str(log_file))
+    return parameter_guard(args, build, rtl, 'write_gate', 'zero_width', {'WIDTH': 0},
+                           'write_gate_width_must_be_greater_than_zero')
 
 
 def assertion_probes(args, build: Path, rtl: Path) -> list[dict]:
@@ -121,22 +79,7 @@ def assertion_probes(args, build: Path, rtl: Path) -> list[dict]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--sim", choices=("vcs", "icarus"), default="vcs")
-    parser.add_argument("--build-dir", type=Path, required=True)
-    parser.add_argument("--rtl", type=Path, default=ROOT / "src/rtl/common/write_gate.sv")
-    parser.add_argument("--seed", type=int, default=20261011)
-    parser.add_argument("--random-cycles", type=int, default=2000)
-    parser.add_argument("--compile-args", default="")
-    parser.add_argument("--sim-args", default="")
-    parser.add_argument("--sim-bin-dir", type=Path)
-    parser.add_argument("--make", default="make")
-    parser.add_argument("--case", action="append", choices=[profile[0] for profile in PROFILES])
-    args = parser.parse_args()
-    if args.random_cycles < 1000:
-        parser.error("--random-cycles must be at least 1000")
-    if args.sim_bin_dir:
-        args.sim_bin_dir = args.sim_bin_dir.resolve()
+    args = parse_args('write_gate', __doc__, profiles=[profile[0] for profile in PROFILES], seed=20261011)
     build, rtl = args.build_dir.resolve(), args.rtl.resolve()
     build.mkdir(parents=True, exist_ok=True)
     summary_file = build / "summary.json"
@@ -154,14 +97,8 @@ def main() -> int:
     )
     try:
         summary["rtl_sha256"] = hashlib.sha256(rtl.read_bytes()).hexdigest()
-        summary["verification_sha256"] = {
-            name: hashlib.sha256((TEST_DIR / name).read_bytes()).hexdigest()
-            for name in ("write_gate_env.py", "test_write_gate.py", "run_write_gate_regression.py", "write_gate_destinations.sv")
-        }
-        binaries = ("vcs",) if args.sim == "vcs" else ("iverilog", "vvp")
-        missing = [binary for binary in binaries if shutil.which(binary, path=str(args.sim_bin_dir) if args.sim_bin_dir else None) is None]
-        if missing:
-            raise FileNotFoundError(f"Simulator executable(s) missing: {', '.join(missing)}")
+        summary["verification_sha256"] = verification_hashes(TEST_DIR)
+        require_simulator(args)
         summary["status"] = "FAIL"
         for index, (name, width, integration) in enumerate(PROFILES):
             if args.case and name not in args.case:
@@ -172,9 +109,7 @@ def main() -> int:
             try:
                 if code:
                     raise ValueError(f"make exited with status {code}")
-                case = test_case(results)
-                if any(case.find(tag) is not None for tag in ("failure", "error", "skipped")):
-                    raise ValueError("The PyUVM test failed or was skipped")
+                passed_test(results, 'WriteGateTest', 'test_write_gate')
                 coverage = json.loads(coverage_file.read_text(encoding="utf-8"))
                 if (coverage["status"] != "PASS" or coverage["parameters"] != {"WIDTH": width}
                         or coverage["integration"] != integration or not coverage["goals"] or not all(coverage["goals"].values())):
@@ -195,11 +130,7 @@ def main() -> int:
         reports = (*summary["profiles"], *summary["parameter_checks"], *summary["assertion_probes"])
         complete = (len(summary["profiles"]) == (len(set(args.case)) if args.case else len(PROFILES))
                     and len(summary["parameter_checks"]) == 1 and len(summary["assertion_probes"]) == len(PROBES))
-        summary["status"] = (
-            "PASS" if complete and all(report["status"] == "PASS" for report in reports)
-            else "NOT_RUN" if complete and any(report["status"] == "NOT_RUN" for report in reports)
-            and all(report["status"] in ("PASS", "NOT_RUN") for report in reports) else "FAIL"
-        )
+        summary["status"] = campaign_status(reports, complete)
         if not args.case:
             crossed = {(report["parameters"]["WIDTH"], report["integration"])
                        for report in summary["profiles"] if report["status"] == "PASS"}
@@ -210,9 +141,7 @@ def main() -> int:
         summary["error"] = str(error)
         print(f"Write gate regression could not run: {error}", file=sys.stderr)
     finally:
-        summary["finished_at_utc"] = datetime.now(timezone.utc).isoformat()
-        summary_file.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
-        print(f"Write gate regression {summary['status']}: {summary_file}", flush=True)
+        finish_summary(summary_file, summary, 'Write gate')
     return 0 if summary["status"] == "PASS" else 1
 
 
