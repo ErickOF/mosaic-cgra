@@ -217,6 +217,23 @@ output/stage changes. Configure `RESET_SYNCHRONIZER_SEED`,
 See the [reset synchronizer verification details](src/val/common/reset_synchronizer/README.md)
 for timing controls and the separate metastability, CDC/RDC, and physical checks.
 
+Run the portable retention register regression:
+
+```sh
+make retention-register-regression
+make retention-register-regression SIM=icarus
+```
+
+The PyUVM suite crosses widths 1, 8, 16, 32, 64, and 128 with both reset styles,
+both enable settings, and zero/all-one/mixed reset values where representable,
+for 68 profiles. It checks pre-edge save, latest-image restore, normal capture
+and hold, control priority, clock-stopped intervals, sampled X/Z controls, and
+illegal protocol sequences. Configure `RETENTION_REGISTER_SEED`,
+`RETENTION_REGISTER_RANDOM_CYCLES`, and `RETENTION_REGISTER_REGRESSION_BUILD`.
+See the [retention register verification details](src/val/common/retention_register/README.md)
+for active assertions and the separate UPF, supply-loss, and retention-cell signoff
+requirements. These tests publish portable functional evidence.
+
 Choose a different HDL top and Python test module:
 
 ```sh
@@ -252,8 +269,8 @@ The shared flow drivers are under `flows/synth`, `flows/power`, and `flows/vcs`;
 the reusable timing budget is `src/constraints/timing.sdc`. Machine-specific
 synthesis setup files can live at `flows/synth/setup.sh`, which is ignored by
 Git. Dry runs of the counter, clock gate, decoder, DFF, isolation cell, lane mask,
-level shifter, mux, operand isolation, priority encoder, and reset synchronizer
-regression targets print their commands without changing reports.
+level shifter, mux, operand isolation, priority encoder, reset synchronizer, and
+retention register regression targets print their commands without changing reports.
 
 Generate a SAIF activity file from the PyUVM simulation with VCS:
 
