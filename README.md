@@ -234,6 +234,22 @@ See the [retention register verification details](src/val/common/retention_regis
 for active assertions and the separate UPF, supply-loss, and retention-cell signoff
 requirements. These tests publish portable functional evidence.
 
+Run the write gate regression with destination-state comparisons:
+
+```sh
+make write-gate-regression
+make write-gate-regression SIM=icarus
+```
+
+The PyUVM suite checks widths `1, 2, 4, 8, 16, 32, 64, 128` in functional and
+integration fixtures, for 16 profiles. It covers independent mask bits,
+four-state controls, suppression ratios, held-input stability, and real HDL
+register/memory writes compared with an ungated reference. Configure
+`WRITE_GATE_SEED`, `WRITE_GATE_RANDOM_CYCLES`, and `WRITE_GATE_REGRESSION_BUILD`.
+See the [write gate verification details](src/val/common/write_gate/README.md)
+for active control and integration assertions, coverage, and the separate
+physical timing and destination-energy requirements.
+
 Choose a different HDL top and Python test module:
 
 ```sh

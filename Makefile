@@ -25,6 +25,7 @@ OPERAND_ISOLATION_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/o
 PRIORITY_ENCODER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/priority_encoder))
 RESET_SYNCHRONIZER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/reset_synchronizer))
 RETENTION_REGISTER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/retention_register))
+WRITE_GATE_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/write_gate))
 # Locate the selected RTL top using the same category layout as validation.
 # Designs with dependencies still provide an ordered VERILOG_SOURCES list.
 VERILOG_SOURCES ?= $(or $(firstword $(wildcard $(PROJECT_ROOT)/src/rtl/*/$(COCOTB_TOPLEVEL).sv)),$(PROJECT_ROOT)/src/rtl/common/$(COCOTB_TOPLEVEL).sv)
@@ -137,6 +138,11 @@ RETENTION_REGISTER_RANDOM_CYCLES ?= 2000
 RETENTION_REGISTER_SEED ?= 20261011
 _RETENTION_REGISTER_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
 _RETENTION_REGISTER_MAKE := $(MAKE)
+WRITE_GATE_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/write_gate/regression
+WRITE_GATE_RANDOM_CYCLES ?= 2000
+WRITE_GATE_SEED ?= 20261011
+_WRITE_GATE_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_WRITE_GATE_MAKE := $(MAKE)
 
 export PYTHONPATH := $(PYUVM_TEST_DIR)$(if $(PYTHONPATH),:$(PYTHONPATH))
 CUSTOM_COMPILE_DEPS += $(PROJECT_ROOT)/Makefile
@@ -158,7 +164,7 @@ endif
 endif
 include $(shell "$(PYTHON_BIN)" -m cocotb_tools.config --makefiles)/Makefile.sim
 else
-.PHONY: all sim pyuvm counter-regression clock-gate-regression decoder-regression dff-regression isolation-cell-regression lane-mask-regression level-shifter-regression mux-regression operand-isolation-regression priority-encoder-regression reset-synchronizer-regression retention-register-regression saif synth gate-sim gate-saif gate-check power power-report power-check power-invalidate setup clean clean-gate clean-synth clean-power help
+.PHONY: all sim pyuvm counter-regression clock-gate-regression decoder-regression dff-regression isolation-cell-regression lane-mask-regression level-shifter-regression mux-regression operand-isolation-regression priority-encoder-regression reset-synchronizer-regression retention-register-regression write-gate-regression saif synth gate-sim gate-saif gate-check power power-report power-check power-invalidate setup clean clean-gate clean-synth clean-power help
 
 all sim: pyuvm
 
@@ -314,6 +320,18 @@ retention-register-regression:
 		--seed "$(RETENTION_REGISTER_SEED)" --random-cycles "$(RETENTION_REGISTER_RANDOM_CYCLES)" \
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_RETENTION_REGISTER_MAKE)" \
 		$(if $(strip $(_RETENTION_REGISTER_SIM_BIN_DIR)),--sim-bin-dir "$(_RETENTION_REGISTER_SIM_BIN_DIR)")
+
+# Check combinational masks and equivalence at real register/memory destinations.
+write-gate-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(WRITE_GATE_TEST_DIR)/run_write_gate_regression.py" || { \
+		echo 'Write gate regression missing under src/val/<category>/write_gate.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(WRITE_GATE_TEST_DIR)/run_write_gate_regression.py" \
+		--sim "$(SIM)" --build-dir "$(WRITE_GATE_REGRESSION_BUILD)" \
+		--seed "$(WRITE_GATE_SEED)" --random-cycles "$(WRITE_GATE_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_WRITE_GATE_MAKE)" \
+		$(if $(strip $(_WRITE_GATE_SIM_BIN_DIR)),--sim-bin-dir "$(_WRITE_GATE_SIM_BIN_DIR)")
 
 # Pass values through the environment so Tcl treats paths and hierarchy names
 # as data. Keep existing runtime options when enabling the UCLI capture script.
@@ -480,6 +498,7 @@ help:
 		'make priority-encoder-regression  Check priority, contention, and X/Z requests' \
 		'make reset-synchronizer-regression  Check reset assertion and synchronized release' \
 		'make retention-register-regression  Check portable save/restore and protocol' \
+		'make write-gate-regression  Check write masks and register/memory state' \
 		'make saif            Run PyUVM with VCS and write switching activity' \
 		'make synth           Synthesize RTL with Design Compiler' \
 		'make gate-sim        Run PyUVM on NETLIST_FILE with CELL_MODELS' \
@@ -523,5 +542,6 @@ help:
 		'Reset synchronizer: RESET_SYNCHRONIZER_REGRESSION_BUILD,' \
 		'                    RESET_SYNCHRONIZER_RANDOM_CYCLES, RESET_SYNCHRONIZER_SEED' \
 		'Retention register: RETENTION_REGISTER_REGRESSION_BUILD,' \
-		'                    RETENTION_REGISTER_RANDOM_CYCLES, RETENTION_REGISTER_SEED'
+		'                    RETENTION_REGISTER_RANDOM_CYCLES, RETENTION_REGISTER_SEED' \
+		'Write gate: WRITE_GATE_REGRESSION_BUILD, WRITE_GATE_RANDOM_CYCLES, WRITE_GATE_SEED'
 endif
