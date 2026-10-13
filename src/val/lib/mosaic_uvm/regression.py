@@ -13,12 +13,12 @@ import sys
 import xml.etree.ElementTree as ET
 
 
-def parse_args(module, description, profiles=None, seed=20261011):
+def parse_args(module, description, profiles=None, seed=20261011, *, rtl_category="common"):
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument("--sim", choices=("vcs", "icarus"), default="vcs")
     parser.add_argument("--build-dir", type=Path, required=True)
     root = Path(__file__).resolve().parents[4]
-    parser.add_argument("--rtl", type=Path, default=root / f"src/rtl/common/{module}.sv")
+    parser.add_argument("--rtl", type=Path, default=root / f"src/rtl/{rtl_category}/{module}.sv")
     parser.add_argument("--seed", type=int, default=seed)
     parser.add_argument("--random-cycles", type=int, default=2000)
     parser.add_argument("--compile-args", default="")
@@ -106,7 +106,7 @@ def passed_test(results, test_class, module):
 
 
 def parameter_guard(args, build, rtl, module, name, parameters, expected_guard,
-                    *, wrapper_source=None, allow_startup=False):
+                    *, wrapper_source=None, allow_startup=False, dependencies=()):
     """Keep strict elaboration and explicitly permitted startup guards distinct."""
     case = build / "invalid_parameters" / name
     case.mkdir(parents=True, exist_ok=True)
@@ -128,7 +128,8 @@ def parameter_guard(args, build, rtl, module, name, parameters, expected_guard,
     log_file = case / ("guard.log" if allow_startup else "elaboration.log")
     runtime_code = None
     with log_file.open("w", encoding="utf-8") as log:
-        compiled = subprocess.run([*command, *shlex.split(args.compile_args), str(rtl), str(wrapper)],
+        compiled = subprocess.run([*command, *shlex.split(args.compile_args),
+                                   *(str(source) for source in dependencies), str(rtl), str(wrapper)],
                                   cwd=case, stdout=log, stderr=subprocess.STDOUT)
         if allow_startup and compiled.returncode == 0:
             runtime = [shutil.which("vvp", path=search), str(executable)] if args.sim == "icarus" else [str(executable)]

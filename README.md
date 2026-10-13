@@ -250,6 +250,23 @@ See the [write gate verification details](src/val/common/write_gate/README.md)
 for active control and integration assertions, coverage, and the separate
 physical timing and destination-energy requirements.
 
+Run the asynchronous FIFO regression:
+
+```sh
+make async-fifo-regression
+make async-fifo-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=async_fifo
+```
+
+The PyUVM suite checks ten representative width/depth/synchronizer/threshold
+profiles with independent clocks, a queue scoreboard, conservative boundary
+timing, repeated pointer wrapping, four-state payloads, clock stops, and reset
+cancellation/recovery. Configure `ASYNC_FIFO_SEED`, `ASYNC_FIFO_RANDOM_CYCLES`,
+and `ASYNC_FIFO_REGRESSION_BUILD`. The Makefile includes the counter and DFF RTL
+dependencies automatically for this top. See the
+[async FIFO verification details](src/val/basic/async_fifo/README.md) for profiles,
+mandatory coverage, assertion probes, and the separate CDC and physical checks.
+
 Choose a different HDL top and Python test module:
 
 ```sh
@@ -270,8 +287,9 @@ can be supplied through `PYTHONPATH`. Set
 `COCOTB_TEST_MODULES` to importable module names without `.py`; multiple modules
 are comma-separated. It defaults to `test_<COCOTB_TOPLEVEL>`. When
 `VERILOG_SOURCES` is omitted, the Makefile discovers the selected top under
-`src/rtl/<category>/<COCOTB_TOPLEVEL>.sv`. Provide an ordered source list for
-designs that instantiate other modules or import packages. Package sources
+`src/rtl/<category>/<COCOTB_TOPLEVEL>.sv`. The async FIFO includes its counter/DFF
+dependencies automatically. Provide an ordered source list for other designs
+that instantiate modules or import packages. Package sources
 must precede sources that import them.
 
 Pass additional compiler options with `COMPILE_ARGS`, runtime options with
@@ -290,8 +308,9 @@ The shared flow drivers are under `flows/synth`, `flows/power`, and `flows/vcs`;
 the reusable timing budget is `src/constraints/timing.sdc`. Machine-specific
 synthesis setup files can live at `flows/synth/setup.sh`, which is ignored by
 Git. Dry runs of the counter, clock gate, decoder, DFF, isolation cell, lane mask,
-level shifter, mux, operand isolation, priority encoder, reset synchronizer, and
-retention register regression targets print their commands without changing reports.
+level shifter, mux, operand isolation, priority encoder, reset synchronizer,
+retention register, write gate, and async FIFO regression targets print their
+commands without changing reports.
 
 Generate a SAIF activity file from the PyUVM simulation with VCS:
 

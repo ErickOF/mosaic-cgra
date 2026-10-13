@@ -1,6 +1,6 @@
 # PyUVM validation structure
 
-Each module under `common/<module>` is a Python package with these roles:
+Each module under `<category>/<module>` is a Python package with these roles:
 
 | File | Responsibility |
 | --- | --- |
@@ -59,6 +59,9 @@ goals, static parameter literals and sampling schedules remain in their suites.
 The shared parameter-guard helper records elaboration rejection separately from
 explicitly permitted simulation-startup rejection. The lane-mask runner retains
 its structural-rejection policy and reports its explicit-guard coverage gap.
+The async FIFO under `basic/async_fifo` adds an independent accepted-record queue,
+destination-edge visibility histories, and coordinated reset cancellation. The
+shared runner accepts a category and ordered RTL dependencies for its guards.
 
 The Makefile supplies the selected suite, its package parent and `src/val/lib`
 through `PYTHONPATH`. Imports use qualified suite names, such as
