@@ -24,6 +24,11 @@ class AsyncFifoMonitor(uvm_monitor):
             await ReadOnly()
             value = logic(handle)
             if value != previous:
+                # Unknown asynchronous reset can poison state between clocks.
+                # Diagnose the illegal control before its secondary activity.
+                for reset_name in ("i_w_rstb", "i_r_rstb"):
+                    reset = logic(getattr(cocotb.top, reset_name))
+                    assert reset in ("0", "1"), f"Known-control assertion failed: {reset_name}={reset}"
                 self.ap.write(Activity(name, value, allowed))
                 previous = value
 

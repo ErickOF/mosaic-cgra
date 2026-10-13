@@ -284,6 +284,24 @@ includes the DFF dependency automatically. See the
 for mandatory coverage, parameter guards, negative probes, and tile integration
 and physical signoff requirements.
 
+Run the context memory regression:
+
+```sh
+make context-memory-regression
+make context-memory-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=context_memory
+```
+
+The RTL reuses common decoders for command selection and a common DFF bank for
+committed validity. It implements masked context loading, atomic write/commit,
+invalidation, combinational reads, and optional raw readback. Its
+PyUVM suite checks 54 profiles, including every exploration depth from 1 through
+32 and representative width/slice/read-port/raw/reset combinations. Configure
+`CONTEXT_MEMORY_SEED`, `CONTEXT_MEMORY_RANDOM_CYCLES`, and
+`CONTEXT_MEMORY_REGRESSION_BUILD`. See the
+[context memory verification details](src/val/basic/context_memory/README.md)
+for timing, reset qualification, protocol checks, and external validator scope.
+
 Choose a different HDL top and Python test module:
 
 ```sh
@@ -304,8 +322,9 @@ can be supplied through `PYTHONPATH`. Set
 `COCOTB_TEST_MODULES` to importable module names without `.py`; multiple modules
 are comma-separated. It defaults to `test_<COCOTB_TOPLEVEL>`. When
 `VERILOG_SOURCES` is omitted, the Makefile discovers the selected top under
-`src/rtl/<category>/<COCOTB_TOPLEVEL>.sv`. The async FIFO and bypass network include
-their common RTL dependencies automatically. Provide an ordered source list for
+`src/rtl/<category>/<COCOTB_TOPLEVEL>.sv`. The async FIFO, bypass network, and context
+memory include their common RTL dependencies automatically. Provide an ordered
+source list for
 other designs that instantiate modules or import packages. Package sources
 must precede sources that import them.
 
@@ -326,7 +345,7 @@ the reusable timing budget is `src/constraints/timing.sdc`. Machine-specific
 synthesis setup files can live at `flows/synth/setup.sh`, which is ignored by
 Git. Dry runs of the counter, clock gate, decoder, DFF, isolation cell, lane mask,
 level shifter, mux, operand isolation, priority encoder, reset synchronizer,
-retention register, write gate, async FIFO, and bypass network regression targets
+retention register, write gate, async FIFO, bypass network, and context memory targets
 print their commands without changing reports.
 
 Generate a SAIF activity file from the PyUVM simulation with VCS:

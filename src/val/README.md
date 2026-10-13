@@ -65,6 +65,9 @@ shared runner accepts a category and ordered RTL dependencies for its guards.
 The bypass network under `basic/bypass_network` uses per-destination graph lookup,
 retained capture state, and pre-edge/post-edge/held observations. Its monitor
 checks destination and storage bits independently during quiet intervals.
+The context memory under `basic/context_memory` keeps independent data/validity
+history, verifies pre-edge masked-write behavior and post-edge atomic commits,
+and monitors unchanged entries and unmasked slices continuously.
 
 The Makefile supplies the selected suite, its package parent and `src/val/lib`
 through `PYTHONPATH`. Imports use qualified suite names, such as
