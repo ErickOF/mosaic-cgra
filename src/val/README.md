@@ -68,6 +68,10 @@ checks destination and storage bits independently during quiet intervals.
 The context memory under `basic/context_memory` keeps independent data/validity
 history, verifies pre-edge masked-write behavior and post-edge atomic commits,
 and monitors unchanged entries and unmasked slices continuously.
+The context sequencer under `basic/context_sequencer` uses a loop-visit history,
+the full controller graph, and pre-edge/post-edge/held observations. Its additional
+PyUVM fixture composes the memory and sequencer references to check real two-port
+commitment and activation timing.
 
 The Makefile supplies the selected suite, its package parent and `src/val/lib`
 through `PYTHONPATH`. Imports use qualified suite names, such as

@@ -302,6 +302,25 @@ PyUVM suite checks 54 profiles, including every exploration depth from 1 through
 [context memory verification details](src/val/basic/context_memory/README.md)
 for timing, reset qualification, protocol checks, and external validator scope.
 
+Run the context sequencer regression:
+
+```sh
+make context-sequencer-regression
+make context-sequencer-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=context_sequencer
+```
+
+The RTL reuses common DFFs and the loop counter for committed context selection,
+candidate waits, counted loops, safe stop/suspend/resume/switch requests,
+completion pulses, and sticky errors. Encodings are defined in repository-local
+`context_sequencer_pkg.sv`; no external contracts package is required. PyUVM covers
+55 controller profiles, every depth from 1 through 32, all feature/reset
+combinations, and three real context-memory fixtures. Configure
+`CONTEXT_SEQUENCER_SEED`, `CONTEXT_SEQUENCER_RANDOM_CYCLES`, and
+`CONTEXT_SEQUENCER_REGRESSION_BUILD`. See the
+[context sequencer verification details](src/val/basic/context_sequencer/README.md)
+for encodings, runtime policy, RTL reuse, and coverage scope.
+
 Choose a different HDL top and Python test module:
 
 ```sh
@@ -322,11 +341,10 @@ can be supplied through `PYTHONPATH`. Set
 `COCOTB_TEST_MODULES` to importable module names without `.py`; multiple modules
 are comma-separated. It defaults to `test_<COCOTB_TOPLEVEL>`. When
 `VERILOG_SOURCES` is omitted, the Makefile discovers the selected top under
-`src/rtl/<category>/<COCOTB_TOPLEVEL>.sv`. The async FIFO, bypass network, and context
-memory include their common RTL dependencies automatically. Provide an ordered
-source list for
-other designs that instantiate modules or import packages. Package sources
-must precede sources that import them.
+`src/rtl/<category>/<COCOTB_TOPLEVEL>.sv`. The async FIFO, bypass network, context
+memory, and context sequencer include their ordered RTL dependencies automatically.
+Provide an ordered source list for other designs that instantiate modules or
+import packages. Package sources must precede sources that import them.
 
 Pass additional compiler options with `COMPILE_ARGS`, runtime options with
 `SIM_ARGS`, and HDL plusargs with `COCOTB_PLUSARGS`. The cocotb VCS backend
@@ -345,8 +363,8 @@ the reusable timing budget is `src/constraints/timing.sdc`. Machine-specific
 synthesis setup files can live at `flows/synth/setup.sh`, which is ignored by
 Git. Dry runs of the counter, clock gate, decoder, DFF, isolation cell, lane mask,
 level shifter, mux, operand isolation, priority encoder, reset synchronizer,
-retention register, write gate, async FIFO, bypass network, and context memory targets
-print their commands without changing reports.
+retention register, write gate, async FIFO, bypass network, context memory, and
+context sequencer targets print their commands without changing reports.
 
 Generate a SAIF activity file from the PyUVM simulation with VCS:
 
