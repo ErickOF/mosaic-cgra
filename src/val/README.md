@@ -62,6 +62,9 @@ its structural-rejection policy and reports its explicit-guard coverage gap.
 The async FIFO under `basic/async_fifo` adds an independent accepted-record queue,
 destination-edge visibility histories, and coordinated reset cancellation. The
 shared runner accepts a category and ordered RTL dependencies for its guards.
+The bypass network under `basic/bypass_network` uses per-destination graph lookup,
+retained capture state, and pre-edge/post-edge/held observations. Its monitor
+checks destination and storage bits independently during quiet intervals.
 
 The Makefile supplies the selected suite, its package parent and `src/val/lib`
 through `PYTHONPATH`. Imports use qualified suite names, such as

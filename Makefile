@@ -27,10 +27,12 @@ RESET_SYNCHRONIZER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/
 RETENTION_REGISTER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/retention_register))
 WRITE_GATE_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/write_gate))
 ASYNC_FIFO_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/async_fifo))
+BYPASS_NETWORK_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/bypass_network))
 # Locate the selected RTL top using the same category layout as validation.
 # The async FIFO reuses the released counter and DFF. Caller lists take precedence.
 _ASYNC_FIFO_SOURCES := $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/basic/async_fifo.sv
-VERILOG_SOURCES ?= $(if $(filter async_fifo,$(COCOTB_TOPLEVEL)),$(_ASYNC_FIFO_SOURCES),$(or $(firstword $(wildcard $(PROJECT_ROOT)/src/rtl/*/$(COCOTB_TOPLEVEL).sv)),$(PROJECT_ROOT)/src/rtl/common/$(COCOTB_TOPLEVEL).sv))
+_BYPASS_NETWORK_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/basic/bypass_network.sv
+VERILOG_SOURCES ?= $(if $(filter async_fifo,$(COCOTB_TOPLEVEL)),$(_ASYNC_FIFO_SOURCES),$(if $(filter bypass_network,$(COCOTB_TOPLEVEL)),$(_BYPASS_NETWORK_SOURCES),$(or $(firstword $(wildcard $(PROJECT_ROOT)/src/rtl/*/$(COCOTB_TOPLEVEL).sv)),$(PROJECT_ROOT)/src/rtl/common/$(COCOTB_TOPLEVEL).sv)))
 SIM_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/$(COCOTB_TOPLEVEL)
 COCOTB_RESULTS_FILE ?= $(SIM_BUILD)/results.xml
 SAIF_FILE ?= $(SIM_BUILD)/$(COCOTB_TOPLEVEL).saif
@@ -150,6 +152,11 @@ ASYNC_FIFO_RANDOM_CYCLES ?= 2000
 ASYNC_FIFO_SEED ?= 20261012
 _ASYNC_FIFO_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
 _ASYNC_FIFO_MAKE := $(MAKE)
+BYPASS_NETWORK_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/bypass_network/regression
+BYPASS_NETWORK_RANDOM_CYCLES ?= 2000
+BYPASS_NETWORK_SEED ?= 20261012
+_BYPASS_NETWORK_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_BYPASS_NETWORK_MAKE := $(MAKE)
 
 # Component imports use suite packages; shared infrastructure lives under lib.
 export PYTHONPATH := $(PYUVM_TEST_DIR):$(patsubst %/,%,$(dir $(PYUVM_TEST_DIR))):$(PROJECT_ROOT)/src/val/lib$(if $(PYTHONPATH),:$(PYTHONPATH))
@@ -172,7 +179,7 @@ endif
 endif
 include $(shell "$(PYTHON_BIN)" -m cocotb_tools.config --makefiles)/Makefile.sim
 else
-.PHONY: all sim pyuvm counter-regression clock-gate-regression decoder-regression dff-regression isolation-cell-regression lane-mask-regression level-shifter-regression mux-regression operand-isolation-regression priority-encoder-regression reset-synchronizer-regression retention-register-regression write-gate-regression async-fifo-regression saif synth gate-sim gate-saif gate-check power power-report power-check power-invalidate setup clean clean-gate clean-synth clean-power help
+.PHONY: all sim pyuvm counter-regression clock-gate-regression decoder-regression dff-regression isolation-cell-regression lane-mask-regression level-shifter-regression mux-regression operand-isolation-regression priority-encoder-regression reset-synchronizer-regression retention-register-regression write-gate-regression async-fifo-regression bypass-network-regression saif synth gate-sim gate-saif gate-check power power-report power-check power-invalidate setup clean clean-gate clean-synth clean-power help
 
 all sim: pyuvm
 
@@ -353,6 +360,18 @@ async-fifo-regression:
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_ASYNC_FIFO_MAKE)" \
 		$(if $(strip $(_ASYNC_FIFO_SIM_BIN_DIR)),--sim-bin-dir "$(_ASYNC_FIFO_SIM_BIN_DIR)")
 
+# Check sparse forwarding, independent destinations, capture/hold, and context flush.
+bypass-network-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(BYPASS_NETWORK_TEST_DIR)/run_bypass_network_regression.py" || { \
+		echo 'Bypass network regression missing under src/val/<category>/bypass_network.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(BYPASS_NETWORK_TEST_DIR)/run_bypass_network_regression.py" \
+		--sim "$(SIM)" --build-dir "$(BYPASS_NETWORK_REGRESSION_BUILD)" \
+		--seed "$(BYPASS_NETWORK_SEED)" --random-cycles "$(BYPASS_NETWORK_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_BYPASS_NETWORK_MAKE)" \
+		$(if $(strip $(_BYPASS_NETWORK_SIM_BIN_DIR)),--sim-bin-dir "$(_BYPASS_NETWORK_SIM_BIN_DIR)")
+
 # Pass values through the environment so Tcl treats paths and hierarchy names
 # as data. Keep existing runtime options when enabling the UCLI capture script.
 # The script's config endofsim noexit command requires -ucli2Proc at runtime.
@@ -520,6 +539,7 @@ help:
 		'make retention-register-regression  Check portable save/restore and protocol' \
 		'make write-gate-regression  Check write masks and register/memory state' \
 		'make async-fifo-regression  Check dual-clock ordering, resets, and coverage' \
+		'make bypass-network-regression  Check sparse forwarding, capture, and flush' \
 		'make saif            Run PyUVM with VCS and write switching activity' \
 		'make synth           Synthesize RTL with Design Compiler' \
 		'make gate-sim        Run PyUVM on NETLIST_FILE with CELL_MODELS' \
@@ -565,5 +585,7 @@ help:
 		'Retention register: RETENTION_REGISTER_REGRESSION_BUILD,' \
 		'                    RETENTION_REGISTER_RANDOM_CYCLES, RETENTION_REGISTER_SEED' \
 		'Write gate: WRITE_GATE_REGRESSION_BUILD, WRITE_GATE_RANDOM_CYCLES, WRITE_GATE_SEED' \
-		'Async FIFO: ASYNC_FIFO_REGRESSION_BUILD, ASYNC_FIFO_RANDOM_CYCLES, ASYNC_FIFO_SEED'
+		'Async FIFO: ASYNC_FIFO_REGRESSION_BUILD, ASYNC_FIFO_RANDOM_CYCLES, ASYNC_FIFO_SEED' \
+		'Bypass network: BYPASS_NETWORK_REGRESSION_BUILD, BYPASS_NETWORK_RANDOM_CYCLES,' \
+		'                BYPASS_NETWORK_SEED'
 endif

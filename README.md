@@ -267,6 +267,23 @@ dependencies automatically for this top. See the
 [async FIFO verification details](src/val/basic/async_fifo/README.md) for profiles,
 mandatory coverage, assertion probes, and the separate CDC and physical checks.
 
+Run the sparse bypass network regression:
+
+```sh
+make bypass-network-regression
+make bypass-network-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=bypass_network
+```
+
+The PyUVM suite checks 31 representative graph/width/count/timing profiles with
+independent destination lookup, fanout, capture/hold, reset/flush priority, context
+invalidation, and four-state protocol assertions. Configure `BYPASS_NETWORK_SEED`,
+`BYPASS_NETWORK_RANDOM_CYCLES`, and `BYPASS_NETWORK_REGRESSION_BUILD`. The Makefile
+includes the DFF dependency automatically. See the
+[bypass network verification details](src/val/basic/bypass_network/README.md)
+for mandatory coverage, parameter guards, negative probes, and tile integration
+and physical signoff requirements.
+
 Choose a different HDL top and Python test module:
 
 ```sh
@@ -287,9 +304,9 @@ can be supplied through `PYTHONPATH`. Set
 `COCOTB_TEST_MODULES` to importable module names without `.py`; multiple modules
 are comma-separated. It defaults to `test_<COCOTB_TOPLEVEL>`. When
 `VERILOG_SOURCES` is omitted, the Makefile discovers the selected top under
-`src/rtl/<category>/<COCOTB_TOPLEVEL>.sv`. The async FIFO includes its counter/DFF
-dependencies automatically. Provide an ordered source list for other designs
-that instantiate modules or import packages. Package sources
+`src/rtl/<category>/<COCOTB_TOPLEVEL>.sv`. The async FIFO and bypass network include
+their common RTL dependencies automatically. Provide an ordered source list for
+other designs that instantiate modules or import packages. Package sources
 must precede sources that import them.
 
 Pass additional compiler options with `COMPILE_ARGS`, runtime options with
@@ -309,8 +326,8 @@ the reusable timing budget is `src/constraints/timing.sdc`. Machine-specific
 synthesis setup files can live at `flows/synth/setup.sh`, which is ignored by
 Git. Dry runs of the counter, clock gate, decoder, DFF, isolation cell, lane mask,
 level shifter, mux, operand isolation, priority encoder, reset synchronizer,
-retention register, write gate, and async FIFO regression targets print their
-commands without changing reports.
+retention register, write gate, async FIFO, and bypass network regression targets
+print their commands without changing reports.
 
 Generate a SAIF activity file from the PyUVM simulation with VCS:
 
