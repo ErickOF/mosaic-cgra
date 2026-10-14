@@ -338,6 +338,23 @@ and `DATA_ALIGNER_REGRESSION_BUILD`. See the
 [data aligner verification details](src/val/basic/data_aligner/README.md) for
 byte ordering, spill handling, cancellation, coverage, and tool scope.
 
+Run the SECDED ECC regression:
+
+```sh
+make ecc-regression
+make ecc-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=ecc
+```
+
+The combinational codec provides independent encode and decode, single-error
+correction, double-error detection, fail-closed outputs, and a repaired codeword
+for external scrubbing. It reuses common decoder and operand-isolation modules.
+PyUVM checks twenty widths from 1 to 256 bits, every parity-count boundary,
+every single bit and unordered double-fault pair, and unknown propagation.
+Configure `ECC_SEED`, `ECC_RANDOM_CYCLES`, and `ECC_REGRESSION_BUILD`. See the
+[ECC verification details](src/val/basic/ecc/README.md) for layout, guarantees,
+implementation limits, coverage, and external tool scope.
+
 Choose a different HDL top and Python test module:
 
 ```sh
@@ -359,8 +376,8 @@ can be supplied through `PYTHONPATH`. Set
 are comma-separated. It defaults to `test_<COCOTB_TOPLEVEL>`. When
 `VERILOG_SOURCES` is omitted, the Makefile discovers the selected top under
 `src/rtl/<category>/<COCOTB_TOPLEVEL>.sv`. The async FIFO, bypass network, context
-memory, context sequencer, and data aligner include their ordered RTL dependencies
-automatically.
+memory, context sequencer, data aligner, and ECC include their ordered RTL
+dependencies automatically.
 Provide an ordered source list for other designs that instantiate modules or
 import packages. Package sources must precede sources that import them.
 
@@ -382,8 +399,8 @@ synthesis setup files can live at `flows/synth/setup.sh`, which is ignored by
 Git. Dry runs of the counter, clock gate, decoder, DFF, isolation cell, lane mask,
 level shifter, mux, operand isolation, priority encoder, reset synchronizer,
 retention register, write gate, async FIFO, bypass network, context memory,
-context sequencer, and data aligner targets print their commands without changing
-reports.
+context sequencer, data aligner, and ECC targets print their commands without
+changing reports.
 
 Generate a SAIF activity file from the PyUVM simulation with VCS:
 

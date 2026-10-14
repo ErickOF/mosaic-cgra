@@ -76,6 +76,9 @@ The data aligner under `basic/data_aligner` uses an independent byte-array
 translation model and an accepted-window ledger for ready-valid ordering,
 spill conservation, cancellation, and consume-and-replace behavior. Continuous
 monitors check held outputs, isolated bytes, and registered capture activity.
+The ECC suite under `basic/ecc` derives conceptual Hamming positions in an
+independent mathematical model, sweeps every practical one/two-bit codeword fault,
+and checks unknown propagation, corrected scrub words, and cone independence.
 
 The Makefile supplies the selected suite, its package parent and `src/val/lib`
 through `PYTHONPATH`. Imports use qualified suite names, such as
