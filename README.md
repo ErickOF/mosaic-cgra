@@ -355,6 +355,23 @@ Configure `ECC_SEED`, `ECC_RANDOM_CYCLES`, and `ECC_REGRESSION_BUILD`. See the
 [ECC verification details](src/val/basic/ecc/README.md) for layout, guarantees,
 implementation limits, coverage, and external tool scope.
 
+Run the synchronous FIFO regression:
+
+```sh
+make fifo-regression
+make fifo-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=fifo
+```
+
+The FIFO supports simultaneous enqueue/dequeue, full replacement, odd depths,
+occupancy thresholds, and both reset styles without combinational fall-through.
+It reuses common DFF and operand-isolation modules and leaves storage unreset.
+PyUVM checks 114 width/depth/reset/threshold profiles against an independent
+accepted-item queue, with continuous state-enable and backpressure assertions.
+Configure `FIFO_SEED`, `FIFO_RANDOM_CYCLES`, and `FIFO_REGRESSION_BUILD`. See the
+[FIFO verification details](src/val/basic/fifo/README.md) for parameters, coverage,
+protocol probes, and external tool scope.
+
 Choose a different HDL top and Python test module:
 
 ```sh
@@ -376,8 +393,8 @@ can be supplied through `PYTHONPATH`. Set
 are comma-separated. It defaults to `test_<COCOTB_TOPLEVEL>`. When
 `VERILOG_SOURCES` is omitted, the Makefile discovers the selected top under
 `src/rtl/<category>/<COCOTB_TOPLEVEL>.sv`. The async FIFO, bypass network, context
-memory, context sequencer, data aligner, and ECC include their ordered RTL
-dependencies automatically.
+memory, context sequencer, data aligner, ECC, and synchronous FIFO include their
+ordered RTL dependencies automatically.
 Provide an ordered source list for other designs that instantiate modules or
 import packages. Package sources must precede sources that import them.
 
@@ -399,8 +416,8 @@ synthesis setup files can live at `flows/synth/setup.sh`, which is ignored by
 Git. Dry runs of the counter, clock gate, decoder, DFF, isolation cell, lane mask,
 level shifter, mux, operand isolation, priority encoder, reset synchronizer,
 retention register, write gate, async FIFO, bypass network, context memory,
-context sequencer, data aligner, and ECC targets print their commands without
-changing reports.
+context sequencer, data aligner, ECC, and synchronous FIFO targets print their
+commands without changing reports.
 
 Generate a SAIF activity file from the PyUVM simulation with VCS:
 

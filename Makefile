@@ -32,6 +32,7 @@ CONTEXT_MEMORY_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/cont
 CONTEXT_SEQUENCER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/context_sequencer))
 DATA_ALIGNER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/data_aligner))
 ECC_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/ecc))
+FIFO_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/fifo))
 # Locate the selected RTL top using the same category layout as validation.
 # Include each basic module's common dependencies. Caller lists take precedence.
 _ASYNC_FIFO_SOURCES := $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/basic/async_fifo.sv
@@ -46,6 +47,8 @@ _DATA_ALIGNER_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/s
 _RTL_SOURCES_data_aligner := $(_DATA_ALIGNER_SOURCES)
 _ECC_SOURCES := $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/ecc.sv
 _RTL_SOURCES_ecc := $(_ECC_SOURCES)
+_FIFO_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv
+_RTL_SOURCES_fifo := $(_FIFO_SOURCES)
 VERILOG_SOURCES ?= $(or $(_RTL_SOURCES_$(COCOTB_TOPLEVEL)),$(firstword $(wildcard $(PROJECT_ROOT)/src/rtl/*/$(COCOTB_TOPLEVEL).sv)),$(PROJECT_ROOT)/src/rtl/common/$(COCOTB_TOPLEVEL).sv)
 SIM_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/$(COCOTB_TOPLEVEL)
 COCOTB_RESULTS_FILE ?= $(SIM_BUILD)/results.xml
@@ -191,6 +194,11 @@ ECC_RANDOM_CYCLES ?= 2000
 ECC_SEED ?= 20261013
 _ECC_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
 _ECC_MAKE := $(MAKE)
+FIFO_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/fifo/regression
+FIFO_RANDOM_CYCLES ?= 2000
+FIFO_SEED ?= 20261013
+_FIFO_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_FIFO_MAKE := $(MAKE)
 
 # Component imports use suite packages; shared infrastructure lives under lib.
 export PYTHONPATH := $(PYUVM_TEST_DIR):$(patsubst %/,%,$(dir $(PYUVM_TEST_DIR))):$(PROJECT_ROOT)/src/val/lib$(if $(PYTHONPATH),:$(PYTHONPATH))
@@ -443,6 +451,19 @@ data-aligner-regression:
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_DATA_ALIGNER_MAKE)" \
 		$(if $(strip $(_DATA_ALIGNER_SIM_BIN_DIR)),--sim-bin-dir "$(_DATA_ALIGNER_SIM_BIN_DIR)")
 
+.PHONY: fifo-regression
+# Check single-clock ordering, full replacement, odd depths and reset timing.
+fifo-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(FIFO_TEST_DIR)/run_fifo_regression.py" || { \
+		echo 'FIFO regression missing under src/val/<category>/fifo.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(FIFO_TEST_DIR)/run_fifo_regression.py" \
+		--sim "$(SIM)" --build-dir "$(FIFO_REGRESSION_BUILD)" \
+		--seed "$(FIFO_SEED)" --random-cycles "$(FIFO_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_FIFO_MAKE)" \
+		$(if $(strip $(_FIFO_SIM_BIN_DIR)),--sim-bin-dir "$(_FIFO_SIM_BIN_DIR)")
+
 .PHONY: ecc-regression
 # Check shortened Hamming layout, all single bits, and every practical fault pair.
 ecc-regression:
@@ -628,6 +649,7 @@ help:
 		'make context-sequencer-regression  Check context control, loops, and runtime safety' \
 		'make data-aligner-regression  Check byte alignment, spill, and ready-valid timing' \
 		'make ecc-regression   Check SECDED layout, correction, and every fault pair' \
+		'make fifo-regression  Check synchronous FIFO ordering, resets, and full replacement' \
 		'make saif            Run PyUVM with VCS and write switching activity' \
 		'make synth           Synthesize RTL with Design Compiler' \
 		'make gate-sim        Run PyUVM on NETLIST_FILE with CELL_MODELS' \
@@ -682,5 +704,6 @@ help:
 		'                   CONTEXT_SEQUENCER_SEED' \
 		'Data aligner: DATA_ALIGNER_REGRESSION_BUILD, DATA_ALIGNER_RANDOM_CYCLES,' \
 		'              DATA_ALIGNER_SEED' \
-		'ECC:       ECC_REGRESSION_BUILD, ECC_RANDOM_CYCLES, ECC_SEED'
+		'ECC:       ECC_REGRESSION_BUILD, ECC_RANDOM_CYCLES, ECC_SEED' \
+		'FIFO:      FIFO_REGRESSION_BUILD, FIFO_RANDOM_CYCLES, FIFO_SEED'
 endif

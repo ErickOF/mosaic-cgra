@@ -79,6 +79,9 @@ monitors check held outputs, isolated bytes, and registered capture activity.
 The ECC suite under `basic/ecc` derives conceptual Hamming positions in an
 independent mathematical model, sweeps every practical one/two-bit codeword fault,
 and checks unknown propagation, corrected scrub words, and cone independence.
+The synchronous FIFO under `basic/fifo` maintains an independent accepted-item
+queue and checks all reachable occupancy/handshake combinations, reset timing,
+full replacement, odd-depth wrapping, four-state payloads, and storage enables.
 
 The Makefile supplies the selected suite, its package parent and `src/val/lib`
 through `PYTHONPATH`. Imports use qualified suite names, such as
