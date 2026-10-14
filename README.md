@@ -406,6 +406,24 @@ even faults, X/Z propagation and independent-cone activity. Configure `PARITY_SE
 [parity verification details](src/val/basic/parity/README.md) for layout, detection
 limits, partial-write responsibilities, coverage and local proof scope.
 
+Run the weighted performance-counter bank regression:
+
+```sh
+make performance-counters-regression
+make performance-counters-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=performance_counters
+```
+
+The bank independently selects weighted events, saturates or wraps with sticky
+overflow, reports upward threshold crossings, and provides coherent post-update
+snapshots and combinational indexed reads. It reuses common DFF and operand
+isolation blocks. PyUVM checks 61 parameter profiles, ownership changes, reset
+styles, ignored X/Z, and live protocol assertions against arbitrary-precision
+state. Configure `PERFORMANCE_COUNTERS_SEED`, `PERFORMANCE_COUNTERS_RANDOM_CYCLES`
+and `PERFORMANCE_COUNTERS_REGRESSION_BUILD`. See the
+[performance-counter verification details](src/val/basic/performance_counters/README.md)
+for packed layout, coverage limits, integration responsibilities and tool scope.
+
 Choose a different HDL top and Python test module:
 
 ```sh
@@ -427,8 +445,8 @@ can be supplied through `PYTHONPATH`. Set
 are comma-separated. It defaults to `test_<COCOTB_TOPLEVEL>`. When
 `VERILOG_SOURCES` is omitted, the Makefile discovers the selected top under
 `src/rtl/<category>/<COCOTB_TOPLEVEL>.sv`. The async FIFO, bypass network, context
-memory, context sequencer, data aligner, ECC, synchronous FIFO, packer, and parity
-include their ordered RTL dependencies automatically.
+memory, context sequencer, data aligner, ECC, synchronous FIFO, packer, parity,
+and performance counters include their ordered RTL dependencies automatically.
 Provide an ordered source list for other designs that instantiate modules or
 import packages. Package sources must precede sources that import them.
 
@@ -450,8 +468,8 @@ synthesis setup files can live at `flows/synth/setup.sh`, which is ignored by
 Git. Dry runs of the counter, clock gate, decoder, DFF, isolation cell, lane mask,
 level shifter, mux, operand isolation, priority encoder, reset synchronizer,
 retention register, write gate, async FIFO, bypass network, context memory,
-context sequencer, data aligner, ECC, synchronous FIFO, packer, and parity targets
-print their commands without changing reports.
+context sequencer, data aligner, ECC, synchronous FIFO, packer, parity, and
+performance-counter targets print their commands without changing reports.
 
 Generate a SAIF activity file from the PyUVM simulation with VCS:
 

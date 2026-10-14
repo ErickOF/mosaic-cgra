@@ -91,6 +91,13 @@ separate fault-position oracle to check generation, error mapping, whole-word
 clamping and expected undetected even-weight faults. It also checks X/Z propagation,
 activity during writes to selected granules, and continuous independence of both cones.
 
+The performance-counter bank under `basic/performance_counters` uses Python integer
+accumulation and independent shadow state to check weighted events, full-width
+overflow, thresholds, ownership boundaries and coherent snapshots. Real-port
+reads are checked before and after edges; optional internal observations check all
+live/shadow storage and isolated arithmetic operands on every sample. Negative
+campaigns require the expected live protocol assertion to reject illegal controls.
+
 The Makefile supplies the selected suite, its package parent and `src/val/lib`
 through `PYTHONPATH`. Imports use qualified suite names, such as
 `write_gate.agent`, to avoid collisions between generic filenames. Standalone

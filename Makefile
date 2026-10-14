@@ -34,6 +34,7 @@ DATA_ALIGNER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/data_a
 ECC_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/ecc))
 FIFO_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/fifo))
 PACKER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/packer))
+PERFORMANCE_COUNTERS_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/performance_counters))
 PARITY_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/parity))
 # Locate the selected RTL top using the same category layout as validation.
 # Include each basic module's common dependencies. Caller lists take precedence.
@@ -55,6 +56,8 @@ _PACKER_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl
 _RTL_SOURCES_packer := $(_PACKER_SOURCES)
 _PARITY_SOURCES := $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv
 _RTL_SOURCES_parity := $(_PARITY_SOURCES)
+_PERFORMANCE_COUNTERS_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/performance_counters.sv
+_RTL_SOURCES_performance_counters := $(_PERFORMANCE_COUNTERS_SOURCES)
 VERILOG_SOURCES ?= $(or $(_RTL_SOURCES_$(COCOTB_TOPLEVEL)),$(firstword $(wildcard $(PROJECT_ROOT)/src/rtl/*/$(COCOTB_TOPLEVEL).sv)),$(PROJECT_ROOT)/src/rtl/common/$(COCOTB_TOPLEVEL).sv)
 SIM_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/$(COCOTB_TOPLEVEL)
 COCOTB_RESULTS_FILE ?= $(SIM_BUILD)/results.xml
@@ -215,6 +218,11 @@ PARITY_RANDOM_CYCLES ?= 2000
 PARITY_SEED ?= 20261013
 _PARITY_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
 _PARITY_MAKE := $(MAKE)
+PERFORMANCE_COUNTERS_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/performance_counters/regression
+PERFORMANCE_COUNTERS_RANDOM_CYCLES ?= 2000
+PERFORMANCE_COUNTERS_SEED ?= 20261013
+_PERFORMANCE_COUNTERS_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_PERFORMANCE_COUNTERS_MAKE := $(MAKE)
 
 # Component imports use suite packages; shared infrastructure lives under lib.
 export PYTHONPATH := $(PYUVM_TEST_DIR):$(patsubst %/,%,$(dir $(PYUVM_TEST_DIR))):$(PROJECT_ROOT)/src/val/lib$(if $(PYTHONPATH),:$(PYTHONPATH))
@@ -467,6 +475,19 @@ data-aligner-regression:
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_DATA_ALIGNER_MAKE)" \
 		$(if $(strip $(_DATA_ALIGNER_SIM_BIN_DIR)),--sim-bin-dir "$(_DATA_ALIGNER_SIM_BIN_DIR)")
 
+.PHONY: performance-counters-regression
+# Check weighted events, overflow, thresholds, coherent snapshots and ownership.
+performance-counters-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(PERFORMANCE_COUNTERS_TEST_DIR)/run_performance_counters_regression.py" || { \
+		echo 'Performance counters regression missing under src/val/<category>/performance_counters.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(PERFORMANCE_COUNTERS_TEST_DIR)/run_performance_counters_regression.py" \
+		--sim "$(SIM)" --build-dir "$(PERFORMANCE_COUNTERS_REGRESSION_BUILD)" \
+		--seed "$(PERFORMANCE_COUNTERS_SEED)" --random-cycles "$(PERFORMANCE_COUNTERS_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_PERFORMANCE_COUNTERS_MAKE)" \
+		$(if $(strip $(_PERFORMANCE_COUNTERS_SIM_BIN_DIR)),--sim-bin-dir "$(_PERFORMANCE_COUNTERS_SIM_BIN_DIR)")
+
 .PHONY: parity-regression
 # Check per-granule even parity, fault limitations, X/Z and cone independence.
 parity-regression:
@@ -694,6 +715,7 @@ help:
 		'make fifo-regression  Check synchronous FIFO ordering, resets, and full replacement' \
 		'make packer-regression  Check element widths, saturation, lanes, and elastic timing' \
 		'make parity-regression  Check granular parity, fault detection limits, and X/Z' \
+		'make performance-counters-regression  Check weighted counters, snapshots and thresholds' \
 		'make saif            Run PyUVM with VCS and write switching activity' \
 		'make synth           Synthesize RTL with Design Compiler' \
 		'make gate-sim        Run PyUVM on NETLIST_FILE with CELL_MODELS' \
@@ -751,5 +773,7 @@ help:
 		'ECC:       ECC_REGRESSION_BUILD, ECC_RANDOM_CYCLES, ECC_SEED' \
 		'FIFO:      FIFO_REGRESSION_BUILD, FIFO_RANDOM_CYCLES, FIFO_SEED' \
 		'Packer:    PACKER_REGRESSION_BUILD, PACKER_RANDOM_CYCLES, PACKER_SEED' \
-		'Parity:    PARITY_REGRESSION_BUILD, PARITY_RANDOM_CYCLES, PARITY_SEED'
+		'Parity:    PARITY_REGRESSION_BUILD, PARITY_RANDOM_CYCLES, PARITY_SEED' \
+		'Performance counters: PERFORMANCE_COUNTERS_REGRESSION_BUILD,' \
+		'                      PERFORMANCE_COUNTERS_RANDOM_CYCLES, PERFORMANCE_COUNTERS_SEED'
 endif
