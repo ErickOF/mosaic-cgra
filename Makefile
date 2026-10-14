@@ -34,6 +34,7 @@ DATA_ALIGNER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/data_a
 ECC_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/ecc))
 FIFO_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/fifo))
 PACKER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/packer))
+PARITY_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/parity))
 # Locate the selected RTL top using the same category layout as validation.
 # Include each basic module's common dependencies. Caller lists take precedence.
 _ASYNC_FIFO_SOURCES := $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/basic/async_fifo.sv
@@ -52,6 +53,8 @@ _FIFO_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/c
 _RTL_SOURCES_fifo := $(_FIFO_SOURCES)
 _PACKER_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/packer.sv
 _RTL_SOURCES_packer := $(_PACKER_SOURCES)
+_PARITY_SOURCES := $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv
+_RTL_SOURCES_parity := $(_PARITY_SOURCES)
 VERILOG_SOURCES ?= $(or $(_RTL_SOURCES_$(COCOTB_TOPLEVEL)),$(firstword $(wildcard $(PROJECT_ROOT)/src/rtl/*/$(COCOTB_TOPLEVEL).sv)),$(PROJECT_ROOT)/src/rtl/common/$(COCOTB_TOPLEVEL).sv)
 SIM_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/$(COCOTB_TOPLEVEL)
 COCOTB_RESULTS_FILE ?= $(SIM_BUILD)/results.xml
@@ -207,6 +210,11 @@ PACKER_RANDOM_CYCLES ?= 2000
 PACKER_SEED ?= 20261013
 _PACKER_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
 _PACKER_MAKE := $(MAKE)
+PARITY_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/parity/regression
+PARITY_RANDOM_CYCLES ?= 2000
+PARITY_SEED ?= 20261013
+_PARITY_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_PARITY_MAKE := $(MAKE)
 
 # Component imports use suite packages; shared infrastructure lives under lib.
 export PYTHONPATH := $(PYUVM_TEST_DIR):$(patsubst %/,%,$(dir $(PYUVM_TEST_DIR))):$(PROJECT_ROOT)/src/val/lib$(if $(PYTHONPATH),:$(PYTHONPATH))
@@ -459,6 +467,19 @@ data-aligner-regression:
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_DATA_ALIGNER_MAKE)" \
 		$(if $(strip $(_DATA_ALIGNER_SIM_BIN_DIR)),--sim-bin-dir "$(_DATA_ALIGNER_SIM_BIN_DIR)")
 
+.PHONY: parity-regression
+# Check per-granule even parity, fault limitations, X/Z and cone independence.
+parity-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(PARITY_TEST_DIR)/run_parity_regression.py" || { \
+		echo 'Parity regression missing under src/val/<category>/parity.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(PARITY_TEST_DIR)/run_parity_regression.py" \
+		--sim "$(SIM)" --build-dir "$(PARITY_REGRESSION_BUILD)" \
+		--seed "$(PARITY_SEED)" --random-cycles "$(PARITY_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_PARITY_MAKE)" \
+		$(if $(strip $(_PARITY_SIM_BIN_DIR)),--sim-bin-dir "$(_PARITY_SIM_BIN_DIR)")
+
 .PHONY: packer-regression
 # Check element conversion, lane mapping, saturation and elastic ready-valid.
 packer-regression:
@@ -672,6 +693,7 @@ help:
 		'make ecc-regression   Check SECDED layout, correction, and every fault pair' \
 		'make fifo-regression  Check synchronous FIFO ordering, resets, and full replacement' \
 		'make packer-regression  Check element widths, saturation, lanes, and elastic timing' \
+		'make parity-regression  Check granular parity, fault detection limits, and X/Z' \
 		'make saif            Run PyUVM with VCS and write switching activity' \
 		'make synth           Synthesize RTL with Design Compiler' \
 		'make gate-sim        Run PyUVM on NETLIST_FILE with CELL_MODELS' \
@@ -728,5 +750,6 @@ help:
 		'              DATA_ALIGNER_SEED' \
 		'ECC:       ECC_REGRESSION_BUILD, ECC_RANDOM_CYCLES, ECC_SEED' \
 		'FIFO:      FIFO_REGRESSION_BUILD, FIFO_RANDOM_CYCLES, FIFO_SEED' \
-		'Packer:    PACKER_REGRESSION_BUILD, PACKER_RANDOM_CYCLES, PACKER_SEED'
+		'Packer:    PACKER_REGRESSION_BUILD, PACKER_RANDOM_CYCLES, PACKER_SEED' \
+		'Parity:    PARITY_REGRESSION_BUILD, PARITY_RANDOM_CYCLES, PARITY_SEED'
 endif

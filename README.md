@@ -389,6 +389,23 @@ and `PACKER_REGRESSION_BUILD`. See the
 [packer verification details](src/val/basic/packer/README.md) for conversion
 semantics, feature support, coverage and tool scope.
 
+Run the granular parity regression:
+
+```sh
+make parity-regression
+make parity-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=parity
+```
+
+The combinational codec independently generates and checks even parity per
+granule, reports granular and aggregate status, and clamps the whole checked word
+on any detected error. It reuses common operand isolation. PyUVM checks 101
+data/granule geometries, every single protected-bit fault, expected undetected
+even faults, X/Z propagation and independent-cone activity. Configure `PARITY_SEED`,
+`PARITY_RANDOM_CYCLES` and `PARITY_REGRESSION_BUILD`. See the
+[parity verification details](src/val/basic/parity/README.md) for layout, detection
+limits, partial-write responsibilities, coverage and local proof scope.
+
 Choose a different HDL top and Python test module:
 
 ```sh
@@ -410,8 +427,8 @@ can be supplied through `PYTHONPATH`. Set
 are comma-separated. It defaults to `test_<COCOTB_TOPLEVEL>`. When
 `VERILOG_SOURCES` is omitted, the Makefile discovers the selected top under
 `src/rtl/<category>/<COCOTB_TOPLEVEL>.sv`. The async FIFO, bypass network, context
-memory, context sequencer, data aligner, ECC, synchronous FIFO, and packer include
-their ordered RTL dependencies automatically.
+memory, context sequencer, data aligner, ECC, synchronous FIFO, packer, and parity
+include their ordered RTL dependencies automatically.
 Provide an ordered source list for other designs that instantiate modules or
 import packages. Package sources must precede sources that import them.
 
@@ -433,8 +450,8 @@ synthesis setup files can live at `flows/synth/setup.sh`, which is ignored by
 Git. Dry runs of the counter, clock gate, decoder, DFF, isolation cell, lane mask,
 level shifter, mux, operand isolation, priority encoder, reset synchronizer,
 retention register, write gate, async FIFO, bypass network, context memory,
-context sequencer, data aligner, ECC, synchronous FIFO, and packer targets print
-their commands without changing reports.
+context sequencer, data aligner, ECC, synchronous FIFO, packer, and parity targets
+print their commands without changing reports.
 
 Generate a SAIF activity file from the PyUVM simulation with VCS:
 

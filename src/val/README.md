@@ -86,6 +86,10 @@ The element packer under `basic/packer` uses mathematical integer conversion and
 an accepted-beat queue to check lane mapping, representability, saturation,
 metadata, feature guards, cancellation and elastic output timing. Continuous
 monitors verify invalid-lane isolation and accepted-only payload capture.
+The granular parity suite under `basic/parity` uses a population-count model and
+separate fault-position oracle to check generation, error mapping, whole-word
+clamping and expected undetected even-weight faults. It also checks X/Z propagation,
+activity during writes to selected granules, and continuous independence of both cones.
 
 The Makefile supplies the selected suite, its package parent and `src/val/lib`
 through `PYTHONPATH`. Imports use qualified suite names, such as
