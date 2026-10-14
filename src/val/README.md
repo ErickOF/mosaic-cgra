@@ -72,6 +72,10 @@ The context sequencer under `basic/context_sequencer` uses a loop-visit history,
 the full controller graph, and pre-edge/post-edge/held observations. Its additional
 PyUVM fixture composes the memory and sequencer references to check real two-port
 commitment and activation timing.
+The data aligner under `basic/data_aligner` uses an independent byte-array
+translation model and an accepted-window ledger for ready-valid ordering,
+spill conservation, cancellation, and consume-and-replace behavior. Continuous
+monitors check held outputs, isolated bytes, and registered capture activity.
 
 The Makefile supplies the selected suite, its package parent and `src/val/lib`
 through `PYTHONPATH`. Imports use qualified suite names, such as

@@ -30,6 +30,7 @@ ASYNC_FIFO_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/async_fi
 BYPASS_NETWORK_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/bypass_network))
 CONTEXT_MEMORY_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/context_memory))
 CONTEXT_SEQUENCER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/context_sequencer))
+DATA_ALIGNER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/data_aligner))
 # Locate the selected RTL top using the same category layout as validation.
 # Include each basic module's common dependencies. Caller lists take precedence.
 _ASYNC_FIFO_SOURCES := $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/basic/async_fifo.sv
@@ -40,6 +41,8 @@ _RTL_SOURCES_async_fifo := $(_ASYNC_FIFO_SOURCES)
 _RTL_SOURCES_bypass_network := $(_BYPASS_NETWORK_SOURCES)
 _RTL_SOURCES_context_memory := $(_CONTEXT_MEMORY_SOURCES)
 _RTL_SOURCES_context_sequencer := $(_CONTEXT_SEQUENCER_SOURCES)
+_DATA_ALIGNER_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/data_aligner.sv
+_RTL_SOURCES_data_aligner := $(_DATA_ALIGNER_SOURCES)
 VERILOG_SOURCES ?= $(or $(_RTL_SOURCES_$(COCOTB_TOPLEVEL)),$(firstword $(wildcard $(PROJECT_ROOT)/src/rtl/*/$(COCOTB_TOPLEVEL).sv)),$(PROJECT_ROOT)/src/rtl/common/$(COCOTB_TOPLEVEL).sv)
 SIM_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/$(COCOTB_TOPLEVEL)
 COCOTB_RESULTS_FILE ?= $(SIM_BUILD)/results.xml
@@ -175,6 +178,11 @@ CONTEXT_SEQUENCER_RANDOM_CYCLES ?= 2000
 CONTEXT_SEQUENCER_SEED ?= 20261012
 _CONTEXT_SEQUENCER_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
 _CONTEXT_SEQUENCER_MAKE := $(MAKE)
+DATA_ALIGNER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/data_aligner/regression
+DATA_ALIGNER_RANDOM_CYCLES ?= 2000
+DATA_ALIGNER_SEED ?= 20261013
+_DATA_ALIGNER_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_DATA_ALIGNER_MAKE := $(MAKE)
 
 # Component imports use suite packages; shared infrastructure lives under lib.
 export PYTHONPATH := $(PYUVM_TEST_DIR):$(patsubst %/,%,$(dir $(PYUVM_TEST_DIR))):$(PROJECT_ROOT)/src/val/lib$(if $(PYTHONPATH),:$(PYTHONPATH))
@@ -414,6 +422,19 @@ context-sequencer-regression:
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_CONTEXT_SEQUENCER_MAKE)" \
 		$(if $(strip $(_CONTEXT_SEQUENCER_SIM_BIN_DIR)),--sim-bin-dir "$(_CONTEXT_SEQUENCER_SIM_BIN_DIR)")
 
+.PHONY: data-aligner-regression
+# Check byte mapping, spill conservation, elastic occupancy and cancellation.
+data-aligner-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(DATA_ALIGNER_TEST_DIR)/run_data_aligner_regression.py" || { \
+		echo 'Data aligner regression missing under src/val/<category>/data_aligner.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(DATA_ALIGNER_TEST_DIR)/run_data_aligner_regression.py" \
+		--sim "$(SIM)" --build-dir "$(DATA_ALIGNER_REGRESSION_BUILD)" \
+		--seed "$(DATA_ALIGNER_SEED)" --random-cycles "$(DATA_ALIGNER_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_DATA_ALIGNER_MAKE)" \
+		$(if $(strip $(_DATA_ALIGNER_SIM_BIN_DIR)),--sim-bin-dir "$(_DATA_ALIGNER_SIM_BIN_DIR)")
+
 # Pass values through the environment so Tcl treats paths and hierarchy names
 # as data. Keep existing runtime options when enabling the UCLI capture script.
 # The script's config endofsim noexit command requires -ucli2Proc at runtime.
@@ -584,6 +605,7 @@ help:
 		'make bypass-network-regression  Check sparse forwarding, capture, and flush' \
 		'make context-memory-regression  Check masked contexts, commit, and raw reads' \
 		'make context-sequencer-regression  Check context control, loops, and runtime safety' \
+		'make data-aligner-regression  Check byte alignment, spill, and ready-valid timing' \
 		'make saif            Run PyUVM with VCS and write switching activity' \
 		'make synth           Synthesize RTL with Design Compiler' \
 		'make gate-sim        Run PyUVM on NETLIST_FILE with CELL_MODELS' \
@@ -635,5 +657,7 @@ help:
 		'Context memory: CONTEXT_MEMORY_REGRESSION_BUILD, CONTEXT_MEMORY_RANDOM_CYCLES,' \
 		'                CONTEXT_MEMORY_SEED' \
 		'Context sequencer: CONTEXT_SEQUENCER_REGRESSION_BUILD, CONTEXT_SEQUENCER_RANDOM_CYCLES,' \
-		'                   CONTEXT_SEQUENCER_SEED'
+		'                   CONTEXT_SEQUENCER_SEED' \
+		'Data aligner: DATA_ALIGNER_REGRESSION_BUILD, DATA_ALIGNER_RANDOM_CYCLES,' \
+		'              DATA_ALIGNER_SEED'
 endif

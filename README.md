@@ -321,6 +321,23 @@ combinations, and three real context-memory fixtures. Configure
 [context sequencer verification details](src/val/basic/context_sequencer/README.md)
 for encodings, runtime policy, RTL reuse, and coverage scope.
 
+Run the data aligner regression:
+
+```sh
+make data-aligner-regression
+make data-aligner-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=data_aligner
+```
+
+The RTL aligns two adjacent words by byte offset, preserves per-byte strobes,
+and reports low-edge or high-edge spill. It reuses common operand isolation and
+DFFs for combinational or one-entry elastic ready-valid operation. PyUVM checks
+57 width/direction/timing profiles with an independent byte-array model and
+transaction ledger. Configure `DATA_ALIGNER_SEED`, `DATA_ALIGNER_RANDOM_CYCLES`,
+and `DATA_ALIGNER_REGRESSION_BUILD`. See the
+[data aligner verification details](src/val/basic/data_aligner/README.md) for
+byte ordering, spill handling, cancellation, coverage, and tool scope.
+
 Choose a different HDL top and Python test module:
 
 ```sh
@@ -342,7 +359,8 @@ can be supplied through `PYTHONPATH`. Set
 are comma-separated. It defaults to `test_<COCOTB_TOPLEVEL>`. When
 `VERILOG_SOURCES` is omitted, the Makefile discovers the selected top under
 `src/rtl/<category>/<COCOTB_TOPLEVEL>.sv`. The async FIFO, bypass network, context
-memory, and context sequencer include their ordered RTL dependencies automatically.
+memory, context sequencer, and data aligner include their ordered RTL dependencies
+automatically.
 Provide an ordered source list for other designs that instantiate modules or
 import packages. Package sources must precede sources that import them.
 
@@ -363,8 +381,9 @@ the reusable timing budget is `src/constraints/timing.sdc`. Machine-specific
 synthesis setup files can live at `flows/synth/setup.sh`, which is ignored by
 Git. Dry runs of the counter, clock gate, decoder, DFF, isolation cell, lane mask,
 level shifter, mux, operand isolation, priority encoder, reset synchronizer,
-retention register, write gate, async FIFO, bypass network, context memory, and
-context sequencer targets print their commands without changing reports.
+retention register, write gate, async FIFO, bypass network, context memory,
+context sequencer, and data aligner targets print their commands without changing
+reports.
 
 Generate a SAIF activity file from the PyUVM simulation with VCS:
 
