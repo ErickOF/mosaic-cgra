@@ -1,0 +1,1 @@
+"""Element packer specification validation."""

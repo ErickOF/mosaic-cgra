@@ -82,6 +82,10 @@ and checks unknown propagation, corrected scrub words, and cone independence.
 The synchronous FIFO under `basic/fifo` maintains an independent accepted-item
 queue and checks all reachable occupancy/handshake combinations, reset timing,
 full replacement, odd-depth wrapping, four-state payloads, and storage enables.
+The element packer under `basic/packer` uses mathematical integer conversion and
+an accepted-beat queue to check lane mapping, representability, saturation,
+metadata, feature guards, cancellation and elastic output timing. Continuous
+monitors verify invalid-lane isolation and accepted-only payload capture.
 
 The Makefile supplies the selected suite, its package parent and `src/val/lib`
 through `PYTHONPATH`. Imports use qualified suite names, such as

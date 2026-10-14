@@ -33,6 +33,7 @@ CONTEXT_SEQUENCER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/c
 DATA_ALIGNER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/data_aligner))
 ECC_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/ecc))
 FIFO_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/fifo))
+PACKER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/packer))
 # Locate the selected RTL top using the same category layout as validation.
 # Include each basic module's common dependencies. Caller lists take precedence.
 _ASYNC_FIFO_SOURCES := $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/basic/async_fifo.sv
@@ -49,6 +50,8 @@ _ECC_SOURCES := $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rt
 _RTL_SOURCES_ecc := $(_ECC_SOURCES)
 _FIFO_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv
 _RTL_SOURCES_fifo := $(_FIFO_SOURCES)
+_PACKER_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/packer.sv
+_RTL_SOURCES_packer := $(_PACKER_SOURCES)
 VERILOG_SOURCES ?= $(or $(_RTL_SOURCES_$(COCOTB_TOPLEVEL)),$(firstword $(wildcard $(PROJECT_ROOT)/src/rtl/*/$(COCOTB_TOPLEVEL).sv)),$(PROJECT_ROOT)/src/rtl/common/$(COCOTB_TOPLEVEL).sv)
 SIM_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/$(COCOTB_TOPLEVEL)
 COCOTB_RESULTS_FILE ?= $(SIM_BUILD)/results.xml
@@ -199,6 +202,11 @@ FIFO_RANDOM_CYCLES ?= 2000
 FIFO_SEED ?= 20261013
 _FIFO_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
 _FIFO_MAKE := $(MAKE)
+PACKER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/packer/regression
+PACKER_RANDOM_CYCLES ?= 2000
+PACKER_SEED ?= 20261013
+_PACKER_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_PACKER_MAKE := $(MAKE)
 
 # Component imports use suite packages; shared infrastructure lives under lib.
 export PYTHONPATH := $(PYUVM_TEST_DIR):$(patsubst %/,%,$(dir $(PYUVM_TEST_DIR))):$(PROJECT_ROOT)/src/val/lib$(if $(PYTHONPATH),:$(PYTHONPATH))
@@ -451,6 +459,19 @@ data-aligner-regression:
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_DATA_ALIGNER_MAKE)" \
 		$(if $(strip $(_DATA_ALIGNER_SIM_BIN_DIR)),--sim-bin-dir "$(_DATA_ALIGNER_SIM_BIN_DIR)")
 
+.PHONY: packer-regression
+# Check element conversion, lane mapping, saturation and elastic ready-valid.
+packer-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(PACKER_TEST_DIR)/run_packer_regression.py" || { \
+		echo 'Packer regression missing under src/val/<category>/packer.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(PACKER_TEST_DIR)/run_packer_regression.py" \
+		--sim "$(SIM)" --build-dir "$(PACKER_REGRESSION_BUILD)" \
+		--seed "$(PACKER_SEED)" --random-cycles "$(PACKER_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_PACKER_MAKE)" \
+		$(if $(strip $(_PACKER_SIM_BIN_DIR)),--sim-bin-dir "$(_PACKER_SIM_BIN_DIR)")
+
 .PHONY: fifo-regression
 # Check single-clock ordering, full replacement, odd depths and reset timing.
 fifo-regression:
@@ -650,6 +671,7 @@ help:
 		'make data-aligner-regression  Check byte alignment, spill, and ready-valid timing' \
 		'make ecc-regression   Check SECDED layout, correction, and every fault pair' \
 		'make fifo-regression  Check synchronous FIFO ordering, resets, and full replacement' \
+		'make packer-regression  Check element widths, saturation, lanes, and elastic timing' \
 		'make saif            Run PyUVM with VCS and write switching activity' \
 		'make synth           Synthesize RTL with Design Compiler' \
 		'make gate-sim        Run PyUVM on NETLIST_FILE with CELL_MODELS' \
@@ -705,5 +727,6 @@ help:
 		'Data aligner: DATA_ALIGNER_REGRESSION_BUILD, DATA_ALIGNER_RANDOM_CYCLES,' \
 		'              DATA_ALIGNER_SEED' \
 		'ECC:       ECC_REGRESSION_BUILD, ECC_RANDOM_CYCLES, ECC_SEED' \
-		'FIFO:      FIFO_REGRESSION_BUILD, FIFO_RANDOM_CYCLES, FIFO_SEED'
+		'FIFO:      FIFO_REGRESSION_BUILD, FIFO_RANDOM_CYCLES, FIFO_SEED' \
+		'Packer:    PACKER_REGRESSION_BUILD, PACKER_RANDOM_CYCLES, PACKER_SEED'
 endif
