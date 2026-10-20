@@ -478,6 +478,24 @@ stability. Configure `REGISTER_SLICE_SEED`, `REGISTER_SLICE_RANDOM_CYCLES` and
 [register-slice verification details](src/val/basic/register_slice/README.md) for
 reset timing, coverage, interface obligations and qualification scope.
 
+Run the round-robin arbiter regression:
+
+```sh
+make round-robin-arbiter-regression
+make round-robin-arbiter-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=round_robin_arbiter
+```
+
+The arbiter provides zero-cycle cyclic selection, eligibility masking, stable
+pending ownership, optional multi-beat locks and sticky protocol errors. It reuses
+the common priority encoder and DFF. PyUVM checks requester counts, initial
+priorities, both reset styles and accepted-service fairness; a real mux and
+register-slice fixture checks requester/payload alignment through stalls and locks.
+Configure `ROUND_ROBIN_ARBITER_SEED`, `ROUND_ROBIN_ARBITER_RANDOM_CYCLES` and
+`ROUND_ROBIN_ARBITER_REGRESSION_BUILD`. See the
+[arbiter verification details](src/val/basic/round_robin_arbiter/README.md) for
+coverage, lock obligations, recovery and qualification scope.
+
 Choose a different HDL top and Python test module:
 
 ```sh
@@ -500,8 +518,8 @@ are comma-separated. It defaults to `test_<COCOTB_TOPLEVEL>`. When
 `VERILOG_SOURCES` is omitted, the Makefile discovers the selected top under
 `src/rtl/<category>/<COCOTB_TOPLEVEL>.sv`. The async FIFO, bypass network, context
 memory, context sequencer, data aligner, ECC, synchronous FIFO, packer, parity,
-performance counters, RDU, register file, and register slice include their ordered
-RTL dependencies automatically.
+performance counters, RDU, register file, register slice and round-robin arbiter
+include their ordered RTL dependencies automatically.
 Provide an ordered source list for other designs that instantiate modules or
 import packages. Package sources must precede sources that import them.
 
@@ -524,8 +542,8 @@ Git. Dry runs of the counter, clock gate, decoder, DFF, isolation cell, lane mas
 level shifter, mux, operand isolation, priority encoder, reset synchronizer,
 retention register, write gate, async FIFO, bypass network, context memory,
 context sequencer, data aligner, ECC, synchronous FIFO, packer, parity, and
-performance-counter, RDU, register-file and register-slice targets print their
-commands without changing reports.
+performance-counter, RDU, register-file, register-slice and round-robin-arbiter
+targets print their commands without changing reports.
 
 Generate a SAIF activity file from the PyUVM simulation with VCS:
 

@@ -116,6 +116,14 @@ real rising edge, one-cycle visibility, continuous replacement throughput and bo
 reset styles. Continuous monitors enforce producer stability, registered forward
 paths, and accepted-only payload writes, including finite changes between samples.
 
+The round-robin arbiter suite under `basic/round_robin_arbiter` models cyclic
+priority as an independent requester-order list. It checks every output and
+registered ownership state before, on and after service edges, with continuous
+assertions for relevant unknown controls and pending payload stability. Directed
+and random traffic exercise eligibility, backpressure, locks, cancellation,
+sticky errors and accepted-grant fairness. An actual mux and register-slice
+receiver check that accepted requester IDs and payloads stay aligned.
+
 The Makefile supplies the selected suite, its package parent and `src/val/lib`
 through `PYTHONPATH`. Imports use qualified suite names, such as
 `write_gate.agent`, to avoid collisions between generic filenames. Standalone
