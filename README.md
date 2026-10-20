@@ -17,6 +17,23 @@ working license and its `vcs` executable on `PATH`; alternatively, pass
 increment/decrement, disabled hold, clear/load priority, saturating boundaries,
 and event pulses. A failing test makes the command fail.
 
+Run the streaming width converter's specification-based regression:
+
+```sh
+make width-converter-regression
+make width-converter-regression SIM=icarus
+```
+
+The RTL reuses common DFF and operand-isolation blocks for narrow-to-wide packing,
+wide-to-narrow serialization and equal-width elastic forwarding. The PyUVM suite
+checks positional sparse keep masks, partial/empty packets, metadata, both slice
+orders, registered latency, stalls, simultaneous replacement, reset and flush.
+Its 76 profiles cover representative ratios 1–8 and unit widths 1, 3, 8 and 64.
+Configure `WIDTH_CONVERTER_SEED`, `WIDTH_CONVERTER_RANDOM_CYCLES` and
+`WIDTH_CONVERTER_REGRESSION_BUILD`; see the
+[width-converter verification details](src/val/basic/width_converter/README.md)
+for parameter overrides, evidence and remaining technology signoff checks.
+
 Run the counter's specification-based functional regression:
 
 ```sh

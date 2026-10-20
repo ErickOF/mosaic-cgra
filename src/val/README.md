@@ -162,6 +162,15 @@ storage holds. Coverage spans lane and slice populations, broadcast source
 selection, ignored unknown inputs, port/address relations and intentional X/Z
 transport; negative probes check active addresses and overlapping slice writes.
 
+The width-converter suite under `basic/width_converter` uses accepted transfer-unit
+records with explicit keep holes, group boundaries and user metadata. Packing and
+serialization produce independent expected output queues; unit and terminal-boundary
+ledgers account for delivery and explicit cancellation. Actual edge-time observations
+check registered visibility and consume/replacement. Optional per-unit raw storage
+checks and continuous waveform assertions enforce accepted-only writes, clamping,
+producer stability and stalls. Coverage spans both orders, every representative slice
+and keep population, terminal trimming, empty packets and reset/flush state crosses.
+
 The Makefile supplies the selected suite, its package parent and `src/val/lib`
 through `PYTHONPATH`. Imports use qualified suite names, such as
 `write_gate.agent`, to avoid collisions between generic filenames. Standalone

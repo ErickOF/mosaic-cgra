@@ -41,6 +41,7 @@ REGISTER_SLICE_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/regi
 ROUND_ROBIN_ARBITER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/round_robin_arbiter))
 SKID_BUFFER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/skid_buffer))
 STREAM_JOIN_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/stream_join))
+WIDTH_CONVERTER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/width_converter))
 STREAM_FORK_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/stream_fork))
 SRAM_WRAPPER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/sram_wrapper))
 PERFORMANCE_COUNTERS_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/performance_counters))
@@ -79,6 +80,8 @@ _ROUND_ROBIN_ARBITER_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_
 _RTL_SOURCES_round_robin_arbiter := $(_ROUND_ROBIN_ARBITER_SOURCES)
 _SKID_BUFFER_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/mux.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/skid_buffer.sv
 _RTL_SOURCES_skid_buffer := $(_SKID_BUFFER_SOURCES)
+_WIDTH_CONVERTER_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/width_converter.sv
+_RTL_SOURCES_width_converter := $(_WIDTH_CONVERTER_SOURCES)
 _STREAM_FORK_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/stream_fork.sv
 _RTL_SOURCES_stream_fork := $(_STREAM_FORK_SOURCES)
 _STREAM_JOIN_SOURCES := $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/stream_join.sv
@@ -286,6 +289,11 @@ STREAM_JOIN_RANDOM_CYCLES ?= 2000
 STREAM_JOIN_SEED ?= 20261020
 _STREAM_JOIN_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
 _STREAM_JOIN_MAKE := $(MAKE)
+WIDTH_CONVERTER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/width_converter/regression
+WIDTH_CONVERTER_RANDOM_CYCLES ?= 2000
+WIDTH_CONVERTER_SEED ?= 20261020
+_WIDTH_CONVERTER_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_WIDTH_CONVERTER_MAKE := $(MAKE)
 STREAM_FORK_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/stream_fork/regression
 STREAM_FORK_RANDOM_CYCLES ?= 2000
 STREAM_FORK_SEED ?= 20261020
@@ -573,6 +581,19 @@ stream-join-regression:
 		--seed "$(STREAM_JOIN_SEED)" --random-cycles "$(STREAM_JOIN_RANDOM_CYCLES)" \
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_STREAM_JOIN_MAKE)" \
 		$(if $(strip $(_STREAM_JOIN_SIM_BIN_DIR)),--sim-bin-dir "$(_STREAM_JOIN_SIM_BIN_DIR)")
+
+.PHONY: width-converter-regression
+# Check positional packing/serialization, keep, packet boundaries and cancellation.
+width-converter-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(WIDTH_CONVERTER_TEST_DIR)/run_width_converter_regression.py" || { \
+		echo 'Width-converter regression missing under src/val/<category>/width_converter.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(WIDTH_CONVERTER_TEST_DIR)/run_width_converter_regression.py" \
+		--sim "$(SIM)" --build-dir "$(WIDTH_CONVERTER_REGRESSION_BUILD)" \
+		--seed "$(WIDTH_CONVERTER_SEED)" --random-cycles "$(WIDTH_CONVERTER_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_WIDTH_CONVERTER_MAKE)" \
+		$(if $(strip $(_WIDTH_CONVERTER_SIM_BIN_DIR)),--sim-bin-dir "$(_WIDTH_CONVERTER_SIM_BIN_DIR)")
 
 .PHONY: stream-fork-regression
 # Check multicast delivery, partial completion, replacement and reset.
@@ -913,6 +934,7 @@ help:
 		'make round-robin-arbiter-regression  Check cyclic grants, backpressure, locks and fairness' \
 		'make skid-buffer-regression  Check bypass, late stalls and registered backpressure' \
 		'make stream-join-regression  Check atomic joins, final arrival and optional inputs' \
+		'make width-converter-regression  Check packing, serialization, keep and packet boundaries' \
 		'make stream-fork-regression  Check multicast delivery, masks and partial completion' \
 		'make sram-wrapper-regression  Check masked 1RW memory, latency, credits and backends' \
 		'make saif            Run PyUVM with VCS and write switching activity' \
@@ -984,6 +1006,8 @@ help:
 		'                    ROUND_ROBIN_ARBITER_RANDOM_CYCLES, ROUND_ROBIN_ARBITER_SEED' \
 		'Skid buffer: SKID_BUFFER_REGRESSION_BUILD, SKID_BUFFER_RANDOM_CYCLES, SKID_BUFFER_SEED' \
 		'Stream join: STREAM_JOIN_REGRESSION_BUILD, STREAM_JOIN_RANDOM_CYCLES, STREAM_JOIN_SEED' \
+		'Width converter: WIDTH_CONVERTER_REGRESSION_BUILD, WIDTH_CONVERTER_RANDOM_CYCLES,' \
+		'                 WIDTH_CONVERTER_SEED' \
 		'Stream fork: STREAM_FORK_REGRESSION_BUILD, STREAM_FORK_RANDOM_CYCLES, STREAM_FORK_SEED' \
 		'SRAM wrapper: SRAM_WRAPPER_REGRESSION_BUILD, SRAM_WRAPPER_RANDOM_CYCLES,' \
 		'              SRAM_WRAPPER_SEED; SRAM_BACKEND_SOURCE selects the backend file'
