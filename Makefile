@@ -35,6 +35,7 @@ ECC_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/ecc))
 FIFO_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/fifo))
 PACKER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/packer))
 RDU_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/rdu))
+VECTOR_REGISTER_FILE_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/vector_register_file))
 REGISTER_FILE_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/register_file))
 REGISTER_SLICE_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/register_slice))
 ROUND_ROBIN_ARBITER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/round_robin_arbiter))
@@ -70,6 +71,8 @@ _RDU_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/co
 _RTL_SOURCES_rdu := $(_RDU_SOURCES)
 _REGISTER_FILE_SOURCES := $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/basic/register_file.sv
 _RTL_SOURCES_register_file := $(_REGISTER_FILE_SOURCES)
+_VECTOR_REGISTER_FILE_SOURCES := $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/basic/register_file.sv $(PROJECT_ROOT)/src/rtl/basic/vector_register_file.sv
+_RTL_SOURCES_vector_register_file := $(_VECTOR_REGISTER_FILE_SOURCES)
 _REGISTER_SLICE_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/register_slice.sv
 _RTL_SOURCES_register_slice := $(_REGISTER_SLICE_SOURCES)
 _ROUND_ROBIN_ARBITER_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv $(PROJECT_ROOT)/src/rtl/basic/round_robin_arbiter.sv
@@ -253,6 +256,11 @@ RDU_RANDOM_CYCLES ?= 2000
 RDU_SEED ?= 20261019
 _RDU_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
 _RDU_MAKE := $(MAKE)
+VECTOR_REGISTER_FILE_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/vector_register_file/regression
+VECTOR_REGISTER_FILE_RANDOM_CYCLES ?= 2000
+VECTOR_REGISTER_FILE_SEED ?= 20261020
+_VECTOR_REGISTER_FILE_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_VECTOR_REGISTER_FILE_MAKE := $(MAKE)
 REGISTER_FILE_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/register_file/regression
 REGISTER_FILE_RANDOM_CYCLES ?= 2000
 REGISTER_FILE_SEED ?= 20261019
@@ -618,6 +626,19 @@ register-slice-regression:
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_REGISTER_SLICE_MAKE)" \
 		$(if $(strip $(_REGISTER_SLICE_SIM_BIN_DIR)),--sim-bin-dir "$(_REGISTER_SLICE_SIM_BIN_DIR)")
 
+.PHONY: vector-register-file-regression
+# Check lane/slice masks, broadcast, concurrent writes and edge-ordered reads.
+vector-register-file-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(VECTOR_REGISTER_FILE_TEST_DIR)/run_vector_register_file_regression.py" || { \
+		echo 'Vector-register-file regression missing under src/val/<category>/vector_register_file.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(VECTOR_REGISTER_FILE_TEST_DIR)/run_vector_register_file_regression.py" \
+		--sim "$(SIM)" --build-dir "$(VECTOR_REGISTER_FILE_REGRESSION_BUILD)" \
+		--seed "$(VECTOR_REGISTER_FILE_SEED)" --random-cycles "$(VECTOR_REGISTER_FILE_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_VECTOR_REGISTER_FILE_MAKE)" \
+		$(if $(strip $(_VECTOR_REGISTER_FILE_SIM_BIN_DIR)),--sim-bin-dir "$(_VECTOR_REGISTER_FILE_SIM_BIN_DIR)")
+
 .PHONY: register-file-regression
 # Check unreset multi-port storage and pre-edge/post-edge read semantics.
 register-file-regression:
@@ -886,6 +907,7 @@ help:
 		'make parity-regression  Check granular parity, fault detection limits, and X/Z' \
 		'make performance-counters-regression  Check weighted counters, snapshots and thresholds' \
 		'make rdu-regression   Check allocated delays, bubbles, stalls and context boundaries' \
+		'make vector-register-file-regression  Check lane/slice masks, broadcasts and concurrent writes' \
 		'make register-file-regression  Check multi-port storage and read-before-write timing' \
 		'make register-slice-regression  Check elastic one-cycle latency and consume/replace' \
 		'make round-robin-arbiter-regression  Check cyclic grants, backpressure, locks and fairness' \
@@ -954,6 +976,8 @@ help:
 		'Performance counters: PERFORMANCE_COUNTERS_REGRESSION_BUILD,' \
 		'                      PERFORMANCE_COUNTERS_RANDOM_CYCLES, PERFORMANCE_COUNTERS_SEED' \
 		'RDU:       RDU_REGRESSION_BUILD, RDU_RANDOM_CYCLES, RDU_SEED' \
+		'Vector register file: VECTOR_REGISTER_FILE_REGRESSION_BUILD, VECTOR_REGISTER_FILE_RANDOM_CYCLES,' \
+		'                      VECTOR_REGISTER_FILE_SEED' \
 		'Register file: REGISTER_FILE_REGRESSION_BUILD, REGISTER_FILE_RANDOM_CYCLES, REGISTER_FILE_SEED' \
 		'Register slice: REGISTER_SLICE_REGRESSION_BUILD, REGISTER_SLICE_RANDOM_CYCLES, REGISTER_SLICE_SEED' \
 		'Round-robin arbiter: ROUND_ROBIN_ARBITER_REGRESSION_BUILD,' \

@@ -154,6 +154,14 @@ early-producer and required-mask stability, output holds and relevant known
 controls. Coverage includes final arrivals, small control matrices, mask/order
 crosses, optional activity, long waits/stalls and four-state payloads.
 
+The vector-register-file suite under `basic/vector_register_file` models each
+entry's slices independently. It predicts only initialized slices, merges legal
+disjoint writes, and compares old read data on the actual clock edge against new
+masked data after propagation. Optional bank observations check all unselected
+storage holds. Coverage spans lane and slice populations, broadcast source
+selection, ignored unknown inputs, port/address relations and intentional X/Z
+transport; negative probes check active addresses and overlapping slice writes.
+
 The Makefile supplies the selected suite, its package parent and `src/val/lib`
 through `PYTHONPATH`. Imports use qualified suite names, such as
 `write_gate.agent`, to avoid collisions between generic filenames. Standalone

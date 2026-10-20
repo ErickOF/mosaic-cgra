@@ -563,6 +563,23 @@ common `operand_isolation`; the join has no clock, reset or storage. Configure
 See the [stream-join verification details](src/val/basic/stream_join/README.md)
 for producer and mask stability, sampling, coverage and qualification scope.
 
+Run the vector-register-file regression:
+
+```sh
+make vector-register-file-regression
+make vector-register-file-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=vector_register_file
+```
+
+The vector file reuses scalar `register_file` banks and their common `decoder`,
+one bank per writable slice. It supports lane-gated reads, masked concurrent
+writes, and optional lane-zero broadcast. Storage is unreset; disjoint same-entry
+writes merge, and reads expose old data at the write edge and merged data afterward.
+Configure `VECTOR_REGISTER_FILE_SEED`, `VECTOR_REGISTER_FILE_RANDOM_CYCLES` and
+`VECTOR_REGISTER_FILE_REGRESSION_BUILD`. See the
+[vector-register-file verification details](src/val/basic/vector_register_file/README.md)
+for banking, initialization, slice masks, assertions and qualification scope.
+
 Choose a different HDL top and Python test module:
 
 ```sh
@@ -586,8 +603,8 @@ are comma-separated. It defaults to `test_<COCOTB_TOPLEVEL>`. When
 `src/rtl/<category>/<COCOTB_TOPLEVEL>.sv`. The async FIFO, bypass network, context
 memory, context sequencer, data aligner, ECC, synchronous FIFO, packer, parity,
 performance counters, RDU, register file, register slice, round-robin arbiter,
-skid buffer, SRAM wrapper, stream fork and stream join include their ordered RTL
-dependencies automatically.
+skid buffer, SRAM wrapper, stream fork, stream join and vector register file
+include their ordered RTL dependencies automatically.
 Provide an ordered source list for other designs that instantiate modules or
 import packages. Package sources must precede sources that import them.
 
@@ -611,8 +628,8 @@ level shifter, mux, operand isolation, priority encoder, reset synchronizer,
 retention register, write gate, async FIFO, bypass network, context memory,
 context sequencer, data aligner, ECC, synchronous FIFO, packer, parity, and
 performance-counter, RDU, register-file, register-slice, round-robin-arbiter,
-skid-buffer, SRAM-wrapper, stream-fork and stream-join targets print their commands
-without changing reports.
+skid-buffer, SRAM-wrapper, stream-fork, stream-join and vector-register-file targets
+print their commands without changing reports.
 
 Generate a SAIF activity file from the PyUVM simulation with VCS:
 
