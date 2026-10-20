@@ -17,6 +17,23 @@ working license and its `vcs` executable on `PATH`; alternatively, pass
 increment/decrement, disabled hold, clear/load priority, saturating boundaries,
 and event pulses. A failing test makes the command fail.
 
+Run the streaming width converter's specification-based regression:
+
+```sh
+make width-converter-regression
+make width-converter-regression SIM=icarus
+```
+
+The RTL reuses common DFF and operand-isolation blocks for narrow-to-wide packing,
+wide-to-narrow serialization and equal-width elastic forwarding. The PyUVM suite
+checks positional sparse keep masks, partial/empty packets, metadata, both slice
+orders, registered latency, stalls, simultaneous replacement, reset and flush.
+Its 76 profiles cover representative ratios 1–8 and unit widths 1, 3, 8 and 64.
+Configure `WIDTH_CONVERTER_SEED`, `WIDTH_CONVERTER_RANDOM_CYCLES` and
+`WIDTH_CONVERTER_REGRESSION_BUILD`; see the
+[width-converter verification details](src/val/basic/width_converter/README.md)
+for parameter overrides, evidence and remaining technology signoff checks.
+
 Run the counter's specification-based functional regression:
 
 ```sh
@@ -250,6 +267,336 @@ See the [write gate verification details](src/val/common/write_gate/README.md)
 for active control and integration assertions, coverage, and the separate
 physical timing and destination-energy requirements.
 
+Run the asynchronous FIFO regression:
+
+```sh
+make async-fifo-regression
+make async-fifo-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=async_fifo
+```
+
+The PyUVM suite checks ten representative width/depth/synchronizer/threshold
+profiles with independent clocks, a queue scoreboard, conservative boundary
+timing, repeated pointer wrapping, four-state payloads, clock stops, and reset
+cancellation/recovery. Configure `ASYNC_FIFO_SEED`, `ASYNC_FIFO_RANDOM_CYCLES`,
+and `ASYNC_FIFO_REGRESSION_BUILD`. The Makefile includes the counter and DFF RTL
+dependencies automatically for this top. See the
+[async FIFO verification details](src/val/basic/async_fifo/README.md) for profiles,
+mandatory coverage, assertion probes, and the separate CDC and physical checks.
+
+Run the sparse bypass network regression:
+
+```sh
+make bypass-network-regression
+make bypass-network-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=bypass_network
+```
+
+The PyUVM suite checks 31 representative graph/width/count/timing profiles with
+independent destination lookup, fanout, capture/hold, reset/flush priority, context
+invalidation, and four-state protocol assertions. Configure `BYPASS_NETWORK_SEED`,
+`BYPASS_NETWORK_RANDOM_CYCLES`, and `BYPASS_NETWORK_REGRESSION_BUILD`. The Makefile
+includes the DFF dependency automatically. See the
+[bypass network verification details](src/val/basic/bypass_network/README.md)
+for mandatory coverage, parameter guards, negative probes, and tile integration
+and physical signoff requirements.
+
+Run the context memory regression:
+
+```sh
+make context-memory-regression
+make context-memory-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=context_memory
+```
+
+The RTL reuses common decoders for command selection and a common DFF bank for
+committed validity. It implements masked context loading, atomic write/commit,
+invalidation, combinational reads, and optional raw readback. Its
+PyUVM suite checks 54 profiles, including every exploration depth from 1 through
+32 and representative width/slice/read-port/raw/reset combinations. Configure
+`CONTEXT_MEMORY_SEED`, `CONTEXT_MEMORY_RANDOM_CYCLES`, and
+`CONTEXT_MEMORY_REGRESSION_BUILD`. See the
+[context memory verification details](src/val/basic/context_memory/README.md)
+for timing, reset qualification, protocol checks, and external validator scope.
+
+Run the context sequencer regression:
+
+```sh
+make context-sequencer-regression
+make context-sequencer-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=context_sequencer
+```
+
+The RTL reuses common DFFs and the loop counter for committed context selection,
+candidate waits, counted loops, safe stop/suspend/resume/switch requests,
+completion pulses, and sticky errors. Encodings are defined in repository-local
+`context_sequencer_pkg.sv`; no external contracts package is required. PyUVM covers
+55 controller profiles, every depth from 1 through 32, all feature/reset
+combinations, and three real context-memory fixtures. Configure
+`CONTEXT_SEQUENCER_SEED`, `CONTEXT_SEQUENCER_RANDOM_CYCLES`, and
+`CONTEXT_SEQUENCER_REGRESSION_BUILD`. See the
+[context sequencer verification details](src/val/basic/context_sequencer/README.md)
+for encodings, runtime policy, RTL reuse, and coverage scope.
+
+Run the data aligner regression:
+
+```sh
+make data-aligner-regression
+make data-aligner-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=data_aligner
+```
+
+The RTL aligns two adjacent words by byte offset, preserves per-byte strobes,
+and reports low-edge or high-edge spill. It reuses common operand isolation and
+DFFs for combinational or one-entry elastic ready-valid operation. PyUVM checks
+57 width/direction/timing profiles with an independent byte-array model and
+transaction ledger. Configure `DATA_ALIGNER_SEED`, `DATA_ALIGNER_RANDOM_CYCLES`,
+and `DATA_ALIGNER_REGRESSION_BUILD`. See the
+[data aligner verification details](src/val/basic/data_aligner/README.md) for
+byte ordering, spill handling, cancellation, coverage, and tool scope.
+
+Run the SECDED ECC regression:
+
+```sh
+make ecc-regression
+make ecc-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=ecc
+```
+
+The combinational codec provides independent encode and decode, single-error
+correction, double-error detection, fail-closed outputs, and a repaired codeword
+for external scrubbing. It reuses common decoder and operand-isolation modules.
+PyUVM checks twenty widths from 1 to 256 bits, every parity-count boundary,
+every single bit and unordered double-fault pair, and unknown propagation.
+Configure `ECC_SEED`, `ECC_RANDOM_CYCLES`, and `ECC_REGRESSION_BUILD`. See the
+[ECC verification details](src/val/basic/ecc/README.md) for layout, guarantees,
+implementation limits, coverage, and external tool scope.
+
+Run the synchronous FIFO regression:
+
+```sh
+make fifo-regression
+make fifo-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=fifo
+```
+
+The FIFO supports simultaneous enqueue/dequeue, full replacement, odd depths,
+occupancy thresholds, and both reset styles without combinational fall-through.
+It reuses common DFF and operand-isolation modules and leaves storage unreset.
+PyUVM checks 114 width/depth/reset/threshold profiles against an independent
+accepted-item queue, with continuous state-enable and backpressure assertions.
+Configure `FIFO_SEED`, `FIFO_RANDOM_CYCLES`, and `FIFO_REGRESSION_BUILD`. See the
+[FIFO verification details](src/val/basic/fifo/README.md) for parameters, coverage,
+protocol probes, and external tool scope.
+
+Run the element packer/unpacker regression:
+
+```sh
+make packer-regression
+make packer-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=packer
+```
+
+The packer converts parallel elements using sign/zero extension, low-bit
+truncation or saturation, with lane validity, status, reversal and opaque metadata.
+It reuses operand isolation and DFFs for combinational or one-entry elastic output.
+PyUVM checks 330 width/lane/feature/timing profiles using an independent integer
+model and accepted-beat queue. Configure `PACKER_SEED`, `PACKER_RANDOM_CYCLES`,
+and `PACKER_REGRESSION_BUILD`. See the
+[packer verification details](src/val/basic/packer/README.md) for conversion
+semantics, feature support, coverage and tool scope.
+
+Run the granular parity regression:
+
+```sh
+make parity-regression
+make parity-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=parity
+```
+
+The combinational codec independently generates and checks even parity per
+granule, reports granular and aggregate status, and clamps the whole checked word
+on any detected error. It reuses common operand isolation. PyUVM checks 101
+data/granule geometries, every single protected-bit fault, expected undetected
+even faults, X/Z propagation and independent-cone activity. Configure `PARITY_SEED`,
+`PARITY_RANDOM_CYCLES` and `PARITY_REGRESSION_BUILD`. See the
+[parity verification details](src/val/basic/parity/README.md) for layout, detection
+limits, partial-write responsibilities, coverage and local proof scope.
+
+Run the weighted performance-counter bank regression:
+
+```sh
+make performance-counters-regression
+make performance-counters-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=performance_counters
+```
+
+The bank independently selects weighted events, saturates or wraps with sticky
+overflow, reports upward threshold crossings, and provides coherent post-update
+snapshots and combinational indexed reads. It reuses common DFF and operand
+isolation blocks. PyUVM checks 61 parameter profiles, ownership changes, reset
+styles, ignored X/Z, and live protocol assertions against arbitrary-precision
+state. Configure `PERFORMANCE_COUNTERS_SEED`, `PERFORMANCE_COUNTERS_RANDOM_CYCLES`
+and `PERFORMANCE_COUNTERS_REGRESSION_BUILD`. See the
+[performance-counter verification details](src/val/basic/performance_counters/README.md)
+for packed layout, coverage limits, integration responsibilities and tool scope.
+
+Run the reconfigurable delay-unit regression:
+
+```sh
+make rdu-regression
+make rdu-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=rdu
+```
+
+The RDU statically partitions one total delay-entry budget among operand channels.
+It supports combinational bypass, token/bubble delay in accepted schedule advances,
+global stalls, independent channel enables and flushes, and guarded delay selection.
+It reuses common validity DFFs and output operand isolation while leaving payload
+storage unreset. PyUVM checks 88 width/allocation/reset profiles against independent
+per-channel histories and observes raw storage enables. Configure `RDU_SEED`,
+`RDU_RANDOM_CYCLES` and `RDU_REGRESSION_BUILD`. See the
+[RDU verification details](src/val/basic/rdu/README.md) for allocation literals,
+configuration boundaries, coverage and qualification scope.
+
+Run the scalar register-file regression:
+
+```sh
+make register-file-regression
+make register-file-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=register_file
+```
+
+The register file provides independent combinational reads and simultaneous
+full-word writes to distinct addresses, with no storage reset or implicit
+forwarding. It reuses the common decoder for legal write selection. PyUVM checks
+55 width/depth/port configurations against an independent initialized-word model,
+including pre-edge, edge-time and post-edge read-during-write observations.
+Configure `REGISTER_FILE_SEED`, `REGISTER_FILE_RANDOM_CYCLES` and
+`REGISTER_FILE_REGRESSION_BUILD`. See the
+[register-file verification details](src/val/basic/register_file/README.md) for
+initialization policy, coverage, protocol assertions and qualification scope.
+
+Run the elastic register-slice regression:
+
+```sh
+make register-slice-regression
+make register-slice-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=register_slice
+```
+
+The register slice adds one forward cycle with one-item storage, combinational
+reverse ready, stable stalled outputs and same-edge consume-and-replace operation.
+It reuses the common validity DFF and operand isolation while keeping payload
+unreset. PyUVM checks 36 width/reset profiles against an independent acceptance
+queue, including real edge-time consumption, reset cancellation and producer
+stability. Configure `REGISTER_SLICE_SEED`, `REGISTER_SLICE_RANDOM_CYCLES` and
+`REGISTER_SLICE_REGRESSION_BUILD`. See the
+[register-slice verification details](src/val/basic/register_slice/README.md) for
+reset timing, coverage, interface obligations and qualification scope.
+
+Run the round-robin arbiter regression:
+
+```sh
+make round-robin-arbiter-regression
+make round-robin-arbiter-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=round_robin_arbiter
+```
+
+The arbiter provides zero-cycle cyclic selection, eligibility masking, stable
+pending ownership, optional multi-beat locks and sticky protocol errors. It reuses
+the common priority encoder and DFF. PyUVM checks requester counts, initial
+priorities, both reset styles and accepted-service fairness; a real mux and
+register-slice fixture checks requester/payload alignment through stalls and locks.
+Configure `ROUND_ROBIN_ARBITER_SEED`, `ROUND_ROBIN_ARBITER_RANDOM_CYCLES` and
+`ROUND_ROBIN_ARBITER_REGRESSION_BUILD`. See the
+[arbiter verification details](src/val/basic/round_robin_arbiter/README.md) for
+coverage, lock obligations, recovery and qualification scope.
+
+Run the skid-buffer regression:
+
+```sh
+make skid-buffer-regression
+make skid-buffer-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=skid_buffer
+```
+
+The skid buffer bypasses data and valid while empty and captures one accepted item
+when downstream stalls. Upstream ready depends only on stored validity, breaking
+the reverse ready path. A buffered release blocks same-edge input replacement;
+the next input can bypass and transfer on the following edge. It reuses the common
+DFF, mux and operand-isolation blocks. Configure `SKID_BUFFER_SEED`,
+`SKID_BUFFER_RANDOM_CYCLES` and `SKID_BUFFER_REGRESSION_BUILD`. See the
+[skid-buffer verification details](src/val/basic/skid_buffer/README.md) for queue
+checking, capture-only writes, coverage, reset behavior and qualification scope.
+
+Run the SRAM-wrapper regression:
+
+```sh
+make sram-wrapper-regression
+make sram-wrapper-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=sram_wrapper
+```
+
+The wrapper provides masked 1RW memory access, fixed read maturity, ordered tagged
+responses and credit-based read admission. Writes remain admissible when read
+credits are exhausted. Reset and flush cancel reads while preserving committed
+memory. The shell reuses the common decoder, DFF, counter and operand isolation.
+`SRAM_BACKEND_SOURCE` selects a compatible backend for direct simulation and
+synthesis; the default is inferred storage. Configure `SRAM_WRAPPER_SEED`,
+`SRAM_WRAPPER_RANDOM_CYCLES` and `SRAM_WRAPPER_REGRESSION_BUILD`. See the
+[SRAM verification details](src/val/basic/sram_wrapper/README.md) for the edge
+timing, backend contract, initialization policy and qualification scope.
+
+Run the stream-fork regression:
+
+```sh
+make stream-fork-regression
+make stream-fork-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=stream_fork
+```
+
+The fork stores one multicast item and independently tracks delivery to every
+selected output. It supports partial consumption and same-edge completion and
+replacement, with zero data on invalid lanes. The pending bits reuse common
+`dff`; output lanes reuse `operand_isolation`. Configure `STREAM_FORK_SEED`,
+`STREAM_FORK_RANDOM_CYCLES` and `STREAM_FORK_REGRESSION_BUILD`. See the
+[stream-fork verification details](src/val/basic/stream_fork/README.md) for mask
+legality, reset timing, per-output reference queues and qualification scope.
+
+Run the stream-join regression:
+
+```sh
+make stream-join-regression
+make stream-join-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=stream_join
+```
+
+The combinational join consumes every required input atomically with one packed
+output transaction. It supports runtime required masks, an all-zero idle mask,
+and ready on the final missing input. Invalid and optional output lanes reuse
+common `operand_isolation`; the join has no clock, reset or storage. Configure
+`STREAM_JOIN_SEED`, `STREAM_JOIN_RANDOM_CYCLES` and `STREAM_JOIN_REGRESSION_BUILD`.
+See the [stream-join verification details](src/val/basic/stream_join/README.md)
+for producer and mask stability, sampling, coverage and qualification scope.
+
+Run the vector-register-file regression:
+
+```sh
+make vector-register-file-regression
+make vector-register-file-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=vector_register_file
+```
+
+The vector file reuses scalar `register_file` banks and their common `decoder`,
+one bank per writable slice. It supports lane-gated reads, masked concurrent
+writes, and optional lane-zero broadcast. Storage is unreset; disjoint same-entry
+writes merge, and reads expose old data at the write edge and merged data afterward.
+Configure `VECTOR_REGISTER_FILE_SEED`, `VECTOR_REGISTER_FILE_RANDOM_CYCLES` and
+`VECTOR_REGISTER_FILE_REGRESSION_BUILD`. See the
+[vector-register-file verification details](src/val/basic/vector_register_file/README.md)
+for banking, initialization, slice masks, assertions and qualification scope.
+
 Choose a different HDL top and Python test module:
 
 ```sh
@@ -270,9 +617,13 @@ can be supplied through `PYTHONPATH`. Set
 `COCOTB_TEST_MODULES` to importable module names without `.py`; multiple modules
 are comma-separated. It defaults to `test_<COCOTB_TOPLEVEL>`. When
 `VERILOG_SOURCES` is omitted, the Makefile discovers the selected top under
-`src/rtl/<category>/<COCOTB_TOPLEVEL>.sv`. Provide an ordered source list for
-designs that instantiate other modules or import packages. Package sources
-must precede sources that import them.
+`src/rtl/<category>/<COCOTB_TOPLEVEL>.sv`. The async FIFO, bypass network, context
+memory, context sequencer, data aligner, ECC, synchronous FIFO, packer, parity,
+performance counters, RDU, register file, register slice, round-robin arbiter,
+skid buffer, SRAM wrapper, stream fork, stream join and vector register file
+include their ordered RTL dependencies automatically.
+Provide an ordered source list for other designs that instantiate modules or
+import packages. Package sources must precede sources that import them.
 
 Pass additional compiler options with `COMPILE_ARGS`, runtime options with
 `SIM_ARGS`, and HDL plusargs with `COCOTB_PLUSARGS`. The cocotb VCS backend
@@ -290,8 +641,12 @@ The shared flow drivers are under `flows/synth`, `flows/power`, and `flows/vcs`;
 the reusable timing budget is `src/constraints/timing.sdc`. Machine-specific
 synthesis setup files can live at `flows/synth/setup.sh`, which is ignored by
 Git. Dry runs of the counter, clock gate, decoder, DFF, isolation cell, lane mask,
-level shifter, mux, operand isolation, priority encoder, reset synchronizer, and
-retention register regression targets print their commands without changing reports.
+level shifter, mux, operand isolation, priority encoder, reset synchronizer,
+retention register, write gate, async FIFO, bypass network, context memory,
+context sequencer, data aligner, ECC, synchronous FIFO, packer, parity, and
+performance-counter, RDU, register-file, register-slice, round-robin-arbiter,
+skid-buffer, SRAM-wrapper, stream-fork, stream-join and vector-register-file targets
+print their commands without changing reports.
 
 Generate a SAIF activity file from the PyUVM simulation with VCS:
 
