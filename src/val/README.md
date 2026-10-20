@@ -98,6 +98,12 @@ reads are checked before and after edges; optional internal observations check a
 live/shadow storage and isolated arithmetic operands on every sample. Negative
 campaigns require the expected live protocol assertion to reject illegal controls.
 
+The RDU suite under `basic/rdu` models each channel as an accepted-advance token
+and bubble history. It checks all legal taps, stalls, draining, flush/reset priority,
+strict capacity packing and context boundaries. Independent raw-storage predictions
+and bit-level waveform masks detect writes on bubbles, bypass, inactive stages,
+flushes or reset. Continuous input monitors enforce pending bypass stability.
+
 The Makefile supplies the selected suite, its package parent and `src/val/lib`
 through `PYTHONPATH`. Imports use qualified suite names, such as
 `write_gate.agent`, to avoid collisions between generic filenames. Standalone

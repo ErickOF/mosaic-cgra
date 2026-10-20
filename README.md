@@ -424,6 +424,24 @@ and `PERFORMANCE_COUNTERS_REGRESSION_BUILD`. See the
 [performance-counter verification details](src/val/basic/performance_counters/README.md)
 for packed layout, coverage limits, integration responsibilities and tool scope.
 
+Run the reconfigurable delay-unit regression:
+
+```sh
+make rdu-regression
+make rdu-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=rdu
+```
+
+The RDU statically partitions one total delay-entry budget among operand channels.
+It supports combinational bypass, token/bubble delay in accepted schedule advances,
+global stalls, independent channel enables and flushes, and guarded delay selection.
+It reuses common validity DFFs and output operand isolation while leaving payload
+storage unreset. PyUVM checks 88 width/allocation/reset profiles against independent
+per-channel histories and observes raw storage enables. Configure `RDU_SEED`,
+`RDU_RANDOM_CYCLES` and `RDU_REGRESSION_BUILD`. See the
+[RDU verification details](src/val/basic/rdu/README.md) for allocation literals,
+configuration boundaries, coverage and qualification scope.
+
 Choose a different HDL top and Python test module:
 
 ```sh
@@ -446,7 +464,7 @@ are comma-separated. It defaults to `test_<COCOTB_TOPLEVEL>`. When
 `VERILOG_SOURCES` is omitted, the Makefile discovers the selected top under
 `src/rtl/<category>/<COCOTB_TOPLEVEL>.sv`. The async FIFO, bypass network, context
 memory, context sequencer, data aligner, ECC, synchronous FIFO, packer, parity,
-and performance counters include their ordered RTL dependencies automatically.
+performance counters, and the RDU include their ordered RTL dependencies automatically.
 Provide an ordered source list for other designs that instantiate modules or
 import packages. Package sources must precede sources that import them.
 
@@ -469,7 +487,7 @@ Git. Dry runs of the counter, clock gate, decoder, DFF, isolation cell, lane mas
 level shifter, mux, operand isolation, priority encoder, reset synchronizer,
 retention register, write gate, async FIFO, bypass network, context memory,
 context sequencer, data aligner, ECC, synchronous FIFO, packer, parity, and
-performance-counter targets print their commands without changing reports.
+performance-counter and RDU targets print their commands without changing reports.
 
 Generate a SAIF activity file from the PyUVM simulation with VCS:
 
