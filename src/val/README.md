@@ -124,6 +124,13 @@ and random traffic exercise eligibility, backpressure, locks, cancellation,
 sticky errors and accepted-grant fairness. An actual mux and register-slice
 receiver check that accepted requester IDs and payloads stay aligned.
 
+The skid-buffer suite under `basic/skid_buffer` tracks an independent acceptance
+queue with same-edge bypass and explicit reset discards. It checks capture,
+buffered hold and release, the blocked producer on the release edge, and resumed
+bypass on the next edge. Continuous monitors enforce producer stability and
+capture-only payload writes. Clockless changes and structural checks verify that
+upstream ready has no combinational dependency on downstream ready or input traffic.
+
 The Makefile supplies the selected suite, its package parent and `src/val/lib`
 through `PYTHONPATH`. Imports use qualified suite names, such as
 `write_gate.agent`, to avoid collisions between generic filenames. Standalone

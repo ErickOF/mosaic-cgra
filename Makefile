@@ -38,6 +38,7 @@ RDU_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/rdu))
 REGISTER_FILE_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/register_file))
 REGISTER_SLICE_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/register_slice))
 ROUND_ROBIN_ARBITER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/round_robin_arbiter))
+SKID_BUFFER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/skid_buffer))
 PERFORMANCE_COUNTERS_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/performance_counters))
 PARITY_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/parity))
 # Locate the selected RTL top using the same category layout as validation.
@@ -70,6 +71,8 @@ _REGISTER_SLICE_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)
 _RTL_SOURCES_register_slice := $(_REGISTER_SLICE_SOURCES)
 _ROUND_ROBIN_ARBITER_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv $(PROJECT_ROOT)/src/rtl/basic/round_robin_arbiter.sv
 _RTL_SOURCES_round_robin_arbiter := $(_ROUND_ROBIN_ARBITER_SOURCES)
+_SKID_BUFFER_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/mux.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/skid_buffer.sv
+_RTL_SOURCES_skid_buffer := $(_SKID_BUFFER_SOURCES)
 VERILOG_SOURCES ?= $(or $(_RTL_SOURCES_$(COCOTB_TOPLEVEL)),$(firstword $(wildcard $(PROJECT_ROOT)/src/rtl/*/$(COCOTB_TOPLEVEL).sv)),$(PROJECT_ROOT)/src/rtl/common/$(COCOTB_TOPLEVEL).sv)
 SIM_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/$(COCOTB_TOPLEVEL)
 COCOTB_RESULTS_FILE ?= $(SIM_BUILD)/results.xml
@@ -255,6 +258,11 @@ ROUND_ROBIN_ARBITER_RANDOM_CYCLES ?= 2000
 ROUND_ROBIN_ARBITER_SEED ?= 20261019
 _ROUND_ROBIN_ARBITER_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
 _ROUND_ROBIN_ARBITER_MAKE := $(MAKE)
+SKID_BUFFER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/skid_buffer/regression
+SKID_BUFFER_RANDOM_CYCLES ?= 2000
+SKID_BUFFER_SEED ?= 20261019
+_SKID_BUFFER_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_SKID_BUFFER_MAKE := $(MAKE)
 
 # Component imports use suite packages; shared infrastructure lives under lib.
 export PYTHONPATH := $(PYUVM_TEST_DIR):$(patsubst %/,%,$(dir $(PYUVM_TEST_DIR))):$(PROJECT_ROOT)/src/val/lib$(if $(PYTHONPATH),:$(PYTHONPATH))
@@ -506,6 +514,19 @@ data-aligner-regression:
 		--seed "$(DATA_ALIGNER_SEED)" --random-cycles "$(DATA_ALIGNER_RANDOM_CYCLES)" \
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_DATA_ALIGNER_MAKE)" \
 		$(if $(strip $(_DATA_ALIGNER_SIM_BIN_DIR)),--sim-bin-dir "$(_DATA_ALIGNER_SIM_BIN_DIR)")
+
+.PHONY: skid-buffer-regression
+# Check zero-cycle bypass, late-stall capture, release and producer stability.
+skid-buffer-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(SKID_BUFFER_TEST_DIR)/run_skid_buffer_regression.py" || { \
+		echo 'Skid-buffer regression missing under src/val/<category>/skid_buffer.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(SKID_BUFFER_TEST_DIR)/run_skid_buffer_regression.py" \
+		--sim "$(SIM)" --build-dir "$(SKID_BUFFER_REGRESSION_BUILD)" \
+		--seed "$(SKID_BUFFER_SEED)" --random-cycles "$(SKID_BUFFER_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_SKID_BUFFER_MAKE)" \
+		$(if $(strip $(_SKID_BUFFER_SIM_BIN_DIR)),--sim-bin-dir "$(_SKID_BUFFER_SIM_BIN_DIR)")
 
 .PHONY: round-robin-arbiter-regression
 # Check rotating fairness, stable pending grants, locks, errors and payloads.
@@ -804,6 +825,7 @@ help:
 		'make register-file-regression  Check multi-port storage and read-before-write timing' \
 		'make register-slice-regression  Check elastic one-cycle latency and consume/replace' \
 		'make round-robin-arbiter-regression  Check cyclic grants, backpressure, locks and fairness' \
+		'make skid-buffer-regression  Check bypass, late stalls and registered backpressure' \
 		'make saif            Run PyUVM with VCS and write switching activity' \
 		'make synth           Synthesize RTL with Design Compiler' \
 		'make gate-sim        Run PyUVM on NETLIST_FILE with CELL_MODELS' \
@@ -868,5 +890,6 @@ help:
 		'Register file: REGISTER_FILE_REGRESSION_BUILD, REGISTER_FILE_RANDOM_CYCLES, REGISTER_FILE_SEED' \
 		'Register slice: REGISTER_SLICE_REGRESSION_BUILD, REGISTER_SLICE_RANDOM_CYCLES, REGISTER_SLICE_SEED' \
 		'Round-robin arbiter: ROUND_ROBIN_ARBITER_REGRESSION_BUILD,' \
-		'                    ROUND_ROBIN_ARBITER_RANDOM_CYCLES, ROUND_ROBIN_ARBITER_SEED'
+		'                    ROUND_ROBIN_ARBITER_RANDOM_CYCLES, ROUND_ROBIN_ARBITER_SEED' \
+		'Skid buffer: SKID_BUFFER_REGRESSION_BUILD, SKID_BUFFER_RANDOM_CYCLES, SKID_BUFFER_SEED'
 endif
