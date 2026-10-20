@@ -21,12 +21,15 @@ module dff #(
   end
 
   // Keep each structural variant explicit so tools infer only the requested
-  // reset and enable controls.
+  // reset and enable controls. Sample illegal X/Z reset inside the clocked
+  // process; an external D-input guard can race an asynchronous reset event.
   if (ASYNC_RESET) begin : gen_async_reset
     if (HAS_ENABLE) begin : gen_enable
       always_ff @(posedge i_clk or negedge i_rstb) begin
         if (!i_rstb) begin
           o_q <= RESET_VALUE;
+        end else if (i_rstb !== 1'b1) begin
+          o_q <= 'x;
         end else if (i_enable) begin
           o_q <= i_d;
         end
@@ -35,6 +38,8 @@ module dff #(
       always_ff @(posedge i_clk or negedge i_rstb) begin
         if (!i_rstb) begin
           o_q <= RESET_VALUE;
+        end else if (i_rstb !== 1'b1) begin
+          o_q <= 'x;
         end else begin
           o_q <= i_d;
         end
@@ -45,6 +50,8 @@ module dff #(
       always_ff @(posedge i_clk) begin
         if (!i_rstb) begin
           o_q <= RESET_VALUE;
+        end else if (i_rstb !== 1'b1) begin
+          o_q <= 'x;
         end else if (i_enable) begin
           o_q <= i_d;
         end
@@ -53,6 +60,8 @@ module dff #(
       always_ff @(posedge i_clk) begin
         if (!i_rstb) begin
           o_q <= RESET_VALUE;
+        end else if (i_rstb !== 1'b1) begin
+          o_q <= 'x;
         end else begin
           o_q <= i_d;
         end

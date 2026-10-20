@@ -1,6 +1,6 @@
 # PyUVM validation structure
 
-Each module under `common/<module>` is a Python package with these roles:
+Each module under `<category>/<module>` is a Python package with these roles:
 
 | File | Responsibility |
 | --- | --- |
@@ -59,6 +59,117 @@ goals, static parameter literals and sampling schedules remain in their suites.
 The shared parameter-guard helper records elaboration rejection separately from
 explicitly permitted simulation-startup rejection. The lane-mask runner retains
 its structural-rejection policy and reports its explicit-guard coverage gap.
+The async FIFO under `basic/async_fifo` adds an independent accepted-record queue,
+destination-edge visibility histories, and coordinated reset cancellation. The
+shared runner accepts a category and ordered RTL dependencies for its guards.
+The bypass network under `basic/bypass_network` uses per-destination graph lookup,
+retained capture state, and pre-edge/post-edge/held observations. Its monitor
+checks destination and storage bits independently during quiet intervals.
+The context memory under `basic/context_memory` keeps independent data/validity
+history, verifies pre-edge masked-write behavior and post-edge atomic commits,
+and monitors unchanged entries and unmasked slices continuously.
+The context sequencer under `basic/context_sequencer` uses a loop-visit history,
+the full controller graph, and pre-edge/post-edge/held observations. Its additional
+PyUVM fixture composes the memory and sequencer references to check real two-port
+commitment and activation timing.
+The data aligner under `basic/data_aligner` uses an independent byte-array
+translation model and an accepted-window ledger for ready-valid ordering,
+spill conservation, cancellation, and consume-and-replace behavior. Continuous
+monitors check held outputs, isolated bytes, and registered capture activity.
+The ECC suite under `basic/ecc` derives conceptual Hamming positions in an
+independent mathematical model, sweeps every practical one/two-bit codeword fault,
+and checks unknown propagation, corrected scrub words, and cone independence.
+The synchronous FIFO under `basic/fifo` maintains an independent accepted-item
+queue and checks all reachable occupancy/handshake combinations, reset timing,
+full replacement, odd-depth wrapping, four-state payloads, and storage enables.
+The element packer under `basic/packer` uses mathematical integer conversion and
+an accepted-beat queue to check lane mapping, representability, saturation,
+metadata, feature guards, cancellation and elastic output timing. Continuous
+monitors verify invalid-lane isolation and accepted-only payload capture.
+The granular parity suite under `basic/parity` uses a population-count model and
+separate fault-position oracle to check generation, error mapping, whole-word
+clamping and expected undetected even-weight faults. It also checks X/Z propagation,
+activity during writes to selected granules, and continuous independence of both cones.
+
+The performance-counter bank under `basic/performance_counters` uses Python integer
+accumulation and independent shadow state to check weighted events, full-width
+overflow, thresholds, ownership boundaries and coherent snapshots. Real-port
+reads are checked before and after edges; optional internal observations check all
+live/shadow storage and isolated arithmetic operands on every sample. Negative
+campaigns require the expected live protocol assertion to reject illegal controls.
+
+The RDU suite under `basic/rdu` models each channel as an accepted-advance token
+and bubble history. It checks all legal taps, stalls, draining, flush/reset priority,
+strict capacity packing and context boundaries. Independent raw-storage predictions
+and bit-level waveform masks detect writes on bubbles, bypass, inactive stages,
+flushes or reset. Continuous input monitors enforce pending bypass stability.
+
+The scalar register-file suite under `basic/register_file` tracks initialized
+words independently of DUT storage. It samples old data at the real rising edge
+and new data after NBA updates, checks multi-port independence, and rejects invalid
+addresses and same-address write conflicts through live assertions. Optional raw
+storage checking verifies holds without assigning a deterministic power-up value.
+
+The register-slice suite under `basic/register_slice` tracks an independent
+acceptance queue and reset-discard ledger. It checks old-token consumption at the
+real rising edge, one-cycle visibility, continuous replacement throughput and both
+reset styles. Continuous monitors enforce producer stability, registered forward
+paths, and accepted-only payload writes, including finite changes between samples.
+
+The round-robin arbiter suite under `basic/round_robin_arbiter` models cyclic
+priority as an independent requester-order list. It checks every output and
+registered ownership state before, on and after service edges, with continuous
+assertions for relevant unknown controls and pending payload stability. Directed
+and random traffic exercise eligibility, backpressure, locks, cancellation,
+sticky errors and accepted-grant fairness. An actual mux and register-slice
+receiver check that accepted requester IDs and payloads stay aligned.
+
+The skid-buffer suite under `basic/skid_buffer` tracks an independent acceptance
+queue with same-edge bypass and explicit reset discards. It checks capture,
+buffered hold and release, the blocked producer on the release edge, and resumed
+bypass on the next edge. Continuous monitors enforce producer stability and
+capture-only payload writes. Clockless changes and structural checks verify that
+upstream ready has no combinational dependency on downstream ready or input traffic.
+
+The SRAM-wrapper suite under `basic/sram_wrapper` keeps independent committed words
+and timestamped read obligations. It checks accepted requests, exact backend
+maturity, response consumption, cancellation and credit conservation separately.
+Optional internal observations verify every word, backend issue pins, latency/tag
+tracking and response slots. A structurally different verification backend checks
+replacement through the same public interface; it does not qualify vendor macros.
+
+The stream-fork suite under `basic/stream_fork` maintains one reference queue per
+output. It checks selected copies independently against observed handshakes,
+preserves ordering across same-edge completion/replacement, and accounts for
+reset discards per destination. Continuous assertions enforce blocked-producer
+stability, stalled-output stability, known relevant controls and capture-only
+payload writes. Coverage includes destination populations, first/final consumers,
+partial completion, mask/order crosses, reset populations and intentional X/Z data.
+
+The stream-join suite under `basic/stream_join` checks atomic input/output
+handshakes at logical harness edges without adding a clock to the combinational
+RTL. Per-input queues record only actual handshakes; each joined output must
+consume its full required operand set on the same edge. Live assertions enforce
+early-producer and required-mask stability, output holds and relevant known
+controls. Coverage includes final arrivals, small control matrices, mask/order
+crosses, optional activity, long waits/stalls and four-state payloads.
+
+The vector-register-file suite under `basic/vector_register_file` models each
+entry's slices independently. It predicts only initialized slices, merges legal
+disjoint writes, and compares old read data on the actual clock edge against new
+masked data after propagation. Optional bank observations check all unselected
+storage holds. Coverage spans lane and slice populations, broadcast source
+selection, ignored unknown inputs, port/address relations and intentional X/Z
+transport; negative probes check active addresses and overlapping slice writes.
+
+The width-converter suite under `basic/width_converter` uses accepted transfer-unit
+records with explicit keep holes, group boundaries and user metadata. Packing and
+serialization produce independent expected output queues; unit and terminal-boundary
+ledgers account for delivery and explicit cancellation. Actual edge-time observations
+check registered visibility and consume/replacement. Optional per-unit raw storage
+checks and continuous waveform assertions enforce accepted-only writes, clamping,
+producer stability and stalls. Coverage spans both orders, every representative slice
+and keep population, terminal trimming, empty packets and reset/flush state crosses.
 
 The Makefile supplies the selected suite, its package parent and `src/val/lib`
 through `PYTHONPATH`. Imports use qualified suite names, such as

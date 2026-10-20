@@ -26,9 +26,70 @@ PRIORITY_ENCODER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/pr
 RESET_SYNCHRONIZER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/reset_synchronizer))
 RETENTION_REGISTER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/retention_register))
 WRITE_GATE_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/write_gate))
+ASYNC_FIFO_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/async_fifo))
+BYPASS_NETWORK_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/bypass_network))
+CONTEXT_MEMORY_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/context_memory))
+CONTEXT_SEQUENCER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/context_sequencer))
+DATA_ALIGNER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/data_aligner))
+ECC_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/ecc))
+FIFO_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/fifo))
+PACKER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/packer))
+RDU_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/rdu))
+VECTOR_REGISTER_FILE_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/vector_register_file))
+REGISTER_FILE_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/register_file))
+REGISTER_SLICE_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/register_slice))
+ROUND_ROBIN_ARBITER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/round_robin_arbiter))
+SKID_BUFFER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/skid_buffer))
+STREAM_JOIN_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/stream_join))
+WIDTH_CONVERTER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/width_converter))
+STREAM_FORK_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/stream_fork))
+SRAM_WRAPPER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/sram_wrapper))
+PERFORMANCE_COUNTERS_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/performance_counters))
+PARITY_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/parity))
 # Locate the selected RTL top using the same category layout as validation.
-# Designs with dependencies still provide an ordered VERILOG_SOURCES list.
-VERILOG_SOURCES ?= $(or $(firstword $(wildcard $(PROJECT_ROOT)/src/rtl/*/$(COCOTB_TOPLEVEL).sv)),$(PROJECT_ROOT)/src/rtl/common/$(COCOTB_TOPLEVEL).sv)
+# Include each basic module's common dependencies. Caller lists take precedence.
+_ASYNC_FIFO_SOURCES := $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/basic/async_fifo.sv
+_BYPASS_NETWORK_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/basic/bypass_network.sv
+_CONTEXT_MEMORY_SOURCES := $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/basic/context_memory.sv
+_CONTEXT_SEQUENCER_SOURCES := $(PROJECT_ROOT)/src/rtl/basic/context_sequencer_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/basic/context_sequencer.sv
+_RTL_SOURCES_async_fifo := $(_ASYNC_FIFO_SOURCES)
+_RTL_SOURCES_bypass_network := $(_BYPASS_NETWORK_SOURCES)
+_RTL_SOURCES_context_memory := $(_CONTEXT_MEMORY_SOURCES)
+_RTL_SOURCES_context_sequencer := $(_CONTEXT_SEQUENCER_SOURCES)
+_DATA_ALIGNER_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/data_aligner.sv
+_RTL_SOURCES_data_aligner := $(_DATA_ALIGNER_SOURCES)
+_ECC_SOURCES := $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/ecc.sv
+_RTL_SOURCES_ecc := $(_ECC_SOURCES)
+_FIFO_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv
+_RTL_SOURCES_fifo := $(_FIFO_SOURCES)
+_PACKER_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/packer.sv
+_RTL_SOURCES_packer := $(_PACKER_SOURCES)
+_PARITY_SOURCES := $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv
+_RTL_SOURCES_parity := $(_PARITY_SOURCES)
+_PERFORMANCE_COUNTERS_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/performance_counters.sv
+_RTL_SOURCES_performance_counters := $(_PERFORMANCE_COUNTERS_SOURCES)
+_RDU_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/rdu.sv
+_RTL_SOURCES_rdu := $(_RDU_SOURCES)
+_REGISTER_FILE_SOURCES := $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/basic/register_file.sv
+_RTL_SOURCES_register_file := $(_REGISTER_FILE_SOURCES)
+_VECTOR_REGISTER_FILE_SOURCES := $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/basic/register_file.sv $(PROJECT_ROOT)/src/rtl/basic/vector_register_file.sv
+_RTL_SOURCES_vector_register_file := $(_VECTOR_REGISTER_FILE_SOURCES)
+_REGISTER_SLICE_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/register_slice.sv
+_RTL_SOURCES_register_slice := $(_REGISTER_SLICE_SOURCES)
+_ROUND_ROBIN_ARBITER_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv $(PROJECT_ROOT)/src/rtl/basic/round_robin_arbiter.sv
+_RTL_SOURCES_round_robin_arbiter := $(_ROUND_ROBIN_ARBITER_SOURCES)
+_SKID_BUFFER_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/mux.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/skid_buffer.sv
+_RTL_SOURCES_skid_buffer := $(_SKID_BUFFER_SOURCES)
+_WIDTH_CONVERTER_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/width_converter.sv
+_RTL_SOURCES_width_converter := $(_WIDTH_CONVERTER_SOURCES)
+_STREAM_FORK_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/stream_fork.sv
+_RTL_SOURCES_stream_fork := $(_STREAM_FORK_SOURCES)
+_STREAM_JOIN_SOURCES := $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/stream_join.sv
+_RTL_SOURCES_stream_join := $(_STREAM_JOIN_SOURCES)
+SRAM_BACKEND_SOURCE ?= $(PROJECT_ROOT)/src/rtl/basic/sram_wrapper_backend.sv
+_SRAM_WRAPPER_SOURCES = $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(SRAM_BACKEND_SOURCE) $(PROJECT_ROOT)/src/rtl/basic/sram_wrapper.sv
+_RTL_SOURCES_sram_wrapper = $(_SRAM_WRAPPER_SOURCES)
+VERILOG_SOURCES ?= $(or $(_RTL_SOURCES_$(COCOTB_TOPLEVEL)),$(firstword $(wildcard $(PROJECT_ROOT)/src/rtl/*/$(COCOTB_TOPLEVEL).sv)),$(PROJECT_ROOT)/src/rtl/common/$(COCOTB_TOPLEVEL).sv)
 SIM_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/$(COCOTB_TOPLEVEL)
 COCOTB_RESULTS_FILE ?= $(SIM_BUILD)/results.xml
 SAIF_FILE ?= $(SIM_BUILD)/$(COCOTB_TOPLEVEL).saif
@@ -143,6 +204,106 @@ WRITE_GATE_RANDOM_CYCLES ?= 2000
 WRITE_GATE_SEED ?= 20261011
 _WRITE_GATE_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
 _WRITE_GATE_MAKE := $(MAKE)
+ASYNC_FIFO_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/async_fifo/regression
+ASYNC_FIFO_RANDOM_CYCLES ?= 2000
+ASYNC_FIFO_SEED ?= 20261012
+_ASYNC_FIFO_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_ASYNC_FIFO_MAKE := $(MAKE)
+BYPASS_NETWORK_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/bypass_network/regression
+BYPASS_NETWORK_RANDOM_CYCLES ?= 2000
+BYPASS_NETWORK_SEED ?= 20261012
+_BYPASS_NETWORK_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_BYPASS_NETWORK_MAKE := $(MAKE)
+CONTEXT_MEMORY_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/context_memory/regression
+CONTEXT_MEMORY_RANDOM_CYCLES ?= 2000
+CONTEXT_MEMORY_SEED ?= 20261012
+_CONTEXT_MEMORY_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_CONTEXT_MEMORY_MAKE := $(MAKE)
+CONTEXT_SEQUENCER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/context_sequencer/regression
+CONTEXT_SEQUENCER_RANDOM_CYCLES ?= 2000
+CONTEXT_SEQUENCER_SEED ?= 20261012
+_CONTEXT_SEQUENCER_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_CONTEXT_SEQUENCER_MAKE := $(MAKE)
+DATA_ALIGNER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/data_aligner/regression
+DATA_ALIGNER_RANDOM_CYCLES ?= 2000
+DATA_ALIGNER_SEED ?= 20261013
+_DATA_ALIGNER_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_DATA_ALIGNER_MAKE := $(MAKE)
+ECC_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/ecc/regression
+ECC_RANDOM_CYCLES ?= 2000
+ECC_SEED ?= 20261013
+_ECC_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_ECC_MAKE := $(MAKE)
+FIFO_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/fifo/regression
+FIFO_RANDOM_CYCLES ?= 2000
+FIFO_SEED ?= 20261013
+_FIFO_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_FIFO_MAKE := $(MAKE)
+PACKER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/packer/regression
+PACKER_RANDOM_CYCLES ?= 2000
+PACKER_SEED ?= 20261013
+_PACKER_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_PACKER_MAKE := $(MAKE)
+PARITY_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/parity/regression
+PARITY_RANDOM_CYCLES ?= 2000
+PARITY_SEED ?= 20261013
+_PARITY_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_PARITY_MAKE := $(MAKE)
+PERFORMANCE_COUNTERS_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/performance_counters/regression
+PERFORMANCE_COUNTERS_RANDOM_CYCLES ?= 2000
+PERFORMANCE_COUNTERS_SEED ?= 20261013
+_PERFORMANCE_COUNTERS_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_PERFORMANCE_COUNTERS_MAKE := $(MAKE)
+RDU_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/rdu/regression
+RDU_RANDOM_CYCLES ?= 2000
+RDU_SEED ?= 20261019
+_RDU_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_RDU_MAKE := $(MAKE)
+VECTOR_REGISTER_FILE_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/vector_register_file/regression
+VECTOR_REGISTER_FILE_RANDOM_CYCLES ?= 2000
+VECTOR_REGISTER_FILE_SEED ?= 20261020
+_VECTOR_REGISTER_FILE_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_VECTOR_REGISTER_FILE_MAKE := $(MAKE)
+REGISTER_FILE_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/register_file/regression
+REGISTER_FILE_RANDOM_CYCLES ?= 2000
+REGISTER_FILE_SEED ?= 20261019
+_REGISTER_FILE_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_REGISTER_FILE_MAKE := $(MAKE)
+REGISTER_SLICE_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/register_slice/regression
+REGISTER_SLICE_RANDOM_CYCLES ?= 2000
+REGISTER_SLICE_SEED ?= 20261019
+_REGISTER_SLICE_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_REGISTER_SLICE_MAKE := $(MAKE)
+ROUND_ROBIN_ARBITER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/round_robin_arbiter/regression
+ROUND_ROBIN_ARBITER_RANDOM_CYCLES ?= 2000
+ROUND_ROBIN_ARBITER_SEED ?= 20261019
+_ROUND_ROBIN_ARBITER_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_ROUND_ROBIN_ARBITER_MAKE := $(MAKE)
+SKID_BUFFER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/skid_buffer/regression
+SKID_BUFFER_RANDOM_CYCLES ?= 2000
+SKID_BUFFER_SEED ?= 20261019
+_SKID_BUFFER_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_SKID_BUFFER_MAKE := $(MAKE)
+STREAM_JOIN_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/stream_join/regression
+STREAM_JOIN_RANDOM_CYCLES ?= 2000
+STREAM_JOIN_SEED ?= 20261020
+_STREAM_JOIN_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_STREAM_JOIN_MAKE := $(MAKE)
+WIDTH_CONVERTER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/width_converter/regression
+WIDTH_CONVERTER_RANDOM_CYCLES ?= 2000
+WIDTH_CONVERTER_SEED ?= 20261020
+_WIDTH_CONVERTER_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_WIDTH_CONVERTER_MAKE := $(MAKE)
+STREAM_FORK_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/stream_fork/regression
+STREAM_FORK_RANDOM_CYCLES ?= 2000
+STREAM_FORK_SEED ?= 20261020
+_STREAM_FORK_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_STREAM_FORK_MAKE := $(MAKE)
+SRAM_WRAPPER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/sram_wrapper/regression
+SRAM_WRAPPER_RANDOM_CYCLES ?= 2000
+SRAM_WRAPPER_SEED ?= 20261019
+_SRAM_WRAPPER_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_SRAM_WRAPPER_MAKE := $(MAKE)
 
 # Component imports use suite packages; shared infrastructure lives under lib.
 export PYTHONPATH := $(PYUVM_TEST_DIR):$(patsubst %/,%,$(dir $(PYUVM_TEST_DIR))):$(PROJECT_ROOT)/src/val/lib$(if $(PYTHONPATH),:$(PYTHONPATH))
@@ -165,7 +326,7 @@ endif
 endif
 include $(shell "$(PYTHON_BIN)" -m cocotb_tools.config --makefiles)/Makefile.sim
 else
-.PHONY: all sim pyuvm counter-regression clock-gate-regression decoder-regression dff-regression isolation-cell-regression lane-mask-regression level-shifter-regression mux-regression operand-isolation-regression priority-encoder-regression reset-synchronizer-regression retention-register-regression write-gate-regression saif synth gate-sim gate-saif gate-check power power-report power-check power-invalidate setup clean clean-gate clean-synth clean-power help
+.PHONY: all sim pyuvm counter-regression clock-gate-regression decoder-regression dff-regression isolation-cell-regression lane-mask-regression level-shifter-regression mux-regression operand-isolation-regression priority-encoder-regression reset-synchronizer-regression retention-register-regression write-gate-regression async-fifo-regression bypass-network-regression context-memory-regression context-sequencer-regression saif synth gate-sim gate-saif gate-check power power-report power-check power-invalidate setup clean clean-gate clean-synth clean-power help
 
 all sim: pyuvm
 
@@ -334,6 +495,262 @@ write-gate-regression:
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_WRITE_GATE_MAKE)" \
 		$(if $(strip $(_WRITE_GATE_SIM_BIN_DIR)),--sim-bin-dir "$(_WRITE_GATE_SIM_BIN_DIR)")
 
+# Validate asynchronous clocks, record ordering, reset cancellation, and CDC stages.
+async-fifo-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(ASYNC_FIFO_TEST_DIR)/run_async_fifo_regression.py" || { \
+		echo 'Async FIFO regression missing under src/val/<category>/async_fifo.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(ASYNC_FIFO_TEST_DIR)/run_async_fifo_regression.py" \
+		--sim "$(SIM)" --build-dir "$(ASYNC_FIFO_REGRESSION_BUILD)" \
+		--seed "$(ASYNC_FIFO_SEED)" --random-cycles "$(ASYNC_FIFO_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_ASYNC_FIFO_MAKE)" \
+		$(if $(strip $(_ASYNC_FIFO_SIM_BIN_DIR)),--sim-bin-dir "$(_ASYNC_FIFO_SIM_BIN_DIR)")
+
+# Check sparse forwarding, independent destinations, capture/hold, and context flush.
+bypass-network-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(BYPASS_NETWORK_TEST_DIR)/run_bypass_network_regression.py" || { \
+		echo 'Bypass network regression missing under src/val/<category>/bypass_network.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(BYPASS_NETWORK_TEST_DIR)/run_bypass_network_regression.py" \
+		--sim "$(SIM)" --build-dir "$(BYPASS_NETWORK_REGRESSION_BUILD)" \
+		--seed "$(BYPASS_NETWORK_SEED)" --random-cycles "$(BYPASS_NETWORK_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_BYPASS_NETWORK_MAKE)" \
+		$(if $(strip $(_BYPASS_NETWORK_SIM_BIN_DIR)),--sim-bin-dir "$(_BYPASS_NETWORK_SIM_BIN_DIR)")
+
+# Validate resident context loading, masked writes, commit, and read timing.
+context-memory-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(CONTEXT_MEMORY_TEST_DIR)/run_context_memory_regression.py" || { \
+		echo 'Context memory regression missing under src/val/<category>/context_memory.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(CONTEXT_MEMORY_TEST_DIR)/run_context_memory_regression.py" \
+		--sim "$(SIM)" --build-dir "$(CONTEXT_MEMORY_REGRESSION_BUILD)" \
+		--seed "$(CONTEXT_MEMORY_SEED)" --random-cycles "$(CONTEXT_MEMORY_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_CONTEXT_MEMORY_MAKE)" \
+		$(if $(strip $(_CONTEXT_MEMORY_SIM_BIN_DIR)),--sim-bin-dir "$(_CONTEXT_MEMORY_SIM_BIN_DIR)")
+
+# Check context selection, loop visits, runtime safe points, and sticky errors.
+context-sequencer-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(CONTEXT_SEQUENCER_TEST_DIR)/run_context_sequencer_regression.py" || { \
+		echo 'Context sequencer regression missing under src/val/<category>/context_sequencer.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(CONTEXT_SEQUENCER_TEST_DIR)/run_context_sequencer_regression.py" \
+		--sim "$(SIM)" --build-dir "$(CONTEXT_SEQUENCER_REGRESSION_BUILD)" \
+		--seed "$(CONTEXT_SEQUENCER_SEED)" --random-cycles "$(CONTEXT_SEQUENCER_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_CONTEXT_SEQUENCER_MAKE)" \
+		$(if $(strip $(_CONTEXT_SEQUENCER_SIM_BIN_DIR)),--sim-bin-dir "$(_CONTEXT_SEQUENCER_SIM_BIN_DIR)")
+
+.PHONY: data-aligner-regression
+# Check byte mapping, spill conservation, elastic occupancy and cancellation.
+data-aligner-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(DATA_ALIGNER_TEST_DIR)/run_data_aligner_regression.py" || { \
+		echo 'Data aligner regression missing under src/val/<category>/data_aligner.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(DATA_ALIGNER_TEST_DIR)/run_data_aligner_regression.py" \
+		--sim "$(SIM)" --build-dir "$(DATA_ALIGNER_REGRESSION_BUILD)" \
+		--seed "$(DATA_ALIGNER_SEED)" --random-cycles "$(DATA_ALIGNER_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_DATA_ALIGNER_MAKE)" \
+		$(if $(strip $(_DATA_ALIGNER_SIM_BIN_DIR)),--sim-bin-dir "$(_DATA_ALIGNER_SIM_BIN_DIR)")
+
+.PHONY: sram-wrapper-regression
+# Check masked memory, fixed latency, read credits and backend replacement.
+sram-wrapper-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(SRAM_WRAPPER_TEST_DIR)/run_sram_wrapper_regression.py" || { \
+		echo 'SRAM-wrapper regression missing under src/val/<category>/sram_wrapper.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(SRAM_WRAPPER_TEST_DIR)/run_sram_wrapper_regression.py" \
+		--sim "$(SIM)" --build-dir "$(SRAM_WRAPPER_REGRESSION_BUILD)" \
+		--seed "$(SRAM_WRAPPER_SEED)" --random-cycles "$(SRAM_WRAPPER_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_SRAM_WRAPPER_MAKE)" \
+		$(if $(strip $(_SRAM_WRAPPER_SIM_BIN_DIR)),--sim-bin-dir "$(_SRAM_WRAPPER_SIM_BIN_DIR)")
+
+.PHONY: stream-join-regression
+# Check atomic input consumption, final arrival, idle masks and backpressure.
+stream-join-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(STREAM_JOIN_TEST_DIR)/run_stream_join_regression.py" || { \
+		echo 'Stream-join regression missing under src/val/<category>/stream_join.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(STREAM_JOIN_TEST_DIR)/run_stream_join_regression.py" \
+		--sim "$(SIM)" --build-dir "$(STREAM_JOIN_REGRESSION_BUILD)" \
+		--seed "$(STREAM_JOIN_SEED)" --random-cycles "$(STREAM_JOIN_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_STREAM_JOIN_MAKE)" \
+		$(if $(strip $(_STREAM_JOIN_SIM_BIN_DIR)),--sim-bin-dir "$(_STREAM_JOIN_SIM_BIN_DIR)")
+
+.PHONY: width-converter-regression
+# Check positional packing/serialization, keep, packet boundaries and cancellation.
+width-converter-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(WIDTH_CONVERTER_TEST_DIR)/run_width_converter_regression.py" || { \
+		echo 'Width-converter regression missing under src/val/<category>/width_converter.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(WIDTH_CONVERTER_TEST_DIR)/run_width_converter_regression.py" \
+		--sim "$(SIM)" --build-dir "$(WIDTH_CONVERTER_REGRESSION_BUILD)" \
+		--seed "$(WIDTH_CONVERTER_SEED)" --random-cycles "$(WIDTH_CONVERTER_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_WIDTH_CONVERTER_MAKE)" \
+		$(if $(strip $(_WIDTH_CONVERTER_SIM_BIN_DIR)),--sim-bin-dir "$(_WIDTH_CONVERTER_SIM_BIN_DIR)")
+
+.PHONY: stream-fork-regression
+# Check multicast delivery, partial completion, replacement and reset.
+stream-fork-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(STREAM_FORK_TEST_DIR)/run_stream_fork_regression.py" || { \
+		echo 'Stream-fork regression missing under src/val/<category>/stream_fork.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(STREAM_FORK_TEST_DIR)/run_stream_fork_regression.py" \
+		--sim "$(SIM)" --build-dir "$(STREAM_FORK_REGRESSION_BUILD)" \
+		--seed "$(STREAM_FORK_SEED)" --random-cycles "$(STREAM_FORK_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_STREAM_FORK_MAKE)" \
+		$(if $(strip $(_STREAM_FORK_SIM_BIN_DIR)),--sim-bin-dir "$(_STREAM_FORK_SIM_BIN_DIR)")
+
+.PHONY: skid-buffer-regression
+# Check zero-cycle bypass, late-stall capture, release and producer stability.
+skid-buffer-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(SKID_BUFFER_TEST_DIR)/run_skid_buffer_regression.py" || { \
+		echo 'Skid-buffer regression missing under src/val/<category>/skid_buffer.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(SKID_BUFFER_TEST_DIR)/run_skid_buffer_regression.py" \
+		--sim "$(SIM)" --build-dir "$(SKID_BUFFER_REGRESSION_BUILD)" \
+		--seed "$(SKID_BUFFER_SEED)" --random-cycles "$(SKID_BUFFER_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_SKID_BUFFER_MAKE)" \
+		$(if $(strip $(_SKID_BUFFER_SIM_BIN_DIR)),--sim-bin-dir "$(_SKID_BUFFER_SIM_BIN_DIR)")
+
+.PHONY: round-robin-arbiter-regression
+# Check rotating fairness, stable pending grants, locks, errors and payloads.
+round-robin-arbiter-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(ROUND_ROBIN_ARBITER_TEST_DIR)/run_round_robin_arbiter_regression.py" || { \
+		echo 'Arbiter regression missing under src/val/<category>/round_robin_arbiter.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(ROUND_ROBIN_ARBITER_TEST_DIR)/run_round_robin_arbiter_regression.py" \
+		--sim "$(SIM)" --build-dir "$(ROUND_ROBIN_ARBITER_REGRESSION_BUILD)" \
+		--seed "$(ROUND_ROBIN_ARBITER_SEED)" --random-cycles "$(ROUND_ROBIN_ARBITER_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_ROUND_ROBIN_ARBITER_MAKE)" \
+		$(if $(strip $(_ROUND_ROBIN_ARBITER_SIM_BIN_DIR)),--sim-bin-dir "$(_ROUND_ROBIN_ARBITER_SIM_BIN_DIR)")
+
+.PHONY: register-slice-regression
+# Check one-cycle forward latency, consume/replace ordering and backpressure.
+register-slice-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(REGISTER_SLICE_TEST_DIR)/run_register_slice_regression.py" || { \
+		echo 'Register-slice regression missing under src/val/<category>/register_slice.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(REGISTER_SLICE_TEST_DIR)/run_register_slice_regression.py" \
+		--sim "$(SIM)" --build-dir "$(REGISTER_SLICE_REGRESSION_BUILD)" \
+		--seed "$(REGISTER_SLICE_SEED)" --random-cycles "$(REGISTER_SLICE_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_REGISTER_SLICE_MAKE)" \
+		$(if $(strip $(_REGISTER_SLICE_SIM_BIN_DIR)),--sim-bin-dir "$(_REGISTER_SLICE_SIM_BIN_DIR)")
+
+.PHONY: vector-register-file-regression
+# Check lane/slice masks, broadcast, concurrent writes and edge-ordered reads.
+vector-register-file-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(VECTOR_REGISTER_FILE_TEST_DIR)/run_vector_register_file_regression.py" || { \
+		echo 'Vector-register-file regression missing under src/val/<category>/vector_register_file.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(VECTOR_REGISTER_FILE_TEST_DIR)/run_vector_register_file_regression.py" \
+		--sim "$(SIM)" --build-dir "$(VECTOR_REGISTER_FILE_REGRESSION_BUILD)" \
+		--seed "$(VECTOR_REGISTER_FILE_SEED)" --random-cycles "$(VECTOR_REGISTER_FILE_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_VECTOR_REGISTER_FILE_MAKE)" \
+		$(if $(strip $(_VECTOR_REGISTER_FILE_SIM_BIN_DIR)),--sim-bin-dir "$(_VECTOR_REGISTER_FILE_SIM_BIN_DIR)")
+
+.PHONY: register-file-regression
+# Check unreset multi-port storage and pre-edge/post-edge read semantics.
+register-file-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(REGISTER_FILE_TEST_DIR)/run_register_file_regression.py" || { \
+		echo 'Register-file regression missing under src/val/<category>/register_file.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(REGISTER_FILE_TEST_DIR)/run_register_file_regression.py" \
+		--sim "$(SIM)" --build-dir "$(REGISTER_FILE_REGRESSION_BUILD)" \
+		--seed "$(REGISTER_FILE_SEED)" --random-cycles "$(REGISTER_FILE_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_REGISTER_FILE_MAKE)" \
+		$(if $(strip $(_REGISTER_FILE_SIM_BIN_DIR)),--sim-bin-dir "$(_REGISTER_FILE_SIM_BIN_DIR)")
+
+.PHONY: rdu-regression
+# Check accepted-advance latency, bubbles, partitioning, stalls and flushes.
+rdu-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(RDU_TEST_DIR)/run_rdu_regression.py" || { \
+		echo 'RDU regression missing under src/val/<category>/rdu.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(RDU_TEST_DIR)/run_rdu_regression.py" \
+		--sim "$(SIM)" --build-dir "$(RDU_REGRESSION_BUILD)" \
+		--seed "$(RDU_SEED)" --random-cycles "$(RDU_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_RDU_MAKE)" \
+		$(if $(strip $(_RDU_SIM_BIN_DIR)),--sim-bin-dir "$(_RDU_SIM_BIN_DIR)")
+
+.PHONY: performance-counters-regression
+# Check weighted events, overflow, thresholds, coherent snapshots and ownership.
+performance-counters-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(PERFORMANCE_COUNTERS_TEST_DIR)/run_performance_counters_regression.py" || { \
+		echo 'Performance counters regression missing under src/val/<category>/performance_counters.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(PERFORMANCE_COUNTERS_TEST_DIR)/run_performance_counters_regression.py" \
+		--sim "$(SIM)" --build-dir "$(PERFORMANCE_COUNTERS_REGRESSION_BUILD)" \
+		--seed "$(PERFORMANCE_COUNTERS_SEED)" --random-cycles "$(PERFORMANCE_COUNTERS_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_PERFORMANCE_COUNTERS_MAKE)" \
+		$(if $(strip $(_PERFORMANCE_COUNTERS_SIM_BIN_DIR)),--sim-bin-dir "$(_PERFORMANCE_COUNTERS_SIM_BIN_DIR)")
+
+.PHONY: parity-regression
+# Check per-granule even parity, fault limitations, X/Z and cone independence.
+parity-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(PARITY_TEST_DIR)/run_parity_regression.py" || { \
+		echo 'Parity regression missing under src/val/<category>/parity.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(PARITY_TEST_DIR)/run_parity_regression.py" \
+		--sim "$(SIM)" --build-dir "$(PARITY_REGRESSION_BUILD)" \
+		--seed "$(PARITY_SEED)" --random-cycles "$(PARITY_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_PARITY_MAKE)" \
+		$(if $(strip $(_PARITY_SIM_BIN_DIR)),--sim-bin-dir "$(_PARITY_SIM_BIN_DIR)")
+
+.PHONY: packer-regression
+# Check element conversion, lane mapping, saturation and elastic ready-valid.
+packer-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(PACKER_TEST_DIR)/run_packer_regression.py" || { \
+		echo 'Packer regression missing under src/val/<category>/packer.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(PACKER_TEST_DIR)/run_packer_regression.py" \
+		--sim "$(SIM)" --build-dir "$(PACKER_REGRESSION_BUILD)" \
+		--seed "$(PACKER_SEED)" --random-cycles "$(PACKER_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_PACKER_MAKE)" \
+		$(if $(strip $(_PACKER_SIM_BIN_DIR)),--sim-bin-dir "$(_PACKER_SIM_BIN_DIR)")
+
+.PHONY: fifo-regression
+# Check single-clock ordering, full replacement, odd depths and reset timing.
+fifo-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(FIFO_TEST_DIR)/run_fifo_regression.py" || { \
+		echo 'FIFO regression missing under src/val/<category>/fifo.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(FIFO_TEST_DIR)/run_fifo_regression.py" \
+		--sim "$(SIM)" --build-dir "$(FIFO_REGRESSION_BUILD)" \
+		--seed "$(FIFO_SEED)" --random-cycles "$(FIFO_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_FIFO_MAKE)" \
+		$(if $(strip $(_FIFO_SIM_BIN_DIR)),--sim-bin-dir "$(_FIFO_SIM_BIN_DIR)")
+
+.PHONY: ecc-regression
+# Check shortened Hamming layout, all single bits, and every practical fault pair.
+ecc-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(ECC_TEST_DIR)/run_ecc_regression.py" || { \
+		echo 'ECC regression missing under src/val/<category>/ecc.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(ECC_TEST_DIR)/run_ecc_regression.py" \
+		--sim "$(SIM)" --build-dir "$(ECC_REGRESSION_BUILD)" \
+		--seed "$(ECC_SEED)" --random-cycles "$(ECC_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_ECC_MAKE)" \
+		$(if $(strip $(_ECC_SIM_BIN_DIR)),--sim-bin-dir "$(_ECC_SIM_BIN_DIR)")
+
 # Pass values through the environment so Tcl treats paths and hierarchy names
 # as data. Keep existing runtime options when enabling the UCLI capture script.
 # The script's config endofsim noexit command requires -ucli2Proc at runtime.
@@ -500,6 +917,26 @@ help:
 		'make reset-synchronizer-regression  Check reset assertion and synchronized release' \
 		'make retention-register-regression  Check portable save/restore and protocol' \
 		'make write-gate-regression  Check write masks and register/memory state' \
+		'make async-fifo-regression  Check dual-clock ordering, resets, and coverage' \
+		'make bypass-network-regression  Check sparse forwarding, capture, and flush' \
+		'make context-memory-regression  Check masked contexts, commit, and raw reads' \
+		'make context-sequencer-regression  Check context control, loops, and runtime safety' \
+		'make data-aligner-regression  Check byte alignment, spill, and ready-valid timing' \
+		'make ecc-regression   Check SECDED layout, correction, and every fault pair' \
+		'make fifo-regression  Check synchronous FIFO ordering, resets, and full replacement' \
+		'make packer-regression  Check element widths, saturation, lanes, and elastic timing' \
+		'make parity-regression  Check granular parity, fault detection limits, and X/Z' \
+		'make performance-counters-regression  Check weighted counters, snapshots and thresholds' \
+		'make rdu-regression   Check allocated delays, bubbles, stalls and context boundaries' \
+		'make vector-register-file-regression  Check lane/slice masks, broadcasts and concurrent writes' \
+		'make register-file-regression  Check multi-port storage and read-before-write timing' \
+		'make register-slice-regression  Check elastic one-cycle latency and consume/replace' \
+		'make round-robin-arbiter-regression  Check cyclic grants, backpressure, locks and fairness' \
+		'make skid-buffer-regression  Check bypass, late stalls and registered backpressure' \
+		'make stream-join-regression  Check atomic joins, final arrival and optional inputs' \
+		'make width-converter-regression  Check packing, serialization, keep and packet boundaries' \
+		'make stream-fork-regression  Check multicast delivery, masks and partial completion' \
+		'make sram-wrapper-regression  Check masked 1RW memory, latency, credits and backends' \
 		'make saif            Run PyUVM with VCS and write switching activity' \
 		'make synth           Synthesize RTL with Design Compiler' \
 		'make gate-sim        Run PyUVM on NETLIST_FILE with CELL_MODELS' \
@@ -544,5 +981,34 @@ help:
 		'                    RESET_SYNCHRONIZER_RANDOM_CYCLES, RESET_SYNCHRONIZER_SEED' \
 		'Retention register: RETENTION_REGISTER_REGRESSION_BUILD,' \
 		'                    RETENTION_REGISTER_RANDOM_CYCLES, RETENTION_REGISTER_SEED' \
-		'Write gate: WRITE_GATE_REGRESSION_BUILD, WRITE_GATE_RANDOM_CYCLES, WRITE_GATE_SEED'
+		'Write gate: WRITE_GATE_REGRESSION_BUILD, WRITE_GATE_RANDOM_CYCLES, WRITE_GATE_SEED' \
+		'Async FIFO: ASYNC_FIFO_REGRESSION_BUILD, ASYNC_FIFO_RANDOM_CYCLES, ASYNC_FIFO_SEED' \
+		'Bypass network: BYPASS_NETWORK_REGRESSION_BUILD, BYPASS_NETWORK_RANDOM_CYCLES,' \
+		'                BYPASS_NETWORK_SEED' \
+		'Context memory: CONTEXT_MEMORY_REGRESSION_BUILD, CONTEXT_MEMORY_RANDOM_CYCLES,' \
+		'                CONTEXT_MEMORY_SEED' \
+		'Context sequencer: CONTEXT_SEQUENCER_REGRESSION_BUILD, CONTEXT_SEQUENCER_RANDOM_CYCLES,' \
+		'                   CONTEXT_SEQUENCER_SEED' \
+		'Data aligner: DATA_ALIGNER_REGRESSION_BUILD, DATA_ALIGNER_RANDOM_CYCLES,' \
+		'              DATA_ALIGNER_SEED' \
+		'ECC:       ECC_REGRESSION_BUILD, ECC_RANDOM_CYCLES, ECC_SEED' \
+		'FIFO:      FIFO_REGRESSION_BUILD, FIFO_RANDOM_CYCLES, FIFO_SEED' \
+		'Packer:    PACKER_REGRESSION_BUILD, PACKER_RANDOM_CYCLES, PACKER_SEED' \
+		'Parity:    PARITY_REGRESSION_BUILD, PARITY_RANDOM_CYCLES, PARITY_SEED' \
+		'Performance counters: PERFORMANCE_COUNTERS_REGRESSION_BUILD,' \
+		'                      PERFORMANCE_COUNTERS_RANDOM_CYCLES, PERFORMANCE_COUNTERS_SEED' \
+		'RDU:       RDU_REGRESSION_BUILD, RDU_RANDOM_CYCLES, RDU_SEED' \
+		'Vector register file: VECTOR_REGISTER_FILE_REGRESSION_BUILD, VECTOR_REGISTER_FILE_RANDOM_CYCLES,' \
+		'                      VECTOR_REGISTER_FILE_SEED' \
+		'Register file: REGISTER_FILE_REGRESSION_BUILD, REGISTER_FILE_RANDOM_CYCLES, REGISTER_FILE_SEED' \
+		'Register slice: REGISTER_SLICE_REGRESSION_BUILD, REGISTER_SLICE_RANDOM_CYCLES, REGISTER_SLICE_SEED' \
+		'Round-robin arbiter: ROUND_ROBIN_ARBITER_REGRESSION_BUILD,' \
+		'                    ROUND_ROBIN_ARBITER_RANDOM_CYCLES, ROUND_ROBIN_ARBITER_SEED' \
+		'Skid buffer: SKID_BUFFER_REGRESSION_BUILD, SKID_BUFFER_RANDOM_CYCLES, SKID_BUFFER_SEED' \
+		'Stream join: STREAM_JOIN_REGRESSION_BUILD, STREAM_JOIN_RANDOM_CYCLES, STREAM_JOIN_SEED' \
+		'Width converter: WIDTH_CONVERTER_REGRESSION_BUILD, WIDTH_CONVERTER_RANDOM_CYCLES,' \
+		'                 WIDTH_CONVERTER_SEED' \
+		'Stream fork: STREAM_FORK_REGRESSION_BUILD, STREAM_FORK_RANDOM_CYCLES, STREAM_FORK_SEED' \
+		'SRAM wrapper: SRAM_WRAPPER_REGRESSION_BUILD, SRAM_WRAPPER_RANDOM_CYCLES,' \
+		'              SRAM_WRAPPER_SEED; SRAM_BACKEND_SOURCE selects the backend file'
 endif
