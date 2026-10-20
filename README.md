@@ -442,6 +442,24 @@ per-channel histories and observes raw storage enables. Configure `RDU_SEED`,
 [RDU verification details](src/val/basic/rdu/README.md) for allocation literals,
 configuration boundaries, coverage and qualification scope.
 
+Run the scalar register-file regression:
+
+```sh
+make register-file-regression
+make register-file-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=register_file
+```
+
+The register file provides independent combinational reads and simultaneous
+full-word writes to distinct addresses, with no storage reset or implicit
+forwarding. It reuses the common decoder for legal write selection. PyUVM checks
+55 width/depth/port configurations against an independent initialized-word model,
+including pre-edge, edge-time and post-edge read-during-write observations.
+Configure `REGISTER_FILE_SEED`, `REGISTER_FILE_RANDOM_CYCLES` and
+`REGISTER_FILE_REGRESSION_BUILD`. See the
+[register-file verification details](src/val/basic/register_file/README.md) for
+initialization policy, coverage, protocol assertions and qualification scope.
+
 Choose a different HDL top and Python test module:
 
 ```sh
@@ -464,7 +482,7 @@ are comma-separated. It defaults to `test_<COCOTB_TOPLEVEL>`. When
 `VERILOG_SOURCES` is omitted, the Makefile discovers the selected top under
 `src/rtl/<category>/<COCOTB_TOPLEVEL>.sv`. The async FIFO, bypass network, context
 memory, context sequencer, data aligner, ECC, synchronous FIFO, packer, parity,
-performance counters, and the RDU include their ordered RTL dependencies automatically.
+performance counters, RDU, and register file include their ordered RTL dependencies automatically.
 Provide an ordered source list for other designs that instantiate modules or
 import packages. Package sources must precede sources that import them.
 
@@ -487,7 +505,7 @@ Git. Dry runs of the counter, clock gate, decoder, DFF, isolation cell, lane mas
 level shifter, mux, operand isolation, priority encoder, reset synchronizer,
 retention register, write gate, async FIFO, bypass network, context memory,
 context sequencer, data aligner, ECC, synchronous FIFO, packer, parity, and
-performance-counter and RDU targets print their commands without changing reports.
+performance-counter, RDU and register-file targets print their commands without changing reports.
 
 Generate a SAIF activity file from the PyUVM simulation with VCS:
 

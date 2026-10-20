@@ -35,6 +35,7 @@ ECC_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/ecc))
 FIFO_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/fifo))
 PACKER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/packer))
 RDU_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/rdu))
+REGISTER_FILE_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/register_file))
 PERFORMANCE_COUNTERS_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/performance_counters))
 PARITY_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/parity))
 # Locate the selected RTL top using the same category layout as validation.
@@ -61,6 +62,8 @@ _PERFORMANCE_COUNTERS_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT
 _RTL_SOURCES_performance_counters := $(_PERFORMANCE_COUNTERS_SOURCES)
 _RDU_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/rdu.sv
 _RTL_SOURCES_rdu := $(_RDU_SOURCES)
+_REGISTER_FILE_SOURCES := $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/basic/register_file.sv
+_RTL_SOURCES_register_file := $(_REGISTER_FILE_SOURCES)
 VERILOG_SOURCES ?= $(or $(_RTL_SOURCES_$(COCOTB_TOPLEVEL)),$(firstword $(wildcard $(PROJECT_ROOT)/src/rtl/*/$(COCOTB_TOPLEVEL).sv)),$(PROJECT_ROOT)/src/rtl/common/$(COCOTB_TOPLEVEL).sv)
 SIM_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/$(COCOTB_TOPLEVEL)
 COCOTB_RESULTS_FILE ?= $(SIM_BUILD)/results.xml
@@ -231,6 +234,11 @@ RDU_RANDOM_CYCLES ?= 2000
 RDU_SEED ?= 20261019
 _RDU_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
 _RDU_MAKE := $(MAKE)
+REGISTER_FILE_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/register_file/regression
+REGISTER_FILE_RANDOM_CYCLES ?= 2000
+REGISTER_FILE_SEED ?= 20261019
+_REGISTER_FILE_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_REGISTER_FILE_MAKE := $(MAKE)
 
 # Component imports use suite packages; shared infrastructure lives under lib.
 export PYTHONPATH := $(PYUVM_TEST_DIR):$(patsubst %/,%,$(dir $(PYUVM_TEST_DIR))):$(PROJECT_ROOT)/src/val/lib$(if $(PYTHONPATH),:$(PYTHONPATH))
@@ -482,6 +490,19 @@ data-aligner-regression:
 		--seed "$(DATA_ALIGNER_SEED)" --random-cycles "$(DATA_ALIGNER_RANDOM_CYCLES)" \
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_DATA_ALIGNER_MAKE)" \
 		$(if $(strip $(_DATA_ALIGNER_SIM_BIN_DIR)),--sim-bin-dir "$(_DATA_ALIGNER_SIM_BIN_DIR)")
+
+.PHONY: register-file-regression
+# Check unreset multi-port storage and pre-edge/post-edge read semantics.
+register-file-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(REGISTER_FILE_TEST_DIR)/run_register_file_regression.py" || { \
+		echo 'Register-file regression missing under src/val/<category>/register_file.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(REGISTER_FILE_TEST_DIR)/run_register_file_regression.py" \
+		--sim "$(SIM)" --build-dir "$(REGISTER_FILE_REGRESSION_BUILD)" \
+		--seed "$(REGISTER_FILE_SEED)" --random-cycles "$(REGISTER_FILE_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_REGISTER_FILE_MAKE)" \
+		$(if $(strip $(_REGISTER_FILE_SIM_BIN_DIR)),--sim-bin-dir "$(_REGISTER_FILE_SIM_BIN_DIR)")
 
 .PHONY: rdu-regression
 # Check accepted-advance latency, bubbles, partitioning, stalls and flushes.
@@ -738,6 +759,7 @@ help:
 		'make parity-regression  Check granular parity, fault detection limits, and X/Z' \
 		'make performance-counters-regression  Check weighted counters, snapshots and thresholds' \
 		'make rdu-regression   Check allocated delays, bubbles, stalls and context boundaries' \
+		'make register-file-regression  Check multi-port storage and read-before-write timing' \
 		'make saif            Run PyUVM with VCS and write switching activity' \
 		'make synth           Synthesize RTL with Design Compiler' \
 		'make gate-sim        Run PyUVM on NETLIST_FILE with CELL_MODELS' \
@@ -798,5 +820,6 @@ help:
 		'Parity:    PARITY_REGRESSION_BUILD, PARITY_RANDOM_CYCLES, PARITY_SEED' \
 		'Performance counters: PERFORMANCE_COUNTERS_REGRESSION_BUILD,' \
 		'                      PERFORMANCE_COUNTERS_RANDOM_CYCLES, PERFORMANCE_COUNTERS_SEED' \
-		'RDU:       RDU_REGRESSION_BUILD, RDU_RANDOM_CYCLES, RDU_SEED'
+		'RDU:       RDU_REGRESSION_BUILD, RDU_RANDOM_CYCLES, RDU_SEED' \
+		'Register file: REGISTER_FILE_REGRESSION_BUILD, REGISTER_FILE_RANDOM_CYCLES, REGISTER_FILE_SEED'
 endif

@@ -104,6 +104,12 @@ strict capacity packing and context boundaries. Independent raw-storage predicti
 and bit-level waveform masks detect writes on bubbles, bypass, inactive stages,
 flushes or reset. Continuous input monitors enforce pending bypass stability.
 
+The scalar register-file suite under `basic/register_file` tracks initialized
+words independently of DUT storage. It samples old data at the real rising edge
+and new data after NBA updates, checks multi-port independence, and rejects invalid
+addresses and same-address write conflicts through live assertions. Optional raw
+storage checking verifies holds without assigning a deterministic power-up value.
+
 The Makefile supplies the selected suite, its package parent and `src/val/lib`
 through `PYTHONPATH`. Imports use qualified suite names, such as
 `write_gate.agent`, to avoid collisions between generic filenames. Standalone
