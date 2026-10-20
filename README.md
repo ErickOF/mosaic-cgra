@@ -531,6 +531,22 @@ synthesis; the default is inferred storage. Configure `SRAM_WRAPPER_SEED`,
 [SRAM verification details](src/val/basic/sram_wrapper/README.md) for the edge
 timing, backend contract, initialization policy and qualification scope.
 
+Run the stream-fork regression:
+
+```sh
+make stream-fork-regression
+make stream-fork-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=stream_fork
+```
+
+The fork stores one multicast item and independently tracks delivery to every
+selected output. It supports partial consumption and same-edge completion and
+replacement, with zero data on invalid lanes. The pending bits reuse common
+`dff`; output lanes reuse `operand_isolation`. Configure `STREAM_FORK_SEED`,
+`STREAM_FORK_RANDOM_CYCLES` and `STREAM_FORK_REGRESSION_BUILD`. See the
+[stream-fork verification details](src/val/basic/stream_fork/README.md) for mask
+legality, reset timing, per-output reference queues and qualification scope.
+
 Choose a different HDL top and Python test module:
 
 ```sh
@@ -554,7 +570,8 @@ are comma-separated. It defaults to `test_<COCOTB_TOPLEVEL>`. When
 `src/rtl/<category>/<COCOTB_TOPLEVEL>.sv`. The async FIFO, bypass network, context
 memory, context sequencer, data aligner, ECC, synchronous FIFO, packer, parity,
 performance counters, RDU, register file, register slice, round-robin arbiter,
-skid buffer and SRAM wrapper include their ordered RTL dependencies automatically.
+skid buffer, SRAM wrapper and stream fork include their ordered RTL dependencies
+automatically.
 Provide an ordered source list for other designs that instantiate modules or
 import packages. Package sources must precede sources that import them.
 
@@ -578,7 +595,8 @@ level shifter, mux, operand isolation, priority encoder, reset synchronizer,
 retention register, write gate, async FIFO, bypass network, context memory,
 context sequencer, data aligner, ECC, synchronous FIFO, packer, parity, and
 performance-counter, RDU, register-file, register-slice, round-robin-arbiter,
-skid-buffer and SRAM-wrapper targets print their commands without changing reports.
+skid-buffer, SRAM-wrapper and stream-fork targets print their commands without
+changing reports.
 
 Generate a SAIF activity file from the PyUVM simulation with VCS:
 

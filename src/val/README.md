@@ -138,6 +138,14 @@ Optional internal observations verify every word, backend issue pins, latency/ta
 tracking and response slots. A structurally different verification backend checks
 replacement through the same public interface; it does not qualify vendor macros.
 
+The stream-fork suite under `basic/stream_fork` maintains one reference queue per
+output. It checks selected copies independently against observed handshakes,
+preserves ordering across same-edge completion/replacement, and accounts for
+reset discards per destination. Continuous assertions enforce blocked-producer
+stability, stalled-output stability, known relevant controls and capture-only
+payload writes. Coverage includes destination populations, first/final consumers,
+partial completion, mask/order crosses, reset populations and intentional X/Z data.
+
 The Makefile supplies the selected suite, its package parent and `src/val/lib`
 through `PYTHONPATH`. Imports use qualified suite names, such as
 `write_gate.agent`, to avoid collisions between generic filenames. Standalone
