@@ -131,6 +131,13 @@ bypass on the next edge. Continuous monitors enforce producer stability and
 capture-only payload writes. Clockless changes and structural checks verify that
 upstream ready has no combinational dependency on downstream ready or input traffic.
 
+The SRAM-wrapper suite under `basic/sram_wrapper` keeps independent committed words
+and timestamped read obligations. It checks accepted requests, exact backend
+maturity, response consumption, cancellation and credit conservation separately.
+Optional internal observations verify every word, backend issue pins, latency/tag
+tracking and response slots. A structurally different verification backend checks
+replacement through the same public interface; it does not qualify vendor macros.
+
 The Makefile supplies the selected suite, its package parent and `src/val/lib`
 through `PYTHONPATH`. Imports use qualified suite names, such as
 `write_gate.agent`, to avoid collisions between generic filenames. Standalone

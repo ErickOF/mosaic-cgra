@@ -513,6 +513,24 @@ DFF, mux and operand-isolation blocks. Configure `SKID_BUFFER_SEED`,
 [skid-buffer verification details](src/val/basic/skid_buffer/README.md) for queue
 checking, capture-only writes, coverage, reset behavior and qualification scope.
 
+Run the SRAM-wrapper regression:
+
+```sh
+make sram-wrapper-regression
+make sram-wrapper-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=sram_wrapper
+```
+
+The wrapper provides masked 1RW memory access, fixed read maturity, ordered tagged
+responses and credit-based read admission. Writes remain admissible when read
+credits are exhausted. Reset and flush cancel reads while preserving committed
+memory. The shell reuses the common decoder, DFF, counter and operand isolation.
+`SRAM_BACKEND_SOURCE` selects a compatible backend for direct simulation and
+synthesis; the default is inferred storage. Configure `SRAM_WRAPPER_SEED`,
+`SRAM_WRAPPER_RANDOM_CYCLES` and `SRAM_WRAPPER_REGRESSION_BUILD`. See the
+[SRAM verification details](src/val/basic/sram_wrapper/README.md) for the edge
+timing, backend contract, initialization policy and qualification scope.
+
 Choose a different HDL top and Python test module:
 
 ```sh
@@ -535,8 +553,8 @@ are comma-separated. It defaults to `test_<COCOTB_TOPLEVEL>`. When
 `VERILOG_SOURCES` is omitted, the Makefile discovers the selected top under
 `src/rtl/<category>/<COCOTB_TOPLEVEL>.sv`. The async FIFO, bypass network, context
 memory, context sequencer, data aligner, ECC, synchronous FIFO, packer, parity,
-performance counters, RDU, register file, register slice, round-robin arbiter and
-skid buffer include their ordered RTL dependencies automatically.
+performance counters, RDU, register file, register slice, round-robin arbiter,
+skid buffer and SRAM wrapper include their ordered RTL dependencies automatically.
 Provide an ordered source list for other designs that instantiate modules or
 import packages. Package sources must precede sources that import them.
 
@@ -559,8 +577,8 @@ Git. Dry runs of the counter, clock gate, decoder, DFF, isolation cell, lane mas
 level shifter, mux, operand isolation, priority encoder, reset synchronizer,
 retention register, write gate, async FIFO, bypass network, context memory,
 context sequencer, data aligner, ECC, synchronous FIFO, packer, parity, and
-performance-counter, RDU, register-file, register-slice, round-robin-arbiter and
-skid-buffer targets print their commands without changing reports.
+performance-counter, RDU, register-file, register-slice, round-robin-arbiter,
+skid-buffer and SRAM-wrapper targets print their commands without changing reports.
 
 Generate a SAIF activity file from the PyUVM simulation with VCS:
 

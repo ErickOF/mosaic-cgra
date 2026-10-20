@@ -39,6 +39,7 @@ REGISTER_FILE_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/regis
 REGISTER_SLICE_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/register_slice))
 ROUND_ROBIN_ARBITER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/round_robin_arbiter))
 SKID_BUFFER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/skid_buffer))
+SRAM_WRAPPER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/sram_wrapper))
 PERFORMANCE_COUNTERS_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/performance_counters))
 PARITY_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/parity))
 # Locate the selected RTL top using the same category layout as validation.
@@ -73,6 +74,9 @@ _ROUND_ROBIN_ARBITER_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_
 _RTL_SOURCES_round_robin_arbiter := $(_ROUND_ROBIN_ARBITER_SOURCES)
 _SKID_BUFFER_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/mux.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/skid_buffer.sv
 _RTL_SOURCES_skid_buffer := $(_SKID_BUFFER_SOURCES)
+SRAM_BACKEND_SOURCE ?= $(PROJECT_ROOT)/src/rtl/basic/sram_wrapper_backend.sv
+_SRAM_WRAPPER_SOURCES = $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(SRAM_BACKEND_SOURCE) $(PROJECT_ROOT)/src/rtl/basic/sram_wrapper.sv
+_RTL_SOURCES_sram_wrapper = $(_SRAM_WRAPPER_SOURCES)
 VERILOG_SOURCES ?= $(or $(_RTL_SOURCES_$(COCOTB_TOPLEVEL)),$(firstword $(wildcard $(PROJECT_ROOT)/src/rtl/*/$(COCOTB_TOPLEVEL).sv)),$(PROJECT_ROOT)/src/rtl/common/$(COCOTB_TOPLEVEL).sv)
 SIM_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/$(COCOTB_TOPLEVEL)
 COCOTB_RESULTS_FILE ?= $(SIM_BUILD)/results.xml
@@ -263,6 +267,11 @@ SKID_BUFFER_RANDOM_CYCLES ?= 2000
 SKID_BUFFER_SEED ?= 20261019
 _SKID_BUFFER_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
 _SKID_BUFFER_MAKE := $(MAKE)
+SRAM_WRAPPER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/sram_wrapper/regression
+SRAM_WRAPPER_RANDOM_CYCLES ?= 2000
+SRAM_WRAPPER_SEED ?= 20261019
+_SRAM_WRAPPER_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_SRAM_WRAPPER_MAKE := $(MAKE)
 
 # Component imports use suite packages; shared infrastructure lives under lib.
 export PYTHONPATH := $(PYUVM_TEST_DIR):$(patsubst %/,%,$(dir $(PYUVM_TEST_DIR))):$(PROJECT_ROOT)/src/val/lib$(if $(PYTHONPATH),:$(PYTHONPATH))
@@ -514,6 +523,19 @@ data-aligner-regression:
 		--seed "$(DATA_ALIGNER_SEED)" --random-cycles "$(DATA_ALIGNER_RANDOM_CYCLES)" \
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_DATA_ALIGNER_MAKE)" \
 		$(if $(strip $(_DATA_ALIGNER_SIM_BIN_DIR)),--sim-bin-dir "$(_DATA_ALIGNER_SIM_BIN_DIR)")
+
+.PHONY: sram-wrapper-regression
+# Check masked memory, fixed latency, read credits and backend replacement.
+sram-wrapper-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(SRAM_WRAPPER_TEST_DIR)/run_sram_wrapper_regression.py" || { \
+		echo 'SRAM-wrapper regression missing under src/val/<category>/sram_wrapper.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(SRAM_WRAPPER_TEST_DIR)/run_sram_wrapper_regression.py" \
+		--sim "$(SIM)" --build-dir "$(SRAM_WRAPPER_REGRESSION_BUILD)" \
+		--seed "$(SRAM_WRAPPER_SEED)" --random-cycles "$(SRAM_WRAPPER_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_SRAM_WRAPPER_MAKE)" \
+		$(if $(strip $(_SRAM_WRAPPER_SIM_BIN_DIR)),--sim-bin-dir "$(_SRAM_WRAPPER_SIM_BIN_DIR)")
 
 .PHONY: skid-buffer-regression
 # Check zero-cycle bypass, late-stall capture, release and producer stability.
@@ -826,6 +848,7 @@ help:
 		'make register-slice-regression  Check elastic one-cycle latency and consume/replace' \
 		'make round-robin-arbiter-regression  Check cyclic grants, backpressure, locks and fairness' \
 		'make skid-buffer-regression  Check bypass, late stalls and registered backpressure' \
+		'make sram-wrapper-regression  Check masked 1RW memory, latency, credits and backends' \
 		'make saif            Run PyUVM with VCS and write switching activity' \
 		'make synth           Synthesize RTL with Design Compiler' \
 		'make gate-sim        Run PyUVM on NETLIST_FILE with CELL_MODELS' \
@@ -891,5 +914,7 @@ help:
 		'Register slice: REGISTER_SLICE_REGRESSION_BUILD, REGISTER_SLICE_RANDOM_CYCLES, REGISTER_SLICE_SEED' \
 		'Round-robin arbiter: ROUND_ROBIN_ARBITER_REGRESSION_BUILD,' \
 		'                    ROUND_ROBIN_ARBITER_RANDOM_CYCLES, ROUND_ROBIN_ARBITER_SEED' \
-		'Skid buffer: SKID_BUFFER_REGRESSION_BUILD, SKID_BUFFER_RANDOM_CYCLES, SKID_BUFFER_SEED'
+		'Skid buffer: SKID_BUFFER_REGRESSION_BUILD, SKID_BUFFER_RANDOM_CYCLES, SKID_BUFFER_SEED' \
+		'SRAM wrapper: SRAM_WRAPPER_REGRESSION_BUILD, SRAM_WRAPPER_RANDOM_CYCLES,' \
+		'              SRAM_WRAPPER_SEED; SRAM_BACKEND_SOURCE selects the backend file'
 endif
