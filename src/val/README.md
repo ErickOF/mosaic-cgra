@@ -110,6 +110,12 @@ and new data after NBA updates, checks multi-port independence, and rejects inva
 addresses and same-address write conflicts through live assertions. Optional raw
 storage checking verifies holds without assigning a deterministic power-up value.
 
+The register-slice suite under `basic/register_slice` tracks an independent
+acceptance queue and reset-discard ledger. It checks old-token consumption at the
+real rising edge, one-cycle visibility, continuous replacement throughput and both
+reset styles. Continuous monitors enforce producer stability, registered forward
+paths, and accepted-only payload writes, including finite changes between samples.
+
 The Makefile supplies the selected suite, its package parent and `src/val/lib`
 through `PYTHONPATH`. Imports use qualified suite names, such as
 `write_gate.agent`, to avoid collisions between generic filenames. Standalone

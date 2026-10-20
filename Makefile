@@ -36,6 +36,7 @@ FIFO_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/fifo))
 PACKER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/packer))
 RDU_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/rdu))
 REGISTER_FILE_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/register_file))
+REGISTER_SLICE_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/register_slice))
 PERFORMANCE_COUNTERS_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/performance_counters))
 PARITY_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/parity))
 # Locate the selected RTL top using the same category layout as validation.
@@ -64,6 +65,8 @@ _RDU_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/co
 _RTL_SOURCES_rdu := $(_RDU_SOURCES)
 _REGISTER_FILE_SOURCES := $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/basic/register_file.sv
 _RTL_SOURCES_register_file := $(_REGISTER_FILE_SOURCES)
+_REGISTER_SLICE_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/register_slice.sv
+_RTL_SOURCES_register_slice := $(_REGISTER_SLICE_SOURCES)
 VERILOG_SOURCES ?= $(or $(_RTL_SOURCES_$(COCOTB_TOPLEVEL)),$(firstword $(wildcard $(PROJECT_ROOT)/src/rtl/*/$(COCOTB_TOPLEVEL).sv)),$(PROJECT_ROOT)/src/rtl/common/$(COCOTB_TOPLEVEL).sv)
 SIM_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/$(COCOTB_TOPLEVEL)
 COCOTB_RESULTS_FILE ?= $(SIM_BUILD)/results.xml
@@ -239,6 +242,11 @@ REGISTER_FILE_RANDOM_CYCLES ?= 2000
 REGISTER_FILE_SEED ?= 20261019
 _REGISTER_FILE_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
 _REGISTER_FILE_MAKE := $(MAKE)
+REGISTER_SLICE_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/register_slice/regression
+REGISTER_SLICE_RANDOM_CYCLES ?= 2000
+REGISTER_SLICE_SEED ?= 20261019
+_REGISTER_SLICE_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_REGISTER_SLICE_MAKE := $(MAKE)
 
 # Component imports use suite packages; shared infrastructure lives under lib.
 export PYTHONPATH := $(PYUVM_TEST_DIR):$(patsubst %/,%,$(dir $(PYUVM_TEST_DIR))):$(PROJECT_ROOT)/src/val/lib$(if $(PYTHONPATH),:$(PYTHONPATH))
@@ -490,6 +498,19 @@ data-aligner-regression:
 		--seed "$(DATA_ALIGNER_SEED)" --random-cycles "$(DATA_ALIGNER_RANDOM_CYCLES)" \
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_DATA_ALIGNER_MAKE)" \
 		$(if $(strip $(_DATA_ALIGNER_SIM_BIN_DIR)),--sim-bin-dir "$(_DATA_ALIGNER_SIM_BIN_DIR)")
+
+.PHONY: register-slice-regression
+# Check one-cycle forward latency, consume/replace ordering and backpressure.
+register-slice-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(REGISTER_SLICE_TEST_DIR)/run_register_slice_regression.py" || { \
+		echo 'Register-slice regression missing under src/val/<category>/register_slice.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(REGISTER_SLICE_TEST_DIR)/run_register_slice_regression.py" \
+		--sim "$(SIM)" --build-dir "$(REGISTER_SLICE_REGRESSION_BUILD)" \
+		--seed "$(REGISTER_SLICE_SEED)" --random-cycles "$(REGISTER_SLICE_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_REGISTER_SLICE_MAKE)" \
+		$(if $(strip $(_REGISTER_SLICE_SIM_BIN_DIR)),--sim-bin-dir "$(_REGISTER_SLICE_SIM_BIN_DIR)")
 
 .PHONY: register-file-regression
 # Check unreset multi-port storage and pre-edge/post-edge read semantics.
@@ -760,6 +781,7 @@ help:
 		'make performance-counters-regression  Check weighted counters, snapshots and thresholds' \
 		'make rdu-regression   Check allocated delays, bubbles, stalls and context boundaries' \
 		'make register-file-regression  Check multi-port storage and read-before-write timing' \
+		'make register-slice-regression  Check elastic one-cycle latency and consume/replace' \
 		'make saif            Run PyUVM with VCS and write switching activity' \
 		'make synth           Synthesize RTL with Design Compiler' \
 		'make gate-sim        Run PyUVM on NETLIST_FILE with CELL_MODELS' \
@@ -821,5 +843,6 @@ help:
 		'Performance counters: PERFORMANCE_COUNTERS_REGRESSION_BUILD,' \
 		'                      PERFORMANCE_COUNTERS_RANDOM_CYCLES, PERFORMANCE_COUNTERS_SEED' \
 		'RDU:       RDU_REGRESSION_BUILD, RDU_RANDOM_CYCLES, RDU_SEED' \
-		'Register file: REGISTER_FILE_REGRESSION_BUILD, REGISTER_FILE_RANDOM_CYCLES, REGISTER_FILE_SEED'
+		'Register file: REGISTER_FILE_REGRESSION_BUILD, REGISTER_FILE_RANDOM_CYCLES, REGISTER_FILE_SEED' \
+		'Register slice: REGISTER_SLICE_REGRESSION_BUILD, REGISTER_SLICE_RANDOM_CYCLES, REGISTER_SLICE_SEED'
 endif
