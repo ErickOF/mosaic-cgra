@@ -39,6 +39,7 @@ REGISTER_FILE_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/regis
 REGISTER_SLICE_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/register_slice))
 ROUND_ROBIN_ARBITER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/round_robin_arbiter))
 SKID_BUFFER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/skid_buffer))
+STREAM_JOIN_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/stream_join))
 STREAM_FORK_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/stream_fork))
 SRAM_WRAPPER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/sram_wrapper))
 PERFORMANCE_COUNTERS_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/performance_counters))
@@ -77,6 +78,8 @@ _SKID_BUFFER_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/sr
 _RTL_SOURCES_skid_buffer := $(_SKID_BUFFER_SOURCES)
 _STREAM_FORK_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/stream_fork.sv
 _RTL_SOURCES_stream_fork := $(_STREAM_FORK_SOURCES)
+_STREAM_JOIN_SOURCES := $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/stream_join.sv
+_RTL_SOURCES_stream_join := $(_STREAM_JOIN_SOURCES)
 SRAM_BACKEND_SOURCE ?= $(PROJECT_ROOT)/src/rtl/basic/sram_wrapper_backend.sv
 _SRAM_WRAPPER_SOURCES = $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(SRAM_BACKEND_SOURCE) $(PROJECT_ROOT)/src/rtl/basic/sram_wrapper.sv
 _RTL_SOURCES_sram_wrapper = $(_SRAM_WRAPPER_SOURCES)
@@ -270,6 +273,11 @@ SKID_BUFFER_RANDOM_CYCLES ?= 2000
 SKID_BUFFER_SEED ?= 20261019
 _SKID_BUFFER_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
 _SKID_BUFFER_MAKE := $(MAKE)
+STREAM_JOIN_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/stream_join/regression
+STREAM_JOIN_RANDOM_CYCLES ?= 2000
+STREAM_JOIN_SEED ?= 20261020
+_STREAM_JOIN_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_STREAM_JOIN_MAKE := $(MAKE)
 STREAM_FORK_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/stream_fork/regression
 STREAM_FORK_RANDOM_CYCLES ?= 2000
 STREAM_FORK_SEED ?= 20261020
@@ -544,6 +552,19 @@ sram-wrapper-regression:
 		--seed "$(SRAM_WRAPPER_SEED)" --random-cycles "$(SRAM_WRAPPER_RANDOM_CYCLES)" \
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_SRAM_WRAPPER_MAKE)" \
 		$(if $(strip $(_SRAM_WRAPPER_SIM_BIN_DIR)),--sim-bin-dir "$(_SRAM_WRAPPER_SIM_BIN_DIR)")
+
+.PHONY: stream-join-regression
+# Check atomic input consumption, final arrival, idle masks and backpressure.
+stream-join-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(STREAM_JOIN_TEST_DIR)/run_stream_join_regression.py" || { \
+		echo 'Stream-join regression missing under src/val/<category>/stream_join.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(STREAM_JOIN_TEST_DIR)/run_stream_join_regression.py" \
+		--sim "$(SIM)" --build-dir "$(STREAM_JOIN_REGRESSION_BUILD)" \
+		--seed "$(STREAM_JOIN_SEED)" --random-cycles "$(STREAM_JOIN_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_STREAM_JOIN_MAKE)" \
+		$(if $(strip $(_STREAM_JOIN_SIM_BIN_DIR)),--sim-bin-dir "$(_STREAM_JOIN_SIM_BIN_DIR)")
 
 .PHONY: stream-fork-regression
 # Check multicast delivery, partial completion, replacement and reset.
@@ -869,6 +890,7 @@ help:
 		'make register-slice-regression  Check elastic one-cycle latency and consume/replace' \
 		'make round-robin-arbiter-regression  Check cyclic grants, backpressure, locks and fairness' \
 		'make skid-buffer-regression  Check bypass, late stalls and registered backpressure' \
+		'make stream-join-regression  Check atomic joins, final arrival and optional inputs' \
 		'make stream-fork-regression  Check multicast delivery, masks and partial completion' \
 		'make sram-wrapper-regression  Check masked 1RW memory, latency, credits and backends' \
 		'make saif            Run PyUVM with VCS and write switching activity' \
@@ -937,6 +959,7 @@ help:
 		'Round-robin arbiter: ROUND_ROBIN_ARBITER_REGRESSION_BUILD,' \
 		'                    ROUND_ROBIN_ARBITER_RANDOM_CYCLES, ROUND_ROBIN_ARBITER_SEED' \
 		'Skid buffer: SKID_BUFFER_REGRESSION_BUILD, SKID_BUFFER_RANDOM_CYCLES, SKID_BUFFER_SEED' \
+		'Stream join: STREAM_JOIN_REGRESSION_BUILD, STREAM_JOIN_RANDOM_CYCLES, STREAM_JOIN_SEED' \
 		'Stream fork: STREAM_FORK_REGRESSION_BUILD, STREAM_FORK_RANDOM_CYCLES, STREAM_FORK_SEED' \
 		'SRAM wrapper: SRAM_WRAPPER_REGRESSION_BUILD, SRAM_WRAPPER_RANDOM_CYCLES,' \
 		'              SRAM_WRAPPER_SEED; SRAM_BACKEND_SOURCE selects the backend file'

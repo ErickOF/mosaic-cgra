@@ -146,6 +146,14 @@ stability, stalled-output stability, known relevant controls and capture-only
 payload writes. Coverage includes destination populations, first/final consumers,
 partial completion, mask/order crosses, reset populations and intentional X/Z data.
 
+The stream-join suite under `basic/stream_join` checks atomic input/output
+handshakes at logical harness edges without adding a clock to the combinational
+RTL. Per-input queues record only actual handshakes; each joined output must
+consume its full required operand set on the same edge. Live assertions enforce
+early-producer and required-mask stability, output holds and relevant known
+controls. Coverage includes final arrivals, small control matrices, mask/order
+crosses, optional activity, long waits/stalls and four-state payloads.
+
 The Makefile supplies the selected suite, its package parent and `src/val/lib`
 through `PYTHONPATH`. Imports use qualified suite names, such as
 `write_gate.agent`, to avoid collisions between generic filenames. Standalone

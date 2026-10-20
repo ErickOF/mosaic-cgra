@@ -547,6 +547,22 @@ replacement, with zero data on invalid lanes. The pending bits reuse common
 [stream-fork verification details](src/val/basic/stream_fork/README.md) for mask
 legality, reset timing, per-output reference queues and qualification scope.
 
+Run the stream-join regression:
+
+```sh
+make stream-join-regression
+make stream-join-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=stream_join
+```
+
+The combinational join consumes every required input atomically with one packed
+output transaction. It supports runtime required masks, an all-zero idle mask,
+and ready on the final missing input. Invalid and optional output lanes reuse
+common `operand_isolation`; the join has no clock, reset or storage. Configure
+`STREAM_JOIN_SEED`, `STREAM_JOIN_RANDOM_CYCLES` and `STREAM_JOIN_REGRESSION_BUILD`.
+See the [stream-join verification details](src/val/basic/stream_join/README.md)
+for producer and mask stability, sampling, coverage and qualification scope.
+
 Choose a different HDL top and Python test module:
 
 ```sh
@@ -570,8 +586,8 @@ are comma-separated. It defaults to `test_<COCOTB_TOPLEVEL>`. When
 `src/rtl/<category>/<COCOTB_TOPLEVEL>.sv`. The async FIFO, bypass network, context
 memory, context sequencer, data aligner, ECC, synchronous FIFO, packer, parity,
 performance counters, RDU, register file, register slice, round-robin arbiter,
-skid buffer, SRAM wrapper and stream fork include their ordered RTL dependencies
-automatically.
+skid buffer, SRAM wrapper, stream fork and stream join include their ordered RTL
+dependencies automatically.
 Provide an ordered source list for other designs that instantiate modules or
 import packages. Package sources must precede sources that import them.
 
@@ -595,8 +611,8 @@ level shifter, mux, operand isolation, priority encoder, reset synchronizer,
 retention register, write gate, async FIFO, bypass network, context memory,
 context sequencer, data aligner, ECC, synchronous FIFO, packer, parity, and
 performance-counter, RDU, register-file, register-slice, round-robin-arbiter,
-skid-buffer, SRAM-wrapper and stream-fork targets print their commands without
-changing reports.
+skid-buffer, SRAM-wrapper, stream-fork and stream-join targets print their commands
+without changing reports.
 
 Generate a SAIF activity file from the PyUVM simulation with VCS:
 
