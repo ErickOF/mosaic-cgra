@@ -14,6 +14,7 @@ COCOTB_TEST_MODULES ?= test_$(COCOTB_TOPLEVEL)
 # Override the directory when a top has multiple suites or lives elsewhere.
 PYUVM_TEST_DIR ?= $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/$(COCOTB_TOPLEVEL)))
 ACCUMULATOR_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/accumulator))
+DOT_PRODUCT_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/dot_product))
 AGU_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/agu))
 DMA_ENGINE_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/dma_engine))
 COUNTER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/counter))
@@ -53,6 +54,8 @@ PARITY_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/parity))
 # Include each basic module's common dependencies. Caller lists take precedence.
 _ACCUMULATOR_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/accumulator_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/lane_mask.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/building_blocks/accumulator.sv
 _RTL_SOURCES_accumulator := $(_ACCUMULATOR_SOURCES)
+_DOT_PRODUCT_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/building_blocks/dot_product.sv
+_RTL_SOURCES_dot_product := $(_DOT_PRODUCT_SOURCES)
 _AGU_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/agu_pkg.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/building_blocks/agu.sv
 _RTL_SOURCES_agu := $(_AGU_SOURCES)
 _DMA_ENGINE_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/dma_engine_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/round_robin_arbiter.sv $(PROJECT_ROOT)/src/rtl/building_blocks/dma_engine_bounds.sv $(PROJECT_ROOT)/src/rtl/building_blocks/dma_engine_command_queue.sv $(PROJECT_ROOT)/src/rtl/building_blocks/dma_engine.sv
@@ -152,6 +155,12 @@ ACCUMULATOR_SEED ?= 20261020
 export ACCUMULATOR_HDL_ASSERTIONS ?= 1
 _ACCUMULATOR_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
 _ACCUMULATOR_MAKE := $(MAKE)
+DOT_PRODUCT_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/dot_product/regression
+DOT_PRODUCT_RANDOM_CYCLES ?= 2000
+DOT_PRODUCT_SEED ?= 20261020
+export DOT_PRODUCT_HDL_ASSERTIONS ?= 1
+_DOT_PRODUCT_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_DOT_PRODUCT_MAKE := $(MAKE)
 AGU_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/agu/regression
 AGU_RANDOM_CYCLES ?= 2000
 AGU_SEED ?= 20261020
@@ -346,6 +355,14 @@ override undefine COMPILE_ARGS
 COMPILE_ARGS := $(_USER_COMPILE_ARGS)
 # Native RTL checkers sample after a precision-tick observation delay; some
 # suites also check private state. Exclude them from synthesis and gate sources.
+ifeq ($(COCOTB_TOPLEVEL),dot_product)
+ifneq ($(_GATE_RUN),1)
+ifeq ($(DOT_PRODUCT_HDL_ASSERTIONS),1)
+override VERILOG_SOURCES += $(DOT_PRODUCT_TEST_DIR)/dot_product_assertions.sv
+COMPILE_ARGS += $(if $(filter vcs,$(SIM)),+define+MOSAIC_DOT_PRODUCT_ASSERTIONS,-DMOSAIC_DOT_PRODUCT_ASSERTIONS)
+endif
+endif
+endif
 ifeq ($(COCOTB_TOPLEVEL),dma_engine)
 ifneq ($(_GATE_RUN),1)
 ifeq ($(DMA_ENGINE_HDL_ASSERTIONS),1)
@@ -634,6 +651,19 @@ stream-join-regression:
 		--seed "$(STREAM_JOIN_SEED)" --random-cycles "$(STREAM_JOIN_RANDOM_CYCLES)" \
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_STREAM_JOIN_MAKE)" \
 		$(if $(strip $(_STREAM_JOIN_SIM_BIN_DIR)),--sim-bin-dir "$(_STREAM_JOIN_SIM_BIN_DIR)")
+
+.PHONY: dot-product-regression
+# Check exact masked products, reduction, accumulation and enabled-edge latency.
+dot-product-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(DOT_PRODUCT_TEST_DIR)/run_dot_product_regression.py" || { \
+		echo 'Dot-product regression missing under src/val/<category>/dot_product.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(DOT_PRODUCT_TEST_DIR)/run_dot_product_regression.py" \
+		--sim "$(SIM)" --build-dir "$(DOT_PRODUCT_REGRESSION_BUILD)" \
+		--seed "$(DOT_PRODUCT_SEED)" --random-cycles "$(DOT_PRODUCT_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_DOT_PRODUCT_MAKE)" \
+		$(if $(strip $(_DOT_PRODUCT_SIM_BIN_DIR)),--sim-bin-dir "$(_DOT_PRODUCT_SIM_BIN_DIR)")
 
 .PHONY: dma-engine-regression
 # Check DMA scheduling, exact data movement, ownership, cancellation and flush.
@@ -1028,6 +1058,7 @@ help:
 		'make stream-join-regression  Check atomic joins, final arrival and optional inputs' \
 		'make accumulator-regression  Check typed atomic lanes, arithmetic, status and clock enables' \
 		'make agu-regression  Check signed address sequences, descriptors, errors and backpressure' \
+		'make dot-product-regression  Check exact masked products, arithmetic and pipeline latency' \
 		'make dma-engine-regression  Check multi-channel DMA, protection, data, cancellation and events' \
 		'make width-converter-regression  Check packing, serialization, keep and packet boundaries' \
 		'make stream-fork-regression  Check multicast delivery, masks and partial completion' \
