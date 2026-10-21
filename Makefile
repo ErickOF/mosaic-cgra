@@ -15,6 +15,7 @@ COCOTB_TEST_MODULES ?= test_$(COCOTB_TOPLEVEL)
 PYUVM_TEST_DIR ?= $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/$(COCOTB_TOPLEVEL)))
 ACCUMULATOR_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/accumulator))
 AGU_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/agu))
+DMA_ENGINE_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/dma_engine))
 COUNTER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/counter))
 CLOCK_GATE_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/clock_gate))
 DECODER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/decoder))
@@ -54,6 +55,8 @@ _ACCUMULATOR_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/accumulator_pkg.
 _RTL_SOURCES_accumulator := $(_ACCUMULATOR_SOURCES)
 _AGU_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/agu_pkg.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/building_blocks/agu.sv
 _RTL_SOURCES_agu := $(_AGU_SOURCES)
+_DMA_ENGINE_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/dma_engine_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/round_robin_arbiter.sv $(PROJECT_ROOT)/src/rtl/building_blocks/dma_engine_bounds.sv $(PROJECT_ROOT)/src/rtl/building_blocks/dma_engine_command_queue.sv $(PROJECT_ROOT)/src/rtl/building_blocks/dma_engine.sv
+_RTL_SOURCES_dma_engine := $(_DMA_ENGINE_SOURCES)
 _ASYNC_FIFO_SOURCES := $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/basic/async_fifo.sv
 _BYPASS_NETWORK_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/basic/bypass_network.sv
 _CONTEXT_MEMORY_SOURCES := $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/basic/context_memory.sv
@@ -155,6 +158,12 @@ AGU_SEED ?= 20261020
 export AGU_HDL_ASSERTIONS ?= 1
 _AGU_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
 _AGU_MAKE := $(MAKE)
+DMA_ENGINE_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/dma_engine/regression
+DMA_ENGINE_RANDOM_CYCLES ?= 2000
+DMA_ENGINE_SEED ?= 20261020
+export DMA_ENGINE_HDL_ASSERTIONS ?= 1
+_DMA_ENGINE_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_DMA_ENGINE_MAKE := $(MAKE)
 COUNTER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/counter/regression
 COUNTER_RANDOM_CYCLES ?= 2000
 COUNTER_SEED ?= 20261010
@@ -335,8 +344,16 @@ ifeq ($(_COCOTB_RUN),1)
 _USER_COMPILE_ARGS := $(COMPILE_ARGS)
 override undefine COMPILE_ARGS
 COMPILE_ARGS := $(_USER_COMPILE_ARGS)
-# Assertions use only architectural ports and a precision-tick observation delay.
-# Keep this verification fixture out of synthesis and mapped-netlist compilation.
+# Native RTL checkers sample after a precision-tick observation delay; some
+# suites also check private state. Exclude them from synthesis and gate sources.
+ifeq ($(COCOTB_TOPLEVEL),dma_engine)
+ifneq ($(_GATE_RUN),1)
+ifeq ($(DMA_ENGINE_HDL_ASSERTIONS),1)
+override VERILOG_SOURCES += $(DMA_ENGINE_TEST_DIR)/dma_engine_assertions.sv
+COMPILE_ARGS += $(if $(filter vcs,$(SIM)),+define+MOSAIC_DMA_ENGINE_ASSERTIONS,-DMOSAIC_DMA_ENGINE_ASSERTIONS)
+endif
+endif
+endif
 ifeq ($(COCOTB_TOPLEVEL),agu)
 ifneq ($(_GATE_RUN),1)
 ifeq ($(AGU_HDL_ASSERTIONS),1)
@@ -617,6 +634,19 @@ stream-join-regression:
 		--seed "$(STREAM_JOIN_SEED)" --random-cycles "$(STREAM_JOIN_RANDOM_CYCLES)" \
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_STREAM_JOIN_MAKE)" \
 		$(if $(strip $(_STREAM_JOIN_SIM_BIN_DIR)),--sim-bin-dir "$(_STREAM_JOIN_SIM_BIN_DIR)")
+
+.PHONY: dma-engine-regression
+# Check DMA scheduling, exact data movement, ownership, cancellation and flush.
+dma-engine-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(DMA_ENGINE_TEST_DIR)/run_dma_engine_regression.py" || { \
+		echo 'DMA regression missing under src/val/<category>/dma_engine.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(DMA_ENGINE_TEST_DIR)/run_dma_engine_regression.py" \
+		--sim "$(SIM)" --build-dir "$(DMA_ENGINE_REGRESSION_BUILD)" \
+		--seed "$(DMA_ENGINE_SEED)" --random-cycles "$(DMA_ENGINE_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_DMA_ENGINE_MAKE)" \
+		$(if $(strip $(_DMA_ENGINE_SIM_BIN_DIR)),--sim-bin-dir "$(_DMA_ENGINE_SIM_BIN_DIR)")
 
 .PHONY: agu-regression
 # Check descriptor legality, signed 1D/2D addresses, metadata and backpressure.
@@ -998,6 +1028,7 @@ help:
 		'make stream-join-regression  Check atomic joins, final arrival and optional inputs' \
 		'make accumulator-regression  Check typed atomic lanes, arithmetic, status and clock enables' \
 		'make agu-regression  Check signed address sequences, descriptors, errors and backpressure' \
+		'make dma-engine-regression  Check multi-channel DMA, protection, data, cancellation and events' \
 		'make width-converter-regression  Check packing, serialization, keep and packet boundaries' \
 		'make stream-fork-regression  Check multicast delivery, masks and partial completion' \
 		'make sram-wrapper-regression  Check masked 1RW memory, latency, credits and backends' \

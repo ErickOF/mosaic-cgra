@@ -189,6 +189,14 @@ a port-only HDL checker adds handshake-history assertions. Coverage includes
 exhaustive small descriptors, signed limits, every supported element size,
 misalignment, unknown required/ignored fields, stalls and both reset styles.
 
+The DMA suite under `building_blocks/dma_engine` uses independent load/store peers,
+affine descriptor expansion and accepted/committed byte ledgers. It checks exact
+copy-data correspondence, per-channel command order, protection, event starts,
+atomic completion/event enqueue, backpressure, cancellation, stale epochs and
+coordinated flush. Native HDL assertions and private counter observations supplement
+the real-port scoreboard; coverage and conservation checks prevent silent loss.
+See its README for the cumulative store-commit and load-data-epoch contracts.
+
 The Makefile supplies the selected suite, its package parent and `src/val/lib`
 through `PYTHONPATH`. Imports use qualified suite names, such as
 `write_gate.agent`, to avoid collisions between generic filenames. Standalone
