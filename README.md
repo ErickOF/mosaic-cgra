@@ -17,6 +17,21 @@ working license and its `vcs` executable on `PATH`; alternatively, pass
 increment/decrement, disabled hold, clear/load priority, saturating boundaries,
 and event pulses. A failing test makes the command fail.
 
+Run the regular address-generation unit's specification-based regression:
+
+```sh
+make agu-regression
+make agu-regression SIM=icarus
+```
+
+The AGU reuses common counter, DFF and operand-isolation RTL for linear and
+signed-stride 1D/2D byte addressing. Its structured PyUVM suite checks descriptor
+legality, checked address arithmetic, row-base strides, metadata, completion,
+sticky errors and backpressure in 32 profiles, with exhaustive small descriptors.
+Configure `AGU_SEED`, `AGU_RANDOM_CYCLES` and `AGU_REGRESSION_BUILD`; see the
+[AGU verification details](src/val/building_blocks/agu/README.md) for encodings,
+assertion controls, coverage and evidence limits.
+
 Run the integer accumulator bank's specification-based regression:
 
 ```sh
