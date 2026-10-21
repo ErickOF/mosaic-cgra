@@ -171,6 +171,15 @@ checks and continuous waveform assertions enforce accepted-only writes, clamping
 producer stability and stalls. Coverage spans both orders, every representative slice
 and keep population, terminal trimming, empty packets and reset/flush state crosses.
 
+The accumulator suite under `building_blocks/accumulator` uses arbitrary-precision
+integer range tests and independent per-lane validity/type histories. It checks
+persistent outputs separately from the enabled-cycle response, rejects vector
+updates atomically, and compares real pre-NBA and post-edge observations. Optional
+raw-storage and operand observations check write enables and arithmetic isolation.
+A verification-only HDL checker independently asserts port-based transitions.
+Coverage includes small-width exhaustive transitions, numerical limits, all masks,
+feature rejections, unknown controls, type changes and clock-enable stalls.
+
 The Makefile supplies the selected suite, its package parent and `src/val/lib`
 through `PYTHONPATH`. Imports use qualified suite names, such as
 `write_gate.agent`, to avoid collisions between generic filenames. Standalone
