@@ -180,6 +180,15 @@ A verification-only HDL checker independently asserts port-based transitions.
 Coverage includes small-width exhaustive transitions, numerical limits, all masks,
 feature rejections, unknown controls, type changes and clock-enable stalls.
 
+The AGU suite under `building_blocks/agu` uses unbounded integer descriptor
+equations to check linear and signed-stride 1D/2D addresses independently of the
+RTL recurrence. Real edge-time observations track exactly-once acceptance,
+row boundaries, metadata, completion, classified errors and recovery. Optional
+storage and waveform checks enforce accepted-only advancement and adder isolation;
+a port-only HDL checker adds handshake-history assertions. Coverage includes
+exhaustive small descriptors, signed limits, every supported element size,
+misalignment, unknown required/ignored fields, stalls and both reset styles.
+
 The Makefile supplies the selected suite, its package parent and `src/val/lib`
 through `PYTHONPATH`. Imports use qualified suite names, such as
 `write_gate.agent`, to avoid collisions between generic filenames. Standalone

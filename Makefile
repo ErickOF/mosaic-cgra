@@ -14,6 +14,7 @@ COCOTB_TEST_MODULES ?= test_$(COCOTB_TOPLEVEL)
 # Override the directory when a top has multiple suites or lives elsewhere.
 PYUVM_TEST_DIR ?= $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/$(COCOTB_TOPLEVEL)))
 ACCUMULATOR_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/accumulator))
+AGU_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/agu))
 COUNTER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/counter))
 CLOCK_GATE_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/clock_gate))
 DECODER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/decoder))
@@ -51,6 +52,8 @@ PARITY_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/parity))
 # Include each basic module's common dependencies. Caller lists take precedence.
 _ACCUMULATOR_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/accumulator_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/lane_mask.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/building_blocks/accumulator.sv
 _RTL_SOURCES_accumulator := $(_ACCUMULATOR_SOURCES)
+_AGU_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/agu_pkg.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/building_blocks/agu.sv
+_RTL_SOURCES_agu := $(_AGU_SOURCES)
 _ASYNC_FIFO_SOURCES := $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/basic/async_fifo.sv
 _BYPASS_NETWORK_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/basic/bypass_network.sv
 _CONTEXT_MEMORY_SOURCES := $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/basic/context_memory.sv
@@ -146,6 +149,12 @@ ACCUMULATOR_SEED ?= 20261020
 export ACCUMULATOR_HDL_ASSERTIONS ?= 1
 _ACCUMULATOR_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
 _ACCUMULATOR_MAKE := $(MAKE)
+AGU_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/agu/regression
+AGU_RANDOM_CYCLES ?= 2000
+AGU_SEED ?= 20261020
+export AGU_HDL_ASSERTIONS ?= 1
+_AGU_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_AGU_MAKE := $(MAKE)
 COUNTER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/counter/regression
 COUNTER_RANDOM_CYCLES ?= 2000
 COUNTER_SEED ?= 20261010
@@ -328,6 +337,14 @@ override undefine COMPILE_ARGS
 COMPILE_ARGS := $(_USER_COMPILE_ARGS)
 # Assertions use only architectural ports and a precision-tick observation delay.
 # Keep this verification fixture out of synthesis and mapped-netlist compilation.
+ifeq ($(COCOTB_TOPLEVEL),agu)
+ifneq ($(_GATE_RUN),1)
+ifeq ($(AGU_HDL_ASSERTIONS),1)
+override VERILOG_SOURCES += $(AGU_TEST_DIR)/agu_assertions.sv
+COMPILE_ARGS += $(if $(filter vcs,$(SIM)),+define+MOSAIC_AGU_ASSERTIONS,-DMOSAIC_AGU_ASSERTIONS)
+endif
+endif
+endif
 ifeq ($(COCOTB_TOPLEVEL),accumulator)
 ifneq ($(_GATE_RUN),1)
 ifeq ($(ACCUMULATOR_HDL_ASSERTIONS),1)
@@ -600,6 +617,19 @@ stream-join-regression:
 		--seed "$(STREAM_JOIN_SEED)" --random-cycles "$(STREAM_JOIN_RANDOM_CYCLES)" \
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_STREAM_JOIN_MAKE)" \
 		$(if $(strip $(_STREAM_JOIN_SIM_BIN_DIR)),--sim-bin-dir "$(_STREAM_JOIN_SIM_BIN_DIR)")
+
+.PHONY: agu-regression
+# Check descriptor legality, signed 1D/2D addresses, metadata and backpressure.
+agu-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(AGU_TEST_DIR)/run_agu_regression.py" || { \
+		echo 'AGU regression missing under src/val/<category>/agu.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(AGU_TEST_DIR)/run_agu_regression.py" \
+		--sim "$(SIM)" --build-dir "$(AGU_REGRESSION_BUILD)" \
+		--seed "$(AGU_SEED)" --random-cycles "$(AGU_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_AGU_MAKE)" \
+		$(if $(strip $(_AGU_SIM_BIN_DIR)),--sim-bin-dir "$(_AGU_SIM_BIN_DIR)")
 
 .PHONY: accumulator-regression
 # Check typed atomic lane updates, numerical status and enabled-cycle recurrence.
@@ -967,6 +997,7 @@ help:
 		'make skid-buffer-regression  Check bypass, late stalls and registered backpressure' \
 		'make stream-join-regression  Check atomic joins, final arrival and optional inputs' \
 		'make accumulator-regression  Check typed atomic lanes, arithmetic, status and clock enables' \
+		'make agu-regression  Check signed address sequences, descriptors, errors and backpressure' \
 		'make width-converter-regression  Check packing, serialization, keep and packet boundaries' \
 		'make stream-fork-regression  Check multicast delivery, masks and partial completion' \
 		'make sram-wrapper-regression  Check masked 1RW memory, latency, credits and backends' \
