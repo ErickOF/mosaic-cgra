@@ -17,6 +17,22 @@ working license and its `vcs` executable on `PATH`; alternatively, pass
 increment/decrement, disabled hold, clear/load priority, saturating boundaries,
 and event pulses. A failing test makes the command fail.
 
+Run the integer accumulator bank's specification-based regression:
+
+```sh
+make accumulator-regression
+make accumulator-regression SIM=icarus
+```
+
+The first `building_blocks` module reuses common DFF, lane-mask and operand-isolation
+RTL for persistent typed lanes, atomic masked CLEAR/LOAD/ADD/SUB, modular or
+saturating arithmetic, response status and clock-enable holds. Its structured
+PyUVM suite and optional HDL transition checker validate 120 width/lane/feature/reset
+profiles, including exhaustive scalar transitions at widths 1–4. Configure
+`ACCUMULATOR_SEED`, `ACCUMULATOR_RANDOM_CYCLES` and `ACCUMULATOR_REGRESSION_BUILD`;
+see the [accumulator verification details](src/val/building_blocks/accumulator/README.md)
+for parameters, assertion controls, evidence and integration limits.
+
 Run the streaming width converter's specification-based regression:
 
 ```sh

@@ -10,9 +10,10 @@ SIM ?= vcs
 TOPLEVEL_LANG ?= verilog
 COCOTB_TOPLEVEL ?= counter
 COCOTB_TEST_MODULES ?= test_$(COCOTB_TOPLEVEL)
-# Discover validation modules by top name across common/basic categories.
+# Discover validation modules by top name across RTL/validation categories.
 # Override the directory when a top has multiple suites or lives elsewhere.
 PYUVM_TEST_DIR ?= $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/$(COCOTB_TOPLEVEL)))
+ACCUMULATOR_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/accumulator))
 COUNTER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/counter))
 CLOCK_GATE_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/clock_gate))
 DECODER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/decoder))
@@ -48,6 +49,8 @@ PERFORMANCE_COUNTERS_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/
 PARITY_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/parity))
 # Locate the selected RTL top using the same category layout as validation.
 # Include each basic module's common dependencies. Caller lists take precedence.
+_ACCUMULATOR_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/accumulator_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/lane_mask.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/building_blocks/accumulator.sv
+_RTL_SOURCES_accumulator := $(_ACCUMULATOR_SOURCES)
 _ASYNC_FIFO_SOURCES := $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/basic/async_fifo.sv
 _BYPASS_NETWORK_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/basic/bypass_network.sv
 _CONTEXT_MEMORY_SOURCES := $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/basic/context_memory.sv
@@ -137,6 +140,12 @@ POWER_ACTIVITY_REPORT := $(abspath $(POWER_BUILD))/reports/activity.rpt
 POWER_SUMMARY := $(abspath $(POWER_BUILD))/summary.json
 export TEST_CLOCK_PERIOD_NS ?= $(SYNTH_CLOCK_PERIOD)
 export TEST_SETTLE_NS ?= 0
+ACCUMULATOR_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/accumulator/regression
+ACCUMULATOR_RANDOM_CYCLES ?= 2000
+ACCUMULATOR_SEED ?= 20261020
+export ACCUMULATOR_HDL_ASSERTIONS ?= 1
+_ACCUMULATOR_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_ACCUMULATOR_MAKE := $(MAKE)
 COUNTER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/counter/regression
 COUNTER_RANDOM_CYCLES ?= 2000
 COUNTER_SEED ?= 20261010
@@ -317,6 +326,16 @@ ifeq ($(_COCOTB_RUN),1)
 _USER_COMPILE_ARGS := $(COMPILE_ARGS)
 override undefine COMPILE_ARGS
 COMPILE_ARGS := $(_USER_COMPILE_ARGS)
+# Assertions use only architectural ports and a precision-tick observation delay.
+# Keep this verification fixture out of synthesis and mapped-netlist compilation.
+ifeq ($(COCOTB_TOPLEVEL),accumulator)
+ifneq ($(_GATE_RUN),1)
+ifeq ($(ACCUMULATOR_HDL_ASSERTIONS),1)
+override VERILOG_SOURCES += $(ACCUMULATOR_TEST_DIR)/accumulator_assertions.sv
+COMPILE_ARGS += $(if $(filter vcs,$(SIM)),+define+MOSAIC_ACCUMULATOR_ASSERTIONS,-DMOSAIC_ACCUMULATOR_ASSERTIONS)
+endif
+endif
+endif
 ifeq ($(_GATE_RUN),1)
 ifneq ($(strip $(SDF_FILE)),)
 # VCS unified SDF annotation is a compilation option, not a simv option.
@@ -581,6 +600,19 @@ stream-join-regression:
 		--seed "$(STREAM_JOIN_SEED)" --random-cycles "$(STREAM_JOIN_RANDOM_CYCLES)" \
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_STREAM_JOIN_MAKE)" \
 		$(if $(strip $(_STREAM_JOIN_SIM_BIN_DIR)),--sim-bin-dir "$(_STREAM_JOIN_SIM_BIN_DIR)")
+
+.PHONY: accumulator-regression
+# Check typed atomic lane updates, numerical status and enabled-cycle recurrence.
+accumulator-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(ACCUMULATOR_TEST_DIR)/run_accumulator_regression.py" || { \
+		echo 'Accumulator regression missing under src/val/<category>/accumulator.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(ACCUMULATOR_TEST_DIR)/run_accumulator_regression.py" \
+		--sim "$(SIM)" --build-dir "$(ACCUMULATOR_REGRESSION_BUILD)" \
+		--seed "$(ACCUMULATOR_SEED)" --random-cycles "$(ACCUMULATOR_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_ACCUMULATOR_MAKE)" \
+		$(if $(strip $(_ACCUMULATOR_SIM_BIN_DIR)),--sim-bin-dir "$(_ACCUMULATOR_SIM_BIN_DIR)")
 
 .PHONY: width-converter-regression
 # Check positional packing/serialization, keep, packet boundaries and cancellation.
@@ -934,6 +966,7 @@ help:
 		'make round-robin-arbiter-regression  Check cyclic grants, backpressure, locks and fairness' \
 		'make skid-buffer-regression  Check bypass, late stalls and registered backpressure' \
 		'make stream-join-regression  Check atomic joins, final arrival and optional inputs' \
+		'make accumulator-regression  Check typed atomic lanes, arithmetic, status and clock enables' \
 		'make width-converter-regression  Check packing, serialization, keep and packet boundaries' \
 		'make stream-fork-regression  Check multicast delivery, masks and partial completion' \
 		'make sram-wrapper-regression  Check masked 1RW memory, latency, credits and backends' \
@@ -1006,6 +1039,8 @@ help:
 		'                    ROUND_ROBIN_ARBITER_RANDOM_CYCLES, ROUND_ROBIN_ARBITER_SEED' \
 		'Skid buffer: SKID_BUFFER_REGRESSION_BUILD, SKID_BUFFER_RANDOM_CYCLES, SKID_BUFFER_SEED' \
 		'Stream join: STREAM_JOIN_REGRESSION_BUILD, STREAM_JOIN_RANDOM_CYCLES, STREAM_JOIN_SEED' \
+		'Accumulator: ACCUMULATOR_REGRESSION_BUILD, ACCUMULATOR_RANDOM_CYCLES,' \
+		'             ACCUMULATOR_SEED, ACCUMULATOR_HDL_ASSERTIONS' \
 		'Width converter: WIDTH_CONVERTER_REGRESSION_BUILD, WIDTH_CONVERTER_RANDOM_CYCLES,' \
 		'                 WIDTH_CONVERTER_SEED' \
 		'Stream fork: STREAM_FORK_REGRESSION_BUILD, STREAM_FORK_RANDOM_CYCLES, STREAM_FORK_SEED' \
