@@ -189,6 +189,14 @@ a port-only HDL checker adds handshake-history assertions. Coverage includes
 exhaustive small descriptors, signed limits, every supported element size,
 misalignment, unknown required/ignored fields, stalls and both reset styles.
 
+The dot-product suite under `building_blocks/dot_product` uses an independent
+integer-product and range oracle, enabled-edge response history, every term mask,
+small exhaustive vectors and deterministic workload shapes. It checks exact
+reduction, final accumulation/saturation, status alignment, clock stalls, reset
+removal, four-state controls, operand isolation and arithmetic-data write enables.
+A separate wide-sum HDL checker supplements the actual-edge PyUVM scoreboard.
+See its README for the 102-profile matrix and qualification limits.
+
 The DMA suite under `building_blocks/dma_engine` uses independent load/store peers,
 affine descriptor expansion and accepted/committed byte ledgers. It checks exact
 copy-data correspondence, per-channel command order, protection, event starts,

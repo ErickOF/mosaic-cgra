@@ -17,6 +17,20 @@ working license and its `vcs` executable on `PATH`; alternatively, pass
 increment/decrement, disabled hold, clear/load priority, saturating boundaries,
 and event pulses. A failing test makes the command fail.
 
+Run the integer dot-product specification regression:
+
+```sh
+make dot-product-regression
+make dot-product-regression SIM=icarus
+```
+
+The unit computes exact masked signed/unsigned products through a balanced tree,
+with optional external accumulation, final saturation and enabled-cycle latency.
+It reuses `dff` and `operand_isolation`. The structured PyUVM suite covers 102
+geometry/feature/latency/reset profiles; see the
+[dot-product verification details](src/val/building_blocks/dot_product/README.md)
+for pipeline structure, parameter settings, coverage and evidence limits.
+
 Run the DMA engine's specification-based regression:
 
 ```sh
