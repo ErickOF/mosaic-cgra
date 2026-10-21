@@ -17,6 +17,22 @@ working license and its `vcs` executable on `PATH`; alternatively, pass
 increment/decrement, disabled hold, clear/load priority, saturating boundaries,
 and event pulses. A failing test makes the command fail.
 
+Run the DMA engine's specification-based regression:
+
+```sh
+make dma-engine-regression
+make dma-engine-regression SIM=icarus
+```
+
+The DMA reuses existing queues, arbiters, counters, DFFs, parity and operand
+isolation for multi-channel transfers, protection, event starts, cancellation and
+coordinated flush. Its structured PyUVM suite checks exact data/progress and
+completion accounting across 25 profiles. Store backends supply cumulative
+committed bytes for accurate cancellation results. Configure `DMA_ENGINE_SEED`,
+`DMA_ENGINE_RANDOM_CYCLES` and `DMA_ENGINE_REGRESSION_BUILD`; see the
+[DMA verification details](src/val/building_blocks/dma_engine/README.md) for
+backend interface extensions, coverage, and qualification limits.
+
 Run the regular address-generation unit's specification-based regression:
 
 ```sh
