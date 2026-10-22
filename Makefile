@@ -14,6 +14,7 @@ COCOTB_TEST_MODULES ?= test_$(COCOTB_TOPLEVEL)
 # Override the directory when a top has multiple suites or lives elsewhere.
 PYUVM_TEST_DIR ?= $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/$(COCOTB_TOPLEVEL)))
 ACCUMULATOR_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/accumulator))
+LOOP_CONTROLLER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/loop_controller))
 LOCAL_SWITCH_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/local_switch))
 LOAD_ENGINE_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/load_engine))
 EXP_UNIT_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/exp_unit))
@@ -58,6 +59,8 @@ PARITY_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/parity))
 # Include each basic module's common dependencies. Caller lists take precedence.
 _ACCUMULATOR_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/accumulator_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/lane_mask.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/building_blocks/accumulator.sv
 _RTL_SOURCES_accumulator := $(_ACCUMULATOR_SOURCES)
+_LOOP_CONTROLLER_SOURCES := $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/building_blocks/loop_controller_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/loop_controller.sv
+_RTL_SOURCES_loop_controller := $(_LOOP_CONTROLLER_SOURCES)
 _LOCAL_SWITCH_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/local_switch_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/mux.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/register_slice.sv $(PROJECT_ROOT)/src/rtl/building_blocks/local_switch.sv
 _RTL_SOURCES_local_switch := $(_LOCAL_SWITCH_SOURCES)
 _LOAD_ENGINE_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/agu_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/dma_engine_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/load_engine_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/building_blocks/dma_engine_bounds.sv $(PROJECT_ROOT)/src/rtl/building_blocks/agu.sv $(PROJECT_ROOT)/src/rtl/building_blocks/load_engine_counters.sv $(PROJECT_ROOT)/src/rtl/building_blocks/load_engine.sv
@@ -167,6 +170,11 @@ ACCUMULATOR_SEED ?= 20261020
 export ACCUMULATOR_HDL_ASSERTIONS ?= 1
 _ACCUMULATOR_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
 _ACCUMULATOR_MAKE := $(MAKE)
+LOOP_CONTROLLER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/loop_controller/regression
+LOOP_CONTROLLER_SEED ?= 20261022
+LOOP_CONTROLLER_RANDOM_CYCLES ?= 2000
+_LOOP_CONTROLLER_MAKE := $(MAKE)
+_LOOP_CONTROLLER_SIM_BIN_DIR := $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
 LOCAL_SWITCH_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/local_switch/regression
 LOCAL_SWITCH_RANDOM_CYCLES ?= 2000
 LOCAL_SWITCH_SEED ?= 20261021
@@ -391,6 +399,14 @@ override undefine COMPILE_ARGS
 COMPILE_ARGS := $(_USER_COMPILE_ARGS)
 # Native RTL checkers sample after a precision-tick observation delay; some
 # suites also check private state. Exclude them from synthesis and gate sources.
+ifeq ($(COCOTB_TOPLEVEL),loop_controller)
+ifneq ($(_GATE_RUN),1)
+ifeq ($(LOOP_CONTROLLER_HDL_ASSERTIONS),1)
+override VERILOG_SOURCES += $(LOOP_CONTROLLER_TEST_DIR)/loop_controller_assertions.sv
+COMPILE_ARGS += $(if $(filter vcs,$(SIM)),+define+MOSAIC_LOOP_CONTROLLER_ASSERTIONS,-DMOSAIC_LOOP_CONTROLLER_ASSERTIONS)
+endif
+endif
+endif
 ifeq ($(COCOTB_TOPLEVEL),local_switch)
 ifneq ($(_GATE_RUN),1)
 ifeq ($(LOCAL_SWITCH_HDL_ASSERTIONS),1)
@@ -719,6 +735,14 @@ stream-join-regression:
 		--seed "$(STREAM_JOIN_SEED)" --random-cycles "$(STREAM_JOIN_RANDOM_CYCLES)" \
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_STREAM_JOIN_MAKE)" \
 		$(if $(strip $(_STREAM_JOIN_SIM_BIN_DIR)),--sim-bin-dir "$(_STREAM_JOIN_SIM_BIN_DIR)")
+
+.PHONY: loop-controller-regression
+loop-controller-regression:
+	@"$(PYTHON_BIN)" "$(LOOP_CONTROLLER_TEST_DIR)/run_loop_controller_regression.py" \
+		--sim "$(SIM)" --build-dir "$(LOOP_CONTROLLER_REGRESSION_BUILD)" \
+		--seed "$(LOOP_CONTROLLER_SEED)" --random-cycles "$(LOOP_CONTROLLER_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_LOOP_CONTROLLER_MAKE)" \
+		$(if $(strip $(_LOOP_CONTROLLER_SIM_BIN_DIR)),--sim-bin-dir "$(_LOOP_CONTROLLER_SIM_BIN_DIR)")
 
 .PHONY: local-switch-regression
 local-switch-regression:
@@ -1164,6 +1188,7 @@ help:
 		'make stream-join-regression  Check atomic joins, final arrival and optional inputs' \
 		'make accumulator-regression  Check typed atomic lanes, arithmetic, status and clock enables' \
 		'make agu-regression  Check signed address sequences, descriptors, errors and backpressure' \
+		'make loop-controller-regression  Check nested loops, pacing and runtime safe points' \
 		'make local-switch-regression  Check static routes, sparse edges and multicast copies' \
 		'make load-engine-regression  Check tagged reads, ordered retirement and fatal drain' \
 		'make exp-unit-regression  Check fixed-point exponentials and elastic responses' \
