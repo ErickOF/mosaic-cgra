@@ -170,3 +170,12 @@ Native VCS and licensed lint/CDC/RDC, DFT, VC LP, technology mapping, physical
 timing/power, canonical requester ownership and cancellation-policy checks require
 the corresponding tools, libraries and integration artifacts. Simulation reports
 record them as `NOT_RUN`, separately from supplemental local qualification.
+
+### Dynamic internal scheduling
+
+`HOLD_PENDING=1` is the default and preserves a stalled stream grant until
+acceptance. `HOLD_PENDING=0` suppresses pending-grant capture, allowing an internal
+candidate to disappear before acceptance. The round-robin pointer still advances
+only on acceptance. This mode is used with `HAS_LOCK=0` by `event_barrier` for
+atomic event, wait, and cancellation scheduling. Its contention and candidate
+withdrawal are exercised by the event/barrier PyUVM regression.

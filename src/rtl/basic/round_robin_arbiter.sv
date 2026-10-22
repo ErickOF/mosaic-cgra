@@ -7,11 +7,15 @@ module round_robin_arbiter #(
     parameter INITIAL_PRIORITY = 0,
     parameter HAS_LOCK = 1,
     parameter ASYNC_RESET = 0,
+    // Dynamic internal schedulers can withdraw a candidate before acceptance.
+    // Stream arbitration retains its original registered pending-grant policy.
+    parameter HOLD_PENDING = 1,
     localparam bit PARAMETERS_VALID =
         ((NUM_REQUESTERS >= 1) === 1'b1) && (^NUM_REQUESTERS !== 1'bx) &&
         ((INITIAL_PRIORITY >= 0 && INITIAL_PRIORITY < NUM_REQUESTERS) === 1'b1) &&
         (^INITIAL_PRIORITY !== 1'bx) &&
         ((HAS_LOCK === 0) || (HAS_LOCK === 1)) &&
+        ((HOLD_PENDING === 0) || (HOLD_PENDING === 1)) &&
         ((ASYNC_RESET === 0) || (ASYNC_RESET === 1)),
     localparam int unsigned REQUESTERS = PARAMETERS_VALID ? NUM_REQUESTERS : 1,
     localparam int unsigned INDEX_WIDTH = REQUESTERS > 1 ? $clog2(REQUESTERS) : 1
@@ -54,7 +58,7 @@ module round_robin_arbiter #(
         logic pending_next, error_next;
         logic [INDEX_WIDTH-1:0] pointer_next;
         wire clear_state = i_flush;
-        wire capture = o_grant_valid && !i_accept && !pending_valid;
+        wire capture = HOLD_PENDING == 1 && o_grant_valid &&!i_accept &&!pending_valid;
         wire accepted = o_grant_accepted;
 
         // Suppress the rotating cone once ownership or an error fixes selection.

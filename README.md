@@ -17,6 +17,21 @@ working license and its `vcs` executable on `PATH`; alternatively, pass
 increment/decrement, disabled hold, clear/load priority, saturating boundaries,
 and event pulses. A failing test makes the command fail.
 
+Run the event/barrier specification regression:
+
+```sh
+make event-barrier-regression
+make event-barrier-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=event_barrier
+```
+
+The event/barrier unit reuses common counters, decoding, arbitration, FIFOs, DFFs
+and parity for atomic event occurrences, one-shot waits and reusable barriers.
+Configure `EVENT_BARRIER_SEED`, `EVENT_BARRIER_RANDOM_CYCLES` and
+`EVENT_BARRIER_REGRESSION_BUILD`; see the
+[event/barrier verification details](src/val/building_blocks/event_barrier/README.md)
+for scheduling, local encodings, protection, coverage and qualification limits.
+
 Run the integer dot-product specification regression:
 
 ```sh

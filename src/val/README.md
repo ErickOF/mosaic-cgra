@@ -226,3 +226,11 @@ the shared library, the Makefile and any local HDL fixture. Moving checks betwee
 files does not remove them from the evidence. Profile seeds, coverage goals,
 expected failure diagnostics and external `NOT_RUN` checks retain their existing
 suite-specific definitions.
+
+The event/barrier suite under `building_blocks/event_barrier` checks an atomic
+integer event ledger, ANY/ALL waits and cancellation, round-robin mutation
+scheduling, participant masks, generation wrap and ordered completion/release
+records. It exercises saturation, both queues under backpressure, context policy,
+flush/reset, X/Z fields and protected-state fault injection. Its 44-profile
+`event-barrier-regression` includes minimum/odd dimensions, all feature combinations
+and both reset styles; the suite README states the remaining release checks.

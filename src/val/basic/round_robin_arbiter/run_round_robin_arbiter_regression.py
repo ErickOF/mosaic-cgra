@@ -38,7 +38,7 @@ CASES = tuple((name, parameters, False) for name, parameters in PROFILES) + tupl
 INVALID = (
     *((f'num_requesters_{label}', dict(NUM_REQUESTERS=value)) for label, value in (('zero', 0), ('negative', -1), ('x', "32'bx"), ('z', "32'bz"))),
     *((f'initial_{label}', dict(INITIAL_PRIORITY=value)) for label, value in (('negative', -1), ('range', 4), ('x', "32'bx"), ('z', "32'bz"))),
-    *((f'{name.lower()}_{label}', {name: value}) for name in ('HAS_LOCK', 'ASYNC_RESET')
+    *((f'{name.lower()}_{label}', {name: value}) for name in ('HAS_LOCK', 'HOLD_PENDING', 'ASYNC_RESET')
       for label, value in (('two', 2), ('negative', -1), ('x', "32'bx"), ('z', "32'bz"))),
 )
 PROBE_PARAMETERS = geometry(3)[1]
