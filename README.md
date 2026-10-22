@@ -17,6 +17,20 @@ working license and its `vcs` executable on `PATH`; alternatively, pass
 increment/decrement, disabled hold, clear/load priority, saturating boundaries,
 and event pulses. A failing test makes the command fail.
 
+Run the nested-loop-controller specification regression:
+
+```sh
+make loop-controller-regression
+make loop-controller-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=loop_controller
+```
+
+The loop controller generates counted/bounded Cartesian iteration tokens with
+signed induction, pacing, runtime safe points and held completion records. It
+reuses common DFF/parity storage. See the
+[loop-controller verification details](src/val/building_blocks/loop_controller/README.md)
+for the 53-profile PyUVM campaign, local encodings and integration assumptions.
+
 Run the static local-switch specification regression:
 
 ```sh
