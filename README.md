@@ -17,6 +17,20 @@ working license and its `vcs` executable on `PATH`; alternatively, pass
 increment/decrement, disabled hold, clear/load priority, saturating boundaries,
 and event pulses. A failing test makes the command fail.
 
+Run the static local-switch specification regression:
+
+```sh
+make local-switch-regression
+make local-switch-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=local_switch
+```
+
+The local switch composes register slices and sparse physical muxes with atomic
+context routing and independent multicast-copy acknowledgements. Its 120-profile
+PyUVM regression checks every physical edge, fanout, backpressure, replacement,
+flush/reset and error handling. See the [local-switch verification details](src/val/building_blocks/local_switch/README.md)
+for connectivity encoding, ownership and integration assumptions.
+
 Run the ordered load-engine specification regression:
 
 ```sh

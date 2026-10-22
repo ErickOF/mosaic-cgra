@@ -235,6 +235,14 @@ flush/reset, X/Z fields and protected-state fault injection. Its 44-profile
 `event-barrier-regression` includes minimum/odd dimensions, all feature combinations
 and both reset styles; the suite README states the remaining release checks.
 
+The static local-switch suite under `building_blocks/local_switch` uses independent
+per-output copy queues with captured route masks and item/copy accounting.
+`make local-switch-regression` covers 120 geometry/connectivity/multicast/reset
+profiles and 36 parameter guards. It checks sparse edges, atomic contexts, partial
+multicast progress, maximum rate, replacement, all partial flush masks, resets,
+unknown controls and qualified payload storage. Its README defines integration
+contracts and the remaining release checks.
+
 The ordered load-engine suite under `building_blocks/load_engine` combines an
 independent affine descriptor model, ordered transaction ledger and separate memory
 peer. `make load-engine-regression` covers 80 address/data/capacity/reset profiles
