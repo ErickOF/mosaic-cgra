@@ -17,6 +17,24 @@ working license and its `vcs` executable on `PATH`; alternatively, pass
 increment/decrement, disabled hold, clear/load priority, saturating boundaries,
 and event pulses. A failing test makes the command fail.
 
+Run the scalar integer MAC specification regression:
+
+```sh
+make mac-regression
+make mac-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=mac
+```
+
+`src/rtl/building_blocks/mac.sv` implements the scalar integer multiply-add
+specification by reusing `dot_product` with one term and permanent accumulation.
+It preserves the exact full-width product, supports signed/unsigned modular or
+saturating results, and provides zero-cycle or globally stalled registered timing.
+Run `make pyuvm SIM=icarus COCOTB_TOPLEVEL=mac` for the default profile or
+`make mac-regression SIM=icarus` for the 80-profile PyUVM matrix with parameter
+and X/Z assertion guards. VCS uses the same targets with `SIM=vcs`.
+See [the MAC validation guide](src/val/building_blocks/mac/README.md) for parameter
+settings, architecture, reuse, coverage, and evidence limits.
+
 Run the programmable LUT-unit specification regression:
 
 ```sh
