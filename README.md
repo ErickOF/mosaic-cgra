@@ -17,6 +17,22 @@ working license and its `vcs` executable on `PATH`; alternatively, pass
 increment/decrement, disabled hold, clear/load priority, saturating boundaries,
 and event pulses. A failing test makes the command fail.
 
+Run the fixed-point exponential specification regression:
+
+```sh
+make exp-unit-images
+make exp-unit-regression
+make exp-unit-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=exp_unit
+```
+
+The exponential unit implements base-e/base-2 range reduction, generated endpoint
+ROMs, optional interpolation, nearest-even/truncating rounding and saturation in
+an elastic pipeline. It reuses common storage, counters, isolation, parity and ECC.
+Configure `EXP_UNIT_SEED`, `EXP_UNIT_RANDOM_CYCLES` and `EXP_UNIT_REGRESSION_BUILD`;
+see the [exp-unit verification details](src/val/building_blocks/exp_unit/README.md)
+for generated assets, timing, protection and scalar accuracy limits.
+
 Run the event/barrier specification regression:
 
 ```sh
