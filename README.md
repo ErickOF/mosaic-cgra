@@ -17,6 +17,20 @@ working license and its `vcs` executable on `PATH`; alternatively, pass
 increment/decrement, disabled hold, clear/load priority, saturating boundaries,
 and event pulses. A failing test makes the command fail.
 
+Run the programmable LUT-unit specification regression:
+
+```sh
+make lut-unit-regression
+make lut-unit-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=lut_unit
+```
+
+The LUT unit provides immutable programmable banks, signed/unsigned interpolation,
+rounding, protection, fixed processing latency and independent response queues.
+It reuses common DFFs, FIFOs, parity, ECC and protected storage/queue helpers.
+See the [LUT-unit verification details](src/val/building_blocks/lut_unit/README.md)
+for the 51-profile PyUVM campaign, synthetic image generator and lifecycle rules.
+
 Run the nested-loop-controller specification regression:
 
 ```sh
