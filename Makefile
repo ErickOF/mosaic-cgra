@@ -14,6 +14,7 @@ COCOTB_TEST_MODULES ?= test_$(COCOTB_TOPLEVEL)
 # Override the directory when a top has multiple suites or lives elsewhere.
 PYUVM_TEST_DIR ?= $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/$(COCOTB_TOPLEVEL)))
 ACCUMULATOR_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/accumulator))
+MULTIPLIER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/multiplier))
 MAC_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/mac))
 LUT_UNIT_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/lut_unit))
 LOOP_CONTROLLER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/loop_controller))
@@ -75,6 +76,7 @@ _EVENT_BARRIER_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_
 _RTL_SOURCES_event_barrier := $(_EVENT_BARRIER_SOURCES)
 _DOT_PRODUCT_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/building_blocks/dot_product.sv
 _RTL_SOURCES_dot_product := $(_DOT_PRODUCT_SOURCES)
+_RTL_SOURCES_multiplier := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/building_blocks/multiplier.sv
 _RTL_SOURCES_mac := $(_DOT_PRODUCT_SOURCES) $(PROJECT_ROOT)/src/rtl/building_blocks/mac.sv
 _AGU_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/agu_pkg.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/building_blocks/agu.sv
 _RTL_SOURCES_agu := $(_AGU_SOURCES)
@@ -175,6 +177,13 @@ ACCUMULATOR_SEED ?= 20261020
 export ACCUMULATOR_HDL_ASSERTIONS ?= 1
 _ACCUMULATOR_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
 _ACCUMULATOR_MAKE := $(MAKE)
+MULTIPLIER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/multiplier/regression
+MULTIPLIER_SEED ?= 20261022
+MULTIPLIER_RANDOM_CYCLES ?= 2000
+export MULTIPLIER_HDL_ASSERTIONS ?= 1
+_MULTIPLIER_MAKE := $(MAKE)
+_MULTIPLIER_SIM_BIN_DIR := $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+
 MAC_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/mac/regression
 MAC_SEED ?= 20261022
 MAC_RANDOM_CYCLES ?= 2000
@@ -416,6 +425,14 @@ override undefine COMPILE_ARGS
 COMPILE_ARGS := $(_USER_COMPILE_ARGS)
 # Native RTL checkers sample after a precision-tick observation delay; some
 # suites also check private state. Exclude them from synthesis and gate sources.
+ifeq ($(COCOTB_TOPLEVEL),multiplier)
+ifneq ($(_GATE_RUN),1)
+ifeq ($(MULTIPLIER_HDL_ASSERTIONS),1)
+override VERILOG_SOURCES += $(MULTIPLIER_TEST_DIR)/multiplier_assertions.sv
+COMPILE_ARGS += $(if $(filter vcs,$(SIM)),+define+MOSAIC_MULTIPLIER_ASSERTIONS,-DMOSAIC_MULTIPLIER_ASSERTIONS)
+endif
+endif
+endif
 ifeq ($(COCOTB_TOPLEVEL),mac)
 ifneq ($(_GATE_RUN),1)
 ifeq ($(MAC_HDL_ASSERTIONS),1)
@@ -768,6 +785,17 @@ stream-join-regression:
 		--seed "$(STREAM_JOIN_SEED)" --random-cycles "$(STREAM_JOIN_RANDOM_CYCLES)" \
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_STREAM_JOIN_MAKE)" \
 		$(if $(strip $(_STREAM_JOIN_SIM_BIN_DIR)),--sim-bin-dir "$(_STREAM_JOIN_SIM_BIN_DIR)")
+
+.PHONY: multiplier-regression
+# Exact full products, independent operand signedness, enabled-edge timing and X/Z.
+multiplier-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(MULTIPLIER_TEST_DIR)/run_multiplier_regression.py" \
+		--sim "$(SIM)" --build-dir "$(MULTIPLIER_REGRESSION_BUILD)" \
+		--seed "$(MULTIPLIER_SEED)" --random-cycles "$(MULTIPLIER_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_MULTIPLIER_MAKE)" \
+		$(if $(strip $(_MULTIPLIER_SIM_BIN_DIR)),--sim-bin-dir "$(_MULTIPLIER_SIM_BIN_DIR)")
 
 .PHONY: mac-regression
 # Reuse the scalar dot-product arithmetic and its independent native HDL checker.
@@ -1240,6 +1268,7 @@ help:
 		'make stream-join-regression  Check atomic joins, final arrival and optional inputs' \
 		'make accumulator-regression  Check typed atomic lanes, arithmetic, status and clock enables' \
 		'make agu-regression  Check signed address sequences, descriptors, errors and backpressure' \
+		'make multiplier-regression  Check exact scalar products, mixed modes and pipeline holds' \
 		'make mac-regression  Check scalar multiply-add, saturation and enabled-edge timing' \
 		'make lut-unit-regression  Check programmable tables, interpolation and bank lifecycle' \
 		'make loop-controller-regression  Check nested loops, pacing and runtime safe points' \
@@ -1322,6 +1351,8 @@ help:
 		'                    ROUND_ROBIN_ARBITER_RANDOM_CYCLES, ROUND_ROBIN_ARBITER_SEED' \
 		'Skid buffer: SKID_BUFFER_REGRESSION_BUILD, SKID_BUFFER_RANDOM_CYCLES, SKID_BUFFER_SEED' \
 		'Stream join: STREAM_JOIN_REGRESSION_BUILD, STREAM_JOIN_RANDOM_CYCLES, STREAM_JOIN_SEED' \
+		'Multiplier: MULTIPLIER_REGRESSION_BUILD, MULTIPLIER_RANDOM_CYCLES, MULTIPLIER_SEED,' \
+		'            MULTIPLIER_HDL_ASSERTIONS' \
 		'MAC:       MAC_REGRESSION_BUILD, MAC_RANDOM_CYCLES, MAC_SEED, MAC_HDL_ASSERTIONS' \
 		'Accumulator: ACCUMULATOR_REGRESSION_BUILD, ACCUMULATOR_RANDOM_CYCLES,' \
 		'             ACCUMULATOR_SEED, ACCUMULATOR_HDL_ASSERTIONS' \

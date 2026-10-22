@@ -17,6 +17,22 @@ working license and its `vcs` executable on `PATH`; alternatively, pass
 increment/decrement, disabled hold, clear/load priority, saturating boundaries,
 and event pulses. A failing test makes the command fail.
 
+Run the scalar integer multiplier specification regression:
+
+```sh
+make multiplier-regression
+make multiplier-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=multiplier
+```
+
+The multiplier returns the exact full-width product with independent operand
+signedness, including both mixed modes. It reuses common DFFs and operand isolation
+for combinational or globally stalled registered profiles. The 84-profile PyUVM
+matrix checks boundaries, exhaustive small products, metadata, status, reset,
+and enabled-edge timing. See the
+[multiplier validation guide](src/val/building_blocks/multiplier/README.md)
+for parameters, architecture, coverage, and evidence limits.
+
 Run the scalar integer MAC specification regression:
 
 ```sh
