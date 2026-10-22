@@ -235,6 +235,13 @@ flush/reset, X/Z fields and protected-state fault injection. Its 44-profile
 `event-barrier-regression` includes minimum/odd dimensions, all feature combinations
 and both reset styles; the suite README states the remaining release checks.
 
+The ordered load-engine suite under `building_blocks/load_engine` combines an
+independent affine descriptor model, ordered transaction ledger and separate memory
+peer. `make load-engine-regression` covers 80 address/data/capacity/reset profiles
+and 48 parameter guards. It checks tagged out-of-order responses, ordered stream
+metadata/data, memory errors, fatal drain, unknown controls and qualified storage
+writes. Its README documents optional counters and remaining release checks.
+
 The exponential suite under `building_blocks/exp_unit` uses an independent integer
 reference with directly computed MPFR endpoints and constants. It checks exact
 numerics, elastic ordering/latency, inactive arithmetic storage, parity/SECDED,
