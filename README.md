@@ -17,6 +17,20 @@ working license and its `vcs` executable on `PATH`; alternatively, pass
 increment/decrement, disabled hold, clear/load priority, saturating boundaries,
 and event pulses. A failing test makes the command fail.
 
+Run the ordered load-engine specification regression:
+
+```sh
+make load-engine-regression
+make load-engine-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=load_engine
+```
+
+The load engine reuses the AGU and DMA affine bounds checker to issue tagged reads,
+accept out-of-order responses and retire stream beats in request order. Its PyUVM
+suite checks byte masks, metadata, backpressure, tag lifetime, fatal drain and reset.
+See the [load-engine verification details](src/val/building_blocks/load_engine/README.md)
+for the 80-profile matrix, optional counters and integration assumptions.
+
 Run the fixed-point exponential specification regression:
 
 ```sh
