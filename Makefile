@@ -14,6 +14,7 @@ COCOTB_TEST_MODULES ?= test_$(COCOTB_TOPLEVEL)
 # Override the directory when a top has multiple suites or lives elsewhere.
 PYUVM_TEST_DIR ?= $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/$(COCOTB_TOPLEVEL)))
 ACCUMULATOR_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/accumulator))
+EXP_UNIT_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/exp_unit))
 EVENT_BARRIER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/event_barrier))
 DOT_PRODUCT_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/dot_product))
 AGU_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/agu))
@@ -55,6 +56,8 @@ PARITY_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/parity))
 # Include each basic module's common dependencies. Caller lists take precedence.
 _ACCUMULATOR_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/accumulator_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/lane_mask.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/building_blocks/accumulator.sv
 _RTL_SOURCES_accumulator := $(_ACCUMULATOR_SOURCES)
+_EXP_UNIT_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/generated/exp_unit_tables_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/exp_unit_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/ecc.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv $(PROJECT_ROOT)/src/rtl/building_blocks/exp_unit_rom.sv $(PROJECT_ROOT)/src/rtl/building_blocks/exp_unit_stage.sv $(PROJECT_ROOT)/src/rtl/building_blocks/exp_unit.sv
+_RTL_SOURCES_exp_unit := $(_EXP_UNIT_SOURCES)
 _EVENT_BARRIER_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/round_robin_arbiter.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier.sv
 _RTL_SOURCES_event_barrier := $(_EVENT_BARRIER_SOURCES)
 _DOT_PRODUCT_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/building_blocks/dot_product.sv
@@ -158,6 +161,12 @@ ACCUMULATOR_SEED ?= 20261020
 export ACCUMULATOR_HDL_ASSERTIONS ?= 1
 _ACCUMULATOR_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
 _ACCUMULATOR_MAKE := $(MAKE)
+EXP_UNIT_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/exp_unit/regression
+EXP_UNIT_RANDOM_CYCLES ?= 2000
+EXP_UNIT_SEED ?= 20261021
+export EXP_UNIT_HDL_ASSERTIONS ?= 1
+_EXP_UNIT_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_EXP_UNIT_MAKE := $(MAKE)
 EVENT_BARRIER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/event_barrier/regression
 EVENT_BARRIER_RANDOM_CYCLES ?= 2000
 EVENT_BARRIER_SEED ?= 20261021
@@ -364,6 +373,14 @@ override undefine COMPILE_ARGS
 COMPILE_ARGS := $(_USER_COMPILE_ARGS)
 # Native RTL checkers sample after a precision-tick observation delay; some
 # suites also check private state. Exclude them from synthesis and gate sources.
+ifeq ($(COCOTB_TOPLEVEL),exp_unit)
+ifneq ($(_GATE_RUN),1)
+ifeq ($(EXP_UNIT_HDL_ASSERTIONS),1)
+override VERILOG_SOURCES += $(EXP_UNIT_TEST_DIR)/exp_unit_assertions.sv
+COMPILE_ARGS += $(if $(filter vcs,$(SIM)),+define+MOSAIC_EXP_UNIT_ASSERTIONS,-DMOSAIC_EXP_UNIT_ASSERTIONS)
+endif
+endif
+endif
 ifeq ($(COCOTB_TOPLEVEL),event_barrier)
 ifneq ($(_GATE_RUN),1)
 ifeq ($(EVENT_BARRIER_HDL_ASSERTIONS),1)
@@ -668,6 +685,17 @@ stream-join-regression:
 		--seed "$(STREAM_JOIN_SEED)" --random-cycles "$(STREAM_JOIN_RANDOM_CYCLES)" \
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_STREAM_JOIN_MAKE)" \
 		$(if $(strip $(_STREAM_JOIN_SIM_BIN_DIR)),--sim-bin-dir "$(_STREAM_JOIN_SIM_BIN_DIR)")
+
+.PHONY: exp-unit-regression exp-unit-images
+exp-unit-images:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/tools/generate_exp_unit.py" --check
+
+exp-unit-regression: exp-unit-images
+	@"$(PYTHON_BIN)" "$(EXP_UNIT_TEST_DIR)/run_exp_unit_regression.py" \
+		--sim "$(SIM)" --build-dir "$(EXP_UNIT_REGRESSION_BUILD)" \
+		--seed "$(EXP_UNIT_SEED)" --random-cycles "$(EXP_UNIT_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_EXP_UNIT_MAKE)" \
+		$(if $(strip $(_EXP_UNIT_SIM_BIN_DIR)),--sim-bin-dir "$(_EXP_UNIT_SIM_BIN_DIR)")
 
 .PHONY: event-barrier-regression
 # Check atomic event mutations, wait scheduling, barrier generations and flush.
@@ -1086,6 +1114,8 @@ help:
 		'make stream-join-regression  Check atomic joins, final arrival and optional inputs' \
 		'make accumulator-regression  Check typed atomic lanes, arithmetic, status and clock enables' \
 		'make agu-regression  Check signed address sequences, descriptors, errors and backpressure' \
+		'make exp-unit-regression  Check fixed-point exponentials and elastic responses' \
+		'make exp-unit-images      Verify generated endpoint and log2(e) artifacts' \
 		'make event-barrier-regression  Check events, one-shot waits and reusable barriers' \
 		'make dot-product-regression  Check exact masked products, arithmetic and pipeline latency' \
 		'make dma-engine-regression  Check multi-channel DMA, protection, data, cancellation and events' \

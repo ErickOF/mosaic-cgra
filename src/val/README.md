@@ -234,3 +234,11 @@ records. It exercises saturation, both queues under backpressure, context policy
 flush/reset, X/Z fields and protected-state fault injection. Its 44-profile
 `event-barrier-regression` includes minimum/odd dimensions, all feature combinations
 and both reset styles; the suite README states the remaining release checks.
+
+The exponential suite under `building_blocks/exp_unit` uses an independent integer
+reference with directly computed MPFR endpoints and constants. It checks exact
+numerics, elastic ordering/latency, inactive arithmetic storage, parity/SECDED,
+drain/flush/reset and unknown controls. The 55-profile `exp-unit-regression`
+verifies generated assets and covers exhaustive reduced-width inputs, optional
+features and representative formats. Its README links scalar accuracy evidence
+and identifies remaining formal, physical and application qualification.
