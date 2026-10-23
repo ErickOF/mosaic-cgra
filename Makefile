@@ -24,6 +24,7 @@ MAC_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/mac))
 LUT_UNIT_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/lut_unit))
 LOOP_CONTROLLER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/loop_controller))
 LOCAL_SWITCH_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/local_switch))
+STREAM_FORMATTER_TEST_DIR := $(PROJECT_ROOT)/src/val/building_blocks/stream_formatter
 STORE_ENGINE_TEST_DIR := $(PROJECT_ROOT)/src/val/building_blocks/store_engine
 LOAD_ENGINE_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/load_engine))
 EXP_UNIT_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/exp_unit))
@@ -74,6 +75,14 @@ _LOOP_CONTROLLER_SOURCES := $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv 
 _RTL_SOURCES_loop_controller := $(_LOOP_CONTROLLER_SOURCES)
 _LOCAL_SWITCH_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/local_switch_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/mux.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/register_slice.sv $(PROJECT_ROOT)/src/rtl/building_blocks/local_switch.sv
 _RTL_SOURCES_local_switch := $(_LOCAL_SWITCH_SOURCES)
+_RTL_SOURCES_stream_formatter := $(PROJECT_ROOT)/src/rtl/building_blocks/stream_formatter_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/common/dff.sv \
+    $(PROJECT_ROOT)/src/rtl/common/counter.sv \
+    $(PROJECT_ROOT)/src/rtl/common/lane_mask.sv \
+    $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv \
+    $(PROJECT_ROOT)/src/rtl/common/write_gate.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/register_slice.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/stream_formatter.sv
 _RTL_SOURCES_store_engine := $(PROJECT_ROOT)/src/rtl/building_blocks/agu_pkg.sv \
     $(PROJECT_ROOT)/src/rtl/building_blocks/dma_engine_pkg.sv \
     $(PROJECT_ROOT)/src/rtl/building_blocks/store_engine_pkg.sv \
@@ -306,6 +315,11 @@ LOCAL_SWITCH_SEED ?= 20261021
 export LOCAL_SWITCH_HDL_ASSERTIONS ?= 1
 _LOCAL_SWITCH_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
 _LOCAL_SWITCH_MAKE := $(MAKE)
+STREAM_FORMATTER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/stream_formatter/regression
+STREAM_FORMATTER_RANDOM_CYCLES ?= 2000
+STREAM_FORMATTER_SEED ?= 20261022
+_STREAM_FORMATTER_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_STREAM_FORMATTER_MAKE := $(MAKE)
 STORE_ENGINE_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/store_engine/regression
 STORE_ENGINE_RANDOM_CYCLES ?= 2000
 STORE_ENGINE_SEED ?= 20261022
@@ -1079,6 +1093,14 @@ local-switch-regression:
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_LOCAL_SWITCH_MAKE)" \
 		$(if $(strip $(_LOCAL_SWITCH_SIM_BIN_DIR)),--sim-bin-dir "$(_LOCAL_SWITCH_SIM_BIN_DIR)")
 
+.PHONY: stream-formatter-regression
+stream-formatter-regression:
+	@"$(PYTHON_BIN)" "$(STREAM_FORMATTER_TEST_DIR)/run_stream_formatter_regression.py" \
+		--sim "$(SIM)" --build-dir "$(STREAM_FORMATTER_REGRESSION_BUILD)" \
+		--seed "$(STREAM_FORMATTER_SEED)" --random-cycles "$(STREAM_FORMATTER_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_STREAM_FORMATTER_MAKE)" \
+		$(if $(strip $(_STREAM_FORMATTER_SIM_BIN_DIR)),--sim-bin-dir "$(_STREAM_FORMATTER_SIM_BIN_DIR)")
+
 .PHONY: store-engine-regression
 store-engine-regression:
 	@"$(PYTHON_BIN)" "$(STORE_ENGINE_TEST_DIR)/run_store_engine_regression.py" \
@@ -1547,6 +1569,7 @@ help:
 		'make lut-unit-regression  Check programmable tables, interpolation and bank lifecycle' \
 		'make loop-controller-regression  Check nested loops, pacing and runtime safe points' \
 		'make local-switch-regression  Check static routes, sparse edges and multicast copies' \
+		'make stream-formatter-regression  Check canonical frames, lanes and elastic output' \
 		'make store-engine-regression  Check atomic writes, framing and ordered completions' \
 		'make load-engine-regression  Check tagged reads, ordered retirement and fatal drain' \
 		'make exp-unit-regression  Check fixed-point exponentials and elastic responses' \
