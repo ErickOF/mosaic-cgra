@@ -17,6 +17,18 @@ working license and its `vcs` executable on `PATH`; alternatively, pass
 increment/decrement, disabled hold, clear/load priority, saturating boundaries,
 and event pulses. A failing test makes the command fail.
 
+Run the combinational scalar integer ALU specification regression:
+
+```sh
+make scalar-alu-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=scalar_alu
+```
+
+The ALU provides modular/saturating arithmetic, Boolean logic, full-width shifts,
+comparisons, select, pass-through and optional min/max with explicit status flags.
+See the [scalar ALU validation guide](src/val/building_blocks/scalar_alu/README.md)
+for the opcode contract, feature profiles, formal/static targets and coverage.
+
 Run the global NoC router specification and mesh regressions:
 
 ```sh
