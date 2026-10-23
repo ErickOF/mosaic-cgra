@@ -17,6 +17,20 @@ working license and its `vcs` executable on `PATH`; alternatively, pass
 increment/decrement, disabled hold, clear/load priority, saturating boundaries,
 and event pulses. A failing test makes the command fail.
 
+Run the global NoC router specification and mesh regressions:
+
+```sh
+make noc-router-regression SIM=icarus
+make noc-router-mesh-regression SIM=icarus
+make noc-router-topology
+```
+
+The five-port router provides deterministic XY/YX routing, packet reservations,
+virtual channels, valid-ready or credit links, bounded QoS and optional parity/ECC.
+The tests reuse the shared PyUVM infrastructure and exercise real 2x2/4x4 meshes.
+See the [router validation guide](src/val/building_blocks/noc_router/README.md)
+for configuration, latency, coverage and integration requirements.
+
 Run the scalar integer multiplier specification regression:
 
 ```sh

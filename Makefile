@@ -14,6 +14,7 @@ COCOTB_TEST_MODULES ?= test_$(COCOTB_TOPLEVEL)
 # Override the directory when a top has multiple suites or lives elsewhere.
 PYUVM_TEST_DIR ?= $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/$(COCOTB_TOPLEVEL)))
 ACCUMULATOR_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/accumulator))
+NOC_ROUTER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/noc_router))
 MULTIPLIER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/multiplier))
 MAC_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/mac))
 LUT_UNIT_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/lut_unit))
@@ -76,6 +77,8 @@ _EVENT_BARRIER_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_
 _RTL_SOURCES_event_barrier := $(_EVENT_BARRIER_SOURCES)
 _DOT_PRODUCT_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/building_blocks/dot_product.sv
 _RTL_SOURCES_dot_product := $(_DOT_PRODUCT_SOURCES)
+_NOC_ROUTER_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/noc_router_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/mux.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/ecc.sv $(PROJECT_ROOT)/src/rtl/basic/round_robin_arbiter.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv $(PROJECT_ROOT)/src/rtl/building_blocks/noc_router_codec.sv $(PROJECT_ROOT)/src/rtl/building_blocks/noc_router_buffer.sv $(PROJECT_ROOT)/src/rtl/building_blocks/noc_router.sv
+_RTL_SOURCES_noc_router := $(_NOC_ROUTER_SOURCES)
 _RTL_SOURCES_multiplier := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/building_blocks/multiplier.sv
 _RTL_SOURCES_mac := $(_DOT_PRODUCT_SOURCES) $(PROJECT_ROOT)/src/rtl/building_blocks/mac.sv
 _AGU_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/agu_pkg.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/building_blocks/agu.sv
@@ -177,6 +180,14 @@ ACCUMULATOR_SEED ?= 20261020
 export ACCUMULATOR_HDL_ASSERTIONS ?= 1
 _ACCUMULATOR_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
 _ACCUMULATOR_MAKE := $(MAKE)
+NOC_ROUTER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/noc_router/regression
+NOC_ROUTER_MESH_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/noc_router/mesh
+NOC_ROUTER_TOPOLOGY_BUILD ?= $(PROJECT_ROOT)/build/noc_router/topology
+NOC_ROUTER_SEED ?= 20261022
+NOC_ROUTER_RANDOM_CYCLES ?= 2000
+export NOC_ROUTER_HDL_ASSERTIONS ?= 1
+_NOC_ROUTER_MAKE := $(MAKE)
+_NOC_ROUTER_SIM_BIN_DIR := $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
 MULTIPLIER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/multiplier/regression
 MULTIPLIER_SEED ?= 20261022
 MULTIPLIER_RANDOM_CYCLES ?= 2000
@@ -425,6 +436,14 @@ override undefine COMPILE_ARGS
 COMPILE_ARGS := $(_USER_COMPILE_ARGS)
 # Native RTL checkers sample after a precision-tick observation delay; some
 # suites also check private state. Exclude them from synthesis and gate sources.
+ifeq ($(COCOTB_TOPLEVEL),noc_router)
+ifneq ($(_GATE_RUN),1)
+ifeq ($(NOC_ROUTER_HDL_ASSERTIONS),1)
+override VERILOG_SOURCES += $(NOC_ROUTER_TEST_DIR)/noc_router_assertions.sv
+COMPILE_ARGS += $(if $(filter vcs,$(SIM)),+define+MOSAIC_NOC_ROUTER_ASSERTIONS,-DMOSAIC_NOC_ROUTER_ASSERTIONS)
+endif
+endif
+endif
 ifeq ($(COCOTB_TOPLEVEL),multiplier)
 ifneq ($(_GATE_RUN),1)
 ifeq ($(MULTIPLIER_HDL_ASSERTIONS),1)
@@ -785,6 +804,25 @@ stream-join-regression:
 		--seed "$(STREAM_JOIN_SEED)" --random-cycles "$(STREAM_JOIN_RANDOM_CYCLES)" \
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_STREAM_JOIN_MAKE)" \
 		$(if $(strip $(_STREAM_JOIN_SIM_BIN_DIR)),--sim-bin-dir "$(_STREAM_JOIN_SIM_BIN_DIR)")
+
+.PHONY: noc-router-regression noc-router-mesh-regression noc-router-topology
+noc-router-regression:
+	@"$(PYTHON_BIN)" "$(NOC_ROUTER_TEST_DIR)/run_noc_router_regression.py" \
+		--sim "$(SIM)" --build-dir "$(NOC_ROUTER_REGRESSION_BUILD)" \
+		--seed "$(NOC_ROUTER_SEED)" --random-cycles "$(NOC_ROUTER_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_NOC_ROUTER_MAKE)" \
+		$(if $(strip $(_NOC_ROUTER_SIM_BIN_DIR)),--sim-bin-dir "$(_NOC_ROUTER_SIM_BIN_DIR)")
+
+noc-router-mesh-regression:
+	@"$(PYTHON_BIN)" "$(NOC_ROUTER_TEST_DIR)/run_noc_router_mesh.py" \
+		--sim "$(SIM)" --build-dir "$(NOC_ROUTER_MESH_BUILD)" \
+		--seed "$(NOC_ROUTER_SEED)" --random-cycles "$(NOC_ROUTER_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_NOC_ROUTER_MAKE)" \
+		$(if $(strip $(_NOC_ROUTER_SIM_BIN_DIR)),--sim-bin-dir "$(_NOC_ROUTER_SIM_BIN_DIR)")
+
+noc-router-topology:
+	@"$(PYTHON_BIN)" "$(NOC_ROUTER_TEST_DIR)/analyze_topology.py" \
+		--output "$(NOC_ROUTER_TOPOLOGY_BUILD)/summary.json"
 
 .PHONY: multiplier-regression
 # Exact full products, independent operand signedness, enabled-edge timing and X/Z.
@@ -1268,6 +1306,9 @@ help:
 		'make stream-join-regression  Check atomic joins, final arrival and optional inputs' \
 		'make accumulator-regression  Check typed atomic lanes, arithmetic, status and clock enables' \
 		'make agu-regression  Check signed address sequences, descriptors, errors and backpressure' \
+		'make noc-router-regression  Check routes, wormhole ownership, credits and protection' \
+		'make noc-router-mesh-regression  Check end-to-end delivery in 2x2 and 4x4 meshes' \
+		'make noc-router-topology  Analyze dimension-order channel dependencies' \
 		'make multiplier-regression  Check exact scalar products, mixed modes and pipeline holds' \
 		'make mac-regression  Check scalar multiply-add, saturation and enabled-edge timing' \
 		'make lut-unit-regression  Check programmable tables, interpolation and bank lifecycle' \
