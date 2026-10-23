@@ -171,6 +171,21 @@ suite checks byte masks, metadata, backpressure, tag lifetime, fatal drain and r
 See the [load-engine verification details](src/val/building_blocks/load_engine/README.md)
 for the 80-profile matrix, optional counters and integration assumptions.
 
+Run the ordered store-engine specification regression:
+
+```sh
+make store-engine-regression
+make store-engine-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=store_engine
+```
+
+The store engine reuses the AGU, DMA bounds checker and common storage, counters,
+decoders, isolation and write gates. It pairs stream beats with tagged writes,
+validates framing and byte strobes, and retires out-of-order responses in request
+order. See the [store-engine verification details](src/val/building_blocks/store_engine/README.md)
+for the 80-profile Python campaign, optional counters and fatal-drain contracts.
+Synthesis is deferred to Design Compiler.
+
 Run the fixed-point exponential specification regression:
 
 ```sh

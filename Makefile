@@ -24,6 +24,7 @@ MAC_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/mac))
 LUT_UNIT_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/lut_unit))
 LOOP_CONTROLLER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/loop_controller))
 LOCAL_SWITCH_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/local_switch))
+STORE_ENGINE_TEST_DIR := $(PROJECT_ROOT)/src/val/building_blocks/store_engine
 LOAD_ENGINE_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/load_engine))
 EXP_UNIT_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/exp_unit))
 EVENT_BARRIER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/event_barrier))
@@ -73,6 +74,18 @@ _LOOP_CONTROLLER_SOURCES := $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv 
 _RTL_SOURCES_loop_controller := $(_LOOP_CONTROLLER_SOURCES)
 _LOCAL_SWITCH_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/local_switch_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/mux.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/register_slice.sv $(PROJECT_ROOT)/src/rtl/building_blocks/local_switch.sv
 _RTL_SOURCES_local_switch := $(_LOCAL_SWITCH_SOURCES)
+_RTL_SOURCES_store_engine := $(PROJECT_ROOT)/src/rtl/building_blocks/agu_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/dma_engine_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/store_engine_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/common/dff.sv \
+    $(PROJECT_ROOT)/src/rtl/common/counter.sv \
+    $(PROJECT_ROOT)/src/rtl/common/decoder.sv \
+    $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv \
+    $(PROJECT_ROOT)/src/rtl/common/write_gate.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/dma_engine_bounds.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/agu.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/store_engine_counters.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/store_engine.sv
 _LOAD_ENGINE_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/agu_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/dma_engine_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/load_engine_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/building_blocks/dma_engine_bounds.sv $(PROJECT_ROOT)/src/rtl/common/write_gate.sv $(PROJECT_ROOT)/src/rtl/building_blocks/agu.sv $(PROJECT_ROOT)/src/rtl/building_blocks/load_engine_counters.sv $(PROJECT_ROOT)/src/rtl/building_blocks/load_engine.sv
 _RTL_SOURCES_load_engine := $(_LOAD_ENGINE_SOURCES)
 _EXP_UNIT_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/generated/exp_unit_tables_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/exp_unit_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/ecc.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv $(PROJECT_ROOT)/src/rtl/building_blocks/exp_unit_rom.sv $(PROJECT_ROOT)/src/rtl/building_blocks/exp_unit_stage.sv $(PROJECT_ROOT)/src/rtl/building_blocks/exp_unit.sv
@@ -293,6 +306,12 @@ LOCAL_SWITCH_SEED ?= 20261021
 export LOCAL_SWITCH_HDL_ASSERTIONS ?= 1
 _LOCAL_SWITCH_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
 _LOCAL_SWITCH_MAKE := $(MAKE)
+STORE_ENGINE_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/store_engine/regression
+STORE_ENGINE_RANDOM_CYCLES ?= 2000
+STORE_ENGINE_SEED ?= 20261022
+export STORE_ENGINE_HDL_ASSERTIONS ?= 1
+_STORE_ENGINE_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_STORE_ENGINE_MAKE := $(MAKE)
 LOAD_ENGINE_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/load_engine/regression
 LOAD_ENGINE_RANDOM_CYCLES ?= 2000
 LOAD_ENGINE_SEED ?= 20261021
@@ -593,6 +612,14 @@ ifneq ($(_GATE_RUN),1)
 ifeq ($(LOCAL_SWITCH_HDL_ASSERTIONS),1)
 override VERILOG_SOURCES += $(LOCAL_SWITCH_TEST_DIR)/local_switch_assertions.sv
 COMPILE_ARGS += $(if $(filter vcs,$(SIM)),+define+MOSAIC_LOCAL_SWITCH_ASSERTIONS,-DMOSAIC_LOCAL_SWITCH_ASSERTIONS)
+endif
+endif
+endif
+ifeq ($(COCOTB_TOPLEVEL),store_engine)
+ifneq ($(_GATE_RUN),1)
+ifeq ($(STORE_ENGINE_HDL_ASSERTIONS),1)
+override VERILOG_SOURCES += $(STORE_ENGINE_TEST_DIR)/store_engine_assertions.sv
+COMPILE_ARGS += $(if $(filter vcs,$(SIM)),+define+MOSAIC_STORE_ENGINE_ASSERTIONS,-DMOSAIC_STORE_ENGINE_ASSERTIONS)
 endif
 endif
 endif
@@ -1051,6 +1078,14 @@ local-switch-regression:
 		--seed "$(LOCAL_SWITCH_SEED)" --random-cycles "$(LOCAL_SWITCH_RANDOM_CYCLES)" \
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_LOCAL_SWITCH_MAKE)" \
 		$(if $(strip $(_LOCAL_SWITCH_SIM_BIN_DIR)),--sim-bin-dir "$(_LOCAL_SWITCH_SIM_BIN_DIR)")
+
+.PHONY: store-engine-regression
+store-engine-regression:
+	@"$(PYTHON_BIN)" "$(STORE_ENGINE_TEST_DIR)/run_store_engine_regression.py" \
+		--sim "$(SIM)" --build-dir "$(STORE_ENGINE_REGRESSION_BUILD)" \
+		--seed "$(STORE_ENGINE_SEED)" --random-cycles "$(STORE_ENGINE_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_STORE_ENGINE_MAKE)" \
+		$(if $(strip $(_STORE_ENGINE_SIM_BIN_DIR)),--sim-bin-dir "$(_STORE_ENGINE_SIM_BIN_DIR)")
 
 .PHONY: load-engine-regression
 load-engine-regression:
@@ -1512,6 +1547,7 @@ help:
 		'make lut-unit-regression  Check programmable tables, interpolation and bank lifecycle' \
 		'make loop-controller-regression  Check nested loops, pacing and runtime safe points' \
 		'make local-switch-regression  Check static routes, sparse edges and multicast copies' \
+		'make store-engine-regression  Check atomic writes, framing and ordered completions' \
 		'make load-engine-regression  Check tagged reads, ordered retirement and fatal drain' \
 		'make exp-unit-regression  Check fixed-point exponentials and elastic responses' \
 		'make exp-unit-images      Verify generated endpoint and log2(e) artifacts' \
