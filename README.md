@@ -236,15 +236,16 @@ Run the regular address-generation unit's specification-based regression:
 ```sh
 make agu-regression
 make agu-regression SIM=icarus
+make agu-lint
 ```
 
-The AGU reuses common counter, DFF and operand-isolation RTL for linear and
+The AGU reuses common counter, DFF, operand-isolation and write-gate RTL for linear and
 signed-stride 1D/2D byte addressing. Its structured PyUVM suite checks descriptor
 legality, checked address arithmetic, row-base strides, metadata, completion,
 sticky errors and backpressure in 32 profiles, with exhaustive small descriptors.
 Configure `AGU_SEED`, `AGU_RANDOM_CYCLES` and `AGU_REGRESSION_BUILD`; see the
 [AGU verification details](src/val/building_blocks/agu/README.md) for encodings,
-assertion controls, coverage and evidence limits.
+assertion controls, coverage and lint reports. Synthesis is deferred to Design Compiler.
 
 Run the integer accumulator bank's specification-based regression:
 

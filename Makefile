@@ -73,7 +73,7 @@ _LOOP_CONTROLLER_SOURCES := $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv 
 _RTL_SOURCES_loop_controller := $(_LOOP_CONTROLLER_SOURCES)
 _LOCAL_SWITCH_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/local_switch_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/mux.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/register_slice.sv $(PROJECT_ROOT)/src/rtl/building_blocks/local_switch.sv
 _RTL_SOURCES_local_switch := $(_LOCAL_SWITCH_SOURCES)
-_LOAD_ENGINE_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/agu_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/dma_engine_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/load_engine_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/building_blocks/dma_engine_bounds.sv $(PROJECT_ROOT)/src/rtl/building_blocks/agu.sv $(PROJECT_ROOT)/src/rtl/building_blocks/load_engine_counters.sv $(PROJECT_ROOT)/src/rtl/building_blocks/load_engine.sv
+_LOAD_ENGINE_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/agu_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/dma_engine_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/load_engine_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/building_blocks/dma_engine_bounds.sv $(PROJECT_ROOT)/src/rtl/common/write_gate.sv $(PROJECT_ROOT)/src/rtl/building_blocks/agu.sv $(PROJECT_ROOT)/src/rtl/building_blocks/load_engine_counters.sv $(PROJECT_ROOT)/src/rtl/building_blocks/load_engine.sv
 _RTL_SOURCES_load_engine := $(_LOAD_ENGINE_SOURCES)
 _EXP_UNIT_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/generated/exp_unit_tables_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/exp_unit_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/ecc.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv $(PROJECT_ROOT)/src/rtl/building_blocks/exp_unit_rom.sv $(PROJECT_ROOT)/src/rtl/building_blocks/exp_unit_stage.sv $(PROJECT_ROOT)/src/rtl/building_blocks/exp_unit.sv
 _RTL_SOURCES_exp_unit := $(_EXP_UNIT_SOURCES)
@@ -116,7 +116,7 @@ _NOC_ROUTER_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/noc_router_pkg.sv
 _RTL_SOURCES_noc_router := $(_NOC_ROUTER_SOURCES)
 _RTL_SOURCES_multiplier := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/building_blocks/multiplier.sv
 _RTL_SOURCES_mac := $(_DOT_PRODUCT_SOURCES) $(PROJECT_ROOT)/src/rtl/building_blocks/mac.sv
-_AGU_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/agu_pkg.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/building_blocks/agu.sv
+_AGU_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/agu_pkg.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/write_gate.sv $(PROJECT_ROOT)/src/rtl/building_blocks/agu.sv
 _RTL_SOURCES_agu := $(_AGU_SOURCES)
 _DMA_ENGINE_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/dma_engine_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/round_robin_arbiter.sv $(PROJECT_ROOT)/src/rtl/building_blocks/dma_engine_bounds.sv $(PROJECT_ROOT)/src/rtl/building_blocks/dma_engine_command_queue.sv $(PROJECT_ROOT)/src/rtl/building_blocks/dma_engine.sv
 _RTL_SOURCES_dma_engine := $(_DMA_ENGINE_SOURCES)
@@ -317,6 +317,8 @@ DOT_PRODUCT_SEED ?= 20261020
 export DOT_PRODUCT_HDL_ASSERTIONS ?= 1
 _DOT_PRODUCT_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
 _DOT_PRODUCT_MAKE := $(MAKE)
+AGU_LINT_BUILD ?= $(PROJECT_ROOT)/build/lint/agu
+AGU_VERILATOR ?= verilator
 AGU_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/agu/regression
 AGU_RANDOM_CYCLES ?= 2000
 AGU_SEED ?= 20261020
@@ -1106,7 +1108,10 @@ dma-engine-regression:
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_DMA_ENGINE_MAKE)" \
 		$(if $(strip $(_DMA_ENGINE_SIM_BIN_DIR)),--sim-bin-dir "$(_DMA_ENGINE_SIM_BIN_DIR)")
 
-.PHONY: agu-regression
+.PHONY: agu-regression agu-lint
+agu-lint:
+	@"$(PYTHON_BIN)" "$(AGU_TEST_DIR)/run_agu_lint.py" \
+		--verilator "$(AGU_VERILATOR)" --build-dir "$(AGU_LINT_BUILD)"
 # Check descriptor legality, signed 1D/2D addresses, metadata and backpressure.
 agu-regression:
 	@test -x "$(PYTHON_BIN)" || { \
@@ -1486,6 +1491,7 @@ help:
 		'make stream-join-regression  Check atomic joins, final arrival and optional inputs' \
 		'make accumulator-regression  Check typed atomic lanes, arithmetic, status and clock enables' \
 		'make agu-regression  Check signed address sequences, descriptors, errors and backpressure' \
+		'make agu-lint  Lint AGU parameter profiles without synthesis' \
 		'make predicate-unit-regression  Check predicate bank commands and state' \
 		'make predicate-unit-static  Lint and synthesize predicate banks' \
 		'make predicate-unit-formal  Prove predicate state/response equivalence' \
