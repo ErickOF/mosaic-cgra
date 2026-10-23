@@ -17,6 +17,19 @@ working license and its `vcs` executable on `PATH`; alternatively, pass
 increment/decrement, disabled hold, clear/load priority, saturating boundaries,
 and event pulses. A failing test makes the command fail.
 
+Run the predicate-register and Boolean-logic specification regression:
+
+```sh
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=predicate_unit
+make predicate-unit-regression SIM=icarus
+```
+
+The predicate bank supports per-lane validity, atomic masked writeback, invalidation,
+pre-edge source reads and one-cycle dependent commands. It reuses common DFFs,
+decoders, operand isolation and write gates. See the
+[predicate unit validation guide](src/val/building_blocks/predicate_unit/README.md)
+for parameter profiles, PyUVM coverage and static/formal checks.
+
 Run the masked integer vector reduction specification regression:
 
 ```sh
