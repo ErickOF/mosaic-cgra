@@ -35,6 +35,10 @@ class LoadEngineMonitor(uvm_monitor):
                 for n in range(self.active['slots'])
                 for kind, inst in (('m', 'u_metadata'), ('r', 'u_response'),
                                    ('a', 'u_allocated'), ('p', 'u_present'))})
+            for label, instance in (('descriptor', bank.u_descriptor_write),
+                                    ('response', bank.u_response_write)):
+                for pin in ('i_write_enable', 'i_suppress', 'o_write_enable', 'o_write_suppressed'):
+                    self.active['storage'][f'gate:{label}:{pin}'] = getattr(instance, pin)
         task = cocotb.start_soon(self.edges())
         try:
             while True:

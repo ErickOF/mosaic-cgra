@@ -16,6 +16,8 @@ class LoadEngineScoreboard(uvm_scoreboard):
     def storage(self, obs, plan, metadata):
         c = self.c
         for key, raw in obs.storage.items():
+            if key.startswith('gate:'):
+                continue  # Combinational policy pins are checked independently below.
             kind, n = key[0], int(key[1:])
             if kind in ('a', 'p'):
                 owned = next((e for e in self.model.pending if e['tag'] == n), None)
@@ -35,6 +37,34 @@ class LoadEngineScoreboard(uvm_scoreboard):
                     (0 if plan['p']['i_mem_rsp_error'] else plan['p']['i_mem_rsp_data']))
                 assert number(raw) == expected, f'Wrong payload capture: {key}'
             self.coverage.storage_checks += 1
+
+    def write_gates(self, obs, plan):
+        """Predict write policy from the independent ledger and public inputs."""
+        c = self.c
+        tag = plan['p']['i_mem_rsp_tag']
+        selected = (1 << tag if plan['response'] and tag is not None
+                    and tag < c.MAX_OUTSTANDING else 0)
+        rejected = bool(plan['desc_error'])
+        bad_response = bool(plan['rsp_error'])
+        for label, enabled, suppressed in (
+            ('descriptor', int(plan['config']), int(rejected)),
+            ('response', selected, ((1 << c.MAX_OUTSTANDING) - 1) if bad_response else 0),
+        ):
+            values = {
+                'i_write_enable': enabled,
+                'i_suppress': suppressed,
+                'o_write_enable': enabled & ~suppressed,
+                'o_write_suppressed': enabled & suppressed,
+            }
+            for pin, expected in values.items():
+                assert number(obs.storage[f'gate:{label}:{pin}']) == expected, (
+                    f'Load-engine write gate {label}.{pin} violates the event contract')
+            self.coverage.write_gate_states.add((label, bool(enabled), bool(suppressed)))
+        if plan['response'] and not bad_response:
+            self.coverage.response_write_tags.add(tag)
+        if bad_response:
+            self.coverage.suppressed_response_errors.add(plan['rsp_error'])
+        self.coverage.write_gate_checks += 1
 
     def write(self, obs):
         item, p, stage = obs.item, obs.ports, obs.stage
@@ -69,7 +99,9 @@ class LoadEngineScoreboard(uvm_scoreboard):
                 self.storage(obs, plan, metadata)
             self.coverage.record(events, obs, self.model, plan)
         if self.initialized:
-            expected, _ = self.model.evaluate(p)
+            expected, current_plan = self.model.evaluate(p)
+            if self.c.check_internals and stage != 'edge':
+                self.write_gates(obs, current_plan)
             for name, value in expected.items():
                 assert number(p[name]) == value, f'{name}: {p[name]} != {value} ({item.get_name()}, {stage})'
         self.coverage.observations[stage] += 1

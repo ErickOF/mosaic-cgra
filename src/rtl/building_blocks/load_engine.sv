@@ -1,4 +1,5 @@
 `timescale 1ns / 1ps
+`default_nettype none
 
 // One descriptor owns an ordered circular table until every issued read retires.
 // A response fills its tagged slot; only stream acceptance releases ownership.
@@ -129,6 +130,8 @@ module load_engine #(
         wire [N-1:0] present;
         wire [N-1:0] issue_select;
         wire [N-1:0] response_select;
+        wire [N-1:0] response_write_enable;
+        wire [N-1:0] unused_response_suppressed;
         wire [N-1:0] retire_select;
         wire unused_issue_valid;
         wire response_tag_valid;
@@ -175,8 +178,8 @@ module load_engine #(
         wire [6:0] events;
 
         wire config_accept = o_config_ready && (i_config_valid === 1'b1);
-        wire start = config_accept && (descriptor_error == LOAD_ERR_NONE);
-        wire reject = config_accept && (descriptor_error != LOAD_ERR_NONE);
+        wire start;
+        wire reject;
         wire issue_enabled = run && active&&!o_error&&!agu_error &&
             (o_outstanding < OCCUPANCY_WIDTH'(N));
         wire agu_ready = issue_enabled && (i_mem_req_ready === 1'b1);
@@ -203,6 +206,15 @@ module load_engine #(
             ? '0 : issue_pointer + 1'b1;
         wire [TAG_WIDTH-1:0] next_retire = retire_pointer == TAG_WIDTH'(N - 1)
             ? '0 : retire_pointer + 1'b1;
+
+        // A consumed illegal descriptor reports rejection without clocking the
+        // AGU or starting a command. Both events share the common write policy.
+        write_gate u_descriptor_write (
+            .i_write_enable(config_accept),
+            .i_suppress(descriptor_error != load_engine_pkg::LOAD_ERR_NONE),
+            .o_write_enable(start),
+            .o_write_suppressed(reject)
+        );
 
         assign o_config_ready = run&&!active && (o_outstanding == '0)&&!o_error &&
             agu_config_ready && (i_error_clear === 1'b0);
@@ -342,6 +354,16 @@ module load_engine #(
             .o_select_valid(unused_retire_valid)
         );
 
+        // Decode the consumed tag first, then suppress every entry update for
+        // malformed responses. Legal reads that report a memory error still
+        // write their ordered zero-data/error response into the selected slot.
+        write_gate #(.WIDTH(N)) u_response_write (
+            .i_write_enable(response_select),
+            .i_suppress({N{response_error != load_engine_pkg::LOAD_ERR_NONE}}),
+            .o_write_enable(response_write_enable),
+            .o_write_suppressed(unused_response_suppressed)
+        );
+
         always_comb begin
             response_error = LOAD_ERR_NONE;
 
@@ -370,7 +392,7 @@ module load_engine #(
         end
 
         for (genvar n = 0; n < N; n++) begin : g_slot
-            wire fill = response_store && response_select[n];
+            wire fill = response_write_enable[n];
 
             dff #(.WIDTH(1), .ASYNC_RESET(ASYNC_RESET != 0)) u_allocated (
                 .i_clk(i_clk),
@@ -393,7 +415,8 @@ module load_engine #(
                 .i_clk(i_clk),
                 .i_rstb(1'b1),
                 .i_enable(issue_select[n]),
-                .i_d(request_metadata), .o_q(slot_metadata[n])
+                .i_d(request_metadata),
+                .o_q(slot_metadata[n])
             );
 
             dff #(.WIDTH(D + 1)) u_response (
@@ -465,7 +488,8 @@ module load_engine #(
 
         dff #(.WIDTH(7), .ASYNC_RESET(ASYNC_RESET != 0)) u_events (
             .i_clk(i_clk),
-            .i_rstb(reset_b), .i_enable(run),
+            .i_rstb(reset_b),
+            .i_enable(run),
             .i_d({start, request_accept, response_accept, stream_accept, finish,
                 finish && o_memory_error_seen, fail}),
                 .o_q(events)
@@ -498,3 +522,4 @@ module load_engine #(
 `endif
     end
 endmodule
+`default_nettype wire

@@ -7,6 +7,10 @@ from load_engine.model import number, signed
 class LoadEngineCoverage(CoverageCollector):
     def build_phase(self):
         super().build_phase()
+        self.write_gate_checks = 0
+        self.write_gate_states = set()
+        self.response_write_tags = set()
+        self.suppressed_response_errors = set()
         self.events = Counter()
         self.observations = Counter()
         self.modes_sizes = set()
@@ -99,6 +103,17 @@ class LoadEngineCoverage(CoverageCollector):
         if c.check_internals:
             expected_errors.add(11)
             goals['payload_storage'] = self.storage_checks > 0
+            goals['write_gate_controls'] = self.write_gate_checks > 0 and {
+                ('descriptor', False, False), ('descriptor', True, False),
+                ('descriptor', True, True), ('response', False, False),
+                ('response', False, True), ('response', True, False),
+                ('response', True, True),
+            } <= self.write_gate_states
+            goals['every_response_write_tag'] = self.response_write_tags == set(
+                range(c.MAX_OUTSTANDING))
+            goals['malformed_response_write_suppression'] = {
+                error for error in expected_errors if error >= 12
+            } <= self.suppressed_response_errors
         goals['fatal_classes'] = expected_errors <= self.errors
         if c.MAX_OUTSTANDING > 1:
             goals['response_reordering'] = self.events['younger_response'] > 0
@@ -109,6 +124,10 @@ class LoadEngineCoverage(CoverageCollector):
                     parameters=c.parameters, seed=c.seed, goals=goals, events=dict(self.events),
                     observations=dict(self.observations), accounting=self.accounting,
                     random_transactions=self.random_transactions, storage_checks=self.storage_checks,
+                    write_gate_checks=self.write_gate_checks,
+                    write_gate_control_states=sorted(self.write_gate_states),
+                    response_write_tags=sorted(self.response_write_tags),
+                    suppressed_response_errors=sorted(self.suppressed_response_errors),
                     modes_sizes=sorted(self.modes_sizes), strides=sorted(self.strides),
                     occupancies=sorted(self.occupancies), tags=sorted(self.tags),
                     error_classes=sorted(self.errors), fatal_occupancies=sorted(self.fatal_occupancies),

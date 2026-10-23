@@ -28,7 +28,10 @@ The regression has **80 profiles** and **48 strict invalid-parameter checks**:
 Every profile runs 2000 seeded random cycles plus directed traffic. Set
 `LOAD_ENGINE_SEED`, `LOAD_ENGINE_RANDOM_CYCLES` (minimum 1000) and
 `LOAD_ENGINE_REGRESSION_BUILD` to override the campaign. The seed advances by
-profile index. The runner checks parameters, actual port widths, mandatory goals,
+profile index. `LOAD_ENGINE_JOBS` controls parallel simulator processes (1–32):
+Icarus defaults to four processes; VCS defaults to one to preserve serial license
+use. Each profile has its own build directory and unchanged seed assignment.
+The runner checks parameters, actual port widths, mandatory goals,
 ownership accounting and the identity of the one test that ran. Select profiles:
 
 ```sh
@@ -63,7 +66,11 @@ addresses. The existing `dma_engine_bounds` helper checks the entire affine
 rectangle, including the final element's bytes, before the descriptor reaches the
 AGU. Both helpers use existing repository-local packages. Common DFFs, counters,
 decoders and operand-isolation blocks provide storage, occupancy, tag decoding and
-invalid-output clamps. No existing common RTL is changed.
+invalid-output clamps. The common `write_gate` now also provides descriptor
+start/reject selection and vector response-entry write suppression. It prevents
+malformed, unallocated or duplicate responses from updating any entry while
+allowing legal failed-memory responses to capture their ordered error state.
+No existing common RTL is changed.
 
 The reorder table uses separately enabled DFF banks because an ordinary FIFO cannot
 accept arbitrary tagged response writes. Metadata writes only on an accepted
@@ -214,8 +221,17 @@ The passive monitor samples actual pre-NBA edges, settled outputs and held cycle
 The scoreboard checks all public outputs and the conservation equation
 `accepted = delivered + reset_discarded + outstanding`. Private checks cover slot
 ownership, stored-response flags, metadata/data captures and inactive-bank holds.
+They also sample the actual input/output pins of both reused write gates and
+compare them with the independent model's descriptor and response classifications.
+Mandatory goals cover idle/accepted/rejected gate controls, a legal response write
+to every tag, and suppression for every reachable malformed-response class.
 The native HDL checker independently checks ownership, allocation, response writes,
 AGU advancement, retirement, completion/drain, error data, events and counters.
+
+This campaign runs only the Python/PyUVM tests, including the existing native
+simulation assertions. Lint, formal analysis and synthesis are outside this run.
+Synthesis is deferred to **Design Compiler** using the existing repository flow
+when technology scripts and libraries are supplied.
 
 Campaigns record actual JUnit results, seeds, parameters, goals, simulator logs and
 RTL/dependency/verification hashes. Native simulation assertions are not formal
