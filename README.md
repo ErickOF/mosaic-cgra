@@ -17,6 +17,18 @@ working license and its `vcs` executable on `PATH`; alternatively, pass
 increment/decrement, disabled hold, clear/load priority, saturating boundaries,
 and event pulses. A failing test makes the command fail.
 
+Run the masked integer vector reduction specification regression:
+
+```sh
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=vector_reduction
+make vector-reduction-regression SIM=icarus
+```
+
+The unit provides exact widened SUM, MIN/MAX and bitwise AND/OR with explicit
+empty-mask identities, active count, signed extension and enabled-edge timing.
+See the [vector reduction validation guide](src/val/building_blocks/vector_reduction/README.md)
+for reusable components, profiles, coverage and static/formal checks.
+
 Run the integer vector lane specification regression:
 
 ```sh

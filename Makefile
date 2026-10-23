@@ -14,6 +14,7 @@ COCOTB_TEST_MODULES ?= test_$(COCOTB_TOPLEVEL)
 # Override the directory when a top has multiple suites or lives elsewhere.
 PYUVM_TEST_DIR ?= $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/$(COCOTB_TOPLEVEL)))
 ACCUMULATOR_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/accumulator))
+VECTOR_REDUCTION_TEST_DIR := $(PROJECT_ROOT)/src/val/building_blocks/vector_reduction
 VECTOR_LANE_TEST_DIR := $(PROJECT_ROOT)/src/val/building_blocks/vector_lane
 SCALAR_ALU_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/scalar_alu))
 NOC_ROUTER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/noc_router))
@@ -83,6 +84,15 @@ _RTL_SOURCES_scalar_alu := $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu_pk
     $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv \
     $(PROJECT_ROOT)/src/rtl/common/mux.sv \
     $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu.sv
+_RTL_SOURCES_vector_reduction := $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/vector_lane_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/vector_reduction_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/common/dff.sv \
+    $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv \
+    $(PROJECT_ROOT)/src/rtl/common/write_gate.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/vector_lane_pipeline.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/vector_reduction_tree.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/vector_reduction.sv
 _RTL_SOURCES_vector_lane := $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu_pkg.sv \
     $(PROJECT_ROOT)/src/rtl/building_blocks/vector_lane_pkg.sv \
     $(PROJECT_ROOT)/src/rtl/common/dff.sv \
@@ -198,6 +208,16 @@ ACCUMULATOR_SEED ?= 20261020
 export ACCUMULATOR_HDL_ASSERTIONS ?= 1
 _ACCUMULATOR_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
 _ACCUMULATOR_MAKE := $(MAKE)
+VECTOR_REDUCTION_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/vector_reduction/regression
+VECTOR_REDUCTION_STATIC_BUILD ?= $(PROJECT_ROOT)/build/static/vector_reduction
+VECTOR_REDUCTION_FORMAL_BUILD ?= $(PROJECT_ROOT)/build/formal/vector_reduction
+VECTOR_REDUCTION_YOSYS ?= yosys
+VECTOR_REDUCTION_VERILATOR ?= verilator
+VECTOR_REDUCTION_RANDOM_CYCLES ?= 2000
+VECTOR_REDUCTION_SEED ?= 20261022
+export VECTOR_REDUCTION_HDL_ASSERTIONS ?= 1
+_VECTOR_REDUCTION_MAKE := $(MAKE)
+_VECTOR_REDUCTION_SIM_BIN_DIR := $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
 VECTOR_LANE_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/vector_lane/regression
 VECTOR_LANE_STATIC_BUILD ?= $(PROJECT_ROOT)/build/static/vector_lane
 VECTOR_LANE_FORMAL_BUILD ?= $(PROJECT_ROOT)/build/formal/vector_lane
@@ -474,6 +494,15 @@ override undefine COMPILE_ARGS
 COMPILE_ARGS := $(_USER_COMPILE_ARGS)
 # Native RTL checkers sample after a precision-tick observation delay; some
 # suites also check private state. Exclude them from synthesis and gate sources.
+ifeq ($(COCOTB_TOPLEVEL),vector_reduction)
+ifneq ($(_GATE_RUN),1)
+ifeq ($(VECTOR_REDUCTION_HDL_ASSERTIONS),1)
+override VERILOG_SOURCES += $(VECTOR_REDUCTION_TEST_DIR)/vector_reduction_reference.sv \
+    $(VECTOR_REDUCTION_TEST_DIR)/vector_reduction_assertions.sv
+COMPILE_ARGS += $(if $(filter vcs,$(SIM)),+define+MOSAIC_VECTOR_REDUCTION_ASSERTIONS,-DMOSAIC_VECTOR_REDUCTION_ASSERTIONS)
+endif
+endif
+endif
 ifeq ($(COCOTB_TOPLEVEL),vector_lane)
 ifneq ($(_GATE_RUN),1)
 ifeq ($(VECTOR_LANE_HDL_ASSERTIONS),1)
@@ -859,6 +888,23 @@ stream-join-regression:
 		--seed "$(STREAM_JOIN_SEED)" --random-cycles "$(STREAM_JOIN_RANDOM_CYCLES)" \
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_STREAM_JOIN_MAKE)" \
 		$(if $(strip $(_STREAM_JOIN_SIM_BIN_DIR)),--sim-bin-dir "$(_STREAM_JOIN_SIM_BIN_DIR)")
+
+.PHONY: vector-reduction-regression vector-reduction-static vector-reduction-formal
+vector-reduction-regression:
+	@"$(PYTHON_BIN)" "$(VECTOR_REDUCTION_TEST_DIR)/run_vector_reduction_regression.py" \
+		--sim "$(SIM)" --build-dir "$(VECTOR_REDUCTION_REGRESSION_BUILD)" \
+		--seed "$(VECTOR_REDUCTION_SEED)" --random-cycles "$(VECTOR_REDUCTION_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_VECTOR_REDUCTION_MAKE)" \
+		$(if $(strip $(_VECTOR_REDUCTION_SIM_BIN_DIR)),--sim-bin-dir "$(_VECTOR_REDUCTION_SIM_BIN_DIR)")
+
+vector-reduction-static:
+	@"$(PYTHON_BIN)" "$(VECTOR_REDUCTION_TEST_DIR)/run_vector_reduction_static.py" \
+		--yosys "$(VECTOR_REDUCTION_YOSYS)" --verilator "$(VECTOR_REDUCTION_VERILATOR)" \
+		--build-dir "$(VECTOR_REDUCTION_STATIC_BUILD)"
+
+vector-reduction-formal:
+	@"$(PYTHON_BIN)" "$(VECTOR_REDUCTION_TEST_DIR)/run_vector_reduction_formal.py" \
+		--yosys "$(VECTOR_REDUCTION_YOSYS)" --build-dir "$(VECTOR_REDUCTION_FORMAL_BUILD)"
 
 .PHONY: vector-lane-regression vector-lane-static vector-lane-formal
 vector-lane-regression:
@@ -1397,6 +1443,9 @@ help:
 		'make stream-join-regression  Check atomic joins, final arrival and optional inputs' \
 		'make accumulator-regression  Check typed atomic lanes, arithmetic, status and clock enables' \
 		'make agu-regression  Check signed address sequences, descriptors, errors and backpressure' \
+		'make vector-reduction-regression  Check masked integer reductions and timing' \
+		'make vector-reduction-static  Lint and synthesize reduction profiles' \
+		'make vector-reduction-formal  Prove small-width reductions and bounded timing' \
 		'make vector-lane-regression  Check lane operations, predication and path alignment' \
 		'make vector-lane-static  Lint and synthesize vector lane profiles' \
 		'make vector-lane-formal  Prove tractable vector lane profiles' \
