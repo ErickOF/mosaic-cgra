@@ -24,6 +24,7 @@ MAC_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/mac))
 LUT_UNIT_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/lut_unit))
 LOOP_CONTROLLER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/loop_controller))
 LOCAL_SWITCH_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/local_switch))
+SCRATCHPAD_BANK_TEST_DIR := $(PROJECT_ROOT)/src/val/building_blocks/scratchpad_bank
 STREAM_FORMATTER_TEST_DIR := $(PROJECT_ROOT)/src/val/building_blocks/stream_formatter
 STORE_ENGINE_TEST_DIR := $(PROJECT_ROOT)/src/val/building_blocks/store_engine
 LOAD_ENGINE_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/load_engine))
@@ -75,6 +76,18 @@ _LOOP_CONTROLLER_SOURCES := $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv 
 _RTL_SOURCES_loop_controller := $(_LOOP_CONTROLLER_SOURCES)
 _LOCAL_SWITCH_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/local_switch_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/mux.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/register_slice.sv $(PROJECT_ROOT)/src/rtl/building_blocks/local_switch.sv
 _RTL_SOURCES_local_switch := $(_LOCAL_SWITCH_SOURCES)
+_RTL_SOURCES_scratchpad_bank = $(PROJECT_ROOT)/src/rtl/building_blocks/scratchpad_bank_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/common/dff.sv \
+    $(PROJECT_ROOT)/src/rtl/common/counter.sv \
+    $(PROJECT_ROOT)/src/rtl/common/decoder.sv \
+    $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv \
+    $(PROJECT_ROOT)/src/rtl/common/write_gate.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/parity.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/ecc.sv \
+    $(SRAM_BACKEND_SOURCE) \
+    $(PROJECT_ROOT)/src/rtl/basic/sram_wrapper.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/scratchpad_bank_counters.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/scratchpad_bank.sv
 _RTL_SOURCES_stream_formatter := $(PROJECT_ROOT)/src/rtl/building_blocks/stream_formatter_pkg.sv \
     $(PROJECT_ROOT)/src/rtl/common/dff.sv \
     $(PROJECT_ROOT)/src/rtl/common/counter.sv \
@@ -315,6 +328,12 @@ LOCAL_SWITCH_SEED ?= 20261021
 export LOCAL_SWITCH_HDL_ASSERTIONS ?= 1
 _LOCAL_SWITCH_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
 _LOCAL_SWITCH_MAKE := $(MAKE)
+SCRATCHPAD_BANK_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/scratchpad_bank/regression
+SCRATCHPAD_BANK_RANDOM_CYCLES ?= 2000
+SCRATCHPAD_BANK_SEED ?= 20261023
+export SCRATCHPAD_BANK_INSTRUMENTATION ?= 1
+_SCRATCHPAD_BANK_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_SCRATCHPAD_BANK_MAKE := $(MAKE)
 STREAM_FORMATTER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/stream_formatter/regression
 STREAM_FORMATTER_RANDOM_CYCLES ?= 2000
 STREAM_FORMATTER_SEED ?= 20261022
@@ -626,6 +645,14 @@ ifneq ($(_GATE_RUN),1)
 ifeq ($(LOCAL_SWITCH_HDL_ASSERTIONS),1)
 override VERILOG_SOURCES += $(LOCAL_SWITCH_TEST_DIR)/local_switch_assertions.sv
 COMPILE_ARGS += $(if $(filter vcs,$(SIM)),+define+MOSAIC_LOCAL_SWITCH_ASSERTIONS,-DMOSAIC_LOCAL_SWITCH_ASSERTIONS)
+endif
+endif
+endif
+ifeq ($(COCOTB_TOPLEVEL),scratchpad_bank)
+ifneq ($(_GATE_RUN),1)
+ifeq ($(SCRATCHPAD_BANK_INSTRUMENTATION),1)
+override VERILOG_SOURCES += $(SCRATCHPAD_BANK_TEST_DIR)/scratchpad_bank_instrumentation.sv
+COMPILE_ARGS += $(if $(filter vcs,$(SIM)),+define+MOSAIC_SCRATCHPAD_BANK_INSTRUMENTATION,-DMOSAIC_SCRATCHPAD_BANK_INSTRUMENTATION)
 endif
 endif
 endif
@@ -1092,6 +1119,14 @@ local-switch-regression:
 		--seed "$(LOCAL_SWITCH_SEED)" --random-cycles "$(LOCAL_SWITCH_RANDOM_CYCLES)" \
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_LOCAL_SWITCH_MAKE)" \
 		$(if $(strip $(_LOCAL_SWITCH_SIM_BIN_DIR)),--sim-bin-dir "$(_LOCAL_SWITCH_SIM_BIN_DIR)")
+
+.PHONY: scratchpad-bank-regression
+scratchpad-bank-regression:
+	@"$(PYTHON_BIN)" "$(SCRATCHPAD_BANK_TEST_DIR)/run_scratchpad_bank_regression.py" \
+		--sim "$(SIM)" --build-dir "$(SCRATCHPAD_BANK_REGRESSION_BUILD)" \
+		--seed "$(SCRATCHPAD_BANK_SEED)" --random-cycles "$(SCRATCHPAD_BANK_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_SCRATCHPAD_BANK_MAKE)" \
+		$(if $(strip $(_SCRATCHPAD_BANK_SIM_BIN_DIR)),--sim-bin-dir "$(_SCRATCHPAD_BANK_SIM_BIN_DIR)")
 
 .PHONY: stream-formatter-regression
 stream-formatter-regression:
@@ -1569,6 +1604,7 @@ help:
 		'make lut-unit-regression  Check programmable tables, interpolation and bank lifecycle' \
 		'make loop-controller-regression  Check nested loops, pacing and runtime safe points' \
 		'make local-switch-regression  Check static routes, sparse edges and multicast copies' \
+		'make scratchpad-bank-regression  Check ordered subword memory, protection and recovery' \
 		'make stream-formatter-regression  Check canonical frames, lanes and elastic output' \
 		'make store-engine-regression  Check atomic writes, framing and ordered completions' \
 		'make load-engine-regression  Check tagged reads, ordered retirement and fatal drain' \
