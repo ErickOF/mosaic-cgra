@@ -14,6 +14,7 @@ COCOTB_TEST_MODULES ?= test_$(COCOTB_TOPLEVEL)
 # Override the directory when a top has multiple suites or lives elsewhere.
 PYUVM_TEST_DIR ?= $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/$(COCOTB_TOPLEVEL)))
 ACCUMULATOR_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/accumulator))
+VECTOR_LANE_TEST_DIR := $(PROJECT_ROOT)/src/val/building_blocks/vector_lane
 SCALAR_ALU_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/scalar_alu))
 NOC_ROUTER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/noc_router))
 MULTIPLIER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/multiplier))
@@ -82,6 +83,18 @@ _RTL_SOURCES_scalar_alu := $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu_pk
     $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv \
     $(PROJECT_ROOT)/src/rtl/common/mux.sv \
     $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu.sv
+_RTL_SOURCES_vector_lane := $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/vector_lane_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/common/dff.sv \
+    $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv \
+    $(PROJECT_ROOT)/src/rtl/common/mux.sv \
+    $(PROJECT_ROOT)/src/rtl/common/write_gate.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/multiplier.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/dot_product.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/mac.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/vector_lane_pipeline.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/vector_lane.sv
 _NOC_ROUTER_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/noc_router_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/mux.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/ecc.sv $(PROJECT_ROOT)/src/rtl/basic/round_robin_arbiter.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv $(PROJECT_ROOT)/src/rtl/building_blocks/noc_router_codec.sv $(PROJECT_ROOT)/src/rtl/building_blocks/noc_router_buffer.sv $(PROJECT_ROOT)/src/rtl/building_blocks/noc_router.sv
 _RTL_SOURCES_noc_router := $(_NOC_ROUTER_SOURCES)
 _RTL_SOURCES_multiplier := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/building_blocks/multiplier.sv
@@ -185,6 +198,16 @@ ACCUMULATOR_SEED ?= 20261020
 export ACCUMULATOR_HDL_ASSERTIONS ?= 1
 _ACCUMULATOR_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
 _ACCUMULATOR_MAKE := $(MAKE)
+VECTOR_LANE_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/vector_lane/regression
+VECTOR_LANE_STATIC_BUILD ?= $(PROJECT_ROOT)/build/static/vector_lane
+VECTOR_LANE_FORMAL_BUILD ?= $(PROJECT_ROOT)/build/formal/vector_lane
+VECTOR_LANE_YOSYS ?= yosys
+VECTOR_LANE_VERILATOR ?= verilator
+VECTOR_LANE_RANDOM_CYCLES ?= 2000
+VECTOR_LANE_SEED ?= 20261022
+export VECTOR_LANE_HDL_ASSERTIONS ?= 1
+_VECTOR_LANE_MAKE := $(MAKE)
+_VECTOR_LANE_SIM_BIN_DIR := $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
 SCALAR_ALU_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/scalar_alu/regression
 SCALAR_ALU_STATIC_BUILD ?= $(PROJECT_ROOT)/build/static/scalar_alu
 SCALAR_ALU_VERILATOR ?= verilator
@@ -451,6 +474,15 @@ override undefine COMPILE_ARGS
 COMPILE_ARGS := $(_USER_COMPILE_ARGS)
 # Native RTL checkers sample after a precision-tick observation delay; some
 # suites also check private state. Exclude them from synthesis and gate sources.
+ifeq ($(COCOTB_TOPLEVEL),vector_lane)
+ifneq ($(_GATE_RUN),1)
+ifeq ($(VECTOR_LANE_HDL_ASSERTIONS),1)
+override VERILOG_SOURCES += $(VECTOR_LANE_TEST_DIR)/vector_lane_reference.sv \
+    $(VECTOR_LANE_TEST_DIR)/vector_lane_assertions.sv
+COMPILE_ARGS += $(if $(filter vcs,$(SIM)),+define+MOSAIC_VECTOR_LANE_ASSERTIONS,-DMOSAIC_VECTOR_LANE_ASSERTIONS)
+endif
+endif
+endif
 ifeq ($(COCOTB_TOPLEVEL),scalar_alu)
 ifneq ($(_GATE_RUN),1)
 ifeq ($(SCALAR_ALU_HDL_ASSERTIONS),1)
@@ -827,6 +859,23 @@ stream-join-regression:
 		--seed "$(STREAM_JOIN_SEED)" --random-cycles "$(STREAM_JOIN_RANDOM_CYCLES)" \
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_STREAM_JOIN_MAKE)" \
 		$(if $(strip $(_STREAM_JOIN_SIM_BIN_DIR)),--sim-bin-dir "$(_STREAM_JOIN_SIM_BIN_DIR)")
+
+.PHONY: vector-lane-regression vector-lane-static vector-lane-formal
+vector-lane-regression:
+	@"$(PYTHON_BIN)" "$(VECTOR_LANE_TEST_DIR)/run_vector_lane_regression.py" \
+		--sim "$(SIM)" --build-dir "$(VECTOR_LANE_REGRESSION_BUILD)" \
+		--seed "$(VECTOR_LANE_SEED)" --random-cycles "$(VECTOR_LANE_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_VECTOR_LANE_MAKE)" \
+		$(if $(strip $(_VECTOR_LANE_SIM_BIN_DIR)),--sim-bin-dir "$(_VECTOR_LANE_SIM_BIN_DIR)")
+
+vector-lane-static:
+	@"$(PYTHON_BIN)" "$(VECTOR_LANE_TEST_DIR)/run_vector_lane_static.py" \
+		--yosys "$(VECTOR_LANE_YOSYS)" --verilator "$(VECTOR_LANE_VERILATOR)" \
+		--build-dir "$(VECTOR_LANE_STATIC_BUILD)"
+
+vector-lane-formal:
+	@"$(PYTHON_BIN)" "$(VECTOR_LANE_TEST_DIR)/run_vector_lane_formal.py" \
+		--yosys "$(VECTOR_LANE_YOSYS)" --build-dir "$(VECTOR_LANE_FORMAL_BUILD)"
 
 .PHONY: scalar-alu-static
 scalar-alu-static:
@@ -1348,6 +1397,9 @@ help:
 		'make stream-join-regression  Check atomic joins, final arrival and optional inputs' \
 		'make accumulator-regression  Check typed atomic lanes, arithmetic, status and clock enables' \
 		'make agu-regression  Check signed address sequences, descriptors, errors and backpressure' \
+		'make vector-lane-regression  Check lane operations, predication and path alignment' \
+		'make vector-lane-static  Lint and synthesize vector lane profiles' \
+		'make vector-lane-formal  Prove tractable vector lane profiles' \
 		'make scalar-alu-static  Lint and synthesize combinational ALU profiles' \
 		'make scalar-alu-formal  Prove ALU profiles with Yosys/slang' \
 		'make scalar-alu-regression  Check scalar operations, flags and feature modes' \

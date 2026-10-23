@@ -17,6 +17,18 @@ working license and its `vcs` executable on `PATH`; alternatively, pass
 increment/decrement, disabled hold, clear/load priority, saturating boundaries,
 and event pulses. A failing test makes the command fail.
 
+Run the integer vector lane specification regression:
+
+```sh
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=vector_lane
+make vector-lane-regression SIM=icarus
+```
+
+The lane composes the scalar ALU, multiplier and MAC with lane masking,
+predication, result-format metadata and fixed enabled-edge path alignment.
+See the [vector lane validation guide](src/val/building_blocks/vector_lane/README.md)
+for the parameter matrix, reusable components and static/formal targets.
+
 Run the combinational scalar integer ALU specification regression:
 
 ```sh
