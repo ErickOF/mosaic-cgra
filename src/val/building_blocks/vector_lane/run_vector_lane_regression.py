@@ -1,0 +1,385 @@
+"""Run the vector lane width/feature matrix and strict integration assertions."""
+
+import hashlib
+import json
+import os
+import shlex
+import sys
+import xml.etree.ElementTree as ET
+from concurrent.futures import ThreadPoolExecutor
+from datetime import UTC, datetime
+from itertools import product
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "lib"))
+from mosaic_uvm.regression import (
+    campaign_status,
+    finish_summary,
+    license_unavailable,
+    parameter_guard,
+    parse_args,
+    passed_test,
+    require_simulator,
+    run_simulation,
+)
+from mosaic_uvm.regression import (
+    verification_hashes as shared_verification_hashes,
+)
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from vector_lane.config import DEFAULTS
+
+ROOT = Path(__file__).resolve().parents[4]
+TEST_DIR = Path(__file__).resolve().parent
+DEPENDENCIES = tuple(
+    ROOT / f"src/rtl/{name}.sv"
+    for name in (
+        "building_blocks/scalar_alu_pkg",
+        "building_blocks/vector_lane_pkg",
+        "common/dff",
+        "common/operand_isolation",
+        "common/mux",
+        "common/write_gate",
+        "building_blocks/scalar_alu",
+        "building_blocks/multiplier",
+        "building_blocks/dot_product",
+        "building_blocks/mac",
+        "building_blocks/vector_lane_pipeline",
+    )
+)
+PROFILES = (
+    *(
+        (
+            f"l{l}_mul{ml}_mac{mc}_a{a}",
+            DEFAULTS
+            | {
+                "ELEMENT_WIDTH": 1,
+                "ACC_WIDTH": 2,
+                "LANE_LATENCY": l,
+                "MUL_LATENCY": ml,
+                "MAC_LATENCY": mc,
+                "ASYNC_RESET": a,
+            },
+        )
+        for l in range(5)
+        for ml, mc, a in product(range(l + 1), range(l + 1), range(2))
+    ),
+    *(
+        (
+            f"features_{m}{c}{s}{n}",
+            DEFAULTS
+            | {
+                "ELEMENT_WIDTH": 2,
+                "ACC_WIDTH": 5,
+                "SUPPORT_MUL": m,
+                "SUPPORT_MAC": c,
+                "SUPPORT_SATURATION": s,
+                "SUPPORT_MINMAX": n,
+                "LANE_LATENCY": 2,
+                "MUL_LATENCY": 1,
+                "MAC_LATENCY": 2,
+            },
+        )
+        for m, c, s, n in product(range(2), repeat=4)
+    ),
+    *(
+        (
+            f"e{e}_acc{a}_async{reset}",
+            DEFAULTS | {"ELEMENT_WIDTH": e, "ACC_WIDTH": a, "ASYNC_RESET": reset},
+        )
+        for (e, a), reset in product(
+            (
+                (1, 2),
+                (1, 3),
+                (3, 6),
+                (3, 13),
+                (4, 16),
+                (4, 32),
+                (8, 16),
+                (8, 32),
+                (8, 64),
+                (16, 32),
+                (16, 64),
+            ),
+            range(2),
+        )
+    ),
+    *(
+        (
+            f"custom_latency_a{a}",
+            DEFAULTS
+            | {
+                "ELEMENT_WIDTH": 1,
+                "ACC_WIDTH": 2,
+                "LANE_LATENCY": 6,
+                "MUL_LATENCY": 4,
+                "MAC_LATENCY": 6,
+                "MAX_LANE_LATENCY": 6,
+                "ASYNC_RESET": a,
+            },
+        )
+        for a in range(2)
+    ),
+    (
+        "disabled_latencies_ignored",
+        DEFAULTS
+        | {
+            "ELEMENT_WIDTH": 2,
+            "ACC_WIDTH": 4,
+            "SUPPORT_MUL": 0,
+            "SUPPORT_MAC": 0,
+            "MUL_LATENCY": 99,
+            "MAC_LATENCY": -1,
+        },
+    ),
+)
+INVALID = (
+    *(
+        (f"{key.lower()}_{label}", {key: value})
+        for key in ("ELEMENT_WIDTH", "ACC_WIDTH", "MAX_LANE_LATENCY")
+        for label, value in (("zero", 0), ("negative", -1), ("x", "32'bx"), ("z", "32'bz"))
+    ),
+    ("accumulator_too_narrow", {"ACC_WIDTH": 15}),
+    ("element_overflow", {"ELEMENT_WIDTH": "64'd4294967296"}),
+    ("packed_overflow", {"ELEMENT_WIDTH": 268435400, "ACC_WIDTH": 536870800}),
+    ("latency_overflow", {"LANE_LATENCY": 2147483646, "MAX_LANE_LATENCY": 2147483646}),
+    *(
+        (f"{key.lower()}_{label}", {key: value})
+        for key in (
+            "SUPPORT_MUL",
+            "SUPPORT_MAC",
+            "SUPPORT_SATURATION",
+            "SUPPORT_MINMAX",
+            "ASYNC_RESET",
+        )
+        for label, value in (("two", 2), ("negative", -1), ("x", "32'bx"), ("z", "32'bz"))
+    ),
+    *(
+        (f"{key.lower()}_{label}", {key: value})
+        for key in ("LANE_LATENCY", "MUL_LATENCY", "MAC_LATENCY")
+        for label, value in (("negative", -1), ("too_long", 5), ("x", "32'bx"), ("z", "32'bz"))
+    ),
+    *(
+        (f"{key.lower()}_{label}", {key: value})
+        for key, wrong in (("OPCODE_WIDTH", 4), ("RESULT_FORMAT_WIDTH", 3))
+        for label, value in (("wrong", wrong), ("x", "32'bx"), ("z", "32'bz"))
+    ),
+    ("zero_latency_multiplier", {"LANE_LATENCY": 0, "MAC_LATENCY": 0}),
+    ("zero_latency_mac", {"LANE_LATENCY": 0, "MUL_LATENCY": 0}),
+)
+PROBES = tuple(
+    (f"{name}:{state}:{op}:{select}", name)
+    for name, op, select in (
+        ("i_valid", 0, 0),
+        ("i_rstb", 0, 0),
+        ("i_clock_enable", 0, 0),
+        ("i_operand_a", 0, 0),
+        ("i_operand_b", 0, 0),
+        ("i_operand_a", 5, 0),
+        ("i_operand_a", 16, 0),
+        ("i_operand_b", 17, 0),
+        ("i_operand_a", 15, 1),
+        ("i_operand_b", 15, 0),
+        ("i_operand_a", 20, 0),
+        ("i_operand_b", 20, 0),
+        ("i_operand_a", 21, 0),
+        ("i_operand_b", 21, 0),
+        ("i_accumulator", 21, 0),
+    )
+    for state in "xz"
+)
+
+
+REUSED_VERIFICATION = tuple(
+    ROOT / "src/val/building_blocks" / path
+    for path in (
+        "scalar_alu/model.py",
+        "scalar_alu/transaction.py",
+        "multiplier/monitor.py",
+        "multiplier/transaction.py",
+    )
+)
+
+
+def verification_hashes(test_dir):
+    return shared_verification_hashes(test_dir) | {
+        str(path.relative_to(ROOT)): hashlib.sha256(path.read_bytes()).hexdigest()
+        for path in REUSED_VERIFICATION
+    }
+
+
+def simulate(args, build, rtl, parameters, seed, probe=""):
+    prefix = "-Pvector_lane." if args.sim == "icarus" else "-pvalue+vector_lane."
+    flags = " ".join(shlex.quote(f"{prefix}{key}={value}") for key, value in parameters.items())
+    return run_simulation(
+        args,
+        ROOT,
+        TEST_DIR,
+        "vector_lane",
+        "test_vector_lane",
+        "LaneTest",
+        build,
+        " ".join(map(str, (*DEPENDENCIES, rtl))),
+        parameters=parameters,
+        compile_args=f"{args.compile_args} {flags}",
+        environment={
+            **{f"VECTOR_LANE_{key}": str(value) for key, value in parameters.items()},
+            "VECTOR_LANE_SEED": str(seed),
+            "VECTOR_LANE_RANDOM_CYCLES": str(args.random_cycles),
+            "VECTOR_LANE_CHECK_INTERNALS": "1",
+            "VECTOR_LANE_HDL_ASSERTIONS": "1",
+            "VECTOR_LANE_ASSERTION_PROBE": probe,
+        },
+    )
+
+
+def assertion_probes(args, build, rtl):
+    rows = []
+    for index, (probe, name) in enumerate(PROBES):
+        result, log, results, _ = simulate(
+            args,
+            build / "assertion_probes" / f"{index:02d}",
+            rtl,
+            DEFAULTS | {"ELEMENT_WIDTH": 3, "ACC_WIDTH": 8},
+            args.seed,
+            probe,
+        )
+        rejected = result.returncode != 0 and f"VECTOR_LANE_PROTOCOL: {name}" in log.read_text()
+        if results.exists():
+            try:
+                cases = ET.parse(results).findall(".//testcase")
+                rejected &= (
+                    len(cases) == 1
+                    and cases[0].find("failure") is not None
+                    and cases[0].get("name") == "LaneTest"
+                    and cases[0].get("classname") == "test_vector_lane"
+                )
+            except ET.ParseError:
+                rejected = False
+        status = (
+            "NOT_RUN" if license_unavailable(log.read_text()) else "PASS" if rejected else "FAIL"
+        )
+        rows.append({"probe": probe, "expected_assertion": name, "status": status, "log": str(log)})
+        print("Assertion", probe, status, flush=True)
+    return rows
+
+
+def run_profile(task):
+    args, build, rtl, index, name, p = task
+    print("Running", name, flush=True)
+    result, log, results, coverage = simulate(args, build / name, rtl, p, args.seed + index)
+    row = {"name": name, "parameters": p, "status": "FAIL", "log": str(log)}
+    try:
+        if result.returncode:
+            raise ValueError(f"make exited {result.returncode}")
+        passed_test(results, "LaneTest", "test_vector_lane")
+        data = json.loads(coverage.read_text())
+        if (
+            data["status"] != "PASS"
+            or data["parameters"] != p
+            or not data["goals"]
+            or not all(data["goals"].values())
+            or data["random_transactions"] != args.random_cycles
+            or data["seed"] != args.seed + index
+            or data["native_hdl_assertions"] != "PASS"
+        ):
+            raise ValueError("Coverage evidence mismatch")
+        row.update(data, name=name, log=str(log), coverage=str(coverage))
+    except (OSError, ValueError, KeyError, ET.ParseError) as error:
+        row["error"] = str(error)
+        if license_unavailable(log.read_text()):
+            row["status"] = "NOT_RUN"
+        print("\n".join(log.read_text().splitlines()[-22:]), flush=True)
+    print(name, row["status"], flush=True)
+    return row
+
+
+def main():
+    args = parse_args(
+        "vector_lane",
+        __doc__,
+        profiles=[name for name, _ in PROFILES],
+        seed=20261022,
+        rtl_category="building_blocks",
+    )
+    build, rtl = args.build_dir.resolve(), args.rtl.resolve()
+    build.mkdir(parents=True, exist_ok=True)
+    output = build / "summary.json"
+    output.unlink(missing_ok=True)
+    summary = {
+        "status": "NOT_RUN",
+        "framework": "PyUVM",
+        "simulator": args.sim,
+        "profiles": [],
+        "parameter_checks": [],
+        "assertion_probes": [],
+        "started_at_utc": datetime.now(UTC).isoformat(),
+        "specification": "specs/building-blocks/mosaic-vector-lane/README.md",
+        "external_checks": dict.fromkeys(
+            (
+                "formal",
+                "commercial_lint",
+                "cdc",
+                "rdc",
+                "dft",
+                "vc_lp",
+                "technology_synthesis",
+                "sequential_equivalence",
+                "physical_timing",
+                "physical_power",
+                "mosaic_contracts",
+            ),
+            "NOT_RUN",
+        ),
+    }
+    try:
+        summary["rtl_sha256"] = hashlib.sha256(rtl.read_bytes()).hexdigest()
+        summary["dependency_sha256"] = {
+            str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
+            for p in DEPENDENCIES
+        }
+        summary["verification_sha256"] = verification_hashes(TEST_DIR)
+        require_simulator(args)
+        tasks = [
+            (args, build, rtl, i, name, p)
+            for i, (name, p) in enumerate(PROFILES)
+            if not args.case or name in args.case
+        ]
+        jobs = int(os.getenv("VECTOR_LANE_JOBS", "4"))
+        if not 1 <= jobs <= 32:
+            raise ValueError("VECTOR_LANE_JOBS must be between 1 and 32")
+        with ThreadPoolExecutor(max_workers=jobs) as pool:
+            summary["profiles"] = list(pool.map(run_profile, tasks))
+        summary["parameter_checks"] = [
+            parameter_guard(
+                args,
+                build,
+                rtl,
+                "vector_lane",
+                name,
+                p,
+                "vector_lane_parameters_must_be_valid",
+                dependencies=DEPENDENCIES,
+            )
+            for name, p in INVALID
+        ]
+        summary["assertion_probes"] = assertion_probes(args, build, rtl)
+        complete = (
+            len(summary["profiles"]) == (len(set(args.case)) if args.case else len(PROFILES))
+            and len(summary["parameter_checks"]) == len(INVALID)
+            and len(summary["assertion_probes"]) == len(PROBES)
+        )
+        summary["status"] = campaign_status(
+            (*summary["profiles"], *summary["parameter_checks"], *summary["assertion_probes"]),
+            complete,
+        )
+    except (OSError, ValueError) as error:
+        summary["error"] = str(error)
+        print(error, file=sys.stderr)
+    finally:
+        finish_summary(output, summary, "Vector lane")
+    return 0 if summary["status"] == "PASS" else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
