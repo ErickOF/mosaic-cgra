@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parents[4]
 TEST_DIR = Path(__file__).resolve().parent
 DEPENDENCIES = tuple(ROOT / f'src/rtl/{name}.sv' for name in (
     'building_blocks/agu_pkg', 'building_blocks/dma_engine_pkg', 'building_blocks/load_engine_pkg',
-    'common/dff', 'common/counter', 'common/operand_isolation', 'common/decoder',
+    'common/dff', 'common/counter', 'common/operand_isolation', 'common/decoder', 'common/write_gate',
     'building_blocks/dma_engine_bounds', 'building_blocks/agu', 'building_blocks/load_engine_counters'))
 
 

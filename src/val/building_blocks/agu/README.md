@@ -4,7 +4,7 @@ This suite checks [the regular address-generation specification](../../../../../
 against `src/rtl/building_blocks/agu.sv`. It uses the normal PyUVM test,
 environment, agent, sequencer, driver, monitor, scoreboard and coverage hierarchy.
 Shared `mosaic_uvm` components provide wiring, four-state conversion, simulator
-execution, exact JUnit validation and evidence hashes. Python 3.10 or newer is
+execution, exact JUnit validation and evidence hashes. Python 3.11 or newer is
 required; the local campaign uses Python 3.12, cocotb 2.1 and PyUVM 5.0.
 
 ## Running
@@ -13,6 +13,7 @@ required; the local campaign uses Python 3.12, cocotb 2.1 and PyUVM 5.0.
 make agu-regression                  # VCS, with a working installation/license
 make agu-regression SIM=icarus       # native four-state RTL simulation
 make pyuvm SIM=icarus COCOTB_TOPLEVEL=agu
+make agu-lint                        # Verilator, no synthesis
 ```
 
 The regression has 32 profiles spanning address widths `1, 3, 4, 8, 32, 64`,
@@ -33,7 +34,7 @@ Select a profile using the runner directly:
 `summary.json`, profile `coverage.json`, simulator logs, `parameters.json` and
 JUnit `results.xml` are written under the selected build directory. The runner
 requires the expected test exactly once, matching parameters and seed, every
-mandatory goal, storage assertions and the HDL checker. It records source,
+mandatory goal, storage assertions, reusable write-gate checks and the HDL checker. It records source,
 dependency, shared-helper and Makefile hashes. Missing tools/licenses produce
 `NOT_RUN`; a partial or failing campaign cannot produce `PASS`.
 
@@ -41,7 +42,12 @@ dependency, shared-helper and Makefile hashes. Missing tools/licenses produce
 
 The implementation reuses common `counter` instances for inner index, outer
 index and accepted-address count, `dff` for captured descriptors, addresses and
-control, and `operand_isolation` for adder operands and inactive outputs.
+control, `operand_isolation` for adder operands and inactive outputs, and
+`write_gate` for descriptor capture and address acceptance. A descriptor gate
+produces mutually exclusive start/reject events; an address gate suppresses
+transfers during backpressure, including unknown ready values. All sequence
+updates derive from the qualified address event. The load engine's source lists
+include these dependencies as well.
 One extended address adder is shared by inner and row-base updates. It accepts
 one address each cycle at full downstream readiness. No generated clock,
 descriptor queue, request issuance, memory response handling, cancellation or
@@ -105,7 +111,10 @@ verify descriptor capture, accepted-only writes, disabled 1D row updates,
 backpressure holds and unreset payload behavior. Both extended adder operands
 must be zero while idle, stalled, final, reset-qualified or in sticky error.
 Continuous waveform observations catch between-edge output/storage changes;
-raw observations serve hold assertions only.
+raw observations serve hold assertions only. The monitor also samples the actual
+input/output pins of both reused write gates. Independent checks cover enable,
+suppress, accepted and suppressed events, with mandatory enabled, idle, rejected
+and stalled control combinations.
 
 Directed traffic includes:
 
@@ -163,24 +172,33 @@ Disabled internal/HDL checks report `NOT_RUN`. This switch alone does not qualif
 the suite for SDF timing; delayed gate sampling requires a separate timing-aware
 driver and an independent physical verification campaign.
 
-## Evidence and limits
+## Lint and synthesis scope
 
-Local qualification artifacts live under ignored `build/validation/agu-*`:
-native PyUVM results, native-package Verilator lint, generic Yosys structure,
-small-profile formal safety proofs and injected RTL fault checks. Yosys's
-portable proof/synthesis view inlines the exact enum package because its
-Verilog frontend lacks package imports; native lint and simulation compile
-the original package and RTL directly.
+`make agu-lint` runs Verilator `--lint-only -Wall` for the same 32 parameter
+profiles as the PyUVM regression, using the native enum package and all common
+RTL dependencies. A warning fails lint; there are no warning waivers. Configure
+`AGU_VERILATOR` and `AGU_LINT_BUILD` to select the executable and report directory.
+The lint runner also supports `--case`. Results include source/dependency and
+verification hashes, exact commands, parameters and the Verilator version:
 
-The 16 formal profiles cross address widths 3/4, count widths 1/2, maximum
-element bytes 1/2 and both resets. They prove unbounded binary safety after
-reset against a closed-form reference with arbitrary descriptors and stalls.
-Asynchronous proofs use `async2sync` clock-edge abstraction. Four-state behavior
-and between-edge reset pulses are checked in native simulation; formal results
-do not establish reset recovery/removal or physical timing.
+```sh
+make agu-lint AGU_VERILATOR=/path/to/verilator
+```
 
-Technology synthesis, VCS execution, VC Lint/CDC/RDC/LP, DFT, mapped sequential
-equivalence, load/store integration, timing corners, clock-gating insertion,
-physical power/energy and external contract compatibility require their own
-tools and evidence. Missing results remain `NOT_RUN`; generic RTL qualification
-does not establish the specification's complete physical release criteria.
+The current validation scope is Python/PyUVM simulation and lint. Neither target
+runs synthesis or formal tools. Synthesis is deferred to **Design Compiler** using
+the repository's existing `make synth COCOTB_TOPLEVEL=agu` flow when technology
+setup scripts and libraries are available. No Yosys synthesis is required or run.
+
+The simulation report is `build/<sim>/agu/regression/summary.json`; lint results
+are in `build/lint/agu/summary.json` by default. The 37 invalid-parameter cases
+must fail strictly during elaboration. Small-profile exhaustive descriptors and
+all mandatory functional coverage goals must pass with both reset styles.
+Existing reports from earlier RTL revisions do not qualify changed sources;
+compare the recorded hashes when using evidence.
+
+VCS execution, commercial lint/CDC/RDC/LP, DFT, Design Compiler synthesis, mapped
+sequential equivalence, formal analysis, timing corners, clock-gating insertion,
+physical power/energy and external contract compatibility require their own tools
+and evidence. They remain `NOT_RUN` in this campaign. Local simulation and lint
+do not establish the specification's complete physical release criteria.
