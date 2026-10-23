@@ -186,6 +186,21 @@ order. See the [store-engine verification details](src/val/building_blocks/store
 for the 80-profile Python campaign, optional counters and fatal-drain contracts.
 Synthesis is deferred to Design Compiler.
 
+Run the canonical stream-formatter specification regression:
+
+```sh
+make stream-formatter-regression
+make stream-formatter-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=stream_formatter
+```
+
+The formatter reuses the register slice, lane mask and common state, counters,
+write gating and isolation. It generates frame/row metadata, validates incoming
+claims and clamps invalid bytes in combinational or buffered profiles. See the
+[stream-formatter verification details](src/val/building_blocks/stream_formatter/README.md)
+for the 40-profile Python campaign, local encodings and flush/reset contracts.
+Synthesis is deferred to Design Compiler.
+
 Run the fixed-point exponential specification regression:
 
 ```sh
