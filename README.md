@@ -201,6 +201,21 @@ claims and clamps invalid bytes in combinational or buffered profiles. See the
 for the 40-profile Python campaign, local encodings and flush/reset contracts.
 Synthesis is deferred to Design Compiler.
 
+Run the scratchpad-bank specification regression:
+
+```sh
+make scratchpad-bank-regression
+make scratchpad-bank-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=scratchpad_bank
+```
+
+The bank reuses the SRAM wrapper, parity, ECC and common control/storage blocks
+for ordered byte-addressed reads and masked writes. Protected partial writes use
+atomic RMW; SECDED correction supports inline scrub. See the
+[scratchpad-bank verification details](src/val/building_blocks/scratchpad_bank/README.md)
+for the 184-profile Python campaign, backend layout and recovery contracts.
+Synthesis is deferred to Design Compiler.
+
 Run the fixed-point exponential specification regression:
 
 ```sh
