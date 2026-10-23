@@ -165,7 +165,8 @@ make pyuvm SIM=icarus COCOTB_TOPLEVEL=load_engine
 ```
 
 The load engine reuses the AGU and DMA affine bounds checker to issue tagged reads,
-accept out-of-order responses and retire stream beats in request order. Its PyUVM
+accept out-of-order responses and retire stream beats in request order. Common
+write gates qualify descriptor capture and suppress malformed response writes. Its PyUVM
 suite checks byte masks, metadata, backpressure, tag lifetime, fatal drain and reset.
 See the [load-engine verification details](src/val/building_blocks/load_engine/README.md)
 for the 80-profile matrix, optional counters and integration assumptions.

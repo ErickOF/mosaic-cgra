@@ -1,8 +1,10 @@
-"""Reproducible generated images and actual PyUVM numerical/elastic campaigns."""
+"""Run the ordered load-engine PyUVM matrix and strict parameter guards."""
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 import hashlib
 from itertools import product
 import json
+import os
 from pathlib import Path
 import shlex
 import subprocess
@@ -56,6 +58,43 @@ INVALID = tuple((f'{name.lower()}_{label}', {name: value}) for name in POSITIVES
 )
 
 
+def run_profile(task):
+    args, build, rtl, index, name, parameters = task
+    print('Running', name, flush=True)
+    prefix = '-Pload_engine.' if args.sim == 'icarus' else '-pvalue+load_engine.'
+    flags = ' '.join(shlex.quote(f'{prefix}{key}={value}') for key, value in parameters.items())
+    result, log, results, coverage = run_simulation(args, ROOT, TEST_DIR, 'load_engine',
+        'test_load_engine', 'LoadEngineTest', build / name, ' '.join(map(str, (*DEPENDENCIES, rtl))),
+        parameters=parameters, compile_args=f'{args.compile_args} {flags}', environment={
+            **{f'LOAD_ENGINE_{key}': str(value) for key, value in parameters.items()},
+            'LOAD_ENGINE_SEED': str(args.seed + index), 'LOAD_ENGINE_RANDOM_CYCLES': str(args.random_cycles),
+            'LOAD_ENGINE_CHECK_INTERNALS': '1', 'LOAD_ENGINE_HDL_ASSERTIONS': '1'})
+    row = dict(name=name, parameters=parameters, status='FAIL', log=str(log))
+    try:
+        if result.returncode:
+            raise ValueError(f'make exited {result.returncode}')
+        passed_test(results, 'LoadEngineTest', 'test_load_engine')
+        data = json.loads(coverage.read_text())
+        if (data['status'] != 'PASS' or data['parameters'] != parameters or not data['goals'] or
+            not all(data['goals'].values()) or data['hdl_assertions'] != 'PASS' or
+            data['internal_storage_assertions'] != 'PASS' or data['write_gate_checks'] <= 0 or
+            data['seed'] != args.seed + index or
+            data['random_transactions'] != args.random_cycles):
+            raise ValueError('Coverage evidence mismatch')
+        accounting = data['accounting']
+        if (accounting['accepted'] <= 0 or accounting['outstanding'] != 0 or
+            accounting['accepted'] != accounting['delivered'] + accounting['discarded']):
+            raise ValueError('Ownership accounting mismatch')
+        row.update(data, name=name, log=str(log), coverage=str(coverage))
+    except (OSError, ValueError, KeyError, ET.ParseError) as error:
+        row['error'] = str(error)
+        if license_unavailable(log.read_text()):
+            row['status'] = 'NOT_RUN'
+        print('\n'.join(log.read_text().splitlines()[-22:]), flush=True)
+    print(name, row['status'], flush=True)
+    return row
+
+
 def main():
     args = parse_args('load_engine', __doc__, profiles=[name for name, _ in PROFILES],
                       seed=20261021, rtl_category='building_blocks')
@@ -73,41 +112,15 @@ def main():
                                         for p in DEPENDENCIES}
         summary['verification_sha256'] = verification_hashes(TEST_DIR)
         require_simulator(args)
-        for index, (name, parameters) in enumerate(PROFILES):
-            if args.case and name not in args.case:
-                continue
-            print('Running', name, flush=True)
-            prefix = '-Pload_engine.' if args.sim == 'icarus' else '-pvalue+load_engine.'
-            flags = ' '.join(shlex.quote(f'{prefix}{key}={value}') for key, value in parameters.items())
-            result, log, results, coverage = run_simulation(args, ROOT, TEST_DIR, 'load_engine',
-                'test_load_engine', 'LoadEngineTest', build / name, ' '.join(map(str, (*DEPENDENCIES, rtl))),
-                parameters=parameters, compile_args=f'{args.compile_args} {flags}', environment={
-                    **{f'LOAD_ENGINE_{key}': str(value) for key, value in parameters.items()},
-                    'LOAD_ENGINE_SEED': str(args.seed + index), 'LOAD_ENGINE_RANDOM_CYCLES': str(args.random_cycles),
-                    'LOAD_ENGINE_CHECK_INTERNALS': '1', 'LOAD_ENGINE_HDL_ASSERTIONS': '1'})
-            row = dict(name=name, parameters=parameters, status='FAIL', log=str(log))
-            try:
-                if result.returncode:
-                    raise ValueError(f'make exited {result.returncode}')
-                passed_test(results, 'LoadEngineTest', 'test_load_engine')
-                data = json.loads(coverage.read_text())
-                if (data['status'] != 'PASS' or data['parameters'] != parameters or not data['goals'] or
-                    not all(data['goals'].values()) or data['hdl_assertions'] != 'PASS' or
-                    data['internal_storage_assertions'] != 'PASS' or data['seed'] != args.seed + index or
-                    data['random_transactions'] != args.random_cycles):
-                    raise ValueError('Coverage evidence mismatch')
-                accounting = data['accounting']
-                if (accounting['accepted'] <= 0 or accounting['outstanding'] != 0 or
-                    accounting['accepted'] != accounting['delivered'] + accounting['discarded']):
-                    raise ValueError('Ownership accounting mismatch')
-                row.update(data, name=name, log=str(log), coverage=str(coverage))
-            except (OSError, ValueError, KeyError, ET.ParseError) as error:
-                row['error'] = str(error)
-                if license_unavailable(log.read_text()):
-                    row['status'] = 'NOT_RUN'
-                print('\n'.join(log.read_text().splitlines()[-22:]), flush=True)
-            summary['profiles'].append(row)
-            print(name, row['status'], flush=True)
+        jobs = int(os.getenv('LOAD_ENGINE_JOBS', '4' if args.sim == 'icarus' else '1'))
+        if not 1 <= jobs <= 32:
+            raise ValueError('LOAD_ENGINE_JOBS must be between 1 and 32')
+        summary['jobs'] = jobs
+        tasks = [(args, build, rtl, index, name, parameters)
+                 for index, (name, parameters) in enumerate(PROFILES)
+                 if not args.case or name in args.case]
+        with ThreadPoolExecutor(max_workers=jobs) as pool:
+            summary['profiles'] = list(pool.map(run_profile, tasks))
         summary['parameter_checks'] = [parameter_guard(args, build, rtl, 'load_engine', name, values,
             'load_engine_parameters_must_be_valid', dependencies=DEPENDENCIES) for name, values in INVALID]
         complete = len(summary['profiles']) == (len(set(args.case)) if args.case else len(PROFILES)) and len(summary['parameter_checks']) == len(INVALID)
