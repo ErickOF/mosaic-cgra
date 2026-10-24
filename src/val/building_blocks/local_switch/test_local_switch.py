@@ -20,6 +20,8 @@ class LocalSwitchTest(uvm_test):
                 assert int(getattr(cocotb.top, name).value) == value, f'Wrong parameter: {name}'
         if c.hdl_assertions:
             assert hasattr(cocotb.top.g_switch, 'u_assertions'), 'HDL checker missing'
+        elif c.check_internals:
+            assert not hasattr(cocotb.top.g_switch, 'u_assertions'), 'Expected Python-only checks'
         ConfigDB().set(self, 'env.*', 'config', c)
         ConfigDB().set(self, 'env.*', 'active', dict(item=None, window='initial', sample=Event(), storage={},
                            check_internals=c.check_internals, inputs=c.NUM_INPUTS))

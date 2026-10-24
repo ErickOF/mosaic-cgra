@@ -29,7 +29,7 @@ class LocalSwitchCoverage(CoverageCollector):
         self.last = set()
         self.errors = set()
         self.unknowns = set()
-        self.random_transactions = self.storage_checks = 0
+        self.random_transactions = self.storage_checks = self.decode_checks = 0
         self.accounting = {}
 
     def record(self, events, obs, model, plan):
@@ -112,6 +112,7 @@ class LocalSwitchCoverage(CoverageCollector):
         if c.check_internals:
             expected_errors |= {5, 6, 7}
             goals['payload_storage'] = self.storage_checks > 0
+            goals['shared_route_decode'] = self.decode_checks > 0
         goals.update(every_physical_edge=self.edges == c.edges,
                      every_fanout=self.fanouts == fanouts,
                      every_occupancy=self.occupancies == set(range(maximum_matching(c) + 1)),
@@ -135,6 +136,7 @@ class LocalSwitchCoverage(CoverageCollector):
             parameters=c.parameters, seed=c.seed, goals=goals, events=dict(self.events),
             accounting=self.accounting, observations=dict(self.observations),
             random_transactions=self.random_transactions, storage_checks=self.storage_checks,
+            decode_checks=self.decode_checks,
             physical_edges=sorted(self.edges), fanouts=sorted(self.fanouts),
             flushed_masks=sorted(self.flushed_masks), occupancies=sorted(self.occupancies),
             flush_occupancies=sorted(self.flush_occupancies), reset_occupancies=sorted(self.reset_occupancies),

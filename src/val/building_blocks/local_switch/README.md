@@ -33,7 +33,8 @@ Duplicate 1×1 full/sparse masks are run once. Every profile runs 2000 random cy
 plus directed traffic. There are **36 strict invalid-parameter elaboration checks**.
 Set `LOCAL_SWITCH_SEED`, `LOCAL_SWITCH_RANDOM_CYCLES` (minimum 1000), and
 `LOCAL_SWITCH_REGRESSION_BUILD` to control the campaign. Seeds advance by profile
-index. Select a profile directly when needed:
+index. `LOCAL_SWITCH_JOBS` selects concurrent profiles (Icarus default four, VCS
+default one). Select a profile directly when needed:
 
 ```sh
 .venv/bin/python src/val/building_blocks/local_switch/run_local_switch_regression.py \
@@ -49,8 +50,9 @@ width and is rejected. The runner supplies explicitly sized mask literals. Use a
 fresh direct build directory when changing geometry; the runner tracks parameter
 files as compile dependencies automatically.
 
-Private storage checks and the native HDL checker default to enabled. A public-port
-RTL run is available:
+The campaign uses Python checks, with private storage and route-decoder checks
+enabled. The optional native HDL checker defaults to disabled and remains
+`NOT_RUN` in the regression. A public-port RTL run is available:
 
 ```sh
 LOCAL_SWITCH_CHECK_INTERNALS=0 LOCAL_SWITCH_HDL_ASSERTIONS=0 \
@@ -66,9 +68,12 @@ SDF-annotated gate timing.
 
 Each input instantiates the existing `register_slice` with concatenated data and
 metadata. A common DFF stores its pending mask. Common DFFs also store the active
-configuration, errors and events. Output source selection uses the existing `mux`,
-followed by `operand_isolation` to clamp invalid payloads. No existing common or
-basic RTL is modified.
+configuration, errors and events. Each output reuses the common `decoder` once
+for its installed source; that one-hot result drives both destination-mask capture
+and sparse mux selection. Disabled routes hold the decoder output and compact mux
+selection at zero. Output source selection uses the existing `mux`, followed by
+`operand_isolation` to clamp invalid payloads. No existing common or basic RTL is
+modified.
 
 Output `o` has a mux lane only for each set bit in
 `CONNECTIVITY_MASK[o*NUM_INPUTS+i]`. The RTL compacts connected inputs in increasing
@@ -180,11 +185,14 @@ accepted_copies = delivered_copies + discarded_copies + pending_copies
 
 The passive monitor samples actual pre-NBA edges, settled outputs and held cycles.
 The scoreboard checks every public output, every payload capture, every inactive
-payload hold and private occupancy/pending storage. Verification-only deposits
+payload hold and private occupancy/pending storage. It also checks the shared
+decoder's one-hot result and enable, compact source selection, and physical mux
+width for each output. Verification-only deposits
 exercise empty-pending, wrong-route, orphaned-pending and unknown ownership faults,
-followed by flush/recovery. The native HDL checker independently checks copy
-conservation, occupancy/pending consistency, route updates, configuration exclusion,
-flush containment, invalid clamps and event correspondence.
+followed by flush/recovery. The Python scoreboard checks copy conservation,
+occupancy/pending consistency, route updates, configuration exclusion, flush
+containment, invalid clamps and event correspondence. The existing optional native
+HDL checker is available separately and is not enabled by this campaign.
 
 Directed traffic covers every physical edge and legal fanout, all reachable input
 occupancies, independent stalls, maximum rate, replacement, held configuration,
@@ -204,8 +212,6 @@ isolated inputs do not create impossible goals. These parameter-derived bounds
 are recorded with the actual coverage evidence.
 
 Regression artifacts include actual JUnit results, coverage/accounting, simulator
-logs, parameters, seeds and exact RTL/dependency/verification hashes. Native HDL
-assertions are simulation checks. Formal proofs, licensed commercial lint/CDC/RDC/
-DFT/LP, technology timing/area, physical implementation, PrimeTime and PrimePower
-are separate release requirements and remain `NOT_RUN` when unavailable. Generic
-structural synthesis does not establish physical timing or power signoff.
+logs, parameters, seeds and exact RTL/dependency/verification hashes. Validation is
+Python-only. Formal proofs, lint/CDC/RDC/DFT/LP, physical implementation, PrimeTime
+and PrimePower remain `NOT_RUN`. Synthesis is deferred to Design Compiler.

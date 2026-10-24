@@ -31,6 +31,18 @@ class LocalSwitchScoreboard(uvm_scoreboard):
     def storage(self, obs, plan):
         c = self.c
         valid, masks = self.model.raw_state()
+        if self.initialized:
+            for o, source in enumerate(self.model.select):
+                enabled = bool(self.model.enabled >> o & 1)
+                decoded = 1 << source if enabled else 0
+                connected = sorted(i for i, output in c.edges if output == o)
+                selected = connected.index(source) if enabled and source in connected else 0
+                assert obs.storage[f'decode{o}'] == bits(decoded, c.NUM_INPUTS), 'Route decode'
+                assert obs.storage[f'decode_valid{o}'] == str(int(enabled)), 'Route enable'
+                assert int(obs.storage[f'select{o}'], 2) == selected, 'Sparse source selection'
+                assert len(obs.storage[f'mux_inputs{o}']) == len(connected) * (
+                    c.DATA_WIDTH + c.METADATA_WIDTH + 2), 'Absent payload edge was instantiated'
+                self.coverage.decode_checks += 1
         for i in range(c.NUM_INPUTS):
             if self.initialized:
                 assert obs.storage[f'v{i}'] == valid[i], 'Stored buffer ownership differs'

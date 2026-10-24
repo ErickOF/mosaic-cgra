@@ -35,6 +35,12 @@ class LocalSwitchMonitor(uvm_monitor):
                 node = bank.g_input[n]
                 self.active['storage'].update({f'd{n}': node.u_buffer.g_slice.slice_data,
                     f'v{n}': node.u_buffer.g_slice.u_valid.o_q, f'p{n}': node.u_pending.o_q})
+            for o in range(len(cocotb.top.o_output_valid)):
+                output = bank.g_output[o]
+                self.active['storage'].update({f'decode{o}': output.u_source_decode.o_decoded,
+                    f'decode_valid{o}': output.u_source_decode.o_select_valid,
+                    f'select{o}': output.u_source.i_select,
+                    f'mux_inputs{o}': output.u_source.i_data})
         task = cocotb.start_soon(self.edges())
         try:
             while True:
