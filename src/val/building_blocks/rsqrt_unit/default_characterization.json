@@ -1,0 +1,2311 @@
+{
+  "parameters": {
+    "INPUT_WIDTH": 16,
+    "INPUT_FRACTION_WIDTH": 8,
+    "INTERNAL_WIDTH": 28,
+    "INTERNAL_FRACTION_WIDTH": 22,
+    "OUTPUT_WIDTH": 16,
+    "OUTPUT_FRACTION_WIDTH": 12,
+    "SEED_MANTISSA_ADDRESS_WIDTH": 6,
+    "MAX_ITERATIONS": 2,
+    "EVALUATION_ARCH": 0,
+    "ZERO_RESULT_MODE": 0,
+    "SUPPORT_EPSILON": 1,
+    "OUTPUT_QUEUE_DEPTH": 2,
+    "CONTEXT_ID_WIDTH": 8,
+    "REQUEST_TAG_WIDTH": 8,
+    "SEED_PROTECTION": 0,
+    "ASYNC_RESET": 0
+  },
+  "input_interval": [
+    0.00390625,
+    255.99609375
+  ],
+  "negative_behavior": "error before epsilon",
+  "zero_behavior": "epsilon rescue or configured zero error result",
+  "python": "3.12.3",
+  "reference": "gmpy2 2.2.1 / MPFR 4.2.1, 512-bit nearest-even",
+  "image": {
+    "generator": "midpoint-rsqrt-v1",
+    "width": 28,
+    "fraction": 22,
+    "mantissa_address_width": 6,
+    "gmpy2": "2.2.1",
+    "mpfr": "MPFR 4.2.1",
+    "precision": 512,
+    "rounding": "nearest-even certified by directed MPFR intervals and exact squared half-ULPs",
+    "image_id": 2320140517,
+    "checksum": 3625572836,
+    "checksum_algorithm": "FNV-1a-32, little-endian metadata and seed words",
+    "seeds": [
+      4178015,
+      4145999,
+      4114708,
+      4084115,
+      4054195,
+      4024922,
+      3996275,
+      3968230,
+      3940768,
+      3913868,
+      3887512,
+      3861681,
+      3836358,
+      3811527,
+      3787172,
+      3763278,
+      3739831,
+      3716816,
+      3694221,
+      3672034,
+      3650241,
+      3628832,
+      3607795,
+      3587120,
+      3566796,
+      3546814,
+      3527164,
+      3507837,
+      3488824,
+      3470117,
+      3451708,
+      3433588,
+      3415751,
+      3398189,
+      3380896,
+      3363863,
+      3347086,
+      3330557,
+      3314271,
+      3298221,
+      3282402,
+      3266808,
+      3251435,
+      3236277,
+      3221329,
+      3206586,
+      3192043,
+      3177697,
+      3163542,
+      3149575,
+      3135791,
+      3122187,
+      3108758,
+      3095501,
+      3082412,
+      3069488,
+      3056725,
+      3044120,
+      3031669,
+      3019371,
+      3007220,
+      2995215,
+      2983353,
+      2971630,
+      2954303,
+      2931664,
+      2909538,
+      2887906,
+      2866749,
+      2846050,
+      2825793,
+      2805963,
+      2786544,
+      2767523,
+      2748886,
+      2730621,
+      2712715,
+      2695157,
+      2677935,
+      2661040,
+      2644460,
+      2628186,
+      2612209,
+      2596520,
+      2581110,
+      2565972,
+      2551096,
+      2536477,
+      2522106,
+      2507976,
+      2494081,
+      2480415,
+      2466971,
+      2453743,
+      2440726,
+      2427913,
+      2415301,
+      2402883,
+      2390654,
+      2378611,
+      2366747,
+      2355059,
+      2343543,
+      2332194,
+      2321009,
+      2309982,
+      2299112,
+      2288393,
+      2277823,
+      2267398,
+      2257115,
+      2246971,
+      2236962,
+      2227086,
+      2217339,
+      2207720,
+      2198224,
+      2188850,
+      2179595,
+      2170456,
+      2161431,
+      2152518,
+      2143714,
+      2135017,
+      2126426,
+      2117937,
+      2109549,
+      2101260
+    ]
+  },
+  "groups": [
+    {
+      "iterations": 0,
+      "quality_id": 0,
+      "round_mode": 0,
+      "output_signed": 0,
+      "epsilon_encoded": 0,
+      "samples": 65535,
+      "method": "exhaustive nonzero operand encodings",
+      "absolute_error": {
+        "maximum": 0.062255859375,
+        "mean": 0.00022633169785421408,
+        "p50": 0.00016572820495298538,
+        "p95": 0.0005251634825614156,
+        "p99": 0.0010937248459851588
+      },
+      "relative_error": {
+        "maximum": 0.006346576513178777,
+        "mean": 0.0019090821657590502,
+        "p50": 0.0016736464341876773,
+        "p95": 0.004454665295225996,
+        "p99": 0.005409733057884648
+      },
+      "maximum_unclamped_absolute_error": 0.062255859375,
+      "relative_error_by_leading_one": {
+        "0": 0.0038909912109375,
+        "1": 0.0039047540414113243,
+        "2": 0.00390625,
+        "3": 0.0039047540414113243,
+        "4": 0.00390625,
+        "5": 0.0039047540414113243,
+        "6": 0.00390625,
+        "7": 0.003981886491002665,
+        "8": 0.004027729336165497,
+        "9": 0.004155863454061006,
+        "10": 0.004027729336165497,
+        "11": 0.004250021024412568,
+        "12": 0.00445520904886077,
+        "13": 0.004923004273226311,
+        "14": 0.005461826633240082,
+        "15": 0.006346576513178777
+      },
+      "relative_error_by_exponent_parity": {
+        "0": 0.005461826633240082,
+        "1": 0.006346576513178777
+      },
+      "monotonicity": "nonincreasing on exhaustive interval",
+      "monotonicity_first_violations": [],
+      "overflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "underflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "latency": 4,
+      "initiation_interval": 4
+    },
+    {
+      "iterations": 0,
+      "quality_id": 0,
+      "round_mode": 1,
+      "output_signed": 0,
+      "epsilon_encoded": 0,
+      "samples": 65535,
+      "method": "exhaustive nonzero operand encodings",
+      "absolute_error": {
+        "maximum": 0.062255859375,
+        "mean": 0.00019106993235251421,
+        "p50": 0.00013145537252739364,
+        "p95": 0.0004755310995199817,
+        "p99": 0.0010544566561736487
+      },
+      "relative_error": {
+        "maximum": 0.005027567680304672,
+        "mean": 0.0014929670744274557,
+        "p50": 0.0013644270102255638,
+        "p95": 0.0033110702090227693,
+        "p99": 0.0039282874738831505
+      },
+      "maximum_unclamped_absolute_error": 0.062255859375,
+      "relative_error_by_leading_one": {
+        "0": 0.0038909912109375,
+        "1": 0.0038831748549737464,
+        "2": 0.003875732421875,
+        "3": 0.0039047540414113243,
+        "4": 0.00390625,
+        "5": 0.0039047540414113243,
+        "6": 0.00390625,
+        "7": 0.0039047540414113243,
+        "8": 0.00390625,
+        "9": 0.0039047540414113243,
+        "10": 0.004027729336165497,
+        "11": 0.004155863454061006,
+        "12": 0.004067414400952509,
+        "13": 0.004250021024412568,
+        "14": 0.0045754941216007644,
+        "15": 0.005027567680304672
+      },
+      "relative_error_by_exponent_parity": {
+        "0": 0.0045754941216007644,
+        "1": 0.005027567680304672
+      },
+      "monotonicity": "nonincreasing on exhaustive interval",
+      "monotonicity_first_violations": [],
+      "overflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "underflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "latency": 4,
+      "initiation_interval": 4
+    },
+    {
+      "iterations": 0,
+      "quality_id": 0,
+      "round_mode": 0,
+      "output_signed": 1,
+      "epsilon_encoded": 0,
+      "samples": 65535,
+      "method": "exhaustive nonzero operand encodings",
+      "absolute_error": {
+        "maximum": 8.000244140625,
+        "mean": 0.0004158736351300972,
+        "p50": 0.00016572820495298538,
+        "p95": 0.0005251634825614156,
+        "p99": 0.0010937248459851588
+      },
+      "relative_error": {
+        "maximum": 0.5000152587890625,
+        "mean": 0.0019230676588419223,
+        "p50": 0.0016736464341876773,
+        "p95": 0.00445520904886077,
+        "p99": 0.005412541290015195
+      },
+      "maximum_unclamped_absolute_error": 0.03125,
+      "relative_error_by_leading_one": {
+        "0": 0.5000152587890625,
+        "1": 0.29291479799989006,
+        "2": 0.00390625,
+        "3": 0.0039047540414113243,
+        "4": 0.00390625,
+        "5": 0.0039047540414113243,
+        "6": 0.00390625,
+        "7": 0.003981886491002665,
+        "8": 0.004027729336165497,
+        "9": 0.004155863454061006,
+        "10": 0.004027729336165497,
+        "11": 0.004250021024412568,
+        "12": 0.00445520904886077,
+        "13": 0.004923004273226311,
+        "14": 0.005461826633240082,
+        "15": 0.006346576513178777
+      },
+      "relative_error_by_exponent_parity": {
+        "0": 0.5000152587890625,
+        "1": 0.29291479799989006
+      },
+      "monotonicity": "nonincreasing on exhaustive interval",
+      "monotonicity_first_violations": [],
+      "overflow": {
+        "count": 3,
+        "minimum": 1,
+        "maximum": 3
+      },
+      "underflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "latency": 4,
+      "initiation_interval": 4
+    },
+    {
+      "iterations": 0,
+      "quality_id": 0,
+      "round_mode": 1,
+      "output_signed": 1,
+      "epsilon_encoded": 0,
+      "samples": 65535,
+      "method": "exhaustive nonzero operand encodings",
+      "absolute_error": {
+        "maximum": 8.000244140625,
+        "mean": 0.00038061559497554003,
+        "p50": 0.00013145537252739364,
+        "p95": 0.0004755310995199817,
+        "p99": 0.0010544566561736487
+      },
+      "relative_error": {
+        "maximum": 0.5000152587890625,
+        "mean": 0.0015069528967876064,
+        "p50": 0.0013644270102255638,
+        "p95": 0.0033113453947180146,
+        "p99": 0.003929689393286282
+      },
+      "maximum_unclamped_absolute_error": 0.031005859375,
+      "relative_error_by_leading_one": {
+        "0": 0.5000152587890625,
+        "1": 0.29291479799989006,
+        "2": 0.003875732421875,
+        "3": 0.0039047540414113243,
+        "4": 0.00390625,
+        "5": 0.0039047540414113243,
+        "6": 0.00390625,
+        "7": 0.0039047540414113243,
+        "8": 0.00390625,
+        "9": 0.0039047540414113243,
+        "10": 0.004027729336165497,
+        "11": 0.004155863454061006,
+        "12": 0.004067414400952509,
+        "13": 0.004250021024412568,
+        "14": 0.0045754941216007644,
+        "15": 0.005027567680304672
+      },
+      "relative_error_by_exponent_parity": {
+        "0": 0.5000152587890625,
+        "1": 0.29291479799989006
+      },
+      "monotonicity": "nonincreasing on exhaustive interval",
+      "monotonicity_first_violations": [],
+      "overflow": {
+        "count": 3,
+        "minimum": 1,
+        "maximum": 3
+      },
+      "underflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "latency": 4,
+      "initiation_interval": 4
+    },
+    {
+      "iterations": 1,
+      "quality_id": 1,
+      "round_mode": 0,
+      "output_signed": 0,
+      "epsilon_encoded": 0,
+      "samples": 65535,
+      "method": "exhaustive nonzero operand encodings",
+      "absolute_error": {
+        "maximum": 0.00048828125,
+        "mean": 0.00012232999433409904,
+        "p50": 0.00012225652684541398,
+        "p95": 0.0002324305087802586,
+        "p99": 0.0002422495892917266
+      },
+      "relative_error": {
+        "maximum": 0.0038909314903375,
+        "mean": 0.0013030715529303398,
+        "p50": 0.0011460158048260634,
+        "p95": 0.0030301723339125307,
+        "p99": 0.003510442535645674
+      },
+      "maximum_unclamped_absolute_error": 0.00048828125,
+      "relative_error_by_leading_one": {
+        "0": 3.0517578125e-05,
+        "1": 4.2079669084908044e-05,
+        "2": 3.587984586873109e-05,
+        "3": 6.365885552248579e-05,
+        "4": 7.885074053173685e-05,
+        "5": 0.00012214995030471242,
+        "6": 0.00016434886602543792,
+        "7": 0.000229216490224715,
+        "8": 0.0003386846119488679,
+        "9": 0.0004884005175327631,
+        "10": 0.0006841328235694579,
+        "11": 0.0009603865246654486,
+        "12": 0.0013709478525566953,
+        "13": 0.0019377318401030833,
+        "14": 0.0027497988121848167,
+        "15": 0.0038909314903375
+      },
+      "relative_error_by_exponent_parity": {
+        "0": 0.0027497988121848167,
+        "1": 0.0038909314903375
+      },
+      "monotonicity": "nonincreasing on exhaustive interval",
+      "monotonicity_first_violations": [],
+      "overflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "underflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "latency": 7,
+      "initiation_interval": 7
+    },
+    {
+      "iterations": 1,
+      "quality_id": 1,
+      "round_mode": 1,
+      "output_signed": 0,
+      "epsilon_encoded": 0,
+      "samples": 65535,
+      "method": "exhaustive nonzero operand encodings",
+      "absolute_error": {
+        "maximum": 0.000244140625,
+        "mean": 6.105593093094177e-05,
+        "p50": 6.102477939238048e-05,
+        "p95": 0.00011602230087174982,
+        "p99": 0.00012094278762691297
+      },
+      "relative_error": {
+        "maximum": 0.0019473917728271876,
+        "mean": 0.0006510553173235896,
+        "p50": 0.0005723367095307513,
+        "p95": 0.0015162431982320113,
+        "p99": 0.001758245915969739
+      },
+      "maximum_unclamped_absolute_error": 0.000244140625,
+      "relative_error_by_leading_one": {
+        "0": 1.52587890625e-05,
+        "1": 2.05004826473303e-05,
+        "2": 3.0517578125e-05,
+        "3": 3.2434765990581085e-05,
+        "4": 5.125711720128206e-05,
+        "5": 6.103515625e-05,
+        "6": 7.885074053173685e-05,
+        "7": 0.00012214995030471242,
+        "8": 0.00015887389994565182,
+        "9": 0.0002382102289574281,
+        "10": 0.00033940377663477543,
+        "11": 0.0004884005175327631,
+        "12": 0.000683276585540061,
+        "13": 0.0009770398033887029,
+        "14": 0.001376505121531093,
+        "15": 0.0019473917728271876
+      },
+      "relative_error_by_exponent_parity": {
+        "0": 0.001376505121531093,
+        "1": 0.0019473917728271876
+      },
+      "monotonicity": "nonincreasing on exhaustive interval",
+      "monotonicity_first_violations": [],
+      "overflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "underflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "latency": 7,
+      "initiation_interval": 7
+    },
+    {
+      "iterations": 1,
+      "quality_id": 1,
+      "round_mode": 0,
+      "output_signed": 1,
+      "epsilon_encoded": 0,
+      "samples": 65535,
+      "method": "exhaustive nonzero operand encodings",
+      "absolute_error": {
+        "maximum": 8.000244140625,
+        "mean": 0.0003138426402484959,
+        "p50": 0.00012225652684541398,
+        "p95": 0.0002324305087802586,
+        "p99": 0.0002422495892917266
+      },
+      "relative_error": {
+        "maximum": 0.5000152587890625,
+        "mean": 0.0013172140119215542,
+        "p50": 0.0011460519349822125,
+        "p95": 0.003030519488663302,
+        "p99": 0.003512081831438876
+      },
+      "maximum_unclamped_absolute_error": 0.0003601088673801952,
+      "relative_error_by_leading_one": {
+        "0": 0.5000152587890625,
+        "1": 0.29291479799989006,
+        "2": 3.587984586873109e-05,
+        "3": 6.365885552248579e-05,
+        "4": 7.885074053173685e-05,
+        "5": 0.00012214995030471242,
+        "6": 0.00016434886602543792,
+        "7": 0.000229216490224715,
+        "8": 0.0003386846119488679,
+        "9": 0.0004884005175327631,
+        "10": 0.0006841328235694579,
+        "11": 0.0009603865246654486,
+        "12": 0.0013709478525566953,
+        "13": 0.0019377318401030833,
+        "14": 0.0027497988121848167,
+        "15": 0.0038909314903375
+      },
+      "relative_error_by_exponent_parity": {
+        "0": 0.5000152587890625,
+        "1": 0.29291479799989006
+      },
+      "monotonicity": "nonincreasing on exhaustive interval",
+      "monotonicity_first_violations": [],
+      "overflow": {
+        "count": 3,
+        "minimum": 1,
+        "maximum": 3
+      },
+      "underflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "latency": 7,
+      "initiation_interval": 7
+    },
+    {
+      "iterations": 1,
+      "quality_id": 1,
+      "round_mode": 1,
+      "output_signed": 1,
+      "epsilon_encoded": 0,
+      "samples": 65535,
+      "method": "exhaustive nonzero operand encodings",
+      "absolute_error": {
+        "maximum": 8.000244140625,
+        "mean": 0.0002525797528867669,
+        "p50": 6.102713351145258e-05,
+        "p95": 0.00011602682493527951,
+        "p99": 0.00012094568578910392
+      },
+      "relative_error": {
+        "maximum": 0.5000152587890625,
+        "mean": 0.0006651987417069365,
+        "p50": 0.0005723683926321921,
+        "p95": 0.0015164143791517564,
+        "p99": 0.0017584896103951882
+      },
+      "maximum_unclamped_absolute_error": 0.000244140625,
+      "relative_error_by_leading_one": {
+        "0": 0.5000152587890625,
+        "1": 0.29291479799989006,
+        "2": 3.0517578125e-05,
+        "3": 3.2434765990581085e-05,
+        "4": 5.125711720128206e-05,
+        "5": 6.103515625e-05,
+        "6": 7.885074053173685e-05,
+        "7": 0.00012214995030471242,
+        "8": 0.00015887389994565182,
+        "9": 0.0002382102289574281,
+        "10": 0.00033940377663477543,
+        "11": 0.0004884005175327631,
+        "12": 0.000683276585540061,
+        "13": 0.0009770398033887029,
+        "14": 0.001376505121531093,
+        "15": 0.0019473917728271876
+      },
+      "relative_error_by_exponent_parity": {
+        "0": 0.5000152587890625,
+        "1": 0.29291479799989006
+      },
+      "monotonicity": "nonincreasing on exhaustive interval",
+      "monotonicity_first_violations": [],
+      "overflow": {
+        "count": 3,
+        "minimum": 1,
+        "maximum": 3
+      },
+      "underflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "latency": 7,
+      "initiation_interval": 7
+    },
+    {
+      "iterations": 2,
+      "quality_id": 2,
+      "round_mode": 0,
+      "output_signed": 0,
+      "epsilon_encoded": 0,
+      "samples": 65535,
+      "method": "exhaustive nonzero operand encodings",
+      "absolute_error": {
+        "maximum": 0.000244140625,
+        "mean": 0.00012174139110886902,
+        "p50": 0.00012163823062568954,
+        "p95": 0.00023180035873267857,
+        "p99": 0.00024165308576750577
+      },
+      "relative_error": {
+        "maximum": 0.0038832723238455724,
+        "mean": 0.0012988675804701138,
+        "p50": 0.0011419312408242463,
+        "p95": 0.003026282060418546,
+        "p99": 0.003508196335619499
+      },
+      "maximum_unclamped_absolute_error": 0.000244140625,
+      "relative_error_by_leading_one": {
+        "0": 1.52587890625e-05,
+        "1": 2.05004826473303e-05,
+        "2": 3.587984586873109e-05,
+        "3": 4.288890636679659e-05,
+        "4": 6.581547255727869e-05,
+        "5": 9.872692905765053e-05,
+        "6": 0.0001421299253441612,
+        "7": 0.000229216490224715,
+        "8": 0.0003386846119488679,
+        "9": 0.0004701136165568327,
+        "10": 0.0006841328235694579,
+        "11": 0.0009603865246654486,
+        "12": 0.0013709478525566953,
+        "13": 0.0019377318401030833,
+        "14": 0.0027497988121848167,
+        "15": 0.0038832723238455724
+      },
+      "relative_error_by_exponent_parity": {
+        "0": 0.0027497988121848167,
+        "1": 0.0038832723238455724
+      },
+      "monotonicity": "nonincreasing on exhaustive interval",
+      "monotonicity_first_violations": [],
+      "overflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "underflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "latency": 10,
+      "initiation_interval": 10
+    },
+    {
+      "iterations": 2,
+      "quality_id": 2,
+      "round_mode": 1,
+      "output_signed": 0,
+      "epsilon_encoded": 0,
+      "samples": 65535,
+      "method": "exhaustive nonzero operand encodings",
+      "absolute_error": {
+        "maximum": 0.000244140625,
+        "mean": 6.103665122075017e-05,
+        "p50": 6.1016516182716416e-05,
+        "p95": 0.00011599883655403267,
+        "p99": 0.00012086457410667339
+      },
+      "relative_error": {
+        "maximum": 0.0019473917728271876,
+        "mean": 0.0006510357170364793,
+        "p50": 0.0005723323116721126,
+        "p95": 0.0015162124416137554,
+        "p99": 0.001758245915969739
+      },
+      "maximum_unclamped_absolute_error": 0.00012209775338012884,
+      "relative_error_by_leading_one": {
+        "0": 1.52587890625e-05,
+        "1": 6.00576807235481e-06,
+        "2": 1.3982430135135071e-05,
+        "3": 2.2888445534219488e-05,
+        "4": 3.587984586873109e-05,
+        "5": 5.244601211384015e-05,
+        "6": 7.067371015576584e-05,
+        "7": 0.00011619995435552484,
+        "8": 0.00015471237665142334,
+        "9": 0.0002382102289574281,
+        "10": 0.00033940377663477543,
+        "11": 0.00048768502883683376,
+        "12": 0.000683276585540061,
+        "13": 0.0009741769157453035,
+        "14": 0.0013745237899798408,
+        "15": 0.0019473917728271876
+      },
+      "relative_error_by_exponent_parity": {
+        "0": 0.0013745237899798408,
+        "1": 0.0019473917728271876
+      },
+      "monotonicity": "nonincreasing on exhaustive interval",
+      "monotonicity_first_violations": [],
+      "overflow": {
+        "count": 1,
+        "minimum": 1,
+        "maximum": 1
+      },
+      "underflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "latency": 10,
+      "initiation_interval": 10
+    },
+    {
+      "iterations": 2,
+      "quality_id": 2,
+      "round_mode": 0,
+      "output_signed": 1,
+      "epsilon_encoded": 0,
+      "samples": 65535,
+      "method": "exhaustive nonzero operand encodings",
+      "absolute_error": {
+        "maximum": 8.000244140625,
+        "mean": 0.00031326521306469416,
+        "p50": 0.00012164064731408797,
+        "p95": 0.00023180856594717995,
+        "p99": 0.00024166026343558922
+      },
+      "relative_error": {
+        "maximum": 0.5000152587890625,
+        "mean": 0.001313011004853461,
+        "p50": 0.0011419827552237227,
+        "p95": 0.003026458381166365,
+        "p99": 0.003508591087938506
+      },
+      "maximum_unclamped_absolute_error": 0.000244140625,
+      "relative_error_by_leading_one": {
+        "0": 0.5000152587890625,
+        "1": 0.29291479799989006,
+        "2": 3.587984586873109e-05,
+        "3": 4.288890636679659e-05,
+        "4": 6.581547255727869e-05,
+        "5": 9.872692905765053e-05,
+        "6": 0.0001421299253441612,
+        "7": 0.000229216490224715,
+        "8": 0.0003386846119488679,
+        "9": 0.0004701136165568327,
+        "10": 0.0006841328235694579,
+        "11": 0.0009603865246654486,
+        "12": 0.0013709478525566953,
+        "13": 0.0019377318401030833,
+        "14": 0.0027497988121848167,
+        "15": 0.0038832723238455724
+      },
+      "relative_error_by_exponent_parity": {
+        "0": 0.5000152587890625,
+        "1": 0.29291479799989006
+      },
+      "monotonicity": "nonincreasing on exhaustive interval",
+      "monotonicity_first_violations": [],
+      "overflow": {
+        "count": 3,
+        "minimum": 1,
+        "maximum": 3
+      },
+      "underflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "latency": 10,
+      "initiation_interval": 10
+    },
+    {
+      "iterations": 2,
+      "quality_id": 2,
+      "round_mode": 1,
+      "output_signed": 1,
+      "epsilon_encoded": 0,
+      "samples": 65535,
+      "method": "exhaustive nonzero operand encodings",
+      "absolute_error": {
+        "maximum": 8.000244140625,
+        "mean": 0.0002525675514243745,
+        "p50": 6.102477939238048e-05,
+        "p95": 0.00011600122068387036,
+        "p99": 0.00012087028834130592
+      },
+      "relative_error": {
+        "maximum": 0.5000152587890625,
+        "mean": 0.0006651799034455681,
+        "p50": 0.0005723491731036247,
+        "p95": 0.001516387796147884,
+        "p99": 0.0017584896103951882
+      },
+      "maximum_unclamped_absolute_error": 0.00012209775338012884,
+      "relative_error_by_leading_one": {
+        "0": 0.5000152587890625,
+        "1": 0.29291479799989006,
+        "2": 3.0517578125e-05,
+        "3": 2.2888445534219488e-05,
+        "4": 3.587984586873109e-05,
+        "5": 5.244601211384015e-05,
+        "6": 7.067371015576584e-05,
+        "7": 0.00011619995435552484,
+        "8": 0.00015471237665142334,
+        "9": 0.0002382102289574281,
+        "10": 0.00033940377663477543,
+        "11": 0.00048768502883683376,
+        "12": 0.000683276585540061,
+        "13": 0.0009741769157453035,
+        "14": 0.0013745237899798408,
+        "15": 0.0019473917728271876
+      },
+      "relative_error_by_exponent_parity": {
+        "0": 0.5000152587890625,
+        "1": 0.29291479799989006
+      },
+      "monotonicity": "nonincreasing on exhaustive interval",
+      "monotonicity_first_violations": [],
+      "overflow": {
+        "count": 4,
+        "minimum": 1,
+        "maximum": 4
+      },
+      "underflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "latency": 10,
+      "initiation_interval": 10
+    },
+    {
+      "iterations": 0,
+      "quality_id": 0,
+      "round_mode": 0,
+      "output_signed": 0,
+      "epsilon_encoded": 1,
+      "samples": 1315,
+      "method": "deterministic magnitude and seed-boundary samples",
+      "absolute_error": {
+        "maximum": 0.062255859375,
+        "mean": 0.0005550382442098314,
+        "p50": 0.0001897854514004902,
+        "p95": 0.0010282066387706657,
+        "p99": 0.010090643530141398
+      },
+      "relative_error": {
+        "maximum": 0.006346576513178777,
+        "mean": 0.002267619763603066,
+        "p50": 0.0022092128766087616,
+        "p95": 0.004736966234991976,
+        "p99": 0.0056310889564175435
+      },
+      "maximum_unclamped_absolute_error": 0.062255859375,
+      "relative_error_by_leading_one": {
+        "0": 0.0038909912109375,
+        "1": 0.0039047540414113243,
+        "2": 0.00390625,
+        "3": 0.0039047540414113243,
+        "4": 0.00390625,
+        "5": 0.0039047540414113243,
+        "6": 0.00390625,
+        "7": 0.003981886491002665,
+        "8": 0.00390625,
+        "9": 0.0039047540414113243,
+        "10": 0.003951900256671114,
+        "11": 0.004250021024412568,
+        "12": 0.00445520904886077,
+        "13": 0.004923004273226311,
+        "14": 0.005461826633240082,
+        "15": 0.006346576513178777,
+        "16": 0.00390625
+      },
+      "relative_error_by_exponent_parity": {
+        "0": 0.005461826633240082,
+        "1": 0.006346576513178777
+      },
+      "monotonicity": "nonincreasing on samples",
+      "monotonicity_first_violations": [],
+      "overflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "underflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "latency": 4,
+      "initiation_interval": 4
+    },
+    {
+      "iterations": 0,
+      "quality_id": 0,
+      "round_mode": 1,
+      "output_signed": 0,
+      "epsilon_encoded": 1,
+      "samples": 1315,
+      "method": "deterministic magnitude and seed-boundary samples",
+      "absolute_error": {
+        "maximum": 0.062255859375,
+        "mean": 0.00048192603118981606,
+        "p50": 0.0001077952798089459,
+        "p95": 0.0009155496864007278,
+        "p99": 0.010090643530141398
+      },
+      "relative_error": {
+        "maximum": 0.0048029728536759,
+        "mean": 0.0015432420403034297,
+        "p50": 0.0012949148449463372,
+        "p95": 0.0035597263286972977,
+        "p99": 0.004117824657973239
+      },
+      "maximum_unclamped_absolute_error": 0.062255859375,
+      "relative_error_by_leading_one": {
+        "0": 0.0038909912109375,
+        "1": 0.0038831748549737464,
+        "2": 0.003875732421875,
+        "3": 0.0039047540414113243,
+        "4": 0.00390625,
+        "5": 0.0039047540414113243,
+        "6": 0.00390625,
+        "7": 0.0039047540414113243,
+        "8": 0.00390625,
+        "9": 0.0039047540414113243,
+        "10": 0.00390625,
+        "11": 0.0035594870584100802,
+        "12": 0.004027729336165497,
+        "13": 0.004250021024412568,
+        "14": 0.004331911568027935,
+        "15": 0.0048029728536759,
+        "16": 0.00390625
+      },
+      "relative_error_by_exponent_parity": {
+        "0": 0.004331911568027935,
+        "1": 0.0048029728536759
+      },
+      "monotonicity": "nonincreasing on samples",
+      "monotonicity_first_violations": [],
+      "overflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "underflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "latency": 4,
+      "initiation_interval": 4
+    },
+    {
+      "iterations": 0,
+      "quality_id": 0,
+      "round_mode": 0,
+      "output_signed": 1,
+      "epsilon_encoded": 1,
+      "samples": 1315,
+      "method": "deterministic magnitude and seed-boundary samples",
+      "absolute_error": {
+        "maximum": 8.000244140625,
+        "mean": 0.010001145361605268,
+        "p50": 0.0001897854514004902,
+        "p95": 0.0010282066387706657,
+        "p99": 0.010090643530141398
+      },
+      "relative_error": {
+        "maximum": 0.5000152587890625,
+        "mean": 0.0029646078162160125,
+        "p50": 0.0022092128766087616,
+        "p95": 0.004771290328170994,
+        "p99": 0.005665616254160328
+      },
+      "maximum_unclamped_absolute_error": 0.03125,
+      "relative_error_by_leading_one": {
+        "0": 0.5000152587890625,
+        "1": 0.29291479799989006,
+        "2": 0.00390625,
+        "3": 0.0039047540414113243,
+        "4": 0.00390625,
+        "5": 0.0039047540414113243,
+        "6": 0.00390625,
+        "7": 0.003981886491002665,
+        "8": 0.00390625,
+        "9": 0.0039047540414113243,
+        "10": 0.003951900256671114,
+        "11": 0.004250021024412568,
+        "12": 0.00445520904886077,
+        "13": 0.004923004273226311,
+        "14": 0.005461826633240082,
+        "15": 0.006346576513178777,
+        "16": 0.00390625
+      },
+      "relative_error_by_exponent_parity": {
+        "0": 0.5000152587890625,
+        "1": 0.29291479799989006
+      },
+      "monotonicity": "nonincreasing on samples",
+      "monotonicity_first_violations": [],
+      "overflow": {
+        "count": 3,
+        "minimum": 1,
+        "maximum": 3
+      },
+      "underflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "latency": 4,
+      "initiation_interval": 4
+    },
+    {
+      "iterations": 0,
+      "quality_id": 0,
+      "round_mode": 1,
+      "output_signed": 1,
+      "epsilon_encoded": 1,
+      "samples": 1315,
+      "method": "deterministic magnitude and seed-boundary samples",
+      "absolute_error": {
+        "maximum": 8.000244140625,
+        "mean": 0.009928218806855215,
+        "p50": 0.0001077952798089459,
+        "p95": 0.0009155496864007278,
+        "p99": 0.010090643530141398
+      },
+      "relative_error": {
+        "maximum": 0.5000152587890625,
+        "mean": 0.0022402465029440857,
+        "p50": 0.0012949148449463372,
+        "p95": 0.0035600254166371155,
+        "p99": 0.004155358441233881
+      },
+      "maximum_unclamped_absolute_error": 0.031005859375,
+      "relative_error_by_leading_one": {
+        "0": 0.5000152587890625,
+        "1": 0.29291479799989006,
+        "2": 0.003875732421875,
+        "3": 0.0039047540414113243,
+        "4": 0.00390625,
+        "5": 0.0039047540414113243,
+        "6": 0.00390625,
+        "7": 0.0039047540414113243,
+        "8": 0.00390625,
+        "9": 0.0039047540414113243,
+        "10": 0.00390625,
+        "11": 0.0035594870584100802,
+        "12": 0.004027729336165497,
+        "13": 0.004250021024412568,
+        "14": 0.004331911568027935,
+        "15": 0.0048029728536759,
+        "16": 0.00390625
+      },
+      "relative_error_by_exponent_parity": {
+        "0": 0.5000152587890625,
+        "1": 0.29291479799989006
+      },
+      "monotonicity": "nonincreasing on samples",
+      "monotonicity_first_violations": [],
+      "overflow": {
+        "count": 3,
+        "minimum": 1,
+        "maximum": 3
+      },
+      "underflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "latency": 4,
+      "initiation_interval": 4
+    },
+    {
+      "iterations": 1,
+      "quality_id": 1,
+      "round_mode": 0,
+      "output_signed": 0,
+      "epsilon_encoded": 1,
+      "samples": 1315,
+      "method": "deterministic magnitude and seed-boundary samples",
+      "absolute_error": {
+        "maximum": 0.00048828125,
+        "mean": 0.0001250106659606625,
+        "p50": 0.00012801304651611156,
+        "p95": 0.00023450628930284426,
+        "p99": 0.000244140625
+      },
+      "relative_error": {
+        "maximum": 0.00390625,
+        "mean": 0.0013185591130449577,
+        "p50": 0.0012047320635547721,
+        "p95": 0.0030247717752375676,
+        "p99": 0.0034763740185937576
+      },
+      "maximum_unclamped_absolute_error": 0.00048828125,
+      "relative_error_by_leading_one": {
+        "0": 3.0517578125e-05,
+        "1": 4.2079669084908044e-05,
+        "2": 3.587984586873109e-05,
+        "3": 6.365885552248579e-05,
+        "4": 6.365885552248579e-05,
+        "5": 0.00010681722839764127,
+        "6": 0.0001220703125,
+        "7": 0.0001543933037191824,
+        "8": 0.000244140625,
+        "9": 0.0003971426528952359,
+        "10": 0.0004901874357285419,
+        "11": 0.0008371996642854241,
+        "12": 0.0012775773954118886,
+        "13": 0.0018442291722391316,
+        "14": 0.0027092664497341498,
+        "15": 0.003725651676000272,
+        "16": 0.00390625
+      },
+      "relative_error_by_exponent_parity": {
+        "0": 0.00390625,
+        "1": 0.003725651676000272
+      },
+      "monotonicity": "nonincreasing on samples",
+      "monotonicity_first_violations": [],
+      "overflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "underflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "latency": 7,
+      "initiation_interval": 7
+    },
+    {
+      "iterations": 1,
+      "quality_id": 1,
+      "round_mode": 1,
+      "output_signed": 0,
+      "epsilon_encoded": 1,
+      "samples": 1315,
+      "method": "deterministic magnitude and seed-boundary samples",
+      "absolute_error": {
+        "maximum": 0.000244140625,
+        "mean": 6.108707195569544e-05,
+        "p50": 6.101281359927217e-05,
+        "p95": 0.00011629070661735777,
+        "p99": 0.00012134137097689883
+      },
+      "relative_error": {
+        "maximum": 0.0019473917728271876,
+        "mean": 0.0006496535916908263,
+        "p50": 0.000564415912651273,
+        "p95": 0.0015128373392008974,
+        "p99": 0.0017977598962175523
+      },
+      "maximum_unclamped_absolute_error": 0.000244140625,
+      "relative_error_by_leading_one": {
+        "0": 1.52587890625e-05,
+        "1": 2.05004826473303e-05,
+        "2": 3.0517578125e-05,
+        "3": 2.05004826473303e-05,
+        "4": 5.125711720128206e-05,
+        "5": 3.0965092379288456e-05,
+        "6": 3.1940245344697936e-05,
+        "7": 0.00010681722839764127,
+        "8": 0.00011634149892937594,
+        "9": 0.00018456791404325036,
+        "10": 0.00028471320902813423,
+        "11": 0.00046173254099181197,
+        "12": 0.0005837167376048465,
+        "13": 0.0009190091590655649,
+        "14": 0.0012835007414819047,
+        "15": 0.0019473917728271876,
+        "16": 0.0
+      },
+      "relative_error_by_exponent_parity": {
+        "0": 0.0012835007414819047,
+        "1": 0.0019473917728271876
+      },
+      "monotonicity": "nonincreasing on samples",
+      "monotonicity_first_violations": [],
+      "overflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "underflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "latency": 7,
+      "initiation_interval": 7
+    },
+    {
+      "iterations": 1,
+      "quality_id": 1,
+      "round_mode": 0,
+      "output_signed": 1,
+      "epsilon_encoded": 1,
+      "samples": 1315,
+      "method": "deterministic magnitude and seed-boundary samples",
+      "absolute_error": {
+        "maximum": 8.000244140625,
+        "mean": 0.009669331008165987,
+        "p50": 0.00012801304651611156,
+        "p95": 0.00023450628930284426,
+        "p99": 0.000244140625
+      },
+      "relative_error": {
+        "maximum": 0.5000152587890625,
+        "mean": 0.0020233697974474155,
+        "p50": 0.0012086259653159058,
+        "p95": 0.0030353837548085403,
+        "p99": 0.0035600254166371155
+      },
+      "maximum_unclamped_absolute_error": 0.0003601088673801952,
+      "relative_error_by_leading_one": {
+        "0": 0.5000152587890625,
+        "1": 0.29291479799989006,
+        "2": 3.587984586873109e-05,
+        "3": 6.365885552248579e-05,
+        "4": 6.365885552248579e-05,
+        "5": 0.00010681722839764127,
+        "6": 0.0001220703125,
+        "7": 0.0001543933037191824,
+        "8": 0.000244140625,
+        "9": 0.0003971426528952359,
+        "10": 0.0004901874357285419,
+        "11": 0.0008371996642854241,
+        "12": 0.0012775773954118886,
+        "13": 0.0018442291722391316,
+        "14": 0.0027092664497341498,
+        "15": 0.003725651676000272,
+        "16": 0.00390625
+      },
+      "relative_error_by_exponent_parity": {
+        "0": 0.5000152587890625,
+        "1": 0.29291479799989006
+      },
+      "monotonicity": "nonincreasing on samples",
+      "monotonicity_first_violations": [],
+      "overflow": {
+        "count": 3,
+        "minimum": 1,
+        "maximum": 3
+      },
+      "underflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "latency": 7,
+      "initiation_interval": 7
+    },
+    {
+      "iterations": 1,
+      "quality_id": 1,
+      "round_mode": 1,
+      "output_signed": 1,
+      "epsilon_encoded": 1,
+      "samples": 1315,
+      "method": "deterministic magnitude and seed-boundary samples",
+      "absolute_error": {
+        "maximum": 8.000244140625,
+        "mean": 0.009605964388970904,
+        "p50": 6.112470898544326e-05,
+        "p95": 0.00011644323248936043,
+        "p99": 0.00012134296247489108
+      },
+      "relative_error": {
+        "maximum": 0.5000152587890625,
+        "mean": 0.0013545123878601418,
+        "p50": 0.000564415912651273,
+        "p95": 0.0015279972245341514,
+        "p99": 0.0018273503280244905
+      },
+      "maximum_unclamped_absolute_error": 0.000244140625,
+      "relative_error_by_leading_one": {
+        "0": 0.5000152587890625,
+        "1": 0.29291479799989006,
+        "2": 3.0517578125e-05,
+        "3": 2.05004826473303e-05,
+        "4": 5.125711720128206e-05,
+        "5": 3.0965092379288456e-05,
+        "6": 3.1940245344697936e-05,
+        "7": 0.00010681722839764127,
+        "8": 0.00011634149892937594,
+        "9": 0.00018456791404325036,
+        "10": 0.00028471320902813423,
+        "11": 0.00046173254099181197,
+        "12": 0.0005837167376048465,
+        "13": 0.0009190091590655649,
+        "14": 0.0012835007414819047,
+        "15": 0.0019473917728271876,
+        "16": 0.0
+      },
+      "relative_error_by_exponent_parity": {
+        "0": 0.5000152587890625,
+        "1": 0.29291479799989006
+      },
+      "monotonicity": "nonincreasing on samples",
+      "monotonicity_first_violations": [],
+      "overflow": {
+        "count": 3,
+        "minimum": 1,
+        "maximum": 3
+      },
+      "underflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "latency": 7,
+      "initiation_interval": 7
+    },
+    {
+      "iterations": 2,
+      "quality_id": 2,
+      "round_mode": 0,
+      "output_signed": 0,
+      "epsilon_encoded": 1,
+      "samples": 1315,
+      "method": "deterministic magnitude and seed-boundary samples",
+      "absolute_error": {
+        "maximum": 0.000244140625,
+        "mean": 0.00012352539980096667,
+        "p50": 0.0001275514372934474,
+        "p95": 0.00023309526263606055,
+        "p99": 0.00024311326095306863
+      },
+      "relative_error": {
+        "maximum": 0.00390625,
+        "mean": 0.0013176345534067935,
+        "p50": 0.0012047320635547721,
+        "p95": 0.0030247717752375676,
+        "p99": 0.0034763740185937576
+      },
+      "maximum_unclamped_absolute_error": 0.000244140625,
+      "relative_error_by_leading_one": {
+        "0": 1.52587890625e-05,
+        "1": 2.05004826473303e-05,
+        "2": 3.587984586873109e-05,
+        "3": 2.05004826473303e-05,
+        "4": 6.365885552248579e-05,
+        "5": 3.0965092379288456e-05,
+        "6": 0.0001220703125,
+        "7": 0.0001543933037191824,
+        "8": 0.000244140625,
+        "9": 0.0003971426528952359,
+        "10": 0.00048828125,
+        "11": 0.0008371996642854241,
+        "12": 0.0012775773954118886,
+        "13": 0.0018442291722391316,
+        "14": 0.0027092664497341498,
+        "15": 0.003725651676000272,
+        "16": 0.00390625
+      },
+      "relative_error_by_exponent_parity": {
+        "0": 0.00390625,
+        "1": 0.003725651676000272
+      },
+      "monotonicity": "nonincreasing on samples",
+      "monotonicity_first_violations": [],
+      "overflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "underflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "latency": 10,
+      "initiation_interval": 10
+    },
+    {
+      "iterations": 2,
+      "quality_id": 2,
+      "round_mode": 1,
+      "output_signed": 0,
+      "epsilon_encoded": 1,
+      "samples": 1315,
+      "method": "deterministic magnitude and seed-boundary samples",
+      "absolute_error": {
+        "maximum": 0.000244140625,
+        "mean": 6.053874756736094e-05,
+        "p50": 6.046956651567211e-05,
+        "p95": 0.00011598029493847705,
+        "p99": 0.00012025560650596041
+      },
+      "relative_error": {
+        "maximum": 0.0019473917728271876,
+        "mean": 0.00064953581297479,
+        "p50": 0.000564415912651273,
+        "p95": 0.001500383557186529,
+        "p99": 0.0017977598962175523
+      },
+      "maximum_unclamped_absolute_error": 0.00012203108404723016,
+      "relative_error_by_leading_one": {
+        "0": 1.52587890625e-05,
+        "1": 6.00576807235481e-06,
+        "2": 1.3982430135135071e-05,
+        "3": 2.05004826473303e-05,
+        "4": 1.1656481822424918e-05,
+        "5": 3.0965092379288456e-05,
+        "6": 3.1940245344697936e-05,
+        "7": 7.328122568232402e-05,
+        "8": 0.00011634149892937594,
+        "9": 0.00018456791404325036,
+        "10": 0.00028471320902813423,
+        "11": 0.00046173254099181197,
+        "12": 0.0005837167376048465,
+        "13": 0.0009190091590655649,
+        "14": 0.0012835007414819047,
+        "15": 0.0019473917728271876,
+        "16": 0.0
+      },
+      "relative_error_by_exponent_parity": {
+        "0": 0.0012835007414819047,
+        "1": 0.0019473917728271876
+      },
+      "monotonicity": "nonincreasing on samples",
+      "monotonicity_first_violations": [],
+      "overflow": {
+        "count": 1,
+        "minimum": 1,
+        "maximum": 1
+      },
+      "underflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "latency": 10,
+      "initiation_interval": 10
+    },
+    {
+      "iterations": 2,
+      "quality_id": 2,
+      "round_mode": 0,
+      "output_signed": 1,
+      "epsilon_encoded": 1,
+      "samples": 1315,
+      "method": "deterministic magnitude and seed-boundary samples",
+      "absolute_error": {
+        "maximum": 8.000244140625,
+        "mean": 0.009668402716816177,
+        "p50": 0.00012766570441778046,
+        "p95": 0.00023356444791639488,
+        "p99": 0.00024321289279275487
+      },
+      "relative_error": {
+        "maximum": 0.5000152587890625,
+        "mean": 0.002022493349576109,
+        "p50": 0.0012086259653159058,
+        "p95": 0.0030353837548085403,
+        "p99": 0.0035600254166371155
+      },
+      "maximum_unclamped_absolute_error": 0.000244140625,
+      "relative_error_by_leading_one": {
+        "0": 0.5000152587890625,
+        "1": 0.29291479799989006,
+        "2": 3.587984586873109e-05,
+        "3": 2.05004826473303e-05,
+        "4": 6.365885552248579e-05,
+        "5": 3.0965092379288456e-05,
+        "6": 0.0001220703125,
+        "7": 0.0001543933037191824,
+        "8": 0.000244140625,
+        "9": 0.0003971426528952359,
+        "10": 0.00048828125,
+        "11": 0.0008371996642854241,
+        "12": 0.0012775773954118886,
+        "13": 0.0018442291722391316,
+        "14": 0.0027092664497341498,
+        "15": 0.003725651676000272,
+        "16": 0.00390625
+      },
+      "relative_error_by_exponent_parity": {
+        "0": 0.5000152587890625,
+        "1": 0.29291479799989006
+      },
+      "monotonicity": "nonincreasing on samples",
+      "monotonicity_first_violations": [],
+      "overflow": {
+        "count": 3,
+        "minimum": 1,
+        "maximum": 3
+      },
+      "underflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "latency": 10,
+      "initiation_interval": 10
+    },
+    {
+      "iterations": 2,
+      "quality_id": 2,
+      "round_mode": 1,
+      "output_signed": 1,
+      "epsilon_encoded": 1,
+      "samples": 1315,
+      "method": "deterministic magnitude and seed-boundary samples",
+      "absolute_error": {
+        "maximum": 8.000244140625,
+        "mean": 0.00960576881969247,
+        "p50": 6.101281359927217e-05,
+        "p95": 0.00011612757848388843,
+        "p99": 0.00012103389478356097
+      },
+      "relative_error": {
+        "maximum": 0.5000152587890625,
+        "mean": 0.0013544325858414303,
+        "p50": 0.000564415912651273,
+        "p95": 0.0015279972245341514,
+        "p99": 0.0018273503280244905
+      },
+      "maximum_unclamped_absolute_error": 0.00012203108404723016,
+      "relative_error_by_leading_one": {
+        "0": 0.5000152587890625,
+        "1": 0.29291479799989006,
+        "2": 3.0517578125e-05,
+        "3": 2.05004826473303e-05,
+        "4": 1.1656481822424918e-05,
+        "5": 3.0965092379288456e-05,
+        "6": 3.1940245344697936e-05,
+        "7": 7.328122568232402e-05,
+        "8": 0.00011634149892937594,
+        "9": 0.00018456791404325036,
+        "10": 0.00028471320902813423,
+        "11": 0.00046173254099181197,
+        "12": 0.0005837167376048465,
+        "13": 0.0009190091590655649,
+        "14": 0.0012835007414819047,
+        "15": 0.0019473917728271876,
+        "16": 0.0
+      },
+      "relative_error_by_exponent_parity": {
+        "0": 0.5000152587890625,
+        "1": 0.29291479799989006
+      },
+      "monotonicity": "nonincreasing on samples",
+      "monotonicity_first_violations": [],
+      "overflow": {
+        "count": 4,
+        "minimum": 1,
+        "maximum": 4
+      },
+      "underflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "latency": 10,
+      "initiation_interval": 10
+    },
+    {
+      "iterations": 0,
+      "quality_id": 0,
+      "round_mode": 0,
+      "output_signed": 0,
+      "epsilon_encoded": 65535,
+      "samples": 1315,
+      "method": "deterministic magnitude and seed-boundary samples",
+      "absolute_error": {
+        "maximum": 0.00040942986132016303,
+        "mean": 0.00012770201071048503,
+        "p50": 0.00011848905683117454,
+        "p95": 0.0002838485041307447,
+        "p99": 0.00033762517588868045
+      },
+      "relative_error": {
+        "maximum": 0.006867348530960856,
+        "mean": 0.0024690725096866567,
+        "p50": 0.002313912622388663,
+        "p95": 0.005471101384946112,
+        "p99": 0.006431219441993576
+      },
+      "maximum_unclamped_absolute_error": 0.00040942986132016303,
+      "relative_error_by_leading_one": {
+        "15": 7.629423635302503e-06,
+        "16": 0.006867348530960856
+      },
+      "relative_error_by_exponent_parity": {
+        "1": 7.629423635302503e-06,
+        "0": 0.006867348530960856
+      },
+      "monotonicity": "nonincreasing on samples",
+      "monotonicity_first_violations": [],
+      "overflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "underflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "latency": 4,
+      "initiation_interval": 4
+    },
+    {
+      "iterations": 0,
+      "quality_id": 0,
+      "round_mode": 1,
+      "output_signed": 0,
+      "epsilon_encoded": 65535,
+      "samples": 1315,
+      "method": "deterministic magnitude and seed-boundary samples",
+      "absolute_error": {
+        "maximum": 0.00033117188408324336,
+        "mean": 9.342860070101317e-05,
+        "p50": 8.173660331900737e-05,
+        "p95": 0.0002213555311438656,
+        "p99": 0.0002503031124854941
+      },
+      "relative_error": {
+        "maximum": 0.005461826633240082,
+        "mean": 0.0017881866025663872,
+        "p50": 0.0015802186592747335,
+        "p95": 0.003967264516207436,
+        "p99": 0.004577082325507568
+      },
+      "maximum_unclamped_absolute_error": 0.00033117188408324336,
+      "relative_error_by_leading_one": {
+        "15": 0.003898590773928622,
+        "16": 0.005461826633240082
+      },
+      "relative_error_by_exponent_parity": {
+        "1": 0.003898590773928622,
+        "0": 0.005461826633240082
+      },
+      "monotonicity": "nonincreasing on samples",
+      "monotonicity_first_violations": [],
+      "overflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "underflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "latency": 4,
+      "initiation_interval": 4
+    },
+    {
+      "iterations": 0,
+      "quality_id": 0,
+      "round_mode": 0,
+      "output_signed": 1,
+      "epsilon_encoded": 65535,
+      "samples": 1315,
+      "method": "deterministic magnitude and seed-boundary samples",
+      "absolute_error": {
+        "maximum": 0.00040942986132016303,
+        "mean": 0.00012770201071048503,
+        "p50": 0.00011848905683117454,
+        "p95": 0.0002838485041307447,
+        "p99": 0.00033762517588868045
+      },
+      "relative_error": {
+        "maximum": 0.006867348530960856,
+        "mean": 0.0024690725096866567,
+        "p50": 0.002313912622388663,
+        "p95": 0.005471101384946112,
+        "p99": 0.006431219441993576
+      },
+      "maximum_unclamped_absolute_error": 0.00040942986132016303,
+      "relative_error_by_leading_one": {
+        "15": 7.629423635302503e-06,
+        "16": 0.006867348530960856
+      },
+      "relative_error_by_exponent_parity": {
+        "1": 7.629423635302503e-06,
+        "0": 0.006867348530960856
+      },
+      "monotonicity": "nonincreasing on samples",
+      "monotonicity_first_violations": [],
+      "overflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "underflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "latency": 4,
+      "initiation_interval": 4
+    },
+    {
+      "iterations": 0,
+      "quality_id": 0,
+      "round_mode": 1,
+      "output_signed": 1,
+      "epsilon_encoded": 65535,
+      "samples": 1315,
+      "method": "deterministic magnitude and seed-boundary samples",
+      "absolute_error": {
+        "maximum": 0.00033117188408324336,
+        "mean": 9.342860070101317e-05,
+        "p50": 8.173660331900737e-05,
+        "p95": 0.0002213555311438656,
+        "p99": 0.0002503031124854941
+      },
+      "relative_error": {
+        "maximum": 0.005461826633240082,
+        "mean": 0.0017881866025663872,
+        "p50": 0.0015802186592747335,
+        "p95": 0.003967264516207436,
+        "p99": 0.004577082325507568
+      },
+      "maximum_unclamped_absolute_error": 0.00033117188408324336,
+      "relative_error_by_leading_one": {
+        "15": 0.003898590773928622,
+        "16": 0.005461826633240082
+      },
+      "relative_error_by_exponent_parity": {
+        "1": 0.003898590773928622,
+        "0": 0.005461826633240082
+      },
+      "monotonicity": "nonincreasing on samples",
+      "monotonicity_first_violations": [],
+      "overflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "underflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "latency": 4,
+      "initiation_interval": 4
+    },
+    {
+      "iterations": 1,
+      "quality_id": 1,
+      "round_mode": 0,
+      "output_signed": 0,
+      "epsilon_encoded": 65535,
+      "samples": 1315,
+      "method": "deterministic magnitude and seed-boundary samples",
+      "absolute_error": {
+        "maximum": 0.0002441724641685532,
+        "mean": 0.00012242938169960442,
+        "p50": 0.00012365305511682423,
+        "p95": 0.00023420165431315527,
+        "p99": 0.0002426960854608625
+      },
+      "relative_error": {
+        "maximum": 0.005449324338332779,
+        "mean": 0.002384785165709047,
+        "p50": 0.0024025691679606443,
+        "p95": 0.004630247436649146,
+        "p99": 0.005121419723078443
+      },
+      "maximum_unclamped_absolute_error": 0.0002441724641685532,
+      "relative_error_by_leading_one": {
+        "15": 7.629423635302503e-06,
+        "16": 0.005449324338332779
+      },
+      "relative_error_by_exponent_parity": {
+        "1": 7.629423635302503e-06,
+        "0": 0.005449324338332779
+      },
+      "monotonicity": "nonincreasing on samples",
+      "monotonicity_first_violations": [],
+      "overflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "underflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "latency": 7,
+      "initiation_interval": 7
+    },
+    {
+      "iterations": 1,
+      "quality_id": 1,
+      "round_mode": 1,
+      "output_signed": 0,
+      "epsilon_encoded": 65535,
+      "samples": 1315,
+      "method": "deterministic magnitude and seed-boundary samples",
+      "absolute_error": {
+        "maximum": 0.0001221633554334562,
+        "mean": 6.000723718514247e-05,
+        "p50": 6.0470445546061215e-05,
+        "p95": 0.0001152563285614516,
+        "p99": 0.00012044189817140541
+      },
+      "relative_error": {
+        "maximum": 0.002723462044597233,
+        "mean": 0.0011736315691537186,
+        "p50": 0.0011850613780831176,
+        "p95": 0.0023109233823015098,
+        "p99": 0.002564620365420024
+      },
+      "maximum_unclamped_absolute_error": 0.0001221633554334562,
+      "relative_error_by_leading_one": {
+        "15": 7.629423635302503e-06,
+        "16": 0.002723462044597233
+      },
+      "relative_error_by_exponent_parity": {
+        "1": 7.629423635302503e-06,
+        "0": 0.002723462044597233
+      },
+      "monotonicity": "nonincreasing on samples",
+      "monotonicity_first_violations": [],
+      "overflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "underflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "latency": 7,
+      "initiation_interval": 7
+    },
+    {
+      "iterations": 1,
+      "quality_id": 1,
+      "round_mode": 0,
+      "output_signed": 1,
+      "epsilon_encoded": 65535,
+      "samples": 1315,
+      "method": "deterministic magnitude and seed-boundary samples",
+      "absolute_error": {
+        "maximum": 0.0002441724641685532,
+        "mean": 0.00012242938169960442,
+        "p50": 0.00012365305511682423,
+        "p95": 0.00023420165431315527,
+        "p99": 0.0002426960854608625
+      },
+      "relative_error": {
+        "maximum": 0.005449324338332779,
+        "mean": 0.002384785165709047,
+        "p50": 0.0024025691679606443,
+        "p95": 0.004630247436649146,
+        "p99": 0.005121419723078443
+      },
+      "maximum_unclamped_absolute_error": 0.0002441724641685532,
+      "relative_error_by_leading_one": {
+        "15": 7.629423635302503e-06,
+        "16": 0.005449324338332779
+      },
+      "relative_error_by_exponent_parity": {
+        "1": 7.629423635302503e-06,
+        "0": 0.005449324338332779
+      },
+      "monotonicity": "nonincreasing on samples",
+      "monotonicity_first_violations": [],
+      "overflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "underflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "latency": 7,
+      "initiation_interval": 7
+    },
+    {
+      "iterations": 1,
+      "quality_id": 1,
+      "round_mode": 1,
+      "output_signed": 1,
+      "epsilon_encoded": 65535,
+      "samples": 1315,
+      "method": "deterministic magnitude and seed-boundary samples",
+      "absolute_error": {
+        "maximum": 0.0001221633554334562,
+        "mean": 6.000723718514247e-05,
+        "p50": 6.0470445546061215e-05,
+        "p95": 0.0001152563285614516,
+        "p99": 0.00012044189817140541
+      },
+      "relative_error": {
+        "maximum": 0.002723462044597233,
+        "mean": 0.0011736315691537186,
+        "p50": 0.0011850613780831176,
+        "p95": 0.0023109233823015098,
+        "p99": 0.002564620365420024
+      },
+      "maximum_unclamped_absolute_error": 0.0001221633554334562,
+      "relative_error_by_leading_one": {
+        "15": 7.629423635302503e-06,
+        "16": 0.002723462044597233
+      },
+      "relative_error_by_exponent_parity": {
+        "1": 7.629423635302503e-06,
+        "0": 0.002723462044597233
+      },
+      "monotonicity": "nonincreasing on samples",
+      "monotonicity_first_violations": [],
+      "overflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "underflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "latency": 7,
+      "initiation_interval": 7
+    },
+    {
+      "iterations": 2,
+      "quality_id": 2,
+      "round_mode": 0,
+      "output_signed": 0,
+      "epsilon_encoded": 65535,
+      "samples": 1315,
+      "method": "deterministic magnitude and seed-boundary samples",
+      "absolute_error": {
+        "maximum": 0.000244140625,
+        "mean": 0.00012224372342964243,
+        "p50": 0.00012337491533923953,
+        "p95": 0.00023393432484308138,
+        "p99": 0.00024253403221775435
+      },
+      "relative_error": {
+        "maximum": 0.005449324338332779,
+        "mean": 0.0023807827670153706,
+        "p50": 0.002401822549207118,
+        "p95": 0.004605662238513241,
+        "p99": 0.005112619327759806
+      },
+      "maximum_unclamped_absolute_error": 0.000244140625,
+      "relative_error_by_leading_one": {
+        "15": 7.629423635302503e-06,
+        "16": 0.005449324338332779
+      },
+      "relative_error_by_exponent_parity": {
+        "1": 7.629423635302503e-06,
+        "0": 0.005449324338332779
+      },
+      "monotonicity": "nonincreasing on samples",
+      "monotonicity_first_violations": [],
+      "overflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "underflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "latency": 10,
+      "initiation_interval": 10
+    },
+    {
+      "iterations": 2,
+      "quality_id": 2,
+      "round_mode": 1,
+      "output_signed": 0,
+      "epsilon_encoded": 65535,
+      "samples": 1315,
+      "method": "deterministic magnitude and seed-boundary samples",
+      "absolute_error": {
+        "maximum": 0.00012199803557129539,
+        "mean": 6.000709567497752e-05,
+        "p50": 6.0470445546061215e-05,
+        "p95": 0.0001152563285614516,
+        "p99": 0.00012044189817140541
+      },
+      "relative_error": {
+        "maximum": 0.002723462044597233,
+        "mean": 0.0011736292644827153,
+        "p50": 0.0011850613780831176,
+        "p95": 0.0023109233823015098,
+        "p99": 0.002564620365420024
+      },
+      "maximum_unclamped_absolute_error": 0.00012199803557129539,
+      "relative_error_by_leading_one": {
+        "15": 7.629423635302503e-06,
+        "16": 0.002723462044597233
+      },
+      "relative_error_by_exponent_parity": {
+        "1": 7.629423635302503e-06,
+        "0": 0.002723462044597233
+      },
+      "monotonicity": "nonincreasing on samples",
+      "monotonicity_first_violations": [],
+      "overflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "underflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "latency": 10,
+      "initiation_interval": 10
+    },
+    {
+      "iterations": 2,
+      "quality_id": 2,
+      "round_mode": 0,
+      "output_signed": 1,
+      "epsilon_encoded": 65535,
+      "samples": 1315,
+      "method": "deterministic magnitude and seed-boundary samples",
+      "absolute_error": {
+        "maximum": 0.000244140625,
+        "mean": 0.00012224372342964243,
+        "p50": 0.00012337491533923953,
+        "p95": 0.00023393432484308138,
+        "p99": 0.00024253403221775435
+      },
+      "relative_error": {
+        "maximum": 0.005449324338332779,
+        "mean": 0.0023807827670153706,
+        "p50": 0.002401822549207118,
+        "p95": 0.004605662238513241,
+        "p99": 0.005112619327759806
+      },
+      "maximum_unclamped_absolute_error": 0.000244140625,
+      "relative_error_by_leading_one": {
+        "15": 7.629423635302503e-06,
+        "16": 0.005449324338332779
+      },
+      "relative_error_by_exponent_parity": {
+        "1": 7.629423635302503e-06,
+        "0": 0.005449324338332779
+      },
+      "monotonicity": "nonincreasing on samples",
+      "monotonicity_first_violations": [],
+      "overflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "underflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "latency": 10,
+      "initiation_interval": 10
+    },
+    {
+      "iterations": 2,
+      "quality_id": 2,
+      "round_mode": 1,
+      "output_signed": 1,
+      "epsilon_encoded": 65535,
+      "samples": 1315,
+      "method": "deterministic magnitude and seed-boundary samples",
+      "absolute_error": {
+        "maximum": 0.00012199803557129539,
+        "mean": 6.000709567497752e-05,
+        "p50": 6.0470445546061215e-05,
+        "p95": 0.0001152563285614516,
+        "p99": 0.00012044189817140541
+      },
+      "relative_error": {
+        "maximum": 0.002723462044597233,
+        "mean": 0.0011736292644827153,
+        "p50": 0.0011850613780831176,
+        "p95": 0.0023109233823015098,
+        "p99": 0.002564620365420024
+      },
+      "maximum_unclamped_absolute_error": 0.00012199803557129539,
+      "relative_error_by_leading_one": {
+        "15": 7.629423635302503e-06,
+        "16": 0.002723462044597233
+      },
+      "relative_error_by_exponent_parity": {
+        "1": 7.629423635302503e-06,
+        "0": 0.002723462044597233
+      },
+      "monotonicity": "nonincreasing on samples",
+      "monotonicity_first_violations": [],
+      "overflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "underflow": {
+        "count": 0,
+        "minimum": null,
+        "maximum": null
+      },
+      "latency": 10,
+      "initiation_interval": 10
+    }
+  ],
+  "application_checks": [
+    {
+      "iterations": 0,
+      "epsilon_encoded": 0,
+      "input_vector_encoded": [
+        64,
+        -128,
+        192,
+        -256
+      ],
+      "reduction_encoded": 120,
+      "reduction_absolute_error": 0.0,
+      "output_values": [
+        0.3642578125,
+        -0.728759765625,
+        1.09326171875,
+        -1.45751953125
+      ],
+      "maximum_absolute_output_error": 0.003073955430442969,
+      "saturated": false,
+      "scope": "RMSNorm example including reduction conversion and final multiply"
+    },
+    {
+      "iterations": 1,
+      "epsilon_encoded": 0,
+      "input_vector_encoded": [
+        64,
+        -128,
+        192,
+        -256
+      ],
+      "reduction_encoded": 120,
+      "reduction_absolute_error": 0.0,
+      "output_values": [
+        0.365234375,
+        -0.73046875,
+        1.095458984375,
+        -1.460693359375
+      ],
+      "maximum_absolute_output_error": 0.0001720066597785154,
+      "saturated": false,
+      "scope": "RMSNorm example including reduction conversion and final multiply"
+    },
+    {
+      "iterations": 2,
+      "epsilon_encoded": 0,
+      "input_vector_encoded": [
+        64,
+        -128,
+        192,
+        -256
+      ],
+      "reduction_encoded": 120,
+      "reduction_absolute_error": 0.0,
+      "output_values": [
+        0.365234375,
+        -0.73046875,
+        1.095458984375,
+        -1.460693359375
+      ],
+      "maximum_absolute_output_error": 0.0001720066597785154,
+      "saturated": false,
+      "scope": "RMSNorm example including reduction conversion and final multiply"
+    },
+    {
+      "iterations": 0,
+      "epsilon_encoded": 1,
+      "input_vector_encoded": [
+        64,
+        -128,
+        192,
+        -256
+      ],
+      "reduction_encoded": 120,
+      "reduction_absolute_error": 0.0,
+      "output_values": [
+        0.36279296875,
+        -0.725830078125,
+        1.0888671875,
+        -1.45166015625
+      ],
+      "maximum_absolute_output_error": 0.0028852982954545455,
+      "saturated": false,
+      "scope": "RMSNorm example including reduction conversion and final multiply"
+    },
+    {
+      "iterations": 1,
+      "epsilon_encoded": 1,
+      "input_vector_encoded": [
+        64,
+        -128,
+        192,
+        -256
+      ],
+      "reduction_encoded": 120,
+      "reduction_absolute_error": 0.0,
+      "output_values": [
+        0.36376953125,
+        -0.727294921875,
+        1.0908203125,
+        -1.45458984375
+      ],
+      "maximum_absolute_output_error": 0.00013316761363636363,
+      "saturated": false,
+      "scope": "RMSNorm example including reduction conversion and final multiply"
+    },
+    {
+      "iterations": 2,
+      "epsilon_encoded": 1,
+      "input_vector_encoded": [
+        64,
+        -128,
+        192,
+        -256
+      ],
+      "reduction_encoded": 120,
+      "reduction_absolute_error": 0.0,
+      "output_values": [
+        0.36376953125,
+        -0.727294921875,
+        1.0908203125,
+        -1.45458984375
+      ],
+      "maximum_absolute_output_error": 0.00013316761363636363,
+      "saturated": false,
+      "scope": "RMSNorm example including reduction conversion and final multiply"
+    }
+  ],
+  "physical_metrics": {
+    "area": "NOT_RUN",
+    "energy": "NOT_RUN",
+    "synthesis": "Design Compiler (deferred)"
+  },
+  "qualification": "numerical evidence only; application acceptance targets are integration-owned"
+}

@@ -28,7 +28,7 @@ DEPENDENCIES = tuple(ROOT / f'src/rtl/{name}.sv' for name in (
     'basic/parity', 'basic/ecc', 'building_blocks/event_barrier_state',
     'building_blocks/event_barrier_queue', 'building_blocks/multiplier',
     'building_blocks/scalar_alu', 'building_blocks/polynomial_unit_round',
-    'building_blocks/reciprocal_unit_normalize', 'building_blocks/reciprocal_unit_seed',
+    'building_blocks/protected_seed_rom', 'building_blocks/reciprocal_unit_normalize', 'building_blocks/reciprocal_unit_seed',
     'building_blocks/reciprocal_unit_newton', 'building_blocks/reciprocal_unit_scale'))
 
 

@@ -162,6 +162,23 @@ architecture equivalence, and publishes numerical error characterization.
 Synthesis remains deferred to Design Compiler. See the
 [reciprocal-unit verification details](src/val/building_blocks/reciprocal_unit/README.md).
 
+Run the inverse-square-root specification regression:
+
+```sh
+make rsqrt-unit-regression SIM=icarus
+make rsqrt-unit-regression
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=rsqrt_unit
+```
+
+The rsqrt unit supports optional widened epsilon addition, exponent-parity
+normalization, iterative or unrolled Newton refinement, independent output range,
+rounding and protected reproducible seed images. It reuses the reciprocal scale
+helper, shared protected ROM, multiplier, scalar ALU, common rounding, state and
+FIFO queues. The Python-only campaign covers 40 profiles, reduced-width exhaustive
+inputs, fault containment and numerical error characterization. Design Compiler
+synthesis is deferred. See the
+[rsqrt verification details](src/val/building_blocks/rsqrt_unit/README.md).
+
 Run the nested-loop-controller specification regression:
 
 ```sh
