@@ -201,6 +201,21 @@ claims and clamps invalid bytes in combinational or buffered profiles. See the
 for the 40-profile Python campaign, local encodings and flush/reset contracts.
 Synthesis is deferred to Design Compiler.
 
+Run the scratchpad-controller specification regression:
+
+```sh
+make scratchpad-controller-regression
+make scratchpad-controller-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=scratchpad_controller
+```
+
+The controller reuses the round-robin arbiter and common state/counters for
+bank mapping, permissions, conflict arbitration and ordered per-client completions.
+See the [scratchpad-controller verification details](src/val/building_blocks/scratchpad_controller/README.md)
+for the 45 standalone and 12 real-bank integration profiles, local encodings,
+optional counters and coordinated recovery. Validation uses Python/PyUVM tests;
+synthesis is deferred to Design Compiler.
+
 Run the scratchpad-bank specification regression:
 
 ```sh
