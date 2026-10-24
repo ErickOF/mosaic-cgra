@@ -19,6 +19,18 @@ class DmaMonitor(uvm_monitor):
             for name in ('bytes_read','bytes_written'):
                 handles=getattr(cocotb.top.g_dma,name)
                 internals[name]=tuple(logic(handles[ch]) for ch in range(self.c.NUM_CHANNELS))
+            channels = tuple(cocotb.top.g_dma.g_channel[ch] for ch in range(self.c.NUM_CHANNELS))
+            internals['cancel_timer'] = tuple(logic(scope.cancel_timer) for scope in channels)
+            internals['phase'] = tuple(
+                logic(cocotb.top.g_dma.phase[ch]) for ch in range(self.c.NUM_CHANNELS)
+            )
+            internals['directory_pointer'] = tuple(
+                logic(scope.u_commands.write_pointer) for scope in channels
+            )
+            internals['directory'] = tuple(
+                logic(scope.u_commands.g_id_entry[slot].u_directory.o_q)
+                for scope in channels for slot in range(self.c.COMMAND_QUEUE_DEPTH)
+            )
         obs=Observation({name:logic(getattr(cocotb.top,name)) for name in (*INPUTS,*OUTPUTS)},item,stage,internals)
         self.ap.write(obs);item.observation=obs
         if stage=='pre':item.pre=obs

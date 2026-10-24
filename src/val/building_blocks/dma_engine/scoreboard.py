@@ -280,6 +280,8 @@ class DmaScoreboard(uvm_scoreboard):
                         assert set(self.payload(p,prefix+'_data',ch))=={'0'},'DMA invalid payload isolation assertion'
         if stage=='edge':
             assert all(p[name]==item.pre.ports[name] for name in OUTPUTS),'DMA pre-NBA edge observation'
+        if stage == 'post' and obs.internals:
+            self.check_directory_and_timer(item.pre, obs)
         if stage=='post' and item.edge:self.advance(item.pre.ports,p,item)
         if obs.internals and self.initialized:
             for ch,r in enumerate(self.active):
@@ -287,6 +289,39 @@ class DmaScoreboard(uvm_scoreboard):
                     for actual,expected in (('bytes_read','read'),('bytes_written','written')):
                         assert int(obs.internals[actual][ch],2)==r[expected],f'DMA private byte-count assertion: {actual}[{ch}]'
         self.coverage.observations[stage]+=1
+
+    def check_directory_and_timer(self, pre, post):
+        """Check captures and retention against public acceptance, including reset.
+
+        Untouched entries must retain their four-state payload. Reading the bank
+        directly also checks unoccupied entries, which duplicate-ID queries mask.
+        """
+        c = self.c
+        p = pre.ports
+        accepted = (
+            post.item.edge and p['i_rstb'] == '1'
+            and post.ports['o_command_accepted'] == '1'
+        )
+        channel = int(p['i_command_channel'], 2) if accepted else -1
+        for ch in range(c.NUM_CHANNELS):
+            write = int(pre.internals['directory_pointer'][ch], 2) if ch == channel else -1
+            for slot in range(c.COMMAND_QUEUE_DEPTH):
+                index = ch * c.COMMAND_QUEUE_DEPTH + slot
+                expected = pre.internals['directory'][index]
+                if slot == write:
+                    expected = p['i_command_context_id'] + p['i_command_id']
+                    self.coverage.directory_captures.add((ch, slot))
+                else:
+                    self.coverage.directory_holds += 1
+                assert post.internals['directory'][index] == expected, (
+                    f'DMA command directory capture/hold assertion: channel {ch}, slot {slot}'
+                )
+            # Phase encodings are independently defined in the local DMA package.
+            if p['i_rstb'] == '1' and pre.internals['phase'][ch] == '110':
+                assert post.internals['cancel_timer'][ch] == pre.internals['cancel_timer'][ch], (
+                    f'DMA fatal cancel timer hold assertion: channel {ch}'
+                )
+                self.coverage.fatal_timer_holds += 1
 
     def check_phase(self):
         assert not self.live and not any(self.queues) and not any(self.active) and not any(self.ready) and not self.events,'DMA unfinished command/event ledger'

@@ -1,8 +1,10 @@
-"""Native multi-channel DMA profile campaign with exact evidence validation."""
+"""Python-only DMA profile campaign with exact simulation evidence validation."""
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime,timezone
 import hashlib
 from itertools import product
 import json
+import os
 from pathlib import Path
 import shlex
 import sys
@@ -14,7 +16,8 @@ ROOT=Path(__file__).resolve().parents[4];TEST_DIR=Path(__file__).resolve().paren
 sys.path.insert(0,str(TEST_DIR.parent))
 from dma_engine.config import DEFAULTS
 DEPENDENCIES=(ROOT/'src/rtl/building_blocks/dma_engine_pkg.sv',
-    *(ROOT/f'src/rtl/common/{name}.sv' for name in ('dff','counter','operand_isolation','priority_encoder')),
+    *(ROOT/f'src/rtl/common/{name}.sv' for name in
+        ('dff','decoder','write_gate','counter','operand_isolation','priority_encoder')),
     *(ROOT/f'src/rtl/basic/{name}.sv' for name in ('fifo','parity','round_robin_arbiter')),
     *(ROOT/f'src/rtl/building_blocks/{name}.sv' for name in ('dma_engine_bounds','dma_engine_command_queue')))
 
@@ -60,7 +63,40 @@ def simulate(args,build,rtl,parameters,seed):
     return run_simulation(args,ROOT,TEST_DIR,'dma_engine','test_dma_engine','DmaEngineTest',build,
         ' '.join(map(str,(*DEPENDENCIES,rtl))),parameters=parameters,compile_args=f'{args.compile_args} {flags}',
         environment={**{f'DMA_ENGINE_{name}':str(value) for name,value in parameters.items()},
-            'DMA_ENGINE_SEED':str(seed),'DMA_ENGINE_RANDOM_CYCLES':str(args.random_cycles),'DMA_ENGINE_HDL_ASSERTIONS':'1'})
+            'DMA_ENGINE_SEED':str(seed),'DMA_ENGINE_RANDOM_CYCLES':str(args.random_cycles),
+            'DMA_ENGINE_HDL_ASSERTIONS':'0','DMA_ENGINE_CHECK_INTERNALS':'1'})
+
+
+def run_profile(task):
+    args, build, rtl, index, name, parameters = task
+    print(f'Running {name}', flush=True)
+    result, log, results, coverage = simulate(
+        args, build / name, rtl, parameters, args.seed + index
+    )
+    row = dict(name=name, status='FAIL', parameters=parameters, log=str(log))
+    try:
+        if result.returncode:
+            raise ValueError(f'make exited {result.returncode}')
+        passed_test(results, 'DmaEngineTest', 'test_dma_engine')
+        data = json.loads(coverage.read_text())
+        if (
+            data['status'] != 'PASS' or data['parameters'] != parameters
+            or not data['goals'] or not all(data['goals'].values())
+            or data.get('hdl_handshake_assertions') != 'NOT_RUN'
+            or data.get('private_byte_assertions') != 'PASS'
+            or data.get('directory_assertions') != 'PASS'
+            or data['random_transactions'] != args.random_cycles
+            or data['seed'] != args.seed + index
+        ):
+            raise ValueError('Coverage evidence mismatch')
+        row.update(data, name=name, log=str(log), coverage=str(coverage))
+    except (OSError, ValueError, KeyError, ET.ParseError) as error:
+        row['error'] = str(error)
+        if license_unavailable(log.read_text()):
+            row['status'] = 'NOT_RUN'
+        print('\n'.join(log.read_text().splitlines()[-25:]), flush=True)
+    print(name, row['status'], flush=True)
+    return row
 
 
 def main():
@@ -68,6 +104,7 @@ def main():
     build,rtl=args.build_dir.resolve(),args.rtl.resolve();build.mkdir(parents=True,exist_ok=True)
     output=build/'summary.json';output.unlink(missing_ok=True)
     summary=dict(status='NOT_RUN',framework='PyUVM',simulator=args.sim,profiles=[],parameter_checks=[],
+        validation_mode='Python-only',synthesis='Design Compiler (deferred)',
         started_at_utc=datetime.now(timezone.utc).isoformat(),specification='specs/building-blocks/mosaic-dma-engine/README.md',
         scope='selected_profiles' if args.case else 'representative_dma_profiles',
         external_checks=dict.fromkeys(('formal','commercial_lint','cdc','rdc','dft','vc_lp','technology_synthesis',
@@ -76,27 +113,28 @@ def main():
         summary['rtl_sha256']=hashlib.sha256(rtl.read_bytes()).hexdigest()
         summary['dependency_sha256']={str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest() for p in DEPENDENCIES}
         summary['verification_sha256']=verification_hashes(TEST_DIR);require_simulator(args)
-        for index,(name,p) in enumerate(PROFILES):
-            if args.case and name not in args.case:continue
-            print(f'Running {name}',flush=True)
-            result,log,results,coverage=simulate(args,build/name,rtl,p,args.seed+index)
-            row=dict(name=name,status='FAIL',parameters=p,log=str(log))
-            try:
-                if result.returncode:raise ValueError(f'make exited {result.returncode}')
-                passed_test(results,'DmaEngineTest','test_dma_engine');data=json.loads(coverage.read_text())
-                if (data['status']!='PASS' or data['parameters']!=p or not data['goals'] or not all(data['goals'].values())
-                    or data.get('hdl_handshake_assertions')!='PASS' or data.get('private_byte_assertions')!='PASS'
-                    or data['random_transactions']!=args.random_cycles or data['seed']!=args.seed+index):raise ValueError('Coverage evidence mismatch')
-                row.update(data,name=name,log=str(log),coverage=str(coverage))
-            except (OSError,ValueError,KeyError,ET.ParseError) as error:
-                row['error']=str(error)
-                if license_unavailable(log.read_text()):row['status']='NOT_RUN'
-                print('\n'.join(log.read_text().splitlines()[-25:]),flush=True)
-            summary['profiles'].append(row);print(name,row['status'],flush=True)
+        jobs = int(os.getenv('DMA_ENGINE_JOBS', '4' if args.sim == 'icarus' else '1'))
+        if not 1 <= jobs <= 32:
+            raise ValueError('DMA_ENGINE_JOBS must be between 1 and 32')
+        summary['jobs'] = jobs
+        tasks = [
+            (args, build, rtl, index, name, parameters)
+            for index, (name, parameters) in enumerate(PROFILES)
+            if not args.case or name in args.case
+        ]
+        with ThreadPoolExecutor(max_workers=jobs) as pool:
+            summary['profiles'] = list(pool.map(run_profile, tasks))
         summary['parameter_checks']=[parameter_guard(args,build,rtl,'dma_engine',name,p,
             'dma_engine_parameters_must_be_valid',dependencies=DEPENDENCIES) for name,p in INVALID]
         complete=len(summary['profiles'])==(len(set(args.case)) if args.case else len(PROFILES)) and len(summary['parameter_checks'])==len(INVALID)
-        summary['status']=campaign_status((*summary['profiles'],*summary['parameter_checks']),complete)
+        stable = (
+            summary['rtl_sha256'] == hashlib.sha256(rtl.read_bytes()).hexdigest()
+            and all(summary['dependency_sha256'][str(p.relative_to(ROOT))]
+                == hashlib.sha256(p.read_bytes()).hexdigest() for p in DEPENDENCIES)
+            and summary['verification_sha256'] == verification_hashes(TEST_DIR)
+        )
+        summary['sources_stable'] = stable
+        summary['status']=campaign_status((*summary['profiles'],*summary['parameter_checks']),complete and stable)
     except (OSError,ValueError) as error:summary['error']=str(error);print(error,file=sys.stderr)
     finally:finish_summary(output,summary,'DMA engine')
     return 0 if summary['status']=='PASS' else 1

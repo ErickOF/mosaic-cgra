@@ -57,6 +57,41 @@ module dma_engine_command_queue #(
     wire unused_any_error;
     wire unused_generated_parity;
     wire unused_parity_error;
+    logic [DEPTH-1:0] directory_select;
+    logic [DEPTH-1:0] directory_write;
+
+    // Share one decode across the command ID and context payload banks. Reset
+    // invalidates occupied entries; their payload intentionally remains unreset.
+    decoder #(
+        .NUM_OUTPUTS(DEPTH),
+        .SELECT_WIDTH(PTR_BITS)
+    ) u_directory_decoder (
+        .i_enable(push),
+        .i_select(write_pointer),
+        .o_decoded(directory_select),
+        .o_select_valid()
+    );
+
+    write_gate #(
+        .WIDTH(DEPTH)
+    ) u_directory_write_gate (
+        .i_write_enable(directory_select),
+        .i_suppress({DEPTH{i_rstb !== 1'b1}}),
+        .o_write_enable(directory_write),
+        .o_write_suppressed()
+    );
+
+    for (genvar k = 0; k < DEPTH; k++) begin : g_id_entry
+        dff #(
+            .WIDTH(ID_BITS + CONTEXT_BITS)
+        ) u_directory (
+            .i_clk(i_clk),
+            .i_rstb(1'b1),
+            .i_enable(directory_write[k]),
+            .i_d({i_context, i_id}),
+            .o_q({contexts[k], ids[k]})
+        );
+    end
 
     if (PROTECTED) begin : g_parity
         parity #(
@@ -135,11 +170,13 @@ module dma_engine_command_queue #(
                 for (int k = 0; k < DEPTH; k ++ )
                 if (occupied[k] && ids[k] === i_cancel_id && contexts[k] === i_cancel_context)
                     canceled[k] <= 1'b1;
+
             if (pop) begin
                 occupied[read_pointer] <= 1'b0;
                 canceled[read_pointer] <= 1'b0;
                 read_pointer <= read_pointer == PTR_BITS'(DEPTH - 1) ? '0 : read_pointer + 1'b1;
             end
+
             if (push) begin
                 occupied[write_pointer] <= 1'b1;
                 canceled[write_pointer] <= 1'b0;
@@ -153,11 +190,4 @@ module dma_engine_command_queue #(
     end else begin : g_sync
         always_ff @(posedge i_clk) update_directory();
     end
-
-    wire store_id = (i_rstb === 1'b1) && push;
-    always_ff @(posedge i_clk)
-        if (store_id) begin
-            ids[write_pointer] <= i_id;
-            contexts[write_pointer] <= i_context;
-        end
 endmodule

@@ -16,7 +16,8 @@ make pyuvm SIM=icarus COCOTB_TOPLEVEL=dma_engine # default hardware parameters
 ```
 
 Configure `DMA_ENGINE_SEED`, `DMA_ENGINE_RANDOM_CYCLES` (at least 1000) and
-`DMA_ENGINE_REGRESSION_BUILD`. The regression runs 25 profiles: all 16 event-start,
+`DMA_ENGINE_REGRESSION_BUILD`. `DMA_ENGINE_JOBS` sets profile parallelism from
+1 to 32, defaulting to 4 for Icarus and 1 for VCS. The regression runs 25 profiles: all 16 event-start,
 cancellation, command-parity and reset combinations; four channel/depth/data-width
 geometries with both resets; and a non-power-of-two queue profile. Channel counts
 are 1, 2, 3, 4 and 8; data widths are 32, 64, 128 and 256 bits; address widths
@@ -35,8 +36,11 @@ Select profiles with the runner directly:
 Reports include `summary.json`, per-profile `coverage.json`, `parameters.json`,
 JUnit `results.xml` and simulator logs. A passing campaign requires the exact
 `test_dma_engine.DmaEngineTest` once per profile, matching parameters/seed/random
-count, all mandatory goals and enabled HDL/private-byte checks. Source, dependency,
+count, all mandatory goals and enabled Python private-byte/directory checks.
+The runner forces `DMA_ENGINE_HDL_ASSERTIONS=0`; the test verifies that no optional
+HDL checker was instantiated. Source, dependency,
 verification, shared-helper and Makefile hashes identify the tested revision.
+The runner verifies these hashes again before accepting the final result.
 Missing simulators or licenses produce `NOT_RUN`.
 
 ## Hardware and integration
@@ -61,14 +65,20 @@ timeouts, drain, coordinated flush and optional command parity.
 
 Existing RTL provides `fifo` for command/data/completion/event storage,
 `round_robin_arbiter` and its `priority_encoder` dependency for retirement,
-`counter` for transfer/cancel timing, `dff` for accepted descriptors,
+`counter` for transfer/cancel timing, `dff` for accepted descriptors and ID-directory entries,
 `operand_isolation` for inactive data and affine arithmetic, and `parity` for
-protected command storage. `dma_engine_bounds.sv` validates the complete affine
+protected command storage. The command queue shares a common `decoder` across its
+ID/context directory banks and uses `write_gate` to suppress payload writes during
+reset. Directory payload remains unreset; reset clears the occupancy that qualifies
+duplicate and cancellation comparisons. These blocks use the existing clock and
+clock enables. `dma_engine_bounds.sv` validates the complete affine
 rectangle and element footprint using extended signed arithmetic before any
 backend work. Load/store engines generate addresses from the forwarded descriptors;
 instantiating an AGU inside the DMA would duplicate that backend responsibility.
 
-Load/store RTL is external to this repository. The Python peers are independent
+The existing `load_engine` and `store_engine` RTL are separate backend modules;
+the DMA exposes descriptor, stream and completion interfaces to connect them.
+The Python peers used here are independent
 protocol models, with randomized descriptor readiness, data latency, independent
 store acceptance/commit delays and cancellation acknowledgements. They do not
 establish integration with a real memory system.
@@ -149,16 +159,23 @@ Regression cases also acknowledge cancellation on its final allowed edge while
 copy data remains buffered, and collide error clear with an unexpected backend
 completion. The buffered-deadline goal applies when the FIFO can retain data at
 that edge; smaller FIFOs necessarily empty first. All profiles check the new-error
-priority. Native HDL assertions check that the fatal cancel timer stops advancing.
+priority. Python assertions check that the fatal cancel timer stops advancing.
 
 The monitor samples actual pre-NBA rising-edge ports, settled pre/post-edge ports
 and held intervals. Private counter observations assert correspondence to the
-independent handshake ledger and detect between-edge updates. The native-only
-`dma_engine_assertions.sv` checker adds descriptor/data stability, destination-first
-arming, legal transfers, accepted-only counts, FIFO accounting and successful
-completion checks. Its one-precision-tick delay requires zero-delay RTL with
-`TEST_SETTLE_NS=0` and at least 1 ps precision. It is excluded from synthesis and
-mapped-netlist source lists.
+independent handshake ledger and detect between-edge updates. Python also checks
+descriptor/data stability, destination-first arming, legal transfers, FIFO capacity
+and successful completion. Every directory slot in every channel must capture a
+command ID/context, and all other slots must retain their previous four-state
+payload, including during reset and clockless observations. These comparisons use
+public command acceptance and observed storage rather than the directory write
+enable as the reference.
+
+All checks in the default run and campaign are Python checks against zero-delay
+RTL with `TEST_SETTLE_NS=0` and at least 1 ps precision. The existing optional
+`dma_engine_assertions.sv` checker is disabled by default and is outside this
+campaign's evidence; it remains available through `DMA_ENGINE_HDL_ASSERTIONS=1`
+for a separate direct RTL run.
 
 For an explicit port-only RTL run:
 
@@ -172,24 +189,11 @@ These switches do not make the driver timing-aware for SDF simulation.
 
 ## Evidence limits
 
-Ignored `build/validation/dma-*` artifacts record local native simulation, lint,
-generic synthesis and bounded safety experiments. Native simulation and Verilator
-lint compile the original package/RTL. Generic Yosys checks use its Slang frontend
-with the same enum package and module-local packed payload types. The tool view
-inlines clocked task bodies verbatim so the frontend recognizes asynchronous
-reset patterns; it does not replace the DMA behavior. Generic checks examine
-unresolved references, latches, combinational loops, initialized storage and clock
-domains.
+This revision is validated with Python/PyUVM tests and Python-driven parameter
+guard probes. The complete default campaign adds 50,000 random clock opportunities
+to its directed cases. No lint, formal or synthesis flow is part of this campaign.
+Synthesis is deferred to Design Compiler.
 
-The 16 small formal profiles cross one/two channels, command/data depths one/two
-and both resets. They check binary safety for 16 clock edges after an initial
-reset, with arbitrary external inputs and a shadow copy-data ledger. Asynchronous
-reset uses an edge abstraction. These bounded results do not establish inductive
-safety, fairness or eventual progress and do not satisfy the complete formal
-release criteria.
-
-VCS, commercial lint/CDC/RDC/LP, DFT, technology synthesis, sequential equivalence,
-real load/store integration, post-route timing, physical power/energy and external
-contract compatibility require separate tools and evidence. Their status remains
-`NOT_RUN`; this implementation and its RTL validation are not full physical release
-signoff.
+VCS execution, CDC/RDC/LP, DFT, sequential equivalence, real load/store integration,
+post-route timing and physical power/energy require separate evidence. Their status
+remains `NOT_RUN`; this RTL validation is not full physical release signoff.

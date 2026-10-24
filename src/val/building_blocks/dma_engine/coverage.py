@@ -13,6 +13,9 @@ class DmaCoverage(CoverageCollector):
         self.reset_discarded=self.flush_discarded=0
         self.cancel_deadline_discard=False
         self.error_clear_collision=False
+        self.directory_captures = set()
+        self.directory_holds = 0
+        self.fatal_timer_holds = 0
         self.command_errors=set();self.command_occupancy=set();self.data_occupancy=set();self.fifo_activity=set()
         self.payload_states=set();self.element_sizes=set();self.start_modes=set();self.regions=set()
         self.contexts=set();self.streams=set();self.priority_burst=set();self.event_masks=set();self.event_ids=set();self.cancel_bytes=set()
@@ -26,6 +29,11 @@ class DmaCoverage(CoverageCollector):
         deadline_discard_reachable=(c.SUPPORT_CANCELLATION and 2<=c.CANCEL_TIMEOUT_CYCLES<=c.DATA_FIFO_DEPTH
             and c.DATA_FIFO_DEPTH<(1<<c.COUNT_WIDTH))
         goals=dict(new_error_wins_over_clear=self.error_clear_collision,
+            directory_capture_and_hold=not c.check_internals or (
+                set(product(range(c.NUM_CHANNELS), range(c.COMMAND_QUEUE_DEPTH)))
+                <= self.directory_captures and self.directory_holds > 0),
+            fatal_cancel_timer_hold=not c.check_internals or not c.SUPPORT_CANCELLATION
+                or c.CANCEL_TIMEOUT_CYCLES > 64 or self.fatal_timer_holds > 0,
             buffered_discard_after_ack_deadline=not deadline_discard_reachable or self.cancel_deadline_discard,
             legal_four_state_payloads=set(product(range(3),'xz'))<=self.payload_states,
             context_bit_classes={0,1<<(c.CONTEXT_ID_WIDTH-1),(1<<c.CONTEXT_ID_WIDTH)-1}<=self.contexts,
@@ -53,7 +61,10 @@ class DmaCoverage(CoverageCollector):
             coordinated_flush=self.flushes>=3,reset_from_idle_arm_data={'reset_idle','reset_arm','reset_data'}<=self.resets,
             completion_events=self.events>0,configured_random_campaign=self.random_cycles==c.random_cycles,
             edge_and_settled_observations=self.observations['edge']>0 and self.observations['pre']==self.observations['post']==self.observations['held'])
-        return dict(hdl_handshake_assertions='PASS' if os.getenv('DMA_ENGINE_HDL_ASSERTIONS','1')=='1' else 'NOT_RUN',
+        return dict(hdl_handshake_assertions='PASS' if os.getenv('DMA_ENGINE_HDL_ASSERTIONS','0')=='1' else 'NOT_RUN',
+            directory_assertions='PASS' if c.check_internals else 'NOT_RUN',
+            directory_captures=sorted(self.directory_captures), directory_holds=self.directory_holds,
+            fatal_timer_holds=self.fatal_timer_holds,
             private_byte_assertions='PASS' if c.check_internals else 'NOT_RUN',status='PASS' if all(goals.values()) else 'FAIL',goals=goals,parameters=c.parameters,seed=c.seed,
             random_transactions=self.random_cycles,commands=self.commands,starts=self.starts,completions=self.completions,events=self.events,
             maximum_concurrent=self.concurrent,rejected_codes=sorted(self.rejections),statuses=sorted(self.statuses),
