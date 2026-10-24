@@ -128,6 +128,23 @@ It reuses common DFFs, FIFOs, parity, ECC and protected storage/queue helpers.
 See the [LUT-unit verification details](src/val/building_blocks/lut_unit/README.md)
 for the 51-profile PyUVM campaign, synthetic image generator and lifecycle rules.
 
+Run the polynomial-unit specification regression:
+
+```sh
+make polynomial-unit-regression SIM=icarus
+make polynomial-unit-regression
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=polynomial_unit
+```
+
+The polynomial unit supports iterative and elastic unrolled Horner evaluation,
+signed fixed-point rounding and saturation, protected coefficient banks and atomic
+programming. It reuses the multiplier, LUT bank storage, common decoders/muxes,
+protected state and FIFO queues. The Python-only regression covers 55 profiles,
+85 parameter guards and architecture equivalence; synthesis is deferred to Design
+Compiler. See the
+[polynomial-unit verification details](src/val/building_blocks/polynomial_unit/README.md)
+for programming, numerical semantics, protection, image recipes and evidence limits.
+
 Run the nested-loop-controller specification regression:
 
 ```sh
