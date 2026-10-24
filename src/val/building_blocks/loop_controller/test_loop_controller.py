@@ -20,6 +20,10 @@ class LoopControllerTest(uvm_test):
                 assert int(getattr(cocotb.top, name).value) == value, f'Wrong parameter: {name}'
         if c.hdl_assertions:
             assert hasattr(cocotb.top.g_controller, 'u_assertions'), 'HDL checker missing'
+        else:
+            assert not hasattr(cocotb.top.g_controller, 'u_assertions'), (
+                'HDL checker must be absent for Python-only validation'
+            )
         ConfigDB().set(self, 'env.*', 'config', c)
         ConfigDB().set(self, 'env.*', 'active', dict(item=None, window='initial', sample=Event(), config=c))
         self.env = LoopControllerEnv('env', self)

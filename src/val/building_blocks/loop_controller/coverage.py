@@ -23,6 +23,9 @@ class LoopControllerCoverage(CoverageCollector):
         self.reset_states = set()
         self.random_cycles = self.tokens = self.samples = 0
         self.accounting = Counter()
+        self.advance_levels = set()
+        self.control_opcodes = set()
+        self.selection_checks = self.level_holds = self.unknown_control_decodes = 0
 
     def record(self, obs, m, o):
         p = {n: number(v) for n, v in obs.ports.items()}
@@ -102,6 +105,15 @@ class LoopControllerCoverage(CoverageCollector):
         if c.SUPPORT_ABORT:
             goals['aborted_event_enable'] = {(1, 0), (1, 1)} <= self.completions
         if c.check_internals:
+            goals['every_depth_and_advance_level'] = {
+                (depth, level) for depth in range(1, c.MAX_LOOP_DEPTH + 1)
+                for level in range(depth)
+            } <= self.advance_levels
+            goals['held_level_update_mask'] = self.level_holds > 0
+            goals['control_decode_and_fail_closed'] = (
+                ({0, 2, 3} | ({1} if c.SUPPORT_SUSPEND else set())) <= self.control_opcodes
+                and self.unknown_control_decodes > 0
+            )
             goals['invariant_injection'] = (14 if c.PROTECT_STATE else 15) in self.errors
             if c.PROTECT_STATE:
                 goals['parity_injection'] = 14 in self.errors
@@ -115,5 +127,9 @@ class LoopControllerCoverage(CoverageCollector):
             completions=sorted(self.completions), flush_states=sorted(self.flush_states),
             reset_states=sorted(self.reset_states), accounting=dict(self.accounting),
             hdl_assertions='PASS' if c.hdl_assertions else 'NOT_RUN',
+            selection_assertions='PASS' if c.check_internals else 'NOT_RUN',
+            selection_checks=self.selection_checks, level_holds=self.level_holds,
+            advance_levels=sorted(self.advance_levels), control_opcodes=sorted(self.control_opcodes),
+            unknown_control_decodes=self.unknown_control_decodes,
             external_checks=dict.fromkeys(('formal', 'commercial_lint', 'cdc', 'rdc', 'dft',
                 'vc_lp', 'technology_synthesis', 'physical_timing', 'physical_power'), 'NOT_RUN'))

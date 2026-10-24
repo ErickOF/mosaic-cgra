@@ -37,7 +37,10 @@ Each profile runs **2000 random cycles plus directed scenarios**. The runner als
 executes **59 strict parameter elaboration guards** for zero/negative/unknown
 widths, invalid feature switches, epoch width one and packed-size overflow.
 Configure `LOOP_CONTROLLER_SEED`, `LOOP_CONTROLLER_RANDOM_CYCLES` (minimum 1000)
-and `LOOP_CONTROLLER_REGRESSION_BUILD`. Seeds advance by profile index. For one case:
+and `LOOP_CONTROLLER_REGRESSION_BUILD`. `LOOP_CONTROLLER_JOBS` sets profile
+parallelism from 1 to 32, defaulting to four Icarus workers and one VCS worker.
+Each profile has a separate build directory; seeds advance by their original
+profile index, including when selecting cases. For one case:
 
 ```sh
 .venv/bin/python src/val/building_blocks/loop_controller/run_loop_controller_regression.py \
@@ -46,14 +49,19 @@ and `LOOP_CONTROLLER_REGRESSION_BUILD`. Seeds advance by profile index. For one 
 
 The runner records source/dependency/verification SHA-256 hashes, parameters,
 individual logs, JUnit identity and mandatory coverage goals in `summary.json`.
-A profile passes only after its decorated PyUVM test and coverage pass. Missing
+A profile passes only after its decorated PyUVM test and coverage pass with
+matching parameters, seed and random-cycle count, Python selection checks enabled
+and HDL assertions disabled. The runner checks the hashes again before accepting
+the campaign to detect source edits during simulation. Missing
 simulators/licenses remain `NOT_RUN`; no old result can satisfy a new invocation.
 
 Direct runs with custom parameters need matching compiler overrides and
 `LOOP_CONTROLLER_<PARAMETER>` environment variables, plus a fresh build directory.
 The runner sets these automatically and tracks parameters as compile dependencies.
-Private fault injection defaults on; native HDL assertions are enabled by the
-regression and can be enabled on a direct RTL invocation:
+Private fault injection defaults on. The default direct run and regression use
+Python checks only. The regression forces `LOOP_CONTROLLER_HDL_ASSERTIONS=0`, and
+the test verifies that the optional HDL checker is absent. The existing native
+HDL checker remains available for a separate direct RTL invocation:
 
 ```sh
 LOOP_CONTROLLER_HDL_ASSERTIONS=1 \
@@ -63,18 +71,27 @@ LOOP_CONTROLLER_CHECK_INTERNALS=0 LOOP_CONTROLLER_HDL_ASSERTIONS=0 \
   make pyuvm SIM=icarus COCOTB_TOPLEVEL=loop_controller
 ```
 
-Public-port mode omits hierarchical fault injection and reports HDL assertions as
-`NOT_RUN`. Clock opportunities are nominally 10 ns with 1 ps observation ticks.
+Public-port mode omits hierarchical fault injection and common-block selection
+checks. Disabled checks report `NOT_RUN`. Clock opportunities are nominally 10 ns
+with 1 ps observation ticks.
 This suite checks zero-delay RTL, not SDF timing.
 
 ## Reuse and local encodings
 
 Configuration and execution records reuse `event_barrier_state`, an existing
 width-generic DFF/parity helper. That helper reuses `common/dff`, `basic/parity`
-and `common/operand_isolation`. The captured candidate uses the same protected helper; diagnostic flops
-reuse DFFs directly. No existing RTL primitive is modified. Packed records retain atomic
-configuration, carry and ownership updates; their parameterized structs stay in
-the module. Optional parity hardware disappears when protection is disabled.
+and `common/operand_isolation`. The captured candidate uses the same protected
+helper; diagnostic flops reuse DFFs directly. The common `decoder` selects pause,
+resume and abort, rejecting reserved or unknown opcodes. The common
+`priority_encoder` selects the innermost nonfinal level. A vector `write_gate`
+authorizes that level and its lower wrapping levels only on token transfer;
+higher levels and the final coordinate hold. No existing RTL primitive is modified.
+
+Packed records retain atomic configuration, carry, pacing and ownership updates,
+including their parity. Their parameterized structs stay in the module. Counters
+remain fields in that protected record so the data and parity share one atomic
+update; separate counter instances would also require coordinated protection.
+Optional parity hardware disappears when protection is disabled.
 
 [`loop_controller_pkg.sv`](../../../rtl/building_blocks/loop_controller_pkg.sv)
 contains repository-local enums. No external `mosaic-contracts` package or
@@ -158,8 +175,14 @@ intervals/backpressure, owner errors, stop/resume at every coordinate of small f
 nests, stop during pacing, delayed safe points, event enable choices, completion
 holding, reset/flush in live/pending/suspended states, X/Z controls and injected
 candidate/installed-configuration/execution corruption. Random cycles mix starts, stalls, controls,
-safe-point delays, flush and reset. HDL assertions independently check held tokens
-and records, count/pacing limits, transfer events and safe-point transitions.
+safe-point delays, flush and reset. The Python model checks held tokens and records,
+count/pacing limits, transfer events and safe-point transitions at every observed
+phase. Additional Python checks compare the decoded command, selected advancement
+level and one-hot selection with the mathematical coordinate. They also verify
+the level-update mask is zero during stalls, pacing, suspension, completion,
+reset, flush and fatal containment. Mandatory coverage includes every configured
+depth crossed with every advancement level, reserved/unknown command decoding,
+and held level-update masks.
 
 Reachability depends on parameters: a depth-one design has no inactive slice or
 outer carry; a power-of-two event count has no unused binary event ID; a narrow II
@@ -170,11 +193,12 @@ than reporting unreachable bins as covered. The mandatory bins are listed explic
 in `coverage.py`; this campaign does not claim every specification cross or formal
 proof obligation has been closed.
 
-Native Verilator lint and Slang/Yosys generic synthesis can check elaboration,
-latches, combinational loops, primary-clock use and optional-protection removal.
-The bound checker and live arithmetic assertions may contribute substantial area
-and forward-valid timing, especially for wide/deep profiles. Technology mapping
-and timing/power must characterize those paths before physical integration.
+This campaign runs Python/PyUVM validation and Python-driven parameter-guard probes
+only. With the default random-cycle count, the 53 profiles exercise 106000 seeded
+random cycles in addition to the directed scenarios. Lint, formal and synthesis
+are outside this campaign. Synthesis is deferred to Design Compiler. The bound
+checker and live arithmetic invariants still require area and timing
+characterization before physical integration.
 
 Formal proofs, VCS execution, commercial lint/CDC/RDC/DFT/low-power checks,
 technology synthesis, physical timing and PrimePower qualification require external
