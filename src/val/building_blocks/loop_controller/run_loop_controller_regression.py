@@ -1,8 +1,10 @@
-"""Native loop, safe-point, arithmetic and protection campaigns."""
+"""Python-only loop, safe-point, arithmetic and protection campaigns."""
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 import hashlib
 from itertools import product
 import json
+import os
 from pathlib import Path
 import shlex
 import subprocess
@@ -18,7 +20,8 @@ from loop_controller.config import DEFAULTS
 ROOT = Path(__file__).resolve().parents[4]
 TEST_DIR = Path(__file__).resolve().parent
 DEPENDENCIES = tuple(ROOT / f'src/rtl/{name}.sv' for name in (
-    'building_blocks/loop_controller_pkg', 'common/dff', 'common/operand_isolation', 'basic/parity',
+    'building_blocks/loop_controller_pkg', 'common/dff', 'common/decoder',
+    'common/priority_encoder', 'common/write_gate', 'common/operand_isolation', 'basic/parity',
     'building_blocks/event_barrier_state'))
 
 
@@ -46,6 +49,45 @@ INVALID = tuple((f'{name.lower()}_{label}', {name: value}) for name in list(DEFA
 )
 
 
+def run_profile(task):
+    args, build, rtl, index, name, parameters = task
+    print('Running', name, flush=True)
+    prefix = '-Ploop_controller.' if args.sim == 'icarus' else '-pvalue+loop_controller.'
+    flags = ' '.join(shlex.quote(f'{prefix}{key}={value}') for key, value in parameters.items())
+    result, log, results, coverage = run_simulation(
+        args, ROOT, TEST_DIR, 'loop_controller', 'test_loop_controller', 'LoopControllerTest',
+        build / name, ' '.join(map(str, (*DEPENDENCIES, rtl))), parameters=parameters,
+        compile_args=f'{args.compile_args} {flags}', environment={
+            **{f'LOOP_CONTROLLER_{key}': str(value) for key, value in parameters.items()},
+            'LOOP_CONTROLLER_SEED': str(args.seed + index),
+            'LOOP_CONTROLLER_RANDOM_CYCLES': str(args.random_cycles),
+            'LOOP_CONTROLLER_CHECK_INTERNALS': '1', 'LOOP_CONTROLLER_HDL_ASSERTIONS': '0',
+        },
+    )
+    row = dict(name=name, parameters=parameters, status='FAIL', log=str(log))
+    try:
+        if result.returncode:
+            raise ValueError(f'make exited {result.returncode}')
+        passed_test(results, 'LoopControllerTest', 'test_loop_controller')
+        data = json.loads(coverage.read_text())
+        if (
+            data['status'] != 'PASS' or data['parameters'] != parameters
+            or not data['goals'] or not all(data['goals'].values())
+            or data['hdl_assertions'] != 'NOT_RUN' or data['selection_assertions'] != 'PASS'
+            or data['seed'] != args.seed + index
+            or data['random_transactions'] != args.random_cycles
+        ):
+            raise ValueError('Coverage evidence mismatch')
+        row.update(data, name=name, log=str(log), coverage=str(coverage))
+    except (OSError, ValueError, KeyError, ET.ParseError) as error:
+        row['error'] = str(error)
+        if license_unavailable(log.read_text()):
+            row['status'] = 'NOT_RUN'
+        print('\n'.join(log.read_text().splitlines()[-25:]), flush=True)
+    print(name, row['status'], flush=True)
+    return row
+
+
 def main():
     args = parse_args('loop_controller', __doc__, profiles=[n for n, _ in PROFILES],
                       seed=20261022, rtl_category='building_blocks')
@@ -54,6 +96,7 @@ def main():
     output = build / 'summary.json'
     output.unlink(missing_ok=True)
     summary = dict(status='NOT_RUN', framework='PyUVM', simulator=args.sim, profiles=[],
+        validation_mode='Python-only', synthesis='Design Compiler (deferred)',
         parameter_checks=[], started_at_utc=datetime.now(timezone.utc).isoformat(),
         scope='selected_profiles' if args.case else 'representative_loop_controller_profiles')
     try:
@@ -62,43 +105,30 @@ def main():
                                        for p in DEPENDENCIES}
         summary['verification_sha256'] = verification_hashes(TEST_DIR)
         require_simulator(args)
-        for index, (name, parameters) in enumerate(PROFILES):
-            if args.case and name not in args.case:
-                continue
-            print('Running', name, flush=True)
-            prefix = '-Ploop_controller.' if args.sim == 'icarus' else '-pvalue+loop_controller.'
-            flags = ' '.join(shlex.quote(f'{prefix}{key}={value}') for key, value in parameters.items())
-            result, log, results, coverage = run_simulation(args, ROOT, TEST_DIR, 'loop_controller',
-                'test_loop_controller', 'LoopControllerTest', build / name,
-                ' '.join(map(str, (*DEPENDENCIES, rtl))), parameters=parameters,
-                compile_args=f'{args.compile_args} {flags}', environment={
-                    **{f'LOOP_CONTROLLER_{key}': str(value) for key, value in parameters.items()},
-                    'LOOP_CONTROLLER_SEED': str(args.seed + index),
-                    'LOOP_CONTROLLER_RANDOM_CYCLES': str(args.random_cycles),
-                    'LOOP_CONTROLLER_CHECK_INTERNALS': '1', 'LOOP_CONTROLLER_HDL_ASSERTIONS': '1'})
-            row = dict(name=name, parameters=parameters, status='FAIL', log=str(log))
-            try:
-                if result.returncode:
-                    raise ValueError(f'make exited {result.returncode}')
-                passed_test(results, 'LoopControllerTest', 'test_loop_controller')
-                data = json.loads(coverage.read_text())
-                if (data['status'] != 'PASS' or data['parameters'] != parameters or
-                    not data['goals'] or not all(data['goals'].values()) or
-                    data['hdl_assertions'] != 'PASS' or
-                    data['seed'] != args.seed + index or data['random_transactions'] != args.random_cycles):
-                    raise ValueError('Coverage evidence mismatch')
-                row.update(data, name=name, log=str(log), coverage=str(coverage))
-            except (OSError, ValueError, KeyError, ET.ParseError) as error:
-                row['error'] = str(error)
-                if license_unavailable(log.read_text()):
-                    row['status'] = 'NOT_RUN'
-                print('\n'.join(log.read_text().splitlines()[-25:]), flush=True)
-            summary['profiles'].append(row)
-            print(name, row['status'], flush=True)
+        jobs = int(os.getenv('LOOP_CONTROLLER_JOBS', '4' if args.sim == 'icarus' else '1'))
+        if not 1 <= jobs <= 32:
+            raise ValueError('LOOP_CONTROLLER_JOBS must be between 1 and 32')
+        summary['jobs'] = jobs
+        tasks = [
+            (args, build, rtl, index, name, parameters)
+            for index, (name, parameters) in enumerate(PROFILES)
+            if not args.case or name in args.case
+        ]
+        with ThreadPoolExecutor(max_workers=jobs) as pool:
+            summary['profiles'] = list(pool.map(run_profile, tasks))
         summary['parameter_checks'] = [parameter_guard(args, build, rtl, 'loop_controller', name, values,
             'loop_controller_parameters_must_be_valid', dependencies=DEPENDENCIES) for name, values in INVALID]
         complete = len(summary['profiles']) == (len(set(args.case)) if args.case else len(PROFILES)) and len(summary['parameter_checks']) == len(INVALID)
-        summary['status'] = campaign_status((*summary['profiles'], *summary['parameter_checks']), complete)
+        stable = (
+            summary['rtl_sha256'] == hashlib.sha256(rtl.read_bytes()).hexdigest()
+            and all(summary['dependency_sha256'][str(p.relative_to(ROOT))]
+                == hashlib.sha256(p.read_bytes()).hexdigest() for p in DEPENDENCIES)
+            and summary['verification_sha256'] == verification_hashes(TEST_DIR)
+        )
+        summary['sources_stable'] = stable
+        summary['status'] = campaign_status(
+            (*summary['profiles'], *summary['parameter_checks']), complete and stable
+        )
     except (OSError, ValueError, subprocess.CalledProcessError) as error:
         summary['error'] = str(error)
         print(error, file=sys.stderr)

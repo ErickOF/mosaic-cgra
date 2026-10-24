@@ -138,7 +138,11 @@ make pyuvm SIM=icarus COCOTB_TOPLEVEL=loop_controller
 
 The loop controller generates counted/bounded Cartesian iteration tokens with
 signed induction, pacing, runtime safe points and held completion records. It
-reuses common DFF/parity storage. See the
+reuses common DFF/parity storage, a decoder for runtime controls, and a priority
+encoder and write gate for per-level advancement. The Python-only suite checks
+every token against an independent Cartesian-product model and verifies carry
+selection and level-update enables. Configure `LOOP_CONTROLLER_JOBS` for parallel
+profiles. Synthesis is deferred to Design Compiler. See the
 [loop-controller verification details](src/val/building_blocks/loop_controller/README.md)
 for the 53-profile PyUVM campaign, local encodings and integration assumptions.
 

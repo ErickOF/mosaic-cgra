@@ -138,6 +138,7 @@ module loop_controller #(
         loop_controller_parameters_must_be_valid invalid_parameters ();
     end else begin : g_controller
         localparam int W = I + T + 2;
+        localparam int LEVEL_WIDTH = D > 1 ? $clog2(D) : 1;
 
         // These records depend on module widths and deliberately remain local.
         typedef struct packed {
@@ -202,6 +203,12 @@ module loop_controller #(
         logic [L-1:0] candidate_total;
         logic legal_control;
         logic legal_start;
+        logic [2:0] control_decoded;
+        logic advance_valid;
+        logic [LEVEL_WIDTH-1:0] advance_level;
+        logic [D-1:0] advance_onehot;
+        logic [D-1:0] advance_suppress;
+        logic [D-1:0] level_write;
         wire candidate_corrupt;
         wire config_corrupt;
         wire state_corrupt;
@@ -235,6 +242,47 @@ module loop_controller #(
         wire [TRIP_VECTOR_WIDTH-1:0] trips = configuration.trips;
         wire [INDEX_VECTOR_WIDTH-1:0] initials = configuration.initial_value;
         wire [INDEX_VECTOR_WIDTH-1:0] steps = configuration.step;
+
+        // Reserved and unknown control opcodes decode to no command. Ownership,
+        // current state and feature support still qualify command acceptance.
+        decoder #(
+            .NUM_OUTPUTS(3),
+            .SELECT_WIDTH(CONTROL_WIDTH)
+        ) u_control_decoder (
+            .i_enable(i_control_valid === 1'b1),
+            .i_select(i_control_command),
+            .o_decoded(control_decoded),
+            .o_select_valid()
+        );
+
+        // Level zero is innermost. Select the first nonfinal coordinate, wrap
+        // its lower levels and hold every higher level. A terminal token has
+        // no eligible level and preserves the final coordinate for safe drain.
+        priority_encoder #(
+            .WIDTH(D),
+            .LSB_HIGH_PRIORITY(1'b1),
+            .INDEX_WIDTH(LEVEL_WIDTH)
+        ) u_advance_encoder (
+            .i_request(active_mask & ~last_mask),
+            .o_valid(advance_valid),
+            .o_index(advance_level),
+            .o_onehot(advance_onehot),
+            .o_multiple()
+        );
+
+        for (genvar level = 0; level < D; level++) begin : g_level_enable
+            assign advance_suppress[level] = !transfer || !advance_valid ||
+                (LEVEL_WIDTH'(level) > advance_level);
+        end
+
+        write_gate #(
+            .WIDTH(D)
+        ) u_level_write_gate (
+            .i_write_enable(active_mask),
+            .i_suppress(advance_suppress),
+            .o_write_enable(level_write),
+            .o_write_suppressed()
+        );
 
         // Parity is compiled out when PROTECT_STATE=0. Data and parity use the
         // same enable, so idle holding and fault checks do not rewrite state.
@@ -479,11 +527,11 @@ module loop_controller #(
                 ( ^ {i_control_context_id, i_control_run_id, i_control_command} !== 1'bx) &&
                 (i_control_context_id == configuration.context_id) &&
                 (i_control_run_id == q.run_id) &&
-                (((i_control_command == LOOP_PAUSE) && (SUPPORT_SUSPEND == 1) &&
+                ((control_decoded[LOOP_PAUSE] && (SUPPORT_SUSPEND == 1) &&
                     (q.state == LOOP_ISSUE)) ||
-                 ((i_control_command == LOOP_RESUME) && (SUPPORT_SUSPEND == 1) &&
+                 (control_decoded[LOOP_RESUME] && (SUPPORT_SUSPEND == 1) &&
                     (q.state == LOOP_SUSPENDED)) ||
-                 ((i_control_command == LOOP_ABORT) && (SUPPORT_ABORT == 1) &&
+                 (control_decoded[LOOP_ABORT] && (SUPPORT_ABORT == 1) &&
                     ((q.state == LOOP_ISSUE) || (q.state == LOOP_PAUSE_WAIT) ||
                     (q.state == LOOP_SUSPENDED))));
             // Start > control > configuration arbitration; invalid requests are
@@ -550,13 +598,11 @@ module loop_controller #(
         end
 
         always_comb begin : next_state
-            logic carry;
             logic [D-1:0] wraps;
             logic [INDEX_VECTOR_WIDTH-1:0] next_indices;
             logic [TRIP_VECTOR_WIDTH-1:0] next_ordinals;
             d = q;
             detected = LOOP_ERR_NONE;
-            carry = 1'b0;
             next_indices = indices;
             next_ordinals = ordinals;
             d.config_accepted = 1'b0;
@@ -624,17 +670,15 @@ module loop_controller #(
                     if (q.state != LOOP_ABORT_WAIT)
                         d.state = LOOP_COMPLETE_WAIT;
                 end else begin
-                    carry = 1'b1;
                     for (int level = 0; level < D; level++) begin
-                        if (carry && active_mask[level]) begin
-                            if (last_mask[level]) begin
+                        if (level_write[level]) begin
+                            if (advance_onehot[level]) begin
+                                next_indices[level*I+:I] = indices[level*I+:I] + steps[level*I+:I];
+                                next_ordinals[level*T+:T] = ordinals[level*T+:T] + T'(1);
+                            end else begin
                                 next_indices[level*I+:I] = initials[level*I+:I];
                                 next_ordinals[level*T+:T] = '0;
                                 wraps[level] = 1'b1;
-                            end else begin
-                                next_indices[level*I+:I] = indices[level*I+:I] + steps[level*I+:I];
-                                next_ordinals[level*T+:T] = ordinals[level*T+:T] + T'(1);
-                                carry = 1'b0;
                             end
                         end
                     end
@@ -650,18 +694,18 @@ module loop_controller #(
                 if (legal_control) begin
                     d.control_accepted = 1'b1;
 
-                    case (i_control_command)
-                        LOOP_PAUSE: begin
+                    case (1'b1)
+                        control_decoded[LOOP_PAUSE]: begin
                             if (!(transfer && last_token)) begin
                                 d.state = LOOP_PAUSE_WAIT;
                                 d.presented = o_iteration_valid&&!transfer;
                             end
                         end
-                        LOOP_RESUME: begin
+                        control_decoded[LOOP_RESUME]: begin
                             d.state = LOOP_ISSUE;
                             d.resume = 1'b1;
                         end
-                        LOOP_ABORT: begin
+                        control_decoded[LOOP_ABORT]: begin
                             d.state = LOOP_ABORT_WAIT;
                             d.presented = o_iteration_valid&&!transfer;
                         end
@@ -678,7 +722,7 @@ module loop_controller #(
                     d.state = LOOP_SUSPENDED;
                     d.pause = 1'b1;
                     // An abort accepted at the same safe edge supersedes pause.
-                    if (control_take && legal_control && (i_control_command == LOOP_ABORT)) begin
+                    if (control_take && legal_control && control_decoded[LOOP_ABORT]) begin
                         d.state = LOOP_RECORD;
                         d.completion = LOOP_ABORTED;
                         d.abort_run = 1'b1;

@@ -1,5 +1,5 @@
 """Complete port schema and one real clock opportunity."""
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pyuvm import uvm_sequence_item
 
 PORTS = {'i_clk': ('input', 1),
@@ -101,3 +101,4 @@ class Observation:
     ports: dict
     item: LoopControllerItem
     stage: str
+    internals: dict[str, str] = field(default_factory=dict)
