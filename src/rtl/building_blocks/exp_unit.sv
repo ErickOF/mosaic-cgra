@@ -178,8 +178,9 @@ module exp_unit #(
         exp_unit_parameters_must_be_valid invalid_parameters ();
     end else begin : g_unit
         localparam int CONV_WIDTH = IW + LF + RF + 3 > RW ? IW + LF + RF + 3 : RW;
+        localparam int CONV_SHIFT_WIDTH = $clog2(CONV_WIDTH + 1);
+        localparam int MULTIPLY_WIDTH = IW > LF + 2 ? IW : LF + 2;
         localparam int PRODUCT_WIDTH = IW + LF + 2;
-        localparam int INTERP_WIDTH = I + REM;
         localparam int SCALE_WIDTH = I + OW + 1;
         localparam int SHIFT_WIDTH = EW + 2 > $clog2(F + OF + 1) + 2 ?
             EW + 2 : $clog2(F + OF + 1) + 2;
@@ -210,42 +211,10 @@ module exp_unit #(
             logic [C-1:0] context_id;
             logic [T-1:0] tag;
         } control_t;
+
         localparam int CONTROL = $bits(control_t);
         localparam int RESPONSE = CONTROL + D4;
-
         localparam logic [31:0] QUALITY_ID = format_id();
-
-        // Return {discarded_nonzero, rounded_signed_value}. Right conversion
-        // uses magnitude division, so truncation of negatives is toward zero.
-        function automatic logic [CONV_WIDTH:0] convert_round(
-            input logic signed [CONV_WIDTH-1:0] value,
-            input int shift,
-            input logic nearest_even
-        );
-            logic [CONV_WIDTH-1:0] magnitude;
-            logic [CONV_WIDTH-1:0] quotient;
-            logic [CONV_WIDTH-1:0] remainder;
-            logic [CONV_WIDTH-1:0] half;
-            logic lost;
-            magnitude = value < 0 ? $unsigned(-value) : $unsigned(value);
-            quotient = magnitude;
-            remainder = '0;
-            half = '0;
-            lost = 1'b0;
-
-            if (shift >= 0) quotient = magnitude << shift;
-            else begin
-                quotient = magnitude >> (-shift);
-                half = {{(CONV_WIDTH - 1){1'b0}}, 1'b1} << (-shift - 1);
-                remainder = magnitude & ((half << 1) - 1'b1);
-                lost = |remainder;
-
-                if (nearest_even && (remainder > half ||
-                    (remainder == half && quotient[0]))) quotient = quotient + 1'b1;
-            end
-
-            return {lost, value < 0 ? -quotient : quotient};
-        endfunction
 
         wire state_rstb = i_rstb !== 1'b0;
         wire controls_known = ( ^ {i_rstb, i_drain, i_flush, i_error_clear,
@@ -296,14 +265,27 @@ module exp_unit #(
         wire signed [PRODUCT_WIDTH-1:0] product_e;
 
         if (SUPPORT_EXP_E == 1) begin : g_base_e
-            wire isolate_base_e = !(active_input && i_request_base == EXP_BASE_E);
-            wire [IW-1:0] isolated_e;
-            operand_isolation #(.WIDTH(IW)) u_isolation (
-                .i_data(i_request_operand),
-                .i_isolate(isolate_base_e),
-                .o_data(isolated_e)
+            wire enabled = active_input && i_request_base == EXP_BASE_E;
+            wire [2*MULTIPLY_WIDTH-1:0] full_product;
+
+            // Preserve the input sign and the generated constant's positive
+            // sign before adapting unequal widths to the common multiplier.
+            multiplier #(.OPERAND_WIDTH(MULTIPLY_WIDTH), .LATENCY(0)) u_multiply (
+                .i_clk(1'b0),
+                .i_rstb(1'b1),
+                .i_clock_enable(1'b1),
+                .i_valid(enabled),
+                .i_operand_a(MULTIPLY_WIDTH'($signed(i_request_operand))),
+                .i_operand_b(MULTIPLY_WIDTH'(LOG2E)),
+                .i_signed_a(1'b1),
+                .i_signed_b(1'b1),
+                .o_product(full_product),
+                .o_valid(),
+                .o_product_signed(),
+                .o_zero(),
+                .o_negative()
             );
-            assign product_e = $signed(isolated_e) * $signed(LOG2E);
+            assign product_e = $signed(full_product[PRODUCT_WIDTH-1:0]);
         end else begin : g_no_base_e
             assign product_e = '0;
         end
@@ -312,8 +294,28 @@ module exp_unit #(
             i_request_operand : '0;
         wire signed [CONV_WIDTH-1:0] conversion_source = i_request_base == EXP_BASE_E ?
             CONV_WIDTH'($signed(product_e)) : CONV_WIDTH'($signed(isolated_2));
-        wire [CONV_WIDTH:0] converted = convert_round(conversion_source,
-            i_request_base == EXP_BASE_E ? RF - XF - LF : RF - XF, i_request_round_mode);
+        wire signed [31:0] conversion_shift = i_request_base == EXP_BASE_E ?
+            RF - XF - LF : RF - XF;
+        wire [CONV_SHIFT_WIDTH-1:0] conversion_right_shift = conversion_shift < 0 ?
+            CONV_SHIFT_WIDTH'(-conversion_shift) : '0;
+        wire signed [CONV_WIDTH-1:0] conversion_rounded;
+        wire conversion_lost;
+
+        // Magnitude rounding restores the sign, so negative conversion truncates
+        // toward zero. Positive shifts are exact and need no rounding boundary.
+        polynomial_unit_round #(
+            .WIDTH(CONV_WIDTH),
+            .SHIFT_WIDTH(CONV_SHIFT_WIDTH)
+        ) u_convert_round (
+            .i_value(conversion_source),
+            .i_shift(conversion_right_shift),
+            .i_nearest(i_request_round_mode),
+            .o_value(conversion_rounded),
+            .o_inexact(conversion_lost)
+        );
+
+        wire [CONV_WIDTH:0] converted = {conversion_lost,
+            conversion_shift >= 0 ? conversion_source << conversion_shift : conversion_rounded};
         wire signed [CONV_WIDTH-1:0] coordinate = $signed(converted[CONV_WIDTH-1:0]);
         wire [CONV_WIDTH-1:0] reconstructed_coordinate =
             CONV_WIDTH'($signed(coordinate[RW-1:0]));
@@ -388,22 +390,19 @@ module exp_unit #(
         wire interpolation_fault;
 
         if (SUPPORT_INTERPOLATION == 1) begin : g_interpolation
-            wire enabled = valid[3] && interpolate_control.active &&
+            wire enabled = permit && valid[3] && interpolate_control.active &&
                 interpolate_control.interpolate;
-            wire [I-1:0] delta = enabled ? upper3 - lower3 : '0;
-            wire [REM-1:0] isolated_remainder = enabled ? remainder3 : '0;
-            wire [INTERP_WIDTH-1:0] product = delta * isolated_remainder;
-            wire [REM-1:0] discarded = product[REM-1:0];
-            wire [REM-1:0] half = {1'b1, {(REM - 1){1'b0}}};
-            wire [I-1:0] quotient = product[INTERP_WIDTH-1:REM];
-            wire increment_round = interpolate_control.round_mode &&
-                (discarded > half || (discarded == half && quotient[0]));
-            wire [I:0] interpolated = {1'b0, lower3} + {1'b0, quotient} +
-                (I + 1)'(increment_round);
-            assign mantissa = enabled ? interpolated[I-1:0] : lower3;
-            assign interpolation_lost = enabled && (|discarded);
-            assign interpolation_fault = enabled && (upper3 < lower3 ||
-                interpolated > {1'b0, upper3} || interpolated < {1'b0, lower3});
+
+            exp_unit_interpolate #(.WIDTH(I), .REMAINDER_WIDTH(REM)) u_interpolate (
+                .i_enable(enabled),
+                .i_nearest(interpolate_control.round_mode),
+                .i_lower(lower3),
+                .i_upper(upper3),
+                .i_remainder(remainder3),
+                .o_mantissa(mantissa),
+                .o_inexact(interpolation_lost),
+                .o_bad(interpolation_fault)
+            );
         end else begin : g_no_interpolation
             assign mantissa = lower3;
             assign interpolation_lost = 1'b0;

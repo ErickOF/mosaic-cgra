@@ -81,5 +81,6 @@ class ExpUnitItem(uvm_sequence_item):
 class Observation:
     ports: dict
     storage: dict
+    arithmetic: dict
     item: ExpUnitItem
     stage: str

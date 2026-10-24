@@ -19,6 +19,7 @@ class ExpUnitCoverage(CoverageCollector):
         self.faults = set()
         self.unknowns = set()
         self.random_transactions = self.storage_checks = 0
+        self.arithmetic_checks = 0
         self.predicated = self.illegal = 0
         self.accounting = {}
 
@@ -71,6 +72,7 @@ class ExpUnitCoverage(CoverageCollector):
             goals['illegal_requests'] = self.illegal > 0
         if c.check_internals:
             goals['arithmetic_storage'] = self.storage_checks > 0
+            goals['reusable_arithmetic'] = self.arithmetic_checks > 0
             goals['identity_fault'] = any('identity' in value for value in self.faults)
             if c.TABLE_PROTECTION:
                 goals['table_faults'] = self.events['table_uncorrectable'] > 0
@@ -81,6 +83,7 @@ class ExpUnitCoverage(CoverageCollector):
                     parameters=c.parameters, seed=c.seed, goals=goals, events=dict(self.events),
                     observations=dict(self.observations), random_transactions=self.random_transactions,
                     storage_checks=self.storage_checks, accounting=self.accounting,
+                    arithmetic_checks=self.arithmetic_checks,
                     hdl_assertions='PASS' if c.hdl_assertions else 'NOT_RUN',
                     internal_storage_assertions='PASS' if c.check_internals else 'NOT_RUN',
                     segments=sorted(self.segments), modes=sorted(self.modes), signs=sorted(self.signs),
