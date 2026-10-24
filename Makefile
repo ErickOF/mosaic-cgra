@@ -91,6 +91,29 @@ _TILE_POWER_CONTROLLER_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/tile_p
     $(PROJECT_ROOT)/src/rtl/common/reset_synchronizer.sv \
     $(PROJECT_ROOT)/src/rtl/building_blocks/tile_power_controller.sv
 _RTL_SOURCES_tile_power_controller := $(_TILE_POWER_CONTROLLER_SOURCES)
+_TILE_SHELL_SOURCES := $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/context_sequencer_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/tile_power_controller_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/common/dff.sv \
+    $(PROJECT_ROOT)/src/rtl/common/counter.sv \
+    $(PROJECT_ROOT)/src/rtl/common/decoder.sv \
+    $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv \
+    $(PROJECT_ROOT)/src/rtl/common/reset_synchronizer.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/fifo.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/parity.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/ecc.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/context_memory.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/context_sequencer.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/async_fifo.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/performance_counters.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/tile_power_controller.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_codec.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_state.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_queue.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell.sv
+_RTL_SOURCES_tile_shell := $(_TILE_SHELL_SOURCES)
 _TILE_NETWORK_INTERFACE_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/tile_network_interface_pkg.sv \
     $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv \
     $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv \
@@ -1745,6 +1768,7 @@ help:
 		'make stream-formatter-regression  Check canonical frames, lanes and elastic output' \
 		'make store-engine-regression  Check atomic writes, framing and ordered completions' \
 		'make load-engine-regression  Check tagged reads, ordered retirement and fatal drain' \
+		'make tile-shell-regression Check context, ownership, transfer and power integration' \
 		'make exp-unit-regression  Check fixed-point exponentials and elastic responses' \
 		'make exp-unit-images      Verify generated endpoint and log2(e) artifacts' \
 		'make event-barrier-regression  Check events, one-shot waits and reusable barriers' \
@@ -1833,3 +1857,17 @@ help:
 		'SRAM wrapper: SRAM_WRAPPER_REGRESSION_BUILD, SRAM_WRAPPER_RANDOM_CYCLES,' \
 		'              SRAM_WRAPPER_SEED; SRAM_BACKEND_SOURCE selects the backend file'
 endif
+
+TILE_SHELL_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/tile_shell/regression
+TILE_SHELL_RANDOM_CYCLES ?= 2000
+TILE_SHELL_SEED ?= 20261025
+_TILE_SHELL_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_TILE_SHELL_MAKE := $(MAKE)
+.PHONY: tile-shell-regression
+tile-shell-regression:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/val/mosaic_blocks/tile_shell/run_tile_shell_regression.py" \
+		--sim "$(SIM)" --build-dir "$(TILE_SHELL_REGRESSION_BUILD)" \
+		--seed "$(TILE_SHELL_SEED)" --random-cycles "$(TILE_SHELL_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" \
+		--make "$(_TILE_SHELL_MAKE)" \
+		$(if $(strip $(_TILE_SHELL_SIM_BIN_DIR)),--sim-bin-dir "$(_TILE_SHELL_SIM_BIN_DIR)")

@@ -1378,3 +1378,19 @@ Power checks also exercise the real Make/Tcl flow with stubbed licensed
 commands, unit conversions, SAIF duration, coverage, and simulation failures.
 Local checks do not validate the technology models or native licensed power
 analysis; run the command above on the server to obtain design power values.
+
+Run the common tile-shell integration regression:
+
+```sh
+make tile-shell-regression
+make tile-shell-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=tile_shell
+```
+
+The shell reuses context memory/sequencing, boundary and asynchronous FIFOs,
+protected storage, counters and the tile power controller. Its Python-only suite
+checks configuration, ownership, metadata, runtime control, completion ordering,
+reset epochs and power handshakes across 27 parameter profiles. See the
+[tile-shell validation details](src/val/mosaic_blocks/tile_shell/README.md) for the
+repository-local boundary, body contract, debug map, protection and evidence.
+Synthesis is deferred to Design Compiler.
