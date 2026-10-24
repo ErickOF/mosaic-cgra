@@ -158,6 +158,23 @@ flush/reset and error handling. See the [local-switch verification details](src/
 for connectivity encoding, ownership and integration assumptions. Synthesis is
 deferred to Design Compiler.
 
+Run the tile-power-controller specification regression:
+
+```sh
+make tile-power-controller-regression
+make tile-power-controller-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=tile_power_controller
+```
+
+The always-on controller implements activity and idle policy, registered clock
+requests, wake capture, drain, retention/OFF entry and wake, power qualification,
+reset release, test policy and fatal containment. It reuses common counters, DFFs
+and reset synchronizers. Its 80-profile Python-only PyUVM regression checks every
+physical request and internal timer. See the
+[tile-power-controller verification details](src/val/building_blocks/tile_power_controller/README.md)
+for local encodings, command legality and tile wrapper integration. Synthesis is
+deferred to Design Compiler.
+
 Run the tile-network-interface specification regression:
 
 ```sh
