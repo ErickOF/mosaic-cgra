@@ -17,8 +17,12 @@ class DmaEngineTest(uvm_test):
         for name,value in c.parameters.items():assert int(getattr(cocotb.top,name).value)==value,f'Wrong DMA parameter: {name}'
         ConfigDB().set(self,'env.*','config',c)
         ConfigDB().set(self,'env.*','active',dict(item=None,stage='',sample=Event()))
-        if os.getenv('DMA_ENGINE_HDL_ASSERTIONS','1')=='1':
+        if os.getenv('DMA_ENGINE_HDL_ASSERTIONS','0')=='1':
             assert hasattr(cocotb.top.g_dma.g_channel[0],'u_assertions'),'DMA HDL checker missing'
+        else:
+            assert not hasattr(cocotb.top.g_dma.g_channel[0], 'u_assertions'), (
+                'DMA HDL checker must be absent for a Python-only run'
+            )
         self.env=DmaEnv('env',self)
 
     async def run_phase(self):

@@ -319,12 +319,14 @@ make dma-engine-regression
 make dma-engine-regression SIM=icarus
 ```
 
-The DMA reuses existing queues, arbiters, counters, DFFs, parity and operand
-isolation for multi-channel transfers, protection, event starts, cancellation and
+The DMA reuses existing queues, arbiters, counters, DFFs, decoders, write gates,
+parity and operand isolation for multi-channel transfers, protection, event starts, cancellation and
 coordinated flush. Its structured PyUVM suite checks exact data/progress and
-completion accounting across 25 profiles. Store backends supply cumulative
+completion accounting across 25 profiles using Python checks only. It also checks
+every command ID-directory entry's capture/retention and fatal cancel timer holds.
+Synthesis is deferred to Design Compiler. Store backends supply cumulative
 committed bytes for accurate cancellation results. Configure `DMA_ENGINE_SEED`,
-`DMA_ENGINE_RANDOM_CYCLES` and `DMA_ENGINE_REGRESSION_BUILD`; see the
+`DMA_ENGINE_RANDOM_CYCLES`, `DMA_ENGINE_JOBS` and `DMA_ENGINE_REGRESSION_BUILD`; see the
 [DMA verification details](src/val/building_blocks/dma_engine/README.md) for
 backend interface extensions, coverage, and qualification limits.
 
