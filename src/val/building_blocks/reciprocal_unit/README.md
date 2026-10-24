@@ -51,6 +51,9 @@ hardware parameters and every port width before sending transactions.
 | Pipeline and result buffering | `event_barrier_queue` using common one-entry FIFOs |
 | Asynchronous reset release | Common two-stage `reset_synchronizer` |
 
+The generated image now uses `protected_seed_rom`, shared with the rsqrt unit.
+The reciprocal image bits, ID, checksum and numerical behavior are unchanged.
+
 The iterative architecture contains one shared multiplier. A request accepted at
 edge `t` becomes result-valid after edge `t + 3 + 2 * iterations`, with the same
 unstalled initiation interval. Normalization, seed lookup, both products per

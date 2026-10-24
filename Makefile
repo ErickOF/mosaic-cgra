@@ -22,6 +22,7 @@ NOC_ROUTER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/noc_rout
 MULTIPLIER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/multiplier))
 MAC_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/mac))
 LUT_UNIT_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/lut_unit))
+RSQRT_UNIT_TEST_DIR := $(PROJECT_ROOT)/src/val/building_blocks/rsqrt_unit
 RECIPROCAL_UNIT_TEST_DIR := $(PROJECT_ROOT)/src/val/building_blocks/reciprocal_unit
 POLYNOMIAL_UNIT_TEST_DIR := $(PROJECT_ROOT)/src/val/building_blocks/polynomial_unit
 LOOP_CONTROLLER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/loop_controller))
@@ -77,7 +78,9 @@ _ACCUMULATOR_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/accumulator_pkg.
 _RTL_SOURCES_accumulator := $(_ACCUMULATOR_SOURCES)
 _LUT_UNIT_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/lut_unit_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/ecc.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv $(PROJECT_ROOT)/src/rtl/building_blocks/lut_unit_bank.sv $(PROJECT_ROOT)/src/rtl/building_blocks/lut_unit.sv
 _RTL_SOURCES_lut_unit := $(_LUT_UNIT_SOURCES)
-_RECIPROCAL_UNIT_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/reciprocal_unit_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/reset_synchronizer.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv $(PROJECT_ROOT)/src/rtl/common/mux.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/ecc.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv $(PROJECT_ROOT)/src/rtl/building_blocks/multiplier.sv $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu.sv $(PROJECT_ROOT)/src/rtl/building_blocks/polynomial_unit_round.sv $(PROJECT_ROOT)/src/rtl/building_blocks/reciprocal_unit_normalize.sv $(PROJECT_ROOT)/src/rtl/building_blocks/reciprocal_unit_seed.sv $(PROJECT_ROOT)/src/rtl/building_blocks/reciprocal_unit_newton.sv $(PROJECT_ROOT)/src/rtl/building_blocks/reciprocal_unit_scale.sv $(PROJECT_ROOT)/src/rtl/building_blocks/reciprocal_unit.sv
+_RSQRT_UNIT_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/rsqrt_unit_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/reset_synchronizer.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv $(PROJECT_ROOT)/src/rtl/common/mux.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/ecc.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv $(PROJECT_ROOT)/src/rtl/building_blocks/multiplier.sv $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu.sv $(PROJECT_ROOT)/src/rtl/building_blocks/polynomial_unit_round.sv $(PROJECT_ROOT)/src/rtl/building_blocks/protected_seed_rom.sv $(PROJECT_ROOT)/src/rtl/building_blocks/reciprocal_unit_scale.sv $(PROJECT_ROOT)/src/rtl/building_blocks/rsqrt_unit_normalize.sv $(PROJECT_ROOT)/src/rtl/building_blocks/rsqrt_unit_seed.sv $(PROJECT_ROOT)/src/rtl/building_blocks/rsqrt_unit_newton.sv $(PROJECT_ROOT)/src/rtl/building_blocks/rsqrt_unit.sv
+_RTL_SOURCES_rsqrt_unit := $(_RSQRT_UNIT_SOURCES)
+_RECIPROCAL_UNIT_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/reciprocal_unit_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/reset_synchronizer.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv $(PROJECT_ROOT)/src/rtl/common/mux.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/ecc.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv $(PROJECT_ROOT)/src/rtl/building_blocks/multiplier.sv $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu.sv $(PROJECT_ROOT)/src/rtl/building_blocks/polynomial_unit_round.sv $(PROJECT_ROOT)/src/rtl/building_blocks/reciprocal_unit_normalize.sv $(PROJECT_ROOT)/src/rtl/building_blocks/protected_seed_rom.sv $(PROJECT_ROOT)/src/rtl/building_blocks/reciprocal_unit_seed.sv $(PROJECT_ROOT)/src/rtl/building_blocks/reciprocal_unit_newton.sv $(PROJECT_ROOT)/src/rtl/building_blocks/reciprocal_unit_scale.sv $(PROJECT_ROOT)/src/rtl/building_blocks/reciprocal_unit.sv
 _RTL_SOURCES_reciprocal_unit := $(_RECIPROCAL_UNIT_SOURCES)
 _POLYNOMIAL_UNIT_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/polynomial_unit_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/mux.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/ecc.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv $(PROJECT_ROOT)/src/rtl/building_blocks/lut_unit_bank.sv $(PROJECT_ROOT)/src/rtl/building_blocks/multiplier.sv $(PROJECT_ROOT)/src/rtl/building_blocks/polynomial_unit_round.sv $(PROJECT_ROOT)/src/rtl/building_blocks/polynomial_unit_horner.sv $(PROJECT_ROOT)/src/rtl/building_blocks/polynomial_unit_scale.sv $(PROJECT_ROOT)/src/rtl/building_blocks/polynomial_unit.sv
 _RTL_SOURCES_polynomial_unit := $(_POLYNOMIAL_UNIT_SOURCES)
@@ -351,6 +354,11 @@ LUT_UNIT_SEED ?= 20261022
 LUT_UNIT_RANDOM_CYCLES ?= 2000
 _LUT_UNIT_MAKE := $(MAKE)
 _LUT_UNIT_SIM_BIN_DIR := $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+RSQRT_UNIT_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/rsqrt_unit/regression
+RSQRT_UNIT_SEED ?= 20261025
+RSQRT_UNIT_RANDOM_CYCLES ?= 2000
+_RSQRT_UNIT_MAKE := $(MAKE)
+_RSQRT_UNIT_SIM_BIN_DIR := $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
 RECIPROCAL_UNIT_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/reciprocal_unit/regression
 RECIPROCAL_UNIT_SEED ?= 20261024
 RECIPROCAL_UNIT_RANDOM_CYCLES ?= 2000
@@ -1175,6 +1183,14 @@ lut-unit-regression:
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_LUT_UNIT_MAKE)" \
 		$(if $(strip $(_LUT_UNIT_SIM_BIN_DIR)),--sim-bin-dir "$(_LUT_UNIT_SIM_BIN_DIR)")
 
+.PHONY: rsqrt-unit-regression
+rsqrt-unit-regression:
+	@"$(PYTHON_BIN)" "$(RSQRT_UNIT_TEST_DIR)/run_rsqrt_unit_regression.py" \
+		--sim "$(SIM)" --build-dir "$(RSQRT_UNIT_REGRESSION_BUILD)" \
+		--seed "$(RSQRT_UNIT_SEED)" --random-cycles "$(RSQRT_UNIT_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_RSQRT_UNIT_MAKE)" \
+		$(if $(strip $(_RSQRT_UNIT_SIM_BIN_DIR)),--sim-bin-dir "$(_RSQRT_UNIT_SIM_BIN_DIR)")
+
 .PHONY: reciprocal-unit-regression
 reciprocal-unit-regression:
 	@"$(PYTHON_BIN)" "$(RECIPROCAL_UNIT_TEST_DIR)/run_reciprocal_unit_regression.py" \
@@ -1717,6 +1733,7 @@ help:
 		'make multiplier-regression  Check exact scalar products, mixed modes and pipeline holds' \
 		'make mac-regression  Check scalar multiply-add, saturation and enabled-edge timing' \
 		'make lut-unit-regression  Check programmable tables, interpolation and bank lifecycle' \
+		'make rsqrt-unit-regression  Check inverse square root, epsilon and seed protection' \
 		'make reciprocal-unit-regression  Check fixed-point Newton reciprocal and seed protection' \
 		'make polynomial-unit-regression  Check Horner arithmetic and coefficient lifecycle' \
 		'make loop-controller-regression  Check nested loops, pacing and runtime safe points' \

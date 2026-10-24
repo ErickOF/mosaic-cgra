@@ -33,7 +33,7 @@ class ReciprocalDriver(uvm_driver):
                     self.forced = None
                 elif kind == 'seed':
                     address, value = values
-                    self.forced = top.g_stage[self.config.seed_lane].g_seed.u_seed.g_word[
+                    self.forced = top.g_stage[self.config.seed_lane].g_seed.u_seed.u_rom.g_word[
                         address].codeword
                     self.forced.value = Force(value)
                 elif kind == 'internal':
