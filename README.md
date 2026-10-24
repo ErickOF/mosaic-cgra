@@ -145,6 +145,23 @@ Compiler. See the
 [polynomial-unit verification details](src/val/building_blocks/polynomial_unit/README.md)
 for programming, numerical semantics, protection, image recipes and evidence limits.
 
+Run the reciprocal-unit specification regression:
+
+```sh
+make reciprocal-unit-regression SIM=icarus
+make reciprocal-unit-regression
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=reciprocal_unit
+```
+
+The reciprocal unit provides iterative and elastic unrolled Newton-Raphson
+refinement, exact fixed-point rounding, signed/unsigned saturation and protected,
+reproducible seed ROMs. It reuses the priority encoder, multiplier, scalar ALU,
+rounding helper, protected state and common FIFO queues. The Python-only campaign
+covers 40 profiles, reduced-width exhaustive inputs, seed faults, timing and
+architecture equivalence, and publishes numerical error characterization.
+Synthesis remains deferred to Design Compiler. See the
+[reciprocal-unit verification details](src/val/building_blocks/reciprocal_unit/README.md).
+
 Run the nested-loop-controller specification regression:
 
 ```sh
