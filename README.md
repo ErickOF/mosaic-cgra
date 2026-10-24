@@ -150,11 +150,13 @@ make local-switch-regression SIM=icarus
 make pyuvm SIM=icarus COCOTB_TOPLEVEL=local_switch
 ```
 
-The local switch composes register slices and sparse physical muxes with atomic
-context routing and independent multicast-copy acknowledgements. Its 120-profile
-PyUVM regression checks every physical edge, fanout, backpressure, replacement,
+The local switch composes register slices, shared source decoders and sparse
+physical muxes with atomic context routing and independent multicast-copy
+acknowledgements. Its 120-profile Python-only PyUVM regression checks every physical
+edge, fanout, backpressure, replacement,
 flush/reset and error handling. See the [local-switch verification details](src/val/building_blocks/local_switch/README.md)
-for connectivity encoding, ownership and integration assumptions.
+for connectivity encoding, ownership and integration assumptions. Synthesis is
+deferred to Design Compiler.
 
 Run the ordered load-engine specification regression:
 

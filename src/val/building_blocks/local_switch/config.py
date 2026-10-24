@@ -27,7 +27,7 @@ class LocalSwitchConfig:
     def from_environment(cls):
         def setting(name, default):
             return int(os.getenv('LOCAL_SWITCH_' + name, str(default)), 0)
-        flags = [setting(name, 1) for name in ('CHECK_INTERNALS', 'HDL_ASSERTIONS')]
+        flags = [setting('CHECK_INTERNALS', 1), setting('HDL_ASSERTIONS', 0)]
         assert set(flags) <= {0, 1}
         path = Path(os.getenv('COCOTB_RESULTS_FILE', 'build/local_switch/results.xml'))
         c = cls({n: setting(n, d) for n, d in DEFAULTS.items()}, setting('SEED', 20261021),

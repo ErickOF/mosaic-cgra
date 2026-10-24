@@ -174,9 +174,19 @@ module local_switch #(
             localparam int SELECT_BITS = K > 1 ? $clog2(K) : 1;
             wire [K-1:0][P+1:0] mux_inputs;
             wire [P+1:0] selected_payload;
+            wire [I-1:0] source_onehot;
             wire unused_mux_valid;
             logic [SELECT_BITS-1:0] compact_select;
             logic selected_exists;
+
+            // Share one decoded route between destination capture and sparse
+            // mux selection. Disabled outputs keep the select cone inactive.
+            decoder #(.NUM_OUTPUTS(I)) u_source_decode (
+                .i_enable(o_active_output_enable[o]),
+                .i_select(o_active_output_select[o*INPUT_SELECT_WIDTH+:INPUT_SELECT_WIDTH]),
+                .o_decoded(source_onehot),
+                .o_select_valid()
+            );
 
             // Only physically connected sources enter this common mux. Sparse
             // profiles have fewer mux lanes, rather than a rejected full crossbar.
@@ -184,9 +194,7 @@ module local_switch #(
                 if (CONNECTIVITY_MASK[o*I+i]) begin : g_connected
                     localparam int RANK = edge_rank(o, i);
                     assign mux_inputs[RANK] = {buffered[i], pending[i*O+o], unused_payload[i*P+:P]};
-                    assign destinations[i*O+o] = o_active_output_enable[o] &&
-                        (o_active_output_select[o*INPUT_SELECT_WIDTH+:INPUT_SELECT_WIDTH] ==
-                            INPUT_SELECT_WIDTH'(i));
+                    assign destinations[i*O+o] = source_onehot[i];
                 end else begin : g_absent
                     assign destinations[i*O+o] = 1'b0;
                 end
@@ -197,9 +205,7 @@ module local_switch #(
                 selected_exists = 1'b0;
 
                 for (int i = 0; i < I; i++) begin
-                    if (CONNECTIVITY_MASK[o*I+i] &&
-                        (o_active_output_select[o*INPUT_SELECT_WIDTH+:INPUT_SELECT_WIDTH] ==
-                            INPUT_SELECT_WIDTH'(i))) begin
+                    if (CONNECTIVITY_MASK[o*I+i] && source_onehot[i]) begin
                         compact_select = SELECT_BITS'(edge_rank(o, i));
                         selected_exists = 1'b1;
                     end

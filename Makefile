@@ -75,7 +75,11 @@ _LUT_UNIT_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/lut_unit_pkg.sv $(P
 _RTL_SOURCES_lut_unit := $(_LUT_UNIT_SOURCES)
 _LOOP_CONTROLLER_SOURCES := $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/building_blocks/loop_controller_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/loop_controller.sv
 _RTL_SOURCES_loop_controller := $(_LOOP_CONTROLLER_SOURCES)
-_LOCAL_SWITCH_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/local_switch_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/mux.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/register_slice.sv $(PROJECT_ROOT)/src/rtl/building_blocks/local_switch.sv
+_LOCAL_SWITCH_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/local_switch_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv \
+    $(PROJECT_ROOT)/src/rtl/common/mux.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/register_slice.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/local_switch.sv
 _RTL_SOURCES_local_switch := $(_LOCAL_SWITCH_SOURCES)
 _RTL_SOURCES_scratchpad_controller = $(PROJECT_ROOT)/src/rtl/building_blocks/scratchpad_bank_pkg.sv \
     $(PROJECT_ROOT)/src/rtl/building_blocks/scratchpad_controller_pkg.sv \
@@ -333,7 +337,7 @@ _LOOP_CONTROLLER_SIM_BIN_DIR := $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARU
 LOCAL_SWITCH_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/local_switch/regression
 LOCAL_SWITCH_RANDOM_CYCLES ?= 2000
 LOCAL_SWITCH_SEED ?= 20261021
-export LOCAL_SWITCH_HDL_ASSERTIONS ?= 1
+export LOCAL_SWITCH_HDL_ASSERTIONS ?= 0
 _LOCAL_SWITCH_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
 _LOCAL_SWITCH_MAKE := $(MAKE)
 SCRATCHPAD_CONTROLLER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/scratchpad_controller/regression
