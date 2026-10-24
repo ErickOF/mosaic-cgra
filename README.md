@@ -158,6 +158,23 @@ flush/reset and error handling. See the [local-switch verification details](src/
 for connectivity encoding, ownership and integration assumptions. Synthesis is
 deferred to Design Compiler.
 
+Run the tile-network-interface specification regression:
+
+```sh
+make tile-network-interface-regression
+make tile-network-interface-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=tile_network_interface
+```
+
+The interface bridges tile beats and fixed-length NoC packets with per-channel
+queues, packet arbitration, per-VC reassembly, ordered ejection, valid-ready or
+credit flow control, parity, and coordinated drain/flush. It reuses common FIFO,
+DFF, counter, parity and round-robin modules through the existing queue helpers.
+Its 61-profile Python-only PyUVM campaign checks transport contents, ownership,
+recovery, events and credit accounting. See the
+[tile-network-interface verification details](src/val/building_blocks/tile_network_interface/README.md)
+for configuration, local encodings and latency. Synthesis is deferred to Design Compiler.
+
 Run the ordered load-engine specification regression:
 
 ```sh
