@@ -16,6 +16,7 @@ class ExpUnitMonitor(uvm_monitor):
         observation = Observation({name: logic(getattr(cocotb.top, name))
                                    for name in (*INPUTS, *OUTPUTS)},
                                   {index: logic(handle) for index, handle in self.active['storage'].items()},
+                                  {name: logic(handle) for name, handle in self.arithmetic.items()},
                                   item, stage)
         self.ap.write(observation)
         item.observation = observation
@@ -29,9 +30,22 @@ class ExpUnitMonitor(uvm_monitor):
 
     async def run_phase(self):
         await Timer(2, unit='ns')
+        self.arithmetic = {}
         if self.active['check_internals']:
             self.active['storage'].update({s: cocotb.top.g_unit.g_stage[s].u_slice.stored_data
                                           for s in range(self.active['depth'])})
+            bank = cocotb.top.g_unit
+            self.arithmetic.update(product_e=bank.product_e, z2=bank.z2, mantissa=bank.mantissa)
+            if hasattr(bank, 'g_base_e'):
+                self.arithmetic.update(base_e_enable=bank.g_base_e.enabled,
+                    base_e_a=bank.g_base_e.u_multiply.g_datapath.isolated_a,
+                    base_e_b=bank.g_base_e.u_multiply.g_datapath.isolated_b)
+            if hasattr(bank, 'g_interpolation'):
+                block = bank.g_interpolation.u_interpolate
+                self.arithmetic.update(interpolation_enable=bank.g_interpolation.enabled,
+                    interpolation_a=block.u_multiply.g_datapath.isolated_a,
+                    interpolation_b=block.u_multiply.g_datapath.isolated_b,
+                    interpolation_product=block.full_product, interpolation_sum=block.interpolated)
         task = cocotb.start_soon(self.edges())
         try:
             while True:

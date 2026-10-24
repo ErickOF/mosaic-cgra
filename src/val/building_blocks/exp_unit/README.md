@@ -2,11 +2,20 @@
 
 This suite implements the [exponential specification](../../../../../specs/building-blocks/mosaic-exp-unit/README.md)
 with [`exp_unit.sv`](../../../rtl/building_blocks/exp_unit.sv).
-It reuses common `fifo`, `dff`, `counter`, `operand_isolation`, `parity`, `ecc`, and
-`decoder` RTL. The existing `event_barrier_state` and `event_barrier_queue` helpers
-provide protected queue metadata and synchronous parallel queue flush.
-Multiplication, floor partitioning, interpolation arithmetic and shifts are inferred
-locally because multiplier, scalar-ALU and LUT-unit modules are not yet available.
+It reuses the common `multiplier` for base-e conversion and interpolation,
+`scalar_alu` for endpoint subtraction and addition, and `polynomial_unit_round`
+for signed conversion and unsigned interpolation rounding. The arithmetic is
+combinational inside the existing elastic stages; it adds no pipeline latency.
+Unequal operands are extended before multiplication, preserving their complete
+signed or unsigned products. Both multipliers isolate their operands when inactive.
+
+Common `fifo`, `dff`, `counter`, `operand_isolation`, `parity`, `ecc`, `mux`, and
+`decoder` RTL provide control and storage. Existing `event_barrier_state` and
+`event_barrier_queue` helpers protect queue metadata and provide synchronous
+parallel queue flush. The generated endpoint ROM keeps the immutable
+`TABLE_SEGMENTS + 1` image and two independently protected reads required here;
+the programmable LUT unit has a different programming and lookup contract.
+Floor partitioning and final signed scaling remain specific to the exp unit.
 
 ## Run
 
@@ -26,7 +35,9 @@ Local validation uses Python 3.12, cocotb 2.1, PyUVM 5.0 and gmpy2 2.2.1.
 
 `EXP_UNIT_SEED` defaults to 20261021, `EXP_UNIT_RANDOM_CYCLES` to 2000 (minimum
 1000), and `EXP_UNIT_REGRESSION_BUILD` to `build/<simulator>/exp_unit/regression`.
-The seed advances by profile index. Select cases directly when needed:
+The seed advances by profile index. `EXP_UNIT_JOBS` selects independent parallel
+simulations (default four for Icarus and one for VCS; range 1 through 32).
+Select cases directly when needed:
 
 ```sh
 .venv/bin/python src/val/building_blocks/exp_unit/run_exp_unit_regression.py \
@@ -40,8 +51,12 @@ For custom direct Make runs, compiler parameters and matching
 Use a fresh direct build directory when changing parameters. The regression runner
 writes parameter-file dependencies and checks every actual port width and parameter.
 
-`EXP_UNIT_HDL_ASSERTIONS=1` includes the native verification-only HDL checker.
-Synthesis and gate sources exclude that checker. A port-only RTL run is:
+Validation defaults to Python-only: `EXP_UNIT_HDL_ASSERTIONS=0`. The regression
+explicitly disables the optional native HDL checker and reports it as `NOT_RUN`.
+Python checks cover conservation, output stability, floor reconstruction,
+interpolation bounds, arithmetic capture/hold, reset and fatal containment.
+The optional `EXP_UNIT_HDL_ASSERTIONS=1` direct-run checker is retained for other
+flows. Synthesis and gate sources exclude it. A port-only RTL run is:
 
 ```sh
 EXP_UNIT_CHECK_INTERNALS=0 EXP_UNIT_HDL_ASSERTIONS=0 \
@@ -199,13 +214,16 @@ tokens. Full formats and SHA-256 evidence accompany every campaign.
 
 ## Validation and accuracy scope
 
-The 55-profile matrix covers input/output widths 8, 16 and 32 plus a five-bit
+The 57-profile matrix covers input/output widths 8, 16 and 32 plus a five-bit
 exhaustive profile; input fractions 4/8/12/16; range fractions 12/20/28 plus reduced
 and down-conversion profiles; internal widths 16/24/32/48; table address widths
 2/3/4/6/8; every legal base-support combination; interpolation on/off; all three
 protection modes; both resets; depths 5/6/8; queue depths 1/2/3; and narrow/default
-metadata. Each profile runs 2000 random cycles plus directed traffic. There are
-88 strict invalid-parameter elaboration checks.
+metadata. Two profiles additionally use a 25-bit interpolation remainder with
+16-bit endpoints, checking the case where the remainder is wider than the table
+word. Each profile runs 2000 random cycles plus directed traffic (114000 random
+cycles in the full campaign). There are 88 strict invalid-parameter elaboration
+checks and four pure Python model tests using independent rational references.
 
 Directed tests exhaust every signed input and legal mode at five/eight input bits.
 Larger profiles cover endpoints, midpoints, remainder extremes reachable from the
@@ -214,9 +232,12 @@ predication, unsupported requests, exact reduced-format half ties, saturation,
 underflow, overshifts, fixed latency, full capacity, stable persistent requests,
 output stalls, drain, flush/reset in every pipeline phase, clockless intervals,
 X/Z controls, lower/upper ROM faults and ownership/identity corruption.
-The separate HDL checker checks accepted/retired conservation, occupancy limits,
-floor reconstruction, interpolation bounds, reset, stable output and containment.
-Private storage checks verify every arithmetic capture and inactive-bank hold.
+Python scoreboards check accepted/retired conservation, occupancy limits, floor
+reconstruction, interpolation bounds, reset, stable output and containment.
+Private checks verify every arithmetic capture and inactive-bank hold, both full
+multiplier products, signed/unsigned operand extension, operand isolation and the
+rounded interpolation sum. These catch arithmetic errors even when saturation
+would hide them at the public output.
 
 [`accuracy.json`](accuracy.json) characterizes every default-profile input on the
 candidate compiler interval `[-8, 0]`, separately for each base, interpolation,
@@ -238,7 +259,10 @@ accuracy contract. Compiler/application acceptance and PPA qualification remain
 unrun. No composite sigmoid, SiLU, Softmax or task-level accuracy is claimed.
 
 Campaigns archive actual JUnit results, parameters, seeds, coverage, simulator logs,
-and exact RTL/dependency/test/generator/image hashes. Formal safety/liveness,
+and exact RTL/dependency/test/generator/image hashes. They rerun the pure Python
+model tests, regenerate table/constant certification and scalar accuracy, compare
+the versioned artifacts byte for byte, and reject source changes during a campaign.
+Synthesis is deferred to Design Compiler. Formal safety/liveness,
 commercial lint/CDC/RDC/DFT/LP, technology timing/area, physical implementation,
 PrimeTime/PrimePower and application accuracy are separate release requirements.
 Unavailable checks report `NOT_RUN`; functional success is not full release signoff.

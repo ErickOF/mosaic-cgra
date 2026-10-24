@@ -333,10 +333,14 @@ make pyuvm SIM=icarus COCOTB_TOPLEVEL=exp_unit
 
 The exponential unit implements base-e/base-2 range reduction, generated endpoint
 ROMs, optional interpolation, nearest-even/truncating rounding and saturation in
-an elastic pipeline. It reuses common storage, counters, isolation, parity and ECC.
-Configure `EXP_UNIT_SEED`, `EXP_UNIT_RANDOM_CYCLES` and `EXP_UNIT_REGRESSION_BUILD`;
+an elastic pipeline. It reuses the multiplier, scalar ALU and rounding helper,
+plus common storage, counters, isolation, parity and ECC. The Python-only campaign
+covers 57 profiles, 88 parameter guards and four numerical model tests.
+Configure `EXP_UNIT_SEED`, `EXP_UNIT_RANDOM_CYCLES`, `EXP_UNIT_REGRESSION_BUILD`
+and `EXP_UNIT_JOBS`;
 see the [exp-unit verification details](src/val/building_blocks/exp_unit/README.md)
-for generated assets, timing, protection and scalar accuracy limits.
+for generated assets, timing, protection and scalar accuracy limits. Synthesis is
+deferred to Design Compiler.
 
 Run the event/barrier specification regression:
 

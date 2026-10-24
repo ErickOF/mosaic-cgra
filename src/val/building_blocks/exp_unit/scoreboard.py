@@ -1,6 +1,6 @@
 """Check every public output, atomic elastic history and arithmetic-bank holds."""
 from pyuvm import ConfigDB, uvm_analysis_export, uvm_scoreboard
-from exp_unit.model import ExpUnitModel, image, number, predict
+from exp_unit.model import ExpUnitModel, image, log2e, number, predict
 from exp_unit.transaction import INPUTS, OUTPUTS
 
 
@@ -13,6 +13,56 @@ class ExpUnitScoreboard(uvm_scoreboard):
         self.previous_values = {}
         self.analysis_export = uvm_analysis_export('analysis_export', self)
         self.analysis_export.write = self.write
+
+    def arithmetic(self, obs, plan):
+        """Check reusable arithmetic and isolation at the actual pre-edge boundary.
+
+        Public results and register captures are checked separately. These checks
+        also catch wrong sign extension or operand widths hidden by saturation.
+        """
+        c, p, a = self.c, plan['p'], {n: number(v) for n, v in obs.arithmetic.items()}
+        legal = all(p[n] is not None for n in INPUTS if n.startswith('i_request_'))
+        legal = legal and (c.SUPPORT_EXP2 if p['i_request_base'] else c.SUPPORT_EXP_E)
+        legal = legal and (not p['i_request_interpolate'] or c.SUPPORT_INTERPOLATION)
+        active = bool(plan['permit'] and p['i_request_valid'] == 1 and legal and
+                      p['i_request_predicate'])
+        enabled = active and p['i_request_base'] == 0
+        x = p['i_request_operand'] or 0
+        if x & (1 << (c.INPUT_WIDTH - 1)):
+            x -= 1 << c.INPUT_WIDTH
+        product_width = c.INPUT_WIDTH + c.LOG2E_FRACTION_WIDTH + 2
+        expected = x * log2e(c.LOG2E_FRACTION_WIDTH) if enabled else 0
+        assert a['product_e'] == expected % (1 << product_width), 'Full signed base-e product'
+        if c.SUPPORT_EXP_E:
+            width = max(c.INPUT_WIDTH, c.LOG2E_FRACTION_WIDTH + 2)
+            assert a['base_e_enable'] == enabled
+            assert a['base_e_a'] == (x % (1 << width) if enabled else 0)
+            assert a['base_e_b'] == (log2e(c.LOG2E_FRACTION_WIDTH) if enabled else 0)
+        if c.SUPPORT_INTERPOLATION:
+            token = self.model.pipeline[2]
+            fact = token[1] if token else {}
+            enabled = bool(plan['permit'] and fact.get('active') and fact['interpolation'])
+            table = image(c.TABLE_ADDRESS_WIDTH, c.INTERNAL_FRACTION_WIDTH)
+            lower = table[fact['address']] if enabled else 0
+            delta = table[fact['address'] + 1] - lower if enabled else 0
+            remainder = fact['remainder'] if enabled else 0
+            assert a['interpolation_enable'] == enabled
+            assert a['interpolation_a'] == delta, 'Unsigned interpolation difference'
+            assert a['interpolation_b'] == remainder, 'Unsigned interpolation remainder'
+            assert a['interpolation_product'] == delta * remainder, 'Full interpolation product'
+            if enabled:
+                assert a['interpolation_sum'] == fact['mantissa'], 'Rounded interpolation sum'
+                assert lower <= a['mantissa'] <= table[fact['address'] + 1]
+        token = self.model.pipeline[1]
+        if plan['permit'] and token and token[1]['active']:
+            fact = token[1]
+            coordinate = a['z2']
+            if coordinate & (1 << (c.RANGE_WIDTH - 1)):
+                coordinate -= 1 << c.RANGE_WIDTH
+            assert coordinate == fact['z']
+            k, fraction = divmod(coordinate, 1 << c.RANGE_FRACTION_WIDTH)
+            assert k == fact['k'] and 0 <= fraction < 1 << c.RANGE_FRACTION_WIDTH
+        self.coverage.arithmetic_checks += 1
 
     def storage(self, obs, incoming, plan):
         c = self.c
@@ -57,6 +107,9 @@ class ExpUnitScoreboard(uvm_scoreboard):
             if self.c.ASYNC_RESET and number(p['i_rstb']) == 0:
                 self.model.reset()
                 self.initialized = True
+            if self.initialized and self.c.check_internals and not self.model.fault:
+                _, plan = self.model.evaluate(p)
+                self.arithmetic(obs, plan)
         if stage == 'edge':
             assert all(p[n] == item.pre.ports[n] for n in OUTPUTS), 'Pre-NBA sampling'
         if stage == 'post':

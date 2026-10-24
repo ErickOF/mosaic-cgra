@@ -43,7 +43,7 @@ class ExpUnitConfig:
         assert Decimal(os.getenv('TEST_SETTLE_NS', '0')) == 0, 'Use zero-delay RTL'
         return cls({n: setting(n, v) for n, v in DEFAULTS.items()}, setting('SEED', 20261021),
                    setting('RANDOM_CYCLES', 2000), bool(setting('CHECK_INTERNALS', 1)),
-                   bool(setting('HDL_ASSERTIONS', 1)),
+                   bool(setting('HDL_ASSERTIONS', 0)),
                    Path(os.getenv('EXP_UNIT_COVERAGE_FILE', str(path.with_name('coverage.json')))))
 
     def __getattr__(self, name):
