@@ -23,6 +23,7 @@ MULTIPLIER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/multipli
 MAC_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/mac))
 LUT_UNIT_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/lut_unit))
 LOOP_CONTROLLER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/loop_controller))
+TILE_POWER_CONTROLLER_TEST_DIR := $(PROJECT_ROOT)/src/val/building_blocks/tile_power_controller
 TILE_NETWORK_INTERFACE_TEST_DIR := $(PROJECT_ROOT)/src/val/building_blocks/tile_network_interface
 LOCAL_SWITCH_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/local_switch))
 SCRATCHPAD_CONTROLLER_TEST_DIR := $(PROJECT_ROOT)/src/val/building_blocks/scratchpad_controller
@@ -76,6 +77,11 @@ _LUT_UNIT_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/lut_unit_pkg.sv $(P
 _RTL_SOURCES_lut_unit := $(_LUT_UNIT_SOURCES)
 _LOOP_CONTROLLER_SOURCES := $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/building_blocks/loop_controller_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/loop_controller.sv
 _RTL_SOURCES_loop_controller := $(_LOOP_CONTROLLER_SOURCES)
+_TILE_POWER_CONTROLLER_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/tile_power_controller_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv \
+    $(PROJECT_ROOT)/src/rtl/common/reset_synchronizer.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/tile_power_controller.sv
+_RTL_SOURCES_tile_power_controller := $(_TILE_POWER_CONTROLLER_SOURCES)
 _TILE_NETWORK_INTERFACE_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/tile_network_interface_pkg.sv \
     $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv \
     $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv \
@@ -344,6 +350,11 @@ LOOP_CONTROLLER_SEED ?= 20261022
 LOOP_CONTROLLER_RANDOM_CYCLES ?= 2000
 _LOOP_CONTROLLER_MAKE := $(MAKE)
 _LOOP_CONTROLLER_SIM_BIN_DIR := $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+TILE_POWER_CONTROLLER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/tile_power_controller/regression
+TILE_POWER_CONTROLLER_RANDOM_CYCLES ?= 2000
+TILE_POWER_CONTROLLER_SEED ?= 20261023
+_TILE_POWER_CONTROLLER_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_TILE_POWER_CONTROLLER_MAKE := $(MAKE)
 TILE_NETWORK_INTERFACE_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/tile_network_interface/regression
 TILE_NETWORK_INTERFACE_RANDOM_CYCLES ?= 2000
 TILE_NETWORK_INTERFACE_SEED ?= 20261023
@@ -1155,6 +1166,16 @@ loop-controller-regression:
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_LOOP_CONTROLLER_MAKE)" \
 		$(if $(strip $(_LOOP_CONTROLLER_SIM_BIN_DIR)),--sim-bin-dir "$(_LOOP_CONTROLLER_SIM_BIN_DIR)")
 
+.PHONY: tile-power-controller-regression
+tile-power-controller-regression:
+	@"$(PYTHON_BIN)" "$(TILE_POWER_CONTROLLER_TEST_DIR)/run_tile_power_controller_regression.py" \
+		--sim "$(SIM)" --build-dir "$(TILE_POWER_CONTROLLER_REGRESSION_BUILD)" \
+		--seed "$(TILE_POWER_CONTROLLER_SEED)" \
+		--random-cycles "$(TILE_POWER_CONTROLLER_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" \
+		--make "$(_TILE_POWER_CONTROLLER_MAKE)" \
+		$(if $(strip $(_TILE_POWER_CONTROLLER_SIM_BIN_DIR)),--sim-bin-dir "$(_TILE_POWER_CONTROLLER_SIM_BIN_DIR)")
+
 .PHONY: tile-network-interface-regression
 tile-network-interface-regression:
 	@"$(PYTHON_BIN)" "$(TILE_NETWORK_INTERFACE_TEST_DIR)/run_tile_network_interface_regression.py" \
@@ -1664,6 +1685,7 @@ help:
 		'make mac-regression  Check scalar multiply-add, saturation and enabled-edge timing' \
 		'make lut-unit-regression  Check programmable tables, interpolation and bank lifecycle' \
 		'make loop-controller-regression  Check nested loops, pacing and runtime safe points' \
+		'make tile-power-controller-regression  Check idle policy, wake, retention and power sequencing' \
 		'make tile-network-interface-regression  Check packetization, reassembly, credits and epochs' \
 		'make local-switch-regression  Check static routes, sparse edges and multicast copies' \
 		'make scratchpad-controller-regression  Check bank mapping, arbitration and ordered clients' \
