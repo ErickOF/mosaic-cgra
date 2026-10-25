@@ -10,9 +10,35 @@ SIM ?= vcs
 TOPLEVEL_LANG ?= verilog
 COCOTB_TOPLEVEL ?= counter
 COCOTB_TEST_MODULES ?= test_$(COCOTB_TOPLEVEL)
-# Discover validation modules by top name across common/basic categories.
+# Discover validation modules by top name across RTL/validation categories.
 # Override the directory when a top has multiple suites or lives elsewhere.
 PYUVM_TEST_DIR ?= $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/$(COCOTB_TOPLEVEL)))
+ACCUMULATOR_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/accumulator))
+PREDICATE_UNIT_TEST_DIR := $(PROJECT_ROOT)/src/val/building_blocks/predicate_unit
+VECTOR_REDUCTION_TEST_DIR := $(PROJECT_ROOT)/src/val/building_blocks/vector_reduction
+VECTOR_LANE_TEST_DIR := $(PROJECT_ROOT)/src/val/building_blocks/vector_lane
+SCALAR_ALU_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/scalar_alu))
+NOC_ROUTER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/noc_router))
+MULTIPLIER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/multiplier))
+MAC_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/mac))
+LUT_UNIT_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/lut_unit))
+RSQRT_UNIT_TEST_DIR := $(PROJECT_ROOT)/src/val/building_blocks/rsqrt_unit
+RECIPROCAL_UNIT_TEST_DIR := $(PROJECT_ROOT)/src/val/building_blocks/reciprocal_unit
+POLYNOMIAL_UNIT_TEST_DIR := $(PROJECT_ROOT)/src/val/building_blocks/polynomial_unit
+LOOP_CONTROLLER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/loop_controller))
+TILE_POWER_CONTROLLER_TEST_DIR := $(PROJECT_ROOT)/src/val/building_blocks/tile_power_controller
+TILE_NETWORK_INTERFACE_TEST_DIR := $(PROJECT_ROOT)/src/val/building_blocks/tile_network_interface
+LOCAL_SWITCH_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/local_switch))
+SCRATCHPAD_CONTROLLER_TEST_DIR := $(PROJECT_ROOT)/src/val/building_blocks/scratchpad_controller
+SCRATCHPAD_BANK_TEST_DIR := $(PROJECT_ROOT)/src/val/building_blocks/scratchpad_bank
+STREAM_FORMATTER_TEST_DIR := $(PROJECT_ROOT)/src/val/building_blocks/stream_formatter
+STORE_ENGINE_TEST_DIR := $(PROJECT_ROOT)/src/val/building_blocks/store_engine
+LOAD_ENGINE_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/load_engine))
+EXP_UNIT_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/exp_unit))
+EVENT_BARRIER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/event_barrier))
+DOT_PRODUCT_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/dot_product))
+AGU_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/agu))
+DMA_ENGINE_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/dma_engine))
 COUNTER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/counter))
 CLOCK_GATE_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/clock_gate))
 DECODER_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/decoder))
@@ -48,6 +74,147 @@ PERFORMANCE_COUNTERS_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/
 PARITY_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/parity))
 # Locate the selected RTL top using the same category layout as validation.
 # Include each basic module's common dependencies. Caller lists take precedence.
+_ACCUMULATOR_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/accumulator_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/lane_mask.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/building_blocks/accumulator.sv
+_RTL_SOURCES_accumulator := $(_ACCUMULATOR_SOURCES)
+_LUT_UNIT_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/lut_unit_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/ecc.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv $(PROJECT_ROOT)/src/rtl/building_blocks/lut_unit_bank.sv $(PROJECT_ROOT)/src/rtl/building_blocks/lut_unit.sv
+_RTL_SOURCES_lut_unit := $(_LUT_UNIT_SOURCES)
+_RSQRT_UNIT_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/rsqrt_unit_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/reset_synchronizer.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv $(PROJECT_ROOT)/src/rtl/common/mux.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/ecc.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv $(PROJECT_ROOT)/src/rtl/building_blocks/multiplier.sv $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu.sv $(PROJECT_ROOT)/src/rtl/building_blocks/polynomial_unit_round.sv $(PROJECT_ROOT)/src/rtl/building_blocks/protected_seed_rom.sv $(PROJECT_ROOT)/src/rtl/building_blocks/reciprocal_unit_scale.sv $(PROJECT_ROOT)/src/rtl/building_blocks/rsqrt_unit_normalize.sv $(PROJECT_ROOT)/src/rtl/building_blocks/rsqrt_unit_seed.sv $(PROJECT_ROOT)/src/rtl/building_blocks/rsqrt_unit_newton.sv $(PROJECT_ROOT)/src/rtl/building_blocks/rsqrt_unit.sv
+_RTL_SOURCES_rsqrt_unit := $(_RSQRT_UNIT_SOURCES)
+_RECIPROCAL_UNIT_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/reciprocal_unit_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/reset_synchronizer.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv $(PROJECT_ROOT)/src/rtl/common/mux.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/ecc.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv $(PROJECT_ROOT)/src/rtl/building_blocks/multiplier.sv $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu.sv $(PROJECT_ROOT)/src/rtl/building_blocks/polynomial_unit_round.sv $(PROJECT_ROOT)/src/rtl/building_blocks/reciprocal_unit_normalize.sv $(PROJECT_ROOT)/src/rtl/building_blocks/protected_seed_rom.sv $(PROJECT_ROOT)/src/rtl/building_blocks/reciprocal_unit_seed.sv $(PROJECT_ROOT)/src/rtl/building_blocks/reciprocal_unit_newton.sv $(PROJECT_ROOT)/src/rtl/building_blocks/reciprocal_unit_scale.sv $(PROJECT_ROOT)/src/rtl/building_blocks/reciprocal_unit.sv
+_RTL_SOURCES_reciprocal_unit := $(_RECIPROCAL_UNIT_SOURCES)
+_POLYNOMIAL_UNIT_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/polynomial_unit_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/mux.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/ecc.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv $(PROJECT_ROOT)/src/rtl/building_blocks/lut_unit_bank.sv $(PROJECT_ROOT)/src/rtl/building_blocks/multiplier.sv $(PROJECT_ROOT)/src/rtl/building_blocks/polynomial_unit_round.sv $(PROJECT_ROOT)/src/rtl/building_blocks/polynomial_unit_horner.sv $(PROJECT_ROOT)/src/rtl/building_blocks/polynomial_unit_scale.sv $(PROJECT_ROOT)/src/rtl/building_blocks/polynomial_unit.sv
+_RTL_SOURCES_polynomial_unit := $(_POLYNOMIAL_UNIT_SOURCES)
+_LOOP_CONTROLLER_SOURCES := $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/building_blocks/loop_controller_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv $(PROJECT_ROOT)/src/rtl/common/write_gate.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/loop_controller.sv
+_RTL_SOURCES_loop_controller := $(_LOOP_CONTROLLER_SOURCES)
+_TILE_POWER_CONTROLLER_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/tile_power_controller_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv \
+    $(PROJECT_ROOT)/src/rtl/common/reset_synchronizer.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/tile_power_controller.sv
+_RTL_SOURCES_tile_power_controller := $(_TILE_POWER_CONTROLLER_SOURCES)
+_TILE_SHELL_SOURCES := $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/context_sequencer_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/tile_power_controller_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/common/dff.sv \
+    $(PROJECT_ROOT)/src/rtl/common/counter.sv \
+    $(PROJECT_ROOT)/src/rtl/common/decoder.sv \
+    $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv \
+    $(PROJECT_ROOT)/src/rtl/common/reset_synchronizer.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/fifo.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/parity.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/ecc.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/context_memory.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/context_sequencer.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/async_fifo.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/performance_counters.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/tile_power_controller.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_codec.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_state.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_queue.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell.sv
+_RTL_SOURCES_tile_shell := $(_TILE_SHELL_SOURCES)
+_TILE_NETWORK_INTERFACE_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/tile_network_interface_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv \
+    $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv \
+    $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/round_robin_arbiter.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/tile_network_interface.sv
+_RTL_SOURCES_tile_network_interface := $(_TILE_NETWORK_INTERFACE_SOURCES)
+_LOCAL_SWITCH_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/local_switch_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv \
+    $(PROJECT_ROOT)/src/rtl/common/mux.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/register_slice.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/local_switch.sv
+_RTL_SOURCES_local_switch := $(_LOCAL_SWITCH_SOURCES)
+_RTL_SOURCES_scratchpad_controller = $(PROJECT_ROOT)/src/rtl/building_blocks/scratchpad_bank_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/scratchpad_controller_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv \
+    $(PROJECT_ROOT)/src/rtl/common/counter.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/scratchpad_controller_counters.sv \
+    $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/basic/round_robin_arbiter.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/scratchpad_controller.sv
+_RTL_SOURCES_scratchpad_bank = $(PROJECT_ROOT)/src/rtl/building_blocks/scratchpad_bank_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/common/dff.sv \
+    $(PROJECT_ROOT)/src/rtl/common/counter.sv \
+    $(PROJECT_ROOT)/src/rtl/common/decoder.sv \
+    $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv \
+    $(PROJECT_ROOT)/src/rtl/common/write_gate.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/parity.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/ecc.sv \
+    $(SRAM_BACKEND_SOURCE) \
+    $(PROJECT_ROOT)/src/rtl/basic/sram_wrapper.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/scratchpad_bank_counters.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/scratchpad_bank.sv
+_RTL_SOURCES_stream_formatter := $(PROJECT_ROOT)/src/rtl/building_blocks/stream_formatter_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/common/dff.sv \
+    $(PROJECT_ROOT)/src/rtl/common/counter.sv \
+    $(PROJECT_ROOT)/src/rtl/common/lane_mask.sv \
+    $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv \
+    $(PROJECT_ROOT)/src/rtl/common/write_gate.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/register_slice.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/stream_formatter.sv
+_RTL_SOURCES_store_engine := $(PROJECT_ROOT)/src/rtl/building_blocks/agu_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/dma_engine_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/store_engine_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/common/dff.sv \
+    $(PROJECT_ROOT)/src/rtl/common/counter.sv \
+    $(PROJECT_ROOT)/src/rtl/common/decoder.sv \
+    $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv \
+    $(PROJECT_ROOT)/src/rtl/common/write_gate.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/dma_engine_bounds.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/agu.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/store_engine_counters.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/store_engine.sv
+_LOAD_ENGINE_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/agu_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/dma_engine_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/load_engine_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/building_blocks/dma_engine_bounds.sv $(PROJECT_ROOT)/src/rtl/common/write_gate.sv $(PROJECT_ROOT)/src/rtl/building_blocks/agu.sv $(PROJECT_ROOT)/src/rtl/building_blocks/load_engine_counters.sv $(PROJECT_ROOT)/src/rtl/building_blocks/load_engine.sv
+_RTL_SOURCES_load_engine := $(_LOAD_ENGINE_SOURCES)
+_EXP_UNIT_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/generated/exp_unit_tables_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/exp_unit_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/ecc.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv $(PROJECT_ROOT)/src/rtl/common/mux.sv $(PROJECT_ROOT)/src/rtl/building_blocks/multiplier.sv $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu.sv $(PROJECT_ROOT)/src/rtl/building_blocks/polynomial_unit_round.sv $(PROJECT_ROOT)/src/rtl/building_blocks/exp_unit_interpolate.sv $(PROJECT_ROOT)/src/rtl/building_blocks/exp_unit_rom.sv $(PROJECT_ROOT)/src/rtl/building_blocks/exp_unit_stage.sv $(PROJECT_ROOT)/src/rtl/building_blocks/exp_unit.sv
+_RTL_SOURCES_exp_unit := $(_EXP_UNIT_SOURCES)
+_EVENT_BARRIER_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/round_robin_arbiter.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier.sv
+_RTL_SOURCES_event_barrier := $(_EVENT_BARRIER_SOURCES)
+_DOT_PRODUCT_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/building_blocks/dot_product.sv
+_RTL_SOURCES_dot_product := $(_DOT_PRODUCT_SOURCES)
+_RTL_SOURCES_scalar_alu := $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv \
+    $(PROJECT_ROOT)/src/rtl/common/mux.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu.sv
+_RTL_SOURCES_predicate_unit := $(PROJECT_ROOT)/src/rtl/building_blocks/predicate_unit_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/common/dff.sv \
+    $(PROJECT_ROOT)/src/rtl/common/decoder.sv \
+    $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv \
+    $(PROJECT_ROOT)/src/rtl/common/write_gate.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/predicate_unit.sv
+_RTL_SOURCES_vector_reduction := $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/vector_lane_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/vector_reduction_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/common/dff.sv \
+    $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv \
+    $(PROJECT_ROOT)/src/rtl/common/write_gate.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/vector_lane_pipeline.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/vector_reduction_tree.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/vector_reduction.sv
+_RTL_SOURCES_vector_lane := $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/vector_lane_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/common/dff.sv \
+    $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv \
+    $(PROJECT_ROOT)/src/rtl/common/mux.sv \
+    $(PROJECT_ROOT)/src/rtl/common/write_gate.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/multiplier.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/dot_product.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/mac.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/vector_lane_pipeline.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/vector_lane.sv
+_NOC_ROUTER_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/noc_router_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/mux.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/ecc.sv $(PROJECT_ROOT)/src/rtl/basic/round_robin_arbiter.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv $(PROJECT_ROOT)/src/rtl/building_blocks/noc_router_codec.sv $(PROJECT_ROOT)/src/rtl/building_blocks/noc_router_buffer.sv $(PROJECT_ROOT)/src/rtl/building_blocks/noc_router.sv
+_RTL_SOURCES_noc_router := $(_NOC_ROUTER_SOURCES)
+_RTL_SOURCES_multiplier := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/building_blocks/multiplier.sv
+_RTL_SOURCES_mac := $(_DOT_PRODUCT_SOURCES) $(PROJECT_ROOT)/src/rtl/building_blocks/mac.sv
+_AGU_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/agu_pkg.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/write_gate.sv $(PROJECT_ROOT)/src/rtl/building_blocks/agu.sv
+_RTL_SOURCES_agu := $(_AGU_SOURCES)
+_DMA_ENGINE_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/dma_engine_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/write_gate.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/round_robin_arbiter.sv $(PROJECT_ROOT)/src/rtl/building_blocks/dma_engine_bounds.sv $(PROJECT_ROOT)/src/rtl/building_blocks/dma_engine_command_queue.sv $(PROJECT_ROOT)/src/rtl/building_blocks/dma_engine.sv
+_RTL_SOURCES_dma_engine := $(_DMA_ENGINE_SOURCES)
 _ASYNC_FIFO_SOURCES := $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/basic/async_fifo.sv
 _BYPASS_NETWORK_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/basic/bypass_network.sv
 _CONTEXT_MEMORY_SOURCES := $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/basic/context_memory.sv
@@ -137,6 +304,177 @@ POWER_ACTIVITY_REPORT := $(abspath $(POWER_BUILD))/reports/activity.rpt
 POWER_SUMMARY := $(abspath $(POWER_BUILD))/summary.json
 export TEST_CLOCK_PERIOD_NS ?= $(SYNTH_CLOCK_PERIOD)
 export TEST_SETTLE_NS ?= 0
+ACCUMULATOR_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/accumulator/regression
+ACCUMULATOR_RANDOM_CYCLES ?= 2000
+ACCUMULATOR_SEED ?= 20261020
+export ACCUMULATOR_HDL_ASSERTIONS ?= 1
+_ACCUMULATOR_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_ACCUMULATOR_MAKE := $(MAKE)
+PREDICATE_UNIT_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/predicate_unit/regression
+PREDICATE_UNIT_STATIC_BUILD ?= $(PROJECT_ROOT)/build/static/predicate_unit
+PREDICATE_UNIT_FORMAL_BUILD ?= $(PROJECT_ROOT)/build/formal/predicate_unit
+PREDICATE_UNIT_YOSYS ?= yosys
+PREDICATE_UNIT_VERILATOR ?= verilator
+PREDICATE_UNIT_RANDOM_CYCLES ?= 2000
+PREDICATE_UNIT_SEED ?= 20261022
+export PREDICATE_UNIT_HDL_ASSERTIONS ?= 1
+_PREDICATE_UNIT_MAKE := $(MAKE)
+_PREDICATE_UNIT_SIM_BIN_DIR := $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+VECTOR_REDUCTION_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/vector_reduction/regression
+VECTOR_REDUCTION_STATIC_BUILD ?= $(PROJECT_ROOT)/build/static/vector_reduction
+VECTOR_REDUCTION_FORMAL_BUILD ?= $(PROJECT_ROOT)/build/formal/vector_reduction
+VECTOR_REDUCTION_YOSYS ?= yosys
+VECTOR_REDUCTION_VERILATOR ?= verilator
+VECTOR_REDUCTION_RANDOM_CYCLES ?= 2000
+VECTOR_REDUCTION_SEED ?= 20261022
+export VECTOR_REDUCTION_HDL_ASSERTIONS ?= 1
+_VECTOR_REDUCTION_MAKE := $(MAKE)
+_VECTOR_REDUCTION_SIM_BIN_DIR := $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+VECTOR_LANE_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/vector_lane/regression
+VECTOR_LANE_STATIC_BUILD ?= $(PROJECT_ROOT)/build/static/vector_lane
+VECTOR_LANE_FORMAL_BUILD ?= $(PROJECT_ROOT)/build/formal/vector_lane
+VECTOR_LANE_YOSYS ?= yosys
+VECTOR_LANE_VERILATOR ?= verilator
+VECTOR_LANE_RANDOM_CYCLES ?= 2000
+VECTOR_LANE_SEED ?= 20261022
+export VECTOR_LANE_HDL_ASSERTIONS ?= 1
+_VECTOR_LANE_MAKE := $(MAKE)
+_VECTOR_LANE_SIM_BIN_DIR := $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+SCALAR_ALU_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/scalar_alu/regression
+SCALAR_ALU_STATIC_BUILD ?= $(PROJECT_ROOT)/build/static/scalar_alu
+SCALAR_ALU_VERILATOR ?= verilator
+SCALAR_ALU_FORMAL_BUILD ?= $(PROJECT_ROOT)/build/formal/scalar_alu
+SCALAR_ALU_YOSYS ?= yosys
+SCALAR_ALU_SEED ?= 20261022
+SCALAR_ALU_RANDOM_CYCLES ?= 2000
+export SCALAR_ALU_HDL_ASSERTIONS ?= 1
+_SCALAR_ALU_MAKE := $(MAKE)
+_SCALAR_ALU_SIM_BIN_DIR := $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+NOC_ROUTER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/noc_router/regression
+NOC_ROUTER_MESH_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/noc_router/mesh
+NOC_ROUTER_TOPOLOGY_BUILD ?= $(PROJECT_ROOT)/build/noc_router/topology
+NOC_ROUTER_SEED ?= 20261022
+NOC_ROUTER_RANDOM_CYCLES ?= 2000
+export NOC_ROUTER_HDL_ASSERTIONS ?= 1
+_NOC_ROUTER_MAKE := $(MAKE)
+_NOC_ROUTER_SIM_BIN_DIR := $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+MULTIPLIER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/multiplier/regression
+MULTIPLIER_SEED ?= 20261022
+MULTIPLIER_RANDOM_CYCLES ?= 2000
+export MULTIPLIER_HDL_ASSERTIONS ?= 1
+_MULTIPLIER_MAKE := $(MAKE)
+_MULTIPLIER_SIM_BIN_DIR := $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+
+MAC_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/mac/regression
+MAC_SEED ?= 20261022
+MAC_RANDOM_CYCLES ?= 2000
+export MAC_HDL_ASSERTIONS ?= 1
+_MAC_MAKE := $(MAKE)
+_MAC_SIM_BIN_DIR := $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+
+LUT_UNIT_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/lut_unit/regression
+LUT_UNIT_SEED ?= 20261022
+LUT_UNIT_RANDOM_CYCLES ?= 2000
+_LUT_UNIT_MAKE := $(MAKE)
+_LUT_UNIT_SIM_BIN_DIR := $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+RSQRT_UNIT_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/rsqrt_unit/regression
+RSQRT_UNIT_SEED ?= 20261025
+RSQRT_UNIT_RANDOM_CYCLES ?= 2000
+_RSQRT_UNIT_MAKE := $(MAKE)
+_RSQRT_UNIT_SIM_BIN_DIR := $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+RECIPROCAL_UNIT_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/reciprocal_unit/regression
+RECIPROCAL_UNIT_SEED ?= 20261024
+RECIPROCAL_UNIT_RANDOM_CYCLES ?= 2000
+_RECIPROCAL_UNIT_MAKE := $(MAKE)
+_RECIPROCAL_UNIT_SIM_BIN_DIR := $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+POLYNOMIAL_UNIT_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/polynomial_unit/regression
+POLYNOMIAL_UNIT_SEED ?= 20261023
+POLYNOMIAL_UNIT_RANDOM_CYCLES ?= 2000
+_POLYNOMIAL_UNIT_MAKE := $(MAKE)
+_POLYNOMIAL_UNIT_SIM_BIN_DIR := $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+LOOP_CONTROLLER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/loop_controller/regression
+LOOP_CONTROLLER_SEED ?= 20261022
+LOOP_CONTROLLER_RANDOM_CYCLES ?= 2000
+export LOOP_CONTROLLER_HDL_ASSERTIONS ?= 0
+_LOOP_CONTROLLER_MAKE := $(MAKE)
+_LOOP_CONTROLLER_SIM_BIN_DIR := $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+TILE_POWER_CONTROLLER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/tile_power_controller/regression
+TILE_POWER_CONTROLLER_RANDOM_CYCLES ?= 2000
+TILE_POWER_CONTROLLER_SEED ?= 20261023
+_TILE_POWER_CONTROLLER_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_TILE_POWER_CONTROLLER_MAKE := $(MAKE)
+TILE_NETWORK_INTERFACE_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/tile_network_interface/regression
+TILE_NETWORK_INTERFACE_RANDOM_CYCLES ?= 2000
+TILE_NETWORK_INTERFACE_SEED ?= 20261023
+_TILE_NETWORK_INTERFACE_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_TILE_NETWORK_INTERFACE_MAKE := $(MAKE)
+LOCAL_SWITCH_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/local_switch/regression
+LOCAL_SWITCH_RANDOM_CYCLES ?= 2000
+LOCAL_SWITCH_SEED ?= 20261021
+export LOCAL_SWITCH_HDL_ASSERTIONS ?= 0
+_LOCAL_SWITCH_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_LOCAL_SWITCH_MAKE := $(MAKE)
+SCRATCHPAD_CONTROLLER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/scratchpad_controller/regression
+SCRATCHPAD_CONTROLLER_SEED ?= 20261023
+SCRATCHPAD_CONTROLLER_RANDOM_CYCLES ?= 2000
+_SCRATCHPAD_CONTROLLER_MAKE := $(if $(filter default,$(origin MAKE)),make,$(MAKE))
+_SCRATCHPAD_CONTROLLER_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+export SCRATCHPAD_CONTROLLER_RANDOM_CYCLES SCRATCHPAD_CONTROLLER_SEED
+SCRATCHPAD_BANK_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/scratchpad_bank/regression
+SCRATCHPAD_BANK_RANDOM_CYCLES ?= 2000
+SCRATCHPAD_BANK_SEED ?= 20261023
+export SCRATCHPAD_BANK_INSTRUMENTATION ?= 1
+_SCRATCHPAD_BANK_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_SCRATCHPAD_BANK_MAKE := $(MAKE)
+STREAM_FORMATTER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/stream_formatter/regression
+STREAM_FORMATTER_RANDOM_CYCLES ?= 2000
+STREAM_FORMATTER_SEED ?= 20261022
+_STREAM_FORMATTER_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_STREAM_FORMATTER_MAKE := $(MAKE)
+STORE_ENGINE_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/store_engine/regression
+STORE_ENGINE_RANDOM_CYCLES ?= 2000
+STORE_ENGINE_SEED ?= 20261022
+export STORE_ENGINE_HDL_ASSERTIONS ?= 1
+_STORE_ENGINE_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_STORE_ENGINE_MAKE := $(MAKE)
+LOAD_ENGINE_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/load_engine/regression
+LOAD_ENGINE_RANDOM_CYCLES ?= 2000
+LOAD_ENGINE_SEED ?= 20261021
+export LOAD_ENGINE_HDL_ASSERTIONS ?= 1
+_LOAD_ENGINE_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_LOAD_ENGINE_MAKE := $(MAKE)
+EXP_UNIT_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/exp_unit/regression
+EXP_UNIT_RANDOM_CYCLES ?= 2000
+EXP_UNIT_SEED ?= 20261021
+export EXP_UNIT_HDL_ASSERTIONS ?= 0
+_EXP_UNIT_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_EXP_UNIT_MAKE := $(MAKE)
+EVENT_BARRIER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/event_barrier/regression
+EVENT_BARRIER_RANDOM_CYCLES ?= 2000
+EVENT_BARRIER_SEED ?= 20261021
+export EVENT_BARRIER_HDL_ASSERTIONS ?= 1
+_EVENT_BARRIER_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_EVENT_BARRIER_MAKE := $(MAKE)
+DOT_PRODUCT_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/dot_product/regression
+DOT_PRODUCT_RANDOM_CYCLES ?= 2000
+DOT_PRODUCT_SEED ?= 20261020
+export DOT_PRODUCT_HDL_ASSERTIONS ?= 1
+_DOT_PRODUCT_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_DOT_PRODUCT_MAKE := $(MAKE)
+AGU_LINT_BUILD ?= $(PROJECT_ROOT)/build/lint/agu
+AGU_VERILATOR ?= verilator
+AGU_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/agu/regression
+AGU_RANDOM_CYCLES ?= 2000
+AGU_SEED ?= 20261020
+export AGU_HDL_ASSERTIONS ?= 1
+_AGU_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_AGU_MAKE := $(MAKE)
+DMA_ENGINE_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/dma_engine/regression
+DMA_ENGINE_RANDOM_CYCLES ?= 2000
+DMA_ENGINE_SEED ?= 20261020
+export DMA_ENGINE_HDL_ASSERTIONS ?= 0
+_DMA_ENGINE_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_DMA_ENGINE_MAKE := $(MAKE)
 COUNTER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/counter/regression
 COUNTER_RANDOM_CYCLES ?= 2000
 COUNTER_SEED ?= 20261010
@@ -317,6 +655,173 @@ ifeq ($(_COCOTB_RUN),1)
 _USER_COMPILE_ARGS := $(COMPILE_ARGS)
 override undefine COMPILE_ARGS
 COMPILE_ARGS := $(_USER_COMPILE_ARGS)
+# Native RTL checkers sample after a precision-tick observation delay; some
+# suites also check private state. Exclude them from synthesis and gate sources.
+ifeq ($(COCOTB_TOPLEVEL),predicate_unit)
+ifneq ($(_GATE_RUN),1)
+ifeq ($(PREDICATE_UNIT_HDL_ASSERTIONS),1)
+override VERILOG_SOURCES += $(PREDICATE_UNIT_TEST_DIR)/predicate_unit_reference.sv \
+    $(PREDICATE_UNIT_TEST_DIR)/predicate_unit_assertions.sv
+COMPILE_ARGS += $(if $(filter vcs,$(SIM)),+define+MOSAIC_PREDICATE_UNIT_ASSERTIONS,-DMOSAIC_PREDICATE_UNIT_ASSERTIONS)
+endif
+endif
+endif
+ifeq ($(COCOTB_TOPLEVEL),vector_reduction)
+ifneq ($(_GATE_RUN),1)
+ifeq ($(VECTOR_REDUCTION_HDL_ASSERTIONS),1)
+override VERILOG_SOURCES += $(VECTOR_REDUCTION_TEST_DIR)/vector_reduction_reference.sv \
+    $(VECTOR_REDUCTION_TEST_DIR)/vector_reduction_assertions.sv
+COMPILE_ARGS += $(if $(filter vcs,$(SIM)),+define+MOSAIC_VECTOR_REDUCTION_ASSERTIONS,-DMOSAIC_VECTOR_REDUCTION_ASSERTIONS)
+endif
+endif
+endif
+ifeq ($(COCOTB_TOPLEVEL),vector_lane)
+ifneq ($(_GATE_RUN),1)
+ifeq ($(VECTOR_LANE_HDL_ASSERTIONS),1)
+override VERILOG_SOURCES += $(VECTOR_LANE_TEST_DIR)/vector_lane_reference.sv \
+    $(VECTOR_LANE_TEST_DIR)/vector_lane_assertions.sv
+COMPILE_ARGS += $(if $(filter vcs,$(SIM)),+define+MOSAIC_VECTOR_LANE_ASSERTIONS,-DMOSAIC_VECTOR_LANE_ASSERTIONS)
+endif
+endif
+endif
+ifeq ($(COCOTB_TOPLEVEL),scalar_alu)
+ifneq ($(_GATE_RUN),1)
+ifeq ($(SCALAR_ALU_HDL_ASSERTIONS),1)
+override VERILOG_SOURCES += $(SCALAR_ALU_TEST_DIR)/scalar_alu_assertions.sv
+COMPILE_ARGS += $(if $(filter vcs,$(SIM)),+define+MOSAIC_SCALAR_ALU_ASSERTIONS,-DMOSAIC_SCALAR_ALU_ASSERTIONS)
+endif
+endif
+endif
+ifeq ($(COCOTB_TOPLEVEL),noc_router)
+ifneq ($(_GATE_RUN),1)
+ifeq ($(NOC_ROUTER_HDL_ASSERTIONS),1)
+override VERILOG_SOURCES += $(NOC_ROUTER_TEST_DIR)/noc_router_assertions.sv
+COMPILE_ARGS += $(if $(filter vcs,$(SIM)),+define+MOSAIC_NOC_ROUTER_ASSERTIONS,-DMOSAIC_NOC_ROUTER_ASSERTIONS)
+endif
+endif
+endif
+ifeq ($(COCOTB_TOPLEVEL),multiplier)
+ifneq ($(_GATE_RUN),1)
+ifeq ($(MULTIPLIER_HDL_ASSERTIONS),1)
+override VERILOG_SOURCES += $(MULTIPLIER_TEST_DIR)/multiplier_assertions.sv
+COMPILE_ARGS += $(if $(filter vcs,$(SIM)),+define+MOSAIC_MULTIPLIER_ASSERTIONS,-DMOSAIC_MULTIPLIER_ASSERTIONS)
+endif
+endif
+endif
+ifeq ($(COCOTB_TOPLEVEL),mac)
+ifneq ($(_GATE_RUN),1)
+ifeq ($(MAC_HDL_ASSERTIONS),1)
+override VERILOG_SOURCES += $(DOT_PRODUCT_TEST_DIR)/dot_product_assertions.sv
+COMPILE_ARGS += $(if $(filter vcs,$(SIM)),+define+MOSAIC_MAC_ASSERTIONS,-DMOSAIC_MAC_ASSERTIONS)
+endif
+endif
+endif
+ifeq ($(COCOTB_TOPLEVEL),lut_unit)
+ifneq ($(_GATE_RUN),1)
+ifeq ($(LUT_UNIT_HDL_ASSERTIONS),1)
+override VERILOG_SOURCES += $(LUT_UNIT_TEST_DIR)/lut_unit_assertions.sv
+COMPILE_ARGS += $(if $(filter vcs,$(SIM)),+define+MOSAIC_LUT_UNIT_ASSERTIONS,-DMOSAIC_LUT_UNIT_ASSERTIONS)
+endif
+endif
+endif
+ifeq ($(COCOTB_TOPLEVEL),loop_controller)
+ifneq ($(_GATE_RUN),1)
+ifeq ($(LOOP_CONTROLLER_HDL_ASSERTIONS),1)
+override VERILOG_SOURCES += $(LOOP_CONTROLLER_TEST_DIR)/loop_controller_assertions.sv
+COMPILE_ARGS += $(if $(filter vcs,$(SIM)),+define+MOSAIC_LOOP_CONTROLLER_ASSERTIONS,-DMOSAIC_LOOP_CONTROLLER_ASSERTIONS)
+endif
+endif
+endif
+ifeq ($(COCOTB_TOPLEVEL),local_switch)
+ifneq ($(_GATE_RUN),1)
+ifeq ($(LOCAL_SWITCH_HDL_ASSERTIONS),1)
+override VERILOG_SOURCES += $(LOCAL_SWITCH_TEST_DIR)/local_switch_assertions.sv
+COMPILE_ARGS += $(if $(filter vcs,$(SIM)),+define+MOSAIC_LOCAL_SWITCH_ASSERTIONS,-DMOSAIC_LOCAL_SWITCH_ASSERTIONS)
+endif
+endif
+endif
+SCRATCHPAD_CONTROLLER_INSTRUMENTATION ?= 1
+export SCRATCHPAD_CONTROLLER_INSTRUMENTATION
+ifneq ($(filter scratchpad_controller scratchpad_controller_system_tb,$(COCOTB_TOPLEVEL)),)
+ifneq ($(_GATE_RUN),1)
+ifeq ($(SCRATCHPAD_CONTROLLER_INSTRUMENTATION),1)
+override VERILOG_SOURCES += $(SCRATCHPAD_CONTROLLER_TEST_DIR)/scratchpad_controller_instrumentation.sv
+COMPILE_ARGS += $(if $(filter vcs,$(SIM)),+define+MOSAIC_SCRATCHPAD_CONTROLLER_INSTRUMENTATION,-DMOSAIC_SCRATCHPAD_CONTROLLER_INSTRUMENTATION)
+endif
+endif
+endif
+ifeq ($(COCOTB_TOPLEVEL),scratchpad_bank)
+ifneq ($(_GATE_RUN),1)
+ifeq ($(SCRATCHPAD_BANK_INSTRUMENTATION),1)
+override VERILOG_SOURCES += $(SCRATCHPAD_BANK_TEST_DIR)/scratchpad_bank_instrumentation.sv
+COMPILE_ARGS += $(if $(filter vcs,$(SIM)),+define+MOSAIC_SCRATCHPAD_BANK_INSTRUMENTATION,-DMOSAIC_SCRATCHPAD_BANK_INSTRUMENTATION)
+endif
+endif
+endif
+ifeq ($(COCOTB_TOPLEVEL),store_engine)
+ifneq ($(_GATE_RUN),1)
+ifeq ($(STORE_ENGINE_HDL_ASSERTIONS),1)
+override VERILOG_SOURCES += $(STORE_ENGINE_TEST_DIR)/store_engine_assertions.sv
+COMPILE_ARGS += $(if $(filter vcs,$(SIM)),+define+MOSAIC_STORE_ENGINE_ASSERTIONS,-DMOSAIC_STORE_ENGINE_ASSERTIONS)
+endif
+endif
+endif
+ifeq ($(COCOTB_TOPLEVEL),load_engine)
+ifneq ($(_GATE_RUN),1)
+ifeq ($(LOAD_ENGINE_HDL_ASSERTIONS),1)
+override VERILOG_SOURCES += $(LOAD_ENGINE_TEST_DIR)/load_engine_assertions.sv
+COMPILE_ARGS += $(if $(filter vcs,$(SIM)),+define+MOSAIC_LOAD_ENGINE_ASSERTIONS,-DMOSAIC_LOAD_ENGINE_ASSERTIONS)
+endif
+endif
+endif
+ifeq ($(COCOTB_TOPLEVEL),exp_unit)
+ifneq ($(_GATE_RUN),1)
+ifeq ($(EXP_UNIT_HDL_ASSERTIONS),1)
+override VERILOG_SOURCES += $(EXP_UNIT_TEST_DIR)/exp_unit_assertions.sv
+COMPILE_ARGS += $(if $(filter vcs,$(SIM)),+define+MOSAIC_EXP_UNIT_ASSERTIONS,-DMOSAIC_EXP_UNIT_ASSERTIONS)
+endif
+endif
+endif
+ifeq ($(COCOTB_TOPLEVEL),event_barrier)
+ifneq ($(_GATE_RUN),1)
+ifeq ($(EVENT_BARRIER_HDL_ASSERTIONS),1)
+override VERILOG_SOURCES += $(EVENT_BARRIER_TEST_DIR)/event_barrier_assertions.sv
+COMPILE_ARGS += $(if $(filter vcs,$(SIM)),+define+MOSAIC_EVENT_BARRIER_ASSERTIONS,-DMOSAIC_EVENT_BARRIER_ASSERTIONS)
+endif
+endif
+endif
+ifeq ($(COCOTB_TOPLEVEL),dot_product)
+ifneq ($(_GATE_RUN),1)
+ifeq ($(DOT_PRODUCT_HDL_ASSERTIONS),1)
+override VERILOG_SOURCES += $(DOT_PRODUCT_TEST_DIR)/dot_product_assertions.sv
+COMPILE_ARGS += $(if $(filter vcs,$(SIM)),+define+MOSAIC_DOT_PRODUCT_ASSERTIONS,-DMOSAIC_DOT_PRODUCT_ASSERTIONS)
+endif
+endif
+endif
+ifeq ($(COCOTB_TOPLEVEL),dma_engine)
+ifneq ($(_GATE_RUN),1)
+ifeq ($(DMA_ENGINE_HDL_ASSERTIONS),1)
+override VERILOG_SOURCES += $(DMA_ENGINE_TEST_DIR)/dma_engine_assertions.sv
+COMPILE_ARGS += $(if $(filter vcs,$(SIM)),+define+MOSAIC_DMA_ENGINE_ASSERTIONS,-DMOSAIC_DMA_ENGINE_ASSERTIONS)
+endif
+endif
+endif
+ifeq ($(COCOTB_TOPLEVEL),agu)
+ifneq ($(_GATE_RUN),1)
+ifeq ($(AGU_HDL_ASSERTIONS),1)
+override VERILOG_SOURCES += $(AGU_TEST_DIR)/agu_assertions.sv
+COMPILE_ARGS += $(if $(filter vcs,$(SIM)),+define+MOSAIC_AGU_ASSERTIONS,-DMOSAIC_AGU_ASSERTIONS)
+endif
+endif
+endif
+ifeq ($(COCOTB_TOPLEVEL),accumulator)
+ifneq ($(_GATE_RUN),1)
+ifeq ($(ACCUMULATOR_HDL_ASSERTIONS),1)
+override VERILOG_SOURCES += $(ACCUMULATOR_TEST_DIR)/accumulator_assertions.sv
+COMPILE_ARGS += $(if $(filter vcs,$(SIM)),+define+MOSAIC_ACCUMULATOR_ASSERTIONS,-DMOSAIC_ACCUMULATOR_ASSERTIONS)
+endif
+endif
+endif
 ifeq ($(_GATE_RUN),1)
 ifneq ($(strip $(SDF_FILE)),)
 # VCS unified SDF annotation is a compilation option, not a simv option.
@@ -581,6 +1086,302 @@ stream-join-regression:
 		--seed "$(STREAM_JOIN_SEED)" --random-cycles "$(STREAM_JOIN_RANDOM_CYCLES)" \
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_STREAM_JOIN_MAKE)" \
 		$(if $(strip $(_STREAM_JOIN_SIM_BIN_DIR)),--sim-bin-dir "$(_STREAM_JOIN_SIM_BIN_DIR)")
+
+.PHONY: predicate-unit-regression predicate-unit-static predicate-unit-formal
+predicate-unit-regression:
+	@"$(PYTHON_BIN)" "$(PREDICATE_UNIT_TEST_DIR)/run_predicate_unit_regression.py" \
+		--sim "$(SIM)" --build-dir "$(PREDICATE_UNIT_REGRESSION_BUILD)" \
+		--seed "$(PREDICATE_UNIT_SEED)" --random-cycles "$(PREDICATE_UNIT_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_PREDICATE_UNIT_MAKE)" \
+		$(if $(strip $(_PREDICATE_UNIT_SIM_BIN_DIR)),--sim-bin-dir "$(_PREDICATE_UNIT_SIM_BIN_DIR)")
+
+predicate-unit-static:
+	@"$(PYTHON_BIN)" "$(PREDICATE_UNIT_TEST_DIR)/run_predicate_unit_static.py" \
+		--yosys "$(PREDICATE_UNIT_YOSYS)" --verilator "$(PREDICATE_UNIT_VERILATOR)" \
+		--build-dir "$(PREDICATE_UNIT_STATIC_BUILD)"
+
+predicate-unit-formal:
+	@"$(PYTHON_BIN)" "$(PREDICATE_UNIT_TEST_DIR)/run_predicate_unit_formal.py" \
+		--yosys "$(PREDICATE_UNIT_YOSYS)" --build-dir "$(PREDICATE_UNIT_FORMAL_BUILD)"
+
+.PHONY: vector-reduction-regression vector-reduction-static vector-reduction-formal
+vector-reduction-regression:
+	@"$(PYTHON_BIN)" "$(VECTOR_REDUCTION_TEST_DIR)/run_vector_reduction_regression.py" \
+		--sim "$(SIM)" --build-dir "$(VECTOR_REDUCTION_REGRESSION_BUILD)" \
+		--seed "$(VECTOR_REDUCTION_SEED)" --random-cycles "$(VECTOR_REDUCTION_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_VECTOR_REDUCTION_MAKE)" \
+		$(if $(strip $(_VECTOR_REDUCTION_SIM_BIN_DIR)),--sim-bin-dir "$(_VECTOR_REDUCTION_SIM_BIN_DIR)")
+
+vector-reduction-static:
+	@"$(PYTHON_BIN)" "$(VECTOR_REDUCTION_TEST_DIR)/run_vector_reduction_static.py" \
+		--yosys "$(VECTOR_REDUCTION_YOSYS)" --verilator "$(VECTOR_REDUCTION_VERILATOR)" \
+		--build-dir "$(VECTOR_REDUCTION_STATIC_BUILD)"
+
+vector-reduction-formal:
+	@"$(PYTHON_BIN)" "$(VECTOR_REDUCTION_TEST_DIR)/run_vector_reduction_formal.py" \
+		--yosys "$(VECTOR_REDUCTION_YOSYS)" --build-dir "$(VECTOR_REDUCTION_FORMAL_BUILD)"
+
+.PHONY: vector-lane-regression vector-lane-static vector-lane-formal
+vector-lane-regression:
+	@"$(PYTHON_BIN)" "$(VECTOR_LANE_TEST_DIR)/run_vector_lane_regression.py" \
+		--sim "$(SIM)" --build-dir "$(VECTOR_LANE_REGRESSION_BUILD)" \
+		--seed "$(VECTOR_LANE_SEED)" --random-cycles "$(VECTOR_LANE_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_VECTOR_LANE_MAKE)" \
+		$(if $(strip $(_VECTOR_LANE_SIM_BIN_DIR)),--sim-bin-dir "$(_VECTOR_LANE_SIM_BIN_DIR)")
+
+vector-lane-static:
+	@"$(PYTHON_BIN)" "$(VECTOR_LANE_TEST_DIR)/run_vector_lane_static.py" \
+		--yosys "$(VECTOR_LANE_YOSYS)" --verilator "$(VECTOR_LANE_VERILATOR)" \
+		--build-dir "$(VECTOR_LANE_STATIC_BUILD)"
+
+vector-lane-formal:
+	@"$(PYTHON_BIN)" "$(VECTOR_LANE_TEST_DIR)/run_vector_lane_formal.py" \
+		--yosys "$(VECTOR_LANE_YOSYS)" --build-dir "$(VECTOR_LANE_FORMAL_BUILD)"
+
+.PHONY: scalar-alu-static
+scalar-alu-static:
+	@"$(PYTHON_BIN)" "$(SCALAR_ALU_TEST_DIR)/run_scalar_alu_static.py" \
+		--yosys "$(SCALAR_ALU_YOSYS)" --verilator "$(SCALAR_ALU_VERILATOR)" \
+		--build-dir "$(SCALAR_ALU_STATIC_BUILD)"
+
+.PHONY: scalar-alu-formal
+scalar-alu-formal:
+	@"$(PYTHON_BIN)" "$(SCALAR_ALU_TEST_DIR)/run_scalar_alu_formal.py" \
+		--yosys "$(SCALAR_ALU_YOSYS)" --build-dir "$(SCALAR_ALU_FORMAL_BUILD)"
+
+.PHONY: scalar-alu-regression
+scalar-alu-regression:
+	@"$(PYTHON_BIN)" "$(SCALAR_ALU_TEST_DIR)/run_scalar_alu_regression.py" \
+		--sim "$(SIM)" --build-dir "$(SCALAR_ALU_REGRESSION_BUILD)" \
+		--seed "$(SCALAR_ALU_SEED)" --random-cycles "$(SCALAR_ALU_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_SCALAR_ALU_MAKE)" \
+		$(if $(strip $(_SCALAR_ALU_SIM_BIN_DIR)),--sim-bin-dir "$(_SCALAR_ALU_SIM_BIN_DIR)")
+
+.PHONY: noc-router-regression noc-router-mesh-regression noc-router-topology
+noc-router-regression:
+	@"$(PYTHON_BIN)" "$(NOC_ROUTER_TEST_DIR)/run_noc_router_regression.py" \
+		--sim "$(SIM)" --build-dir "$(NOC_ROUTER_REGRESSION_BUILD)" \
+		--seed "$(NOC_ROUTER_SEED)" --random-cycles "$(NOC_ROUTER_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_NOC_ROUTER_MAKE)" \
+		$(if $(strip $(_NOC_ROUTER_SIM_BIN_DIR)),--sim-bin-dir "$(_NOC_ROUTER_SIM_BIN_DIR)")
+
+noc-router-mesh-regression:
+	@"$(PYTHON_BIN)" "$(NOC_ROUTER_TEST_DIR)/run_noc_router_mesh.py" \
+		--sim "$(SIM)" --build-dir "$(NOC_ROUTER_MESH_BUILD)" \
+		--seed "$(NOC_ROUTER_SEED)" --random-cycles "$(NOC_ROUTER_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_NOC_ROUTER_MAKE)" \
+		$(if $(strip $(_NOC_ROUTER_SIM_BIN_DIR)),--sim-bin-dir "$(_NOC_ROUTER_SIM_BIN_DIR)")
+
+noc-router-topology:
+	@"$(PYTHON_BIN)" "$(NOC_ROUTER_TEST_DIR)/analyze_topology.py" \
+		--output "$(NOC_ROUTER_TOPOLOGY_BUILD)/summary.json"
+
+.PHONY: multiplier-regression
+# Exact full products, independent operand signedness, enabled-edge timing and X/Z.
+multiplier-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(MULTIPLIER_TEST_DIR)/run_multiplier_regression.py" \
+		--sim "$(SIM)" --build-dir "$(MULTIPLIER_REGRESSION_BUILD)" \
+		--seed "$(MULTIPLIER_SEED)" --random-cycles "$(MULTIPLIER_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_MULTIPLIER_MAKE)" \
+		$(if $(strip $(_MULTIPLIER_SIM_BIN_DIR)),--sim-bin-dir "$(_MULTIPLIER_SIM_BIN_DIR)")
+
+.PHONY: mac-regression
+# Reuse the scalar dot-product arithmetic and its independent native HDL checker.
+mac-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(MAC_TEST_DIR)/run_mac_regression.py" \
+		--sim "$(SIM)" --build-dir "$(MAC_REGRESSION_BUILD)" \
+		--seed "$(MAC_SEED)" --random-cycles "$(MAC_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_MAC_MAKE)" \
+		$(if $(strip $(_MAC_SIM_BIN_DIR)),--sim-bin-dir "$(_MAC_SIM_BIN_DIR)")
+
+.PHONY: lut-unit-regression
+lut-unit-regression:
+	@"$(PYTHON_BIN)" "$(LUT_UNIT_TEST_DIR)/run_lut_unit_regression.py" \
+		--sim "$(SIM)" --build-dir "$(LUT_UNIT_REGRESSION_BUILD)" \
+		--seed "$(LUT_UNIT_SEED)" --random-cycles "$(LUT_UNIT_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_LUT_UNIT_MAKE)" \
+		$(if $(strip $(_LUT_UNIT_SIM_BIN_DIR)),--sim-bin-dir "$(_LUT_UNIT_SIM_BIN_DIR)")
+
+.PHONY: rsqrt-unit-regression
+rsqrt-unit-regression:
+	@"$(PYTHON_BIN)" "$(RSQRT_UNIT_TEST_DIR)/run_rsqrt_unit_regression.py" \
+		--sim "$(SIM)" --build-dir "$(RSQRT_UNIT_REGRESSION_BUILD)" \
+		--seed "$(RSQRT_UNIT_SEED)" --random-cycles "$(RSQRT_UNIT_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_RSQRT_UNIT_MAKE)" \
+		$(if $(strip $(_RSQRT_UNIT_SIM_BIN_DIR)),--sim-bin-dir "$(_RSQRT_UNIT_SIM_BIN_DIR)")
+
+.PHONY: reciprocal-unit-regression
+reciprocal-unit-regression:
+	@"$(PYTHON_BIN)" "$(RECIPROCAL_UNIT_TEST_DIR)/run_reciprocal_unit_regression.py" \
+		--sim "$(SIM)" --build-dir "$(RECIPROCAL_UNIT_REGRESSION_BUILD)" \
+		--seed "$(RECIPROCAL_UNIT_SEED)" --random-cycles "$(RECIPROCAL_UNIT_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_RECIPROCAL_UNIT_MAKE)" \
+		$(if $(strip $(_RECIPROCAL_UNIT_SIM_BIN_DIR)),--sim-bin-dir "$(_RECIPROCAL_UNIT_SIM_BIN_DIR)")
+
+.PHONY: polynomial-unit-regression
+polynomial-unit-regression:
+	@"$(PYTHON_BIN)" "$(POLYNOMIAL_UNIT_TEST_DIR)/run_polynomial_unit_regression.py" \
+		--sim "$(SIM)" --build-dir "$(POLYNOMIAL_UNIT_REGRESSION_BUILD)" \
+		--seed "$(POLYNOMIAL_UNIT_SEED)" --random-cycles "$(POLYNOMIAL_UNIT_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_POLYNOMIAL_UNIT_MAKE)" \
+		$(if $(strip $(_POLYNOMIAL_UNIT_SIM_BIN_DIR)),--sim-bin-dir "$(_POLYNOMIAL_UNIT_SIM_BIN_DIR)")
+
+.PHONY: loop-controller-regression
+loop-controller-regression:
+	@"$(PYTHON_BIN)" "$(LOOP_CONTROLLER_TEST_DIR)/run_loop_controller_regression.py" \
+		--sim "$(SIM)" --build-dir "$(LOOP_CONTROLLER_REGRESSION_BUILD)" \
+		--seed "$(LOOP_CONTROLLER_SEED)" --random-cycles "$(LOOP_CONTROLLER_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_LOOP_CONTROLLER_MAKE)" \
+		$(if $(strip $(_LOOP_CONTROLLER_SIM_BIN_DIR)),--sim-bin-dir "$(_LOOP_CONTROLLER_SIM_BIN_DIR)")
+
+.PHONY: tile-power-controller-regression
+tile-power-controller-regression:
+	@"$(PYTHON_BIN)" "$(TILE_POWER_CONTROLLER_TEST_DIR)/run_tile_power_controller_regression.py" \
+		--sim "$(SIM)" --build-dir "$(TILE_POWER_CONTROLLER_REGRESSION_BUILD)" \
+		--seed "$(TILE_POWER_CONTROLLER_SEED)" \
+		--random-cycles "$(TILE_POWER_CONTROLLER_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" \
+		--make "$(_TILE_POWER_CONTROLLER_MAKE)" \
+		$(if $(strip $(_TILE_POWER_CONTROLLER_SIM_BIN_DIR)),--sim-bin-dir "$(_TILE_POWER_CONTROLLER_SIM_BIN_DIR)")
+
+.PHONY: tile-network-interface-regression
+tile-network-interface-regression:
+	@"$(PYTHON_BIN)" "$(TILE_NETWORK_INTERFACE_TEST_DIR)/run_tile_network_interface_regression.py" \
+		--sim "$(SIM)" --build-dir "$(TILE_NETWORK_INTERFACE_REGRESSION_BUILD)" \
+		--seed "$(TILE_NETWORK_INTERFACE_SEED)" \
+		--random-cycles "$(TILE_NETWORK_INTERFACE_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" \
+		--make "$(_TILE_NETWORK_INTERFACE_MAKE)" \
+		$(if $(strip $(_TILE_NETWORK_INTERFACE_SIM_BIN_DIR)),--sim-bin-dir "$(_TILE_NETWORK_INTERFACE_SIM_BIN_DIR)")
+
+.PHONY: local-switch-regression
+local-switch-regression:
+	@"$(PYTHON_BIN)" "$(LOCAL_SWITCH_TEST_DIR)/run_local_switch_regression.py" \
+		--sim "$(SIM)" --build-dir "$(LOCAL_SWITCH_REGRESSION_BUILD)" \
+		--seed "$(LOCAL_SWITCH_SEED)" --random-cycles "$(LOCAL_SWITCH_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_LOCAL_SWITCH_MAKE)" \
+		$(if $(strip $(_LOCAL_SWITCH_SIM_BIN_DIR)),--sim-bin-dir "$(_LOCAL_SWITCH_SIM_BIN_DIR)")
+
+.PHONY: scratchpad-controller-regression
+scratchpad-controller-regression:
+	@"$(PYTHON_BIN)" "$(SCRATCHPAD_CONTROLLER_TEST_DIR)/run_scratchpad_controller_regression.py" \
+		--sim "$(SIM)" --build-dir "$(SCRATCHPAD_CONTROLLER_REGRESSION_BUILD)" \
+		--seed "$(SCRATCHPAD_CONTROLLER_SEED)" --random-cycles "$(SCRATCHPAD_CONTROLLER_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_SCRATCHPAD_CONTROLLER_MAKE)" \
+		$(if $(strip $(_SCRATCHPAD_CONTROLLER_SIM_BIN_DIR)),--sim-bin-dir "$(_SCRATCHPAD_CONTROLLER_SIM_BIN_DIR)")
+
+.PHONY: scratchpad-bank-regression
+scratchpad-bank-regression:
+	@"$(PYTHON_BIN)" "$(SCRATCHPAD_BANK_TEST_DIR)/run_scratchpad_bank_regression.py" \
+		--sim "$(SIM)" --build-dir "$(SCRATCHPAD_BANK_REGRESSION_BUILD)" \
+		--seed "$(SCRATCHPAD_BANK_SEED)" --random-cycles "$(SCRATCHPAD_BANK_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_SCRATCHPAD_BANK_MAKE)" \
+		$(if $(strip $(_SCRATCHPAD_BANK_SIM_BIN_DIR)),--sim-bin-dir "$(_SCRATCHPAD_BANK_SIM_BIN_DIR)")
+
+.PHONY: stream-formatter-regression
+stream-formatter-regression:
+	@"$(PYTHON_BIN)" "$(STREAM_FORMATTER_TEST_DIR)/run_stream_formatter_regression.py" \
+		--sim "$(SIM)" --build-dir "$(STREAM_FORMATTER_REGRESSION_BUILD)" \
+		--seed "$(STREAM_FORMATTER_SEED)" --random-cycles "$(STREAM_FORMATTER_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_STREAM_FORMATTER_MAKE)" \
+		$(if $(strip $(_STREAM_FORMATTER_SIM_BIN_DIR)),--sim-bin-dir "$(_STREAM_FORMATTER_SIM_BIN_DIR)")
+
+.PHONY: store-engine-regression
+store-engine-regression:
+	@"$(PYTHON_BIN)" "$(STORE_ENGINE_TEST_DIR)/run_store_engine_regression.py" \
+		--sim "$(SIM)" --build-dir "$(STORE_ENGINE_REGRESSION_BUILD)" \
+		--seed "$(STORE_ENGINE_SEED)" --random-cycles "$(STORE_ENGINE_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_STORE_ENGINE_MAKE)" \
+		$(if $(strip $(_STORE_ENGINE_SIM_BIN_DIR)),--sim-bin-dir "$(_STORE_ENGINE_SIM_BIN_DIR)")
+
+.PHONY: load-engine-regression
+load-engine-regression:
+	@"$(PYTHON_BIN)" "$(LOAD_ENGINE_TEST_DIR)/run_load_engine_regression.py" \
+		--sim "$(SIM)" --build-dir "$(LOAD_ENGINE_REGRESSION_BUILD)" \
+		--seed "$(LOAD_ENGINE_SEED)" --random-cycles "$(LOAD_ENGINE_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_LOAD_ENGINE_MAKE)" \
+		$(if $(strip $(_LOAD_ENGINE_SIM_BIN_DIR)),--sim-bin-dir "$(_LOAD_ENGINE_SIM_BIN_DIR)")
+
+.PHONY: exp-unit-regression exp-unit-images
+exp-unit-images:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/tools/generate_exp_unit.py" --check
+
+exp-unit-regression: exp-unit-images
+	@"$(PYTHON_BIN)" "$(EXP_UNIT_TEST_DIR)/run_exp_unit_regression.py" \
+		--sim "$(SIM)" --build-dir "$(EXP_UNIT_REGRESSION_BUILD)" \
+		--seed "$(EXP_UNIT_SEED)" --random-cycles "$(EXP_UNIT_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_EXP_UNIT_MAKE)" \
+		$(if $(strip $(_EXP_UNIT_SIM_BIN_DIR)),--sim-bin-dir "$(_EXP_UNIT_SIM_BIN_DIR)")
+
+.PHONY: event-barrier-regression
+# Check atomic event mutations, wait scheduling, barrier generations and flush.
+event-barrier-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(EVENT_BARRIER_TEST_DIR)/run_event_barrier_regression.py" \
+		--sim "$(SIM)" --build-dir "$(EVENT_BARRIER_REGRESSION_BUILD)" \
+		--seed "$(EVENT_BARRIER_SEED)" --random-cycles "$(EVENT_BARRIER_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_EVENT_BARRIER_MAKE)" \
+		$(if $(strip $(_EVENT_BARRIER_SIM_BIN_DIR)),--sim-bin-dir "$(_EVENT_BARRIER_SIM_BIN_DIR)")
+
+.PHONY: dot-product-regression
+# Check exact masked products, reduction, accumulation and enabled-edge latency.
+dot-product-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(DOT_PRODUCT_TEST_DIR)/run_dot_product_regression.py" || { \
+		echo 'Dot-product regression missing under src/val/<category>/dot_product.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(DOT_PRODUCT_TEST_DIR)/run_dot_product_regression.py" \
+		--sim "$(SIM)" --build-dir "$(DOT_PRODUCT_REGRESSION_BUILD)" \
+		--seed "$(DOT_PRODUCT_SEED)" --random-cycles "$(DOT_PRODUCT_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_DOT_PRODUCT_MAKE)" \
+		$(if $(strip $(_DOT_PRODUCT_SIM_BIN_DIR)),--sim-bin-dir "$(_DOT_PRODUCT_SIM_BIN_DIR)")
+
+.PHONY: dma-engine-regression
+# Check DMA scheduling, exact data movement, ownership, cancellation and flush.
+dma-engine-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(DMA_ENGINE_TEST_DIR)/run_dma_engine_regression.py" || { \
+		echo 'DMA regression missing under src/val/<category>/dma_engine.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(DMA_ENGINE_TEST_DIR)/run_dma_engine_regression.py" \
+		--sim "$(SIM)" --build-dir "$(DMA_ENGINE_REGRESSION_BUILD)" \
+		--seed "$(DMA_ENGINE_SEED)" --random-cycles "$(DMA_ENGINE_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_DMA_ENGINE_MAKE)" \
+		$(if $(strip $(_DMA_ENGINE_SIM_BIN_DIR)),--sim-bin-dir "$(_DMA_ENGINE_SIM_BIN_DIR)")
+
+.PHONY: agu-regression agu-lint
+agu-lint:
+	@"$(PYTHON_BIN)" "$(AGU_TEST_DIR)/run_agu_lint.py" \
+		--verilator "$(AGU_VERILATOR)" --build-dir "$(AGU_LINT_BUILD)"
+# Check descriptor legality, signed 1D/2D addresses, metadata and backpressure.
+agu-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(AGU_TEST_DIR)/run_agu_regression.py" || { \
+		echo 'AGU regression missing under src/val/<category>/agu.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(AGU_TEST_DIR)/run_agu_regression.py" \
+		--sim "$(SIM)" --build-dir "$(AGU_REGRESSION_BUILD)" \
+		--seed "$(AGU_SEED)" --random-cycles "$(AGU_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_AGU_MAKE)" \
+		$(if $(strip $(_AGU_SIM_BIN_DIR)),--sim-bin-dir "$(_AGU_SIM_BIN_DIR)")
+
+.PHONY: accumulator-regression
+# Check typed atomic lane updates, numerical status and enabled-cycle recurrence.
+accumulator-regression:
+	@test -x "$(PYTHON_BIN)" || { \
+		echo 'Python environment missing. Run make setup first.' >&2; exit 2; }
+	@test -r "$(ACCUMULATOR_TEST_DIR)/run_accumulator_regression.py" || { \
+		echo 'Accumulator regression missing under src/val/<category>/accumulator.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(ACCUMULATOR_TEST_DIR)/run_accumulator_regression.py" \
+		--sim "$(SIM)" --build-dir "$(ACCUMULATOR_REGRESSION_BUILD)" \
+		--seed "$(ACCUMULATOR_SEED)" --random-cycles "$(ACCUMULATOR_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(_ACCUMULATOR_MAKE)" \
+		$(if $(strip $(_ACCUMULATOR_SIM_BIN_DIR)),--sim-bin-dir "$(_ACCUMULATOR_SIM_BIN_DIR)")
 
 .PHONY: width-converter-regression
 # Check positional packing/serialization, keep, packet boundaries and cancellation.
@@ -934,6 +1735,45 @@ help:
 		'make round-robin-arbiter-regression  Check cyclic grants, backpressure, locks and fairness' \
 		'make skid-buffer-regression  Check bypass, late stalls and registered backpressure' \
 		'make stream-join-regression  Check atomic joins, final arrival and optional inputs' \
+		'make accumulator-regression  Check typed atomic lanes, arithmetic, status and clock enables' \
+		'make agu-regression  Check signed address sequences, descriptors, errors and backpressure' \
+		'make agu-lint  Lint AGU parameter profiles without synthesis' \
+		'make predicate-unit-regression  Check predicate bank commands and state' \
+		'make predicate-unit-static  Lint and synthesize predicate banks' \
+		'make predicate-unit-formal  Prove predicate state/response equivalence' \
+		'make vector-reduction-regression  Check masked integer reductions and timing' \
+		'make vector-reduction-static  Lint and synthesize reduction profiles' \
+		'make vector-reduction-formal  Prove small-width reductions and bounded timing' \
+		'make vector-lane-regression  Check lane operations, predication and path alignment' \
+		'make vector-lane-static  Lint and synthesize vector lane profiles' \
+		'make vector-lane-formal  Prove tractable vector lane profiles' \
+		'make scalar-alu-static  Lint and synthesize combinational ALU profiles' \
+		'make scalar-alu-formal  Prove ALU profiles with Yosys/slang' \
+		'make scalar-alu-regression  Check scalar operations, flags and feature modes' \
+		'make noc-router-regression  Check routes, wormhole ownership, credits and protection' \
+		'make noc-router-mesh-regression  Check end-to-end delivery in 2x2 and 4x4 meshes' \
+		'make noc-router-topology  Analyze dimension-order channel dependencies' \
+		'make multiplier-regression  Check exact scalar products, mixed modes and pipeline holds' \
+		'make mac-regression  Check scalar multiply-add, saturation and enabled-edge timing' \
+		'make lut-unit-regression  Check programmable tables, interpolation and bank lifecycle' \
+		'make rsqrt-unit-regression  Check inverse square root, epsilon and seed protection' \
+		'make reciprocal-unit-regression  Check fixed-point Newton reciprocal and seed protection' \
+		'make polynomial-unit-regression  Check Horner arithmetic and coefficient lifecycle' \
+		'make loop-controller-regression  Check nested loops, pacing and runtime safe points' \
+		'make tile-power-controller-regression  Check idle policy, wake, retention and power sequencing' \
+		'make tile-network-interface-regression  Check packetization, reassembly, credits and epochs' \
+		'make local-switch-regression  Check static routes, sparse edges and multicast copies' \
+		'make scratchpad-controller-regression  Check bank mapping, arbitration and ordered clients' \
+		'make scratchpad-bank-regression  Check ordered subword memory, protection and recovery' \
+		'make stream-formatter-regression  Check canonical frames, lanes and elastic output' \
+		'make store-engine-regression  Check atomic writes, framing and ordered completions' \
+		'make load-engine-regression  Check tagged reads, ordered retirement and fatal drain' \
+		'make tile-shell-regression Check context, ownership, transfer and power integration' \
+		'make exp-unit-regression  Check fixed-point exponentials and elastic responses' \
+		'make exp-unit-images      Verify generated endpoint and log2(e) artifacts' \
+		'make event-barrier-regression  Check events, one-shot waits and reusable barriers' \
+		'make dot-product-regression  Check exact masked products, arithmetic and pipeline latency' \
+		'make dma-engine-regression  Check multi-channel DMA, protection, data, cancellation and events' \
 		'make width-converter-regression  Check packing, serialization, keep and packet boundaries' \
 		'make stream-fork-regression  Check multicast delivery, masks and partial completion' \
 		'make sram-wrapper-regression  Check masked 1RW memory, latency, credits and backends' \
@@ -1006,9 +1846,28 @@ help:
 		'                    ROUND_ROBIN_ARBITER_RANDOM_CYCLES, ROUND_ROBIN_ARBITER_SEED' \
 		'Skid buffer: SKID_BUFFER_REGRESSION_BUILD, SKID_BUFFER_RANDOM_CYCLES, SKID_BUFFER_SEED' \
 		'Stream join: STREAM_JOIN_REGRESSION_BUILD, STREAM_JOIN_RANDOM_CYCLES, STREAM_JOIN_SEED' \
+		'Multiplier: MULTIPLIER_REGRESSION_BUILD, MULTIPLIER_RANDOM_CYCLES, MULTIPLIER_SEED,' \
+		'            MULTIPLIER_HDL_ASSERTIONS' \
+		'MAC:       MAC_REGRESSION_BUILD, MAC_RANDOM_CYCLES, MAC_SEED, MAC_HDL_ASSERTIONS' \
+		'Accumulator: ACCUMULATOR_REGRESSION_BUILD, ACCUMULATOR_RANDOM_CYCLES,' \
+		'             ACCUMULATOR_SEED, ACCUMULATOR_HDL_ASSERTIONS' \
 		'Width converter: WIDTH_CONVERTER_REGRESSION_BUILD, WIDTH_CONVERTER_RANDOM_CYCLES,' \
 		'                 WIDTH_CONVERTER_SEED' \
 		'Stream fork: STREAM_FORK_REGRESSION_BUILD, STREAM_FORK_RANDOM_CYCLES, STREAM_FORK_SEED' \
 		'SRAM wrapper: SRAM_WRAPPER_REGRESSION_BUILD, SRAM_WRAPPER_RANDOM_CYCLES,' \
 		'              SRAM_WRAPPER_SEED; SRAM_BACKEND_SOURCE selects the backend file'
 endif
+
+TILE_SHELL_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/tile_shell/regression
+TILE_SHELL_RANDOM_CYCLES ?= 2000
+TILE_SHELL_SEED ?= 20261025
+_TILE_SHELL_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+_TILE_SHELL_MAKE := $(MAKE)
+.PHONY: tile-shell-regression
+tile-shell-regression:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/val/mosaic_blocks/tile_shell/run_tile_shell_regression.py" \
+		--sim "$(SIM)" --build-dir "$(TILE_SHELL_REGRESSION_BUILD)" \
+		--seed "$(TILE_SHELL_SEED)" --random-cycles "$(TILE_SHELL_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" \
+		--make "$(_TILE_SHELL_MAKE)" \
+		$(if $(strip $(_TILE_SHELL_SIM_BIN_DIR)),--sim-bin-dir "$(_TILE_SHELL_SIM_BIN_DIR)")

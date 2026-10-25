@@ -171,6 +171,40 @@ checks and continuous waveform assertions enforce accepted-only writes, clamping
 producer stability and stalls. Coverage spans both orders, every representative slice
 and keep population, terminal trimming, empty packets and reset/flush state crosses.
 
+The accumulator suite under `building_blocks/accumulator` uses arbitrary-precision
+integer range tests and independent per-lane validity/type histories. It checks
+persistent outputs separately from the enabled-cycle response, rejects vector
+updates atomically, and compares real pre-NBA and post-edge observations. Optional
+raw-storage and operand observations check write enables and arithmetic isolation.
+A verification-only HDL checker independently asserts port-based transitions.
+Coverage includes small-width exhaustive transitions, numerical limits, all masks,
+feature rejections, unknown controls, type changes and clock-enable stalls.
+
+The AGU suite under `building_blocks/agu` uses unbounded integer descriptor
+equations to check linear and signed-stride 1D/2D addresses independently of the
+RTL recurrence. Real edge-time observations track exactly-once acceptance,
+row boundaries, metadata, completion, classified errors and recovery. Optional
+storage and waveform checks enforce accepted-only advancement and adder isolation;
+a port-only HDL checker adds handshake-history assertions. Coverage includes
+exhaustive small descriptors, signed limits, every supported element size,
+misalignment, unknown required/ignored fields, stalls and both reset styles.
+
+The dot-product suite under `building_blocks/dot_product` uses an independent
+integer-product and range oracle, enabled-edge response history, every term mask,
+small exhaustive vectors and deterministic workload shapes. It checks exact
+reduction, final accumulation/saturation, status alignment, clock stalls, reset
+removal, four-state controls, operand isolation and arithmetic-data write enables.
+A separate wide-sum HDL checker supplements the actual-edge PyUVM scoreboard.
+See its README for the 102-profile matrix and qualification limits.
+
+The DMA suite under `building_blocks/dma_engine` uses independent load/store peers,
+affine descriptor expansion and accepted/committed byte ledgers. It checks exact
+copy-data correspondence, per-channel command order, protection, event starts,
+atomic completion/event enqueue, backpressure, cancellation, stale epochs and
+coordinated flush. Native HDL assertions and private counter observations supplement
+the real-port scoreboard; coverage and conservation checks prevent silent loss.
+See its README for the cumulative store-commit and load-data-epoch contracts.
+
 The Makefile supplies the selected suite, its package parent and `src/val/lib`
 through `PYTHONPATH`. Imports use qualified suite names, such as
 `write_gate.agent`, to avoid collisions between generic filenames. Standalone
@@ -192,3 +226,34 @@ the shared library, the Makefile and any local HDL fixture. Moving checks betwee
 files does not remove them from the evidence. Profile seeds, coverage goals,
 expected failure diagnostics and external `NOT_RUN` checks retain their existing
 suite-specific definitions.
+
+The event/barrier suite under `building_blocks/event_barrier` checks an atomic
+integer event ledger, ANY/ALL waits and cancellation, round-robin mutation
+scheduling, participant masks, generation wrap and ordered completion/release
+records. It exercises saturation, both queues under backpressure, context policy,
+flush/reset, X/Z fields and protected-state fault injection. Its 44-profile
+`event-barrier-regression` includes minimum/odd dimensions, all feature combinations
+and both reset styles; the suite README states the remaining release checks.
+
+The static local-switch suite under `building_blocks/local_switch` uses independent
+per-output copy queues with captured route masks and item/copy accounting.
+`make local-switch-regression` covers 120 geometry/connectivity/multicast/reset
+profiles and 36 parameter guards. It checks sparse edges, atomic contexts, partial
+multicast progress, maximum rate, replacement, all partial flush masks, resets,
+unknown controls and qualified payload storage. Its README defines integration
+contracts and the remaining release checks.
+
+The ordered load-engine suite under `building_blocks/load_engine` combines an
+independent affine descriptor model, ordered transaction ledger and separate memory
+peer. `make load-engine-regression` covers 80 address/data/capacity/reset profiles
+and 48 parameter guards. It checks tagged out-of-order responses, ordered stream
+metadata/data, memory errors, fatal drain, unknown controls and qualified storage
+writes. Its README documents optional counters and remaining release checks.
+
+The exponential suite under `building_blocks/exp_unit` uses an independent integer
+reference with directly computed MPFR endpoints and constants. It checks exact
+numerics, elastic ordering/latency, inactive arithmetic storage, parity/SECDED,
+drain/flush/reset and unknown controls. The 55-profile `exp-unit-regression`
+verifies generated assets and covers exhaustive reduced-width inputs, optional
+features and representative formats. Its README links scalar accuracy evidence
+and identifies remaining formal, physical and application qualification.

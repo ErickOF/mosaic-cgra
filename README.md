@@ -17,6 +17,410 @@ working license and its `vcs` executable on `PATH`; alternatively, pass
 increment/decrement, disabled hold, clear/load priority, saturating boundaries,
 and event pulses. A failing test makes the command fail.
 
+Run the predicate-register and Boolean-logic specification regression:
+
+```sh
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=predicate_unit
+make predicate-unit-regression SIM=icarus
+```
+
+The predicate bank supports per-lane validity, atomic masked writeback, invalidation,
+pre-edge source reads and one-cycle dependent commands. It reuses common DFFs,
+decoders, operand isolation and write gates. See the
+[predicate unit validation guide](src/val/building_blocks/predicate_unit/README.md)
+for parameter profiles, PyUVM coverage and static/formal checks.
+
+Run the masked integer vector reduction specification regression:
+
+```sh
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=vector_reduction
+make vector-reduction-regression SIM=icarus
+```
+
+The unit provides exact widened SUM, MIN/MAX and bitwise AND/OR with explicit
+empty-mask identities, active count, signed extension and enabled-edge timing.
+See the [vector reduction validation guide](src/val/building_blocks/vector_reduction/README.md)
+for reusable components, profiles, coverage and static/formal checks.
+
+Run the integer vector lane specification regression:
+
+```sh
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=vector_lane
+make vector-lane-regression SIM=icarus
+```
+
+The lane composes the scalar ALU, multiplier and MAC with lane masking,
+predication, result-format metadata and fixed enabled-edge path alignment.
+See the [vector lane validation guide](src/val/building_blocks/vector_lane/README.md)
+for the parameter matrix, reusable components and static/formal targets.
+
+Run the combinational scalar integer ALU specification regression:
+
+```sh
+make scalar-alu-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=scalar_alu
+```
+
+The ALU provides modular/saturating arithmetic, Boolean logic, full-width shifts,
+comparisons, select, pass-through and optional min/max with explicit status flags.
+See the [scalar ALU validation guide](src/val/building_blocks/scalar_alu/README.md)
+for the opcode contract, feature profiles, formal/static targets and coverage.
+
+Run the global NoC router specification and mesh regressions:
+
+```sh
+make noc-router-regression SIM=icarus
+make noc-router-mesh-regression SIM=icarus
+make noc-router-topology
+```
+
+The five-port router provides deterministic XY/YX routing, packet reservations,
+virtual channels, valid-ready or credit links, bounded QoS and optional parity/ECC.
+The tests reuse the shared PyUVM infrastructure and exercise real 2x2/4x4 meshes.
+See the [router validation guide](src/val/building_blocks/noc_router/README.md)
+for configuration, latency, coverage and integration requirements.
+
+Run the scalar integer multiplier specification regression:
+
+```sh
+make multiplier-regression
+make multiplier-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=multiplier
+```
+
+The multiplier returns the exact full-width product with independent operand
+signedness, including both mixed modes. It reuses common DFFs and operand isolation
+for combinational or globally stalled registered profiles. The 84-profile PyUVM
+matrix checks boundaries, exhaustive small products, metadata, status, reset,
+and enabled-edge timing. See the
+[multiplier validation guide](src/val/building_blocks/multiplier/README.md)
+for parameters, architecture, coverage, and evidence limits.
+
+Run the scalar integer MAC specification regression:
+
+```sh
+make mac-regression
+make mac-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=mac
+```
+
+`src/rtl/building_blocks/mac.sv` implements the scalar integer multiply-add
+specification by reusing `dot_product` with one term and permanent accumulation.
+It preserves the exact full-width product, supports signed/unsigned modular or
+saturating results, and provides zero-cycle or globally stalled registered timing.
+Run `make pyuvm SIM=icarus COCOTB_TOPLEVEL=mac` for the default profile or
+`make mac-regression SIM=icarus` for the 80-profile PyUVM matrix with parameter
+and X/Z assertion guards. VCS uses the same targets with `SIM=vcs`.
+See [the MAC validation guide](src/val/building_blocks/mac/README.md) for parameter
+settings, architecture, reuse, coverage, and evidence limits.
+
+Run the programmable LUT-unit specification regression:
+
+```sh
+make lut-unit-regression
+make lut-unit-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=lut_unit
+```
+
+The LUT unit provides immutable programmable banks, signed/unsigned interpolation,
+rounding, protection, fixed processing latency and independent response queues.
+It reuses common DFFs, FIFOs, parity, ECC and protected storage/queue helpers.
+See the [LUT-unit verification details](src/val/building_blocks/lut_unit/README.md)
+for the 51-profile PyUVM campaign, synthetic image generator and lifecycle rules.
+
+Run the polynomial-unit specification regression:
+
+```sh
+make polynomial-unit-regression SIM=icarus
+make polynomial-unit-regression
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=polynomial_unit
+```
+
+The polynomial unit supports iterative and elastic unrolled Horner evaluation,
+signed fixed-point rounding and saturation, protected coefficient banks and atomic
+programming. It reuses the multiplier, LUT bank storage, common decoders/muxes,
+protected state and FIFO queues. The Python-only regression covers 55 profiles,
+85 parameter guards and architecture equivalence; synthesis is deferred to Design
+Compiler. See the
+[polynomial-unit verification details](src/val/building_blocks/polynomial_unit/README.md)
+for programming, numerical semantics, protection, image recipes and evidence limits.
+
+Run the reciprocal-unit specification regression:
+
+```sh
+make reciprocal-unit-regression SIM=icarus
+make reciprocal-unit-regression
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=reciprocal_unit
+```
+
+The reciprocal unit provides iterative and elastic unrolled Newton-Raphson
+refinement, exact fixed-point rounding, signed/unsigned saturation and protected,
+reproducible seed ROMs. It reuses the priority encoder, multiplier, scalar ALU,
+rounding helper, protected state and common FIFO queues. The Python-only campaign
+covers 40 profiles, reduced-width exhaustive inputs, seed faults, timing and
+architecture equivalence, and publishes numerical error characterization.
+Synthesis remains deferred to Design Compiler. See the
+[reciprocal-unit verification details](src/val/building_blocks/reciprocal_unit/README.md).
+
+Run the inverse-square-root specification regression:
+
+```sh
+make rsqrt-unit-regression SIM=icarus
+make rsqrt-unit-regression
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=rsqrt_unit
+```
+
+The rsqrt unit supports optional widened epsilon addition, exponent-parity
+normalization, iterative or unrolled Newton refinement, independent output range,
+rounding and protected reproducible seed images. It reuses the reciprocal scale
+helper, shared protected ROM, multiplier, scalar ALU, common rounding, state and
+FIFO queues. The Python-only campaign covers 40 profiles, reduced-width exhaustive
+inputs, fault containment and numerical error characterization. Design Compiler
+synthesis is deferred. See the
+[rsqrt verification details](src/val/building_blocks/rsqrt_unit/README.md).
+
+Run the nested-loop-controller specification regression:
+
+```sh
+make loop-controller-regression
+make loop-controller-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=loop_controller
+```
+
+The loop controller generates counted/bounded Cartesian iteration tokens with
+signed induction, pacing, runtime safe points and held completion records. It
+reuses common DFF/parity storage, a decoder for runtime controls, and a priority
+encoder and write gate for per-level advancement. The Python-only suite checks
+every token against an independent Cartesian-product model and verifies carry
+selection and level-update enables. Configure `LOOP_CONTROLLER_JOBS` for parallel
+profiles. Synthesis is deferred to Design Compiler. See the
+[loop-controller verification details](src/val/building_blocks/loop_controller/README.md)
+for the 53-profile PyUVM campaign, local encodings and integration assumptions.
+
+Run the static local-switch specification regression:
+
+```sh
+make local-switch-regression
+make local-switch-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=local_switch
+```
+
+The local switch composes register slices, shared source decoders and sparse
+physical muxes with atomic context routing and independent multicast-copy
+acknowledgements. Its 120-profile Python-only PyUVM regression checks every physical
+edge, fanout, backpressure, replacement,
+flush/reset and error handling. See the [local-switch verification details](src/val/building_blocks/local_switch/README.md)
+for connectivity encoding, ownership and integration assumptions. Synthesis is
+deferred to Design Compiler.
+
+Run the tile-power-controller specification regression:
+
+```sh
+make tile-power-controller-regression
+make tile-power-controller-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=tile_power_controller
+```
+
+The always-on controller implements activity and idle policy, registered clock
+requests, wake capture, drain, retention/OFF entry and wake, power qualification,
+reset release, test policy and fatal containment. It reuses common counters, DFFs
+and reset synchronizers. Its 80-profile Python-only PyUVM regression checks every
+physical request and internal timer. See the
+[tile-power-controller verification details](src/val/building_blocks/tile_power_controller/README.md)
+for local encodings, command legality and tile wrapper integration. Synthesis is
+deferred to Design Compiler.
+
+Run the tile-network-interface specification regression:
+
+```sh
+make tile-network-interface-regression
+make tile-network-interface-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=tile_network_interface
+```
+
+The interface bridges tile beats and fixed-length NoC packets with per-channel
+queues, packet arbitration, per-VC reassembly, ordered ejection, valid-ready or
+credit flow control, parity, and coordinated drain/flush. It reuses common FIFO,
+DFF, counter, parity and round-robin modules through the existing queue helpers.
+Its 61-profile Python-only PyUVM campaign checks transport contents, ownership,
+recovery, events and credit accounting. See the
+[tile-network-interface verification details](src/val/building_blocks/tile_network_interface/README.md)
+for configuration, local encodings and latency. Synthesis is deferred to Design Compiler.
+
+Run the ordered load-engine specification regression:
+
+```sh
+make load-engine-regression
+make load-engine-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=load_engine
+```
+
+The load engine reuses the AGU and DMA affine bounds checker to issue tagged reads,
+accept out-of-order responses and retire stream beats in request order. Common
+write gates qualify descriptor capture and suppress malformed response writes. Its PyUVM
+suite checks byte masks, metadata, backpressure, tag lifetime, fatal drain and reset.
+See the [load-engine verification details](src/val/building_blocks/load_engine/README.md)
+for the 80-profile matrix, optional counters and integration assumptions.
+
+Run the ordered store-engine specification regression:
+
+```sh
+make store-engine-regression
+make store-engine-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=store_engine
+```
+
+The store engine reuses the AGU, DMA bounds checker and common storage, counters,
+decoders, isolation and write gates. It pairs stream beats with tagged writes,
+validates framing and byte strobes, and retires out-of-order responses in request
+order. See the [store-engine verification details](src/val/building_blocks/store_engine/README.md)
+for the 80-profile Python campaign, optional counters and fatal-drain contracts.
+Synthesis is deferred to Design Compiler.
+
+Run the canonical stream-formatter specification regression:
+
+```sh
+make stream-formatter-regression
+make stream-formatter-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=stream_formatter
+```
+
+The formatter reuses the register slice, lane mask and common state, counters,
+write gating and isolation. It generates frame/row metadata, validates incoming
+claims and clamps invalid bytes in combinational or buffered profiles. See the
+[stream-formatter verification details](src/val/building_blocks/stream_formatter/README.md)
+for the 40-profile Python campaign, local encodings and flush/reset contracts.
+Synthesis is deferred to Design Compiler.
+
+Run the scratchpad-controller specification regression:
+
+```sh
+make scratchpad-controller-regression
+make scratchpad-controller-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=scratchpad_controller
+```
+
+The controller reuses the round-robin arbiter and common state/counters for
+bank mapping, permissions, conflict arbitration and ordered per-client completions.
+See the [scratchpad-controller verification details](src/val/building_blocks/scratchpad_controller/README.md)
+for the 45 standalone and 12 real-bank integration profiles, local encodings,
+optional counters and coordinated recovery. Validation uses Python/PyUVM tests;
+synthesis is deferred to Design Compiler.
+
+Run the scratchpad-bank specification regression:
+
+```sh
+make scratchpad-bank-regression
+make scratchpad-bank-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=scratchpad_bank
+```
+
+The bank reuses the SRAM wrapper, parity, ECC and common control/storage blocks
+for ordered byte-addressed reads and masked writes. Protected partial writes use
+atomic RMW; SECDED correction supports inline scrub. See the
+[scratchpad-bank verification details](src/val/building_blocks/scratchpad_bank/README.md)
+for the 184-profile Python campaign, backend layout and recovery contracts.
+Synthesis is deferred to Design Compiler.
+
+Run the fixed-point exponential specification regression:
+
+```sh
+make exp-unit-images
+make exp-unit-regression
+make exp-unit-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=exp_unit
+```
+
+The exponential unit implements base-e/base-2 range reduction, generated endpoint
+ROMs, optional interpolation, nearest-even/truncating rounding and saturation in
+an elastic pipeline. It reuses the multiplier, scalar ALU and rounding helper,
+plus common storage, counters, isolation, parity and ECC. The Python-only campaign
+covers 57 profiles, 88 parameter guards and four numerical model tests.
+Configure `EXP_UNIT_SEED`, `EXP_UNIT_RANDOM_CYCLES`, `EXP_UNIT_REGRESSION_BUILD`
+and `EXP_UNIT_JOBS`;
+see the [exp-unit verification details](src/val/building_blocks/exp_unit/README.md)
+for generated assets, timing, protection and scalar accuracy limits. Synthesis is
+deferred to Design Compiler.
+
+Run the event/barrier specification regression:
+
+```sh
+make event-barrier-regression
+make event-barrier-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=event_barrier
+```
+
+The event/barrier unit reuses common counters, decoding, arbitration, FIFOs, DFFs
+and parity for atomic event occurrences, one-shot waits and reusable barriers.
+Configure `EVENT_BARRIER_SEED`, `EVENT_BARRIER_RANDOM_CYCLES` and
+`EVENT_BARRIER_REGRESSION_BUILD`; see the
+[event/barrier verification details](src/val/building_blocks/event_barrier/README.md)
+for scheduling, local encodings, protection, coverage and qualification limits.
+
+Run the integer dot-product specification regression:
+
+```sh
+make dot-product-regression
+make dot-product-regression SIM=icarus
+```
+
+The unit computes exact masked signed/unsigned products through a balanced tree,
+with optional external accumulation, final saturation and enabled-cycle latency.
+It reuses `dff` and `operand_isolation`. The structured PyUVM suite covers 102
+geometry/feature/latency/reset profiles; see the
+[dot-product verification details](src/val/building_blocks/dot_product/README.md)
+for pipeline structure, parameter settings, coverage and evidence limits.
+
+Run the DMA engine's specification-based regression:
+
+```sh
+make dma-engine-regression
+make dma-engine-regression SIM=icarus
+```
+
+The DMA reuses existing queues, arbiters, counters, DFFs, decoders, write gates,
+parity and operand isolation for multi-channel transfers, protection, event starts, cancellation and
+coordinated flush. Its structured PyUVM suite checks exact data/progress and
+completion accounting across 25 profiles using Python checks only. It also checks
+every command ID-directory entry's capture/retention and fatal cancel timer holds.
+Synthesis is deferred to Design Compiler. Store backends supply cumulative
+committed bytes for accurate cancellation results. Configure `DMA_ENGINE_SEED`,
+`DMA_ENGINE_RANDOM_CYCLES`, `DMA_ENGINE_JOBS` and `DMA_ENGINE_REGRESSION_BUILD`; see the
+[DMA verification details](src/val/building_blocks/dma_engine/README.md) for
+backend interface extensions, coverage, and qualification limits.
+
+Run the regular address-generation unit's specification-based regression:
+
+```sh
+make agu-regression
+make agu-regression SIM=icarus
+make agu-lint
+```
+
+The AGU reuses common counter, DFF, operand-isolation and write-gate RTL for linear and
+signed-stride 1D/2D byte addressing. Its structured PyUVM suite checks descriptor
+legality, checked address arithmetic, row-base strides, metadata, completion,
+sticky errors and backpressure in 32 profiles, with exhaustive small descriptors.
+Configure `AGU_SEED`, `AGU_RANDOM_CYCLES` and `AGU_REGRESSION_BUILD`; see the
+[AGU verification details](src/val/building_blocks/agu/README.md) for encodings,
+assertion controls, coverage and lint reports. Synthesis is deferred to Design Compiler.
+
+Run the integer accumulator bank's specification-based regression:
+
+```sh
+make accumulator-regression
+make accumulator-regression SIM=icarus
+```
+
+The first `building_blocks` module reuses common DFF, lane-mask and operand-isolation
+RTL for persistent typed lanes, atomic masked CLEAR/LOAD/ADD/SUB, modular or
+saturating arithmetic, response status and clock-enable holds. Its structured
+PyUVM suite and optional HDL transition checker validate 120 width/lane/feature/reset
+profiles, including exhaustive scalar transitions at widths 1–4. Configure
+`ACCUMULATOR_SEED`, `ACCUMULATOR_RANDOM_CYCLES` and `ACCUMULATOR_REGRESSION_BUILD`;
+see the [accumulator verification details](src/val/building_blocks/accumulator/README.md)
+for parameters, assertion controls, evidence and integration limits.
+
 Run the streaming width converter's specification-based regression:
 
 ```sh
@@ -974,3 +1378,19 @@ Power checks also exercise the real Make/Tcl flow with stubbed licensed
 commands, unit conversions, SAIF duration, coverage, and simulation failures.
 Local checks do not validate the technology models or native licensed power
 analysis; run the command above on the server to obtain design power values.
+
+Run the common tile-shell integration regression:
+
+```sh
+make tile-shell-regression
+make tile-shell-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=tile_shell
+```
+
+The shell reuses context memory/sequencing, boundary and asynchronous FIFOs,
+protected storage, counters and the tile power controller. Its Python-only suite
+checks configuration, ownership, metadata, runtime control, completion ordering,
+reset epochs and power handshakes across 27 parameter profiles. See the
+[tile-shell validation details](src/val/mosaic_blocks/tile_shell/README.md) for the
+repository-local boundary, body contract, debug map, protection and evidence.
+Synthesis is deferred to Design Compiler.
