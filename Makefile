@@ -220,6 +220,14 @@ _RTL_SOURCES_scratchpad_bank = $(PROJECT_ROOT)/src/rtl/building_blocks/scratchpa
     $(PROJECT_ROOT)/src/rtl/basic/sram_wrapper.sv \
     $(PROJECT_ROOT)/src/rtl/building_blocks/scratchpad_bank_counters.sv \
     $(PROJECT_ROOT)/src/rtl/building_blocks/scratchpad_bank.sv
+_RTL_SOURCES_banked_scratchpad = $(PROJECT_ROOT)/src/rtl/mosaic_blocks/banked_scratchpad_pkg.sv \
+    $(_RTL_SOURCES_scratchpad_controller) \
+    $(filter-out $(_RTL_SOURCES_scratchpad_controller),$(_RTL_SOURCES_scratchpad_bank)) \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_codec.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/banked_scratchpad_state.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/banked_scratchpad_power.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/banked_scratchpad_counters.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/banked_scratchpad.sv
 _RTL_SOURCES_stream_formatter := $(PROJECT_ROOT)/src/rtl/building_blocks/stream_formatter_pkg.sv \
     $(PROJECT_ROOT)/src/rtl/common/dff.sv \
     $(PROJECT_ROOT)/src/rtl/common/counter.sv \
@@ -1840,6 +1848,7 @@ help:
 		'make stream-formatter-regression  Check canonical frames, lanes and elastic output' \
 		'make store-engine-regression  Check atomic writes, framing and ordered completions' \
 		'make load-engine-regression  Check tagged reads, ordered retirement and fatal drain' \
+		'make banked-scratchpad-regression Check region-managed scratchpad with real banks' \
 		'make vct-regression     Check vector tile execution and shell integration' \
 		'make bct-regression     Check scalar tile execution and shell integration' \
 		'make tile-shell-regression Check context, ownership, transfer and power integration' \
@@ -1969,3 +1978,15 @@ vct-regression:
 		--seed "$(VCT_SEED)" --random-cycles "$(VCT_RANDOM_CYCLES)" \
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(MAKE)" \
 		$(if $(strip $(_VCT_SIM_BIN_DIR)),--sim-bin-dir "$(_VCT_SIM_BIN_DIR)")
+
+BANKED_SCRATCHPAD_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/banked_scratchpad/regression
+BANKED_SCRATCHPAD_RANDOM_CYCLES ?= 2000
+BANKED_SCRATCHPAD_SEED ?= 20261026
+_BANKED_SCRATCHPAD_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+.PHONY: banked-scratchpad-regression
+banked-scratchpad-regression:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/val/mosaic_blocks/banked_scratchpad/run_banked_scratchpad_regression.py" \
+		--sim "$(SIM)" --build-dir "$(BANKED_SCRATCHPAD_REGRESSION_BUILD)" \
+		--seed "$(BANKED_SCRATCHPAD_SEED)" --random-cycles "$(BANKED_SCRATCHPAD_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(MAKE)" \
+		$(if $(strip $(_BANKED_SCRATCHPAD_SIM_BIN_DIR)),--sim-bin-dir "$(_BANKED_SCRATCHPAD_SIM_BIN_DIR)")
