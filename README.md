@@ -1427,3 +1427,18 @@ writes, state lifetime, atomic output, runtime, protection and power behavior.
 See the [VCT validation and context ABI](src/val/mosaic_blocks/vct/README.md) for
 configuration, conservative timing, debug counters and reproducible evidence.
 Design Compiler synthesis is deferred.
+
+Run the region-managed banked-scratchpad specification regression:
+
+```sh
+make banked-scratchpad-regression
+make banked-scratchpad-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=banked_scratchpad
+```
+
+The DUT reuses the released scratchpad controller, real SRAM-backed banks and
+protection codecs. PyUVM checks region ownership, generation fencing, atomic buffer
+swaps, ordered completions, masked accesses, faults, drain/flush and power hooks.
+See the [banked-scratchpad ABI and validation details](src/val/mosaic_blocks/banked_scratchpad/README.md)
+for parameter profiles, descriptor packing, counters and evidence. Validation is
+Python-only; Design Compiler synthesis remains deferred.
