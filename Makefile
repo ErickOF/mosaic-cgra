@@ -114,6 +114,26 @@ _TILE_SHELL_SOURCES := $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_pkg.sv \
     $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_queue.sv \
     $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell.sv
 _RTL_SOURCES_tile_shell := $(_TILE_SHELL_SOURCES)
+_BCT_SOURCES := $(_TILE_SHELL_SOURCES) $(PROJECT_ROOT)/src/rtl/mosaic_blocks/bct_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/predicate_unit_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/accumulator_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/common/write_gate.sv \
+    $(PROJECT_ROOT)/src/rtl/common/lane_mask.sv \
+    $(PROJECT_ROOT)/src/rtl/common/mux.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/register_file.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/bypass_network.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/rdu.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/stream_join.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/multiplier.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/dot_product.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/mac.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/accumulator.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/predicate_unit.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/bct_body.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/bct.sv
+_RTL_SOURCES_bct := $(_BCT_SOURCES)
 _TILE_NETWORK_INTERFACE_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/tile_network_interface_pkg.sv \
     $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv \
     $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv \
@@ -1768,6 +1788,7 @@ help:
 		'make stream-formatter-regression  Check canonical frames, lanes and elastic output' \
 		'make store-engine-regression  Check atomic writes, framing and ordered completions' \
 		'make load-engine-regression  Check tagged reads, ordered retirement and fatal drain' \
+		'make bct-regression     Check scalar tile execution and shell integration' \
 		'make tile-shell-regression Check context, ownership, transfer and power integration' \
 		'make exp-unit-regression  Check fixed-point exponentials and elastic responses' \
 		'make exp-unit-images      Verify generated endpoint and log2(e) artifacts' \
@@ -1871,3 +1892,15 @@ tile-shell-regression:
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" \
 		--make "$(_TILE_SHELL_MAKE)" \
 		$(if $(strip $(_TILE_SHELL_SIM_BIN_DIR)),--sim-bin-dir "$(_TILE_SHELL_SIM_BIN_DIR)")
+
+BCT_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/bct/regression
+BCT_RANDOM_CYCLES ?= 2000
+BCT_SEED ?= 20261025
+_BCT_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+.PHONY: bct-regression
+bct-regression:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/val/mosaic_blocks/bct/run_bct_regression.py" \
+		--sim "$(SIM)" --build-dir "$(BCT_REGRESSION_BUILD)" \
+		--seed "$(BCT_SEED)" --random-cycles "$(BCT_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(MAKE)" \
+		$(if $(strip $(_BCT_SIM_BIN_DIR)),--sim-bin-dir "$(_BCT_SIM_BIN_DIR)")
