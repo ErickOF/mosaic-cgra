@@ -1394,3 +1394,19 @@ reset epochs and power handshakes across 27 parameter profiles. See the
 [tile-shell validation details](src/val/mosaic_blocks/tile_shell/README.md) for the
 repository-local boundary, body contract, debug map, protection and evidence.
 Synthesis is deferred to Design Compiler.
+
+Run the scalar BCT integration regression:
+
+```sh
+make bct-regression
+make bct-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=bct
+```
+
+The BCT composes the common tile shell with released scalar arithmetic, register
+storage, predication, bypass, RDU/elastic synchronization and protected result
+queues. Its Python-only campaign checks BCT-A/M/MAC mappings, atomic destinations,
+local-state lifetime, temporal contexts, protection, runtime and power behavior.
+See the [BCT validation and context ABI](src/val/mosaic_blocks/bct/README.md) for
+configuration, timing, debug counters and evidence. Design Compiler synthesis is
+deferred.
