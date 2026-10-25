@@ -1410,3 +1410,20 @@ local-state lifetime, temporal contexts, protection, runtime and power behavior.
 See the [BCT validation and context ABI](src/val/mosaic_blocks/bct/README.md) for
 configuration, timing, debug counters and evidence. Design Compiler synthesis is
 deferred.
+
+Run the vector VCT integration regression:
+
+```sh
+make vct-regression
+make vct-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=vct
+```
+
+The VCT composes the common tile shell with vector lanes, slice-banked VRF,
+predicates and masks, vector/scalar accumulators, reduction, optional dot product,
+bypass, RDU or elastic synchronization, explicit packing and protected result
+storage. The Python-only campaign checks numerical results, lane masks, partial
+writes, state lifetime, atomic output, runtime, protection and power behavior.
+See the [VCT validation and context ABI](src/val/mosaic_blocks/vct/README.md) for
+configuration, conservative timing, debug counters and reproducible evidence.
+Design Compiler synthesis is deferred.
