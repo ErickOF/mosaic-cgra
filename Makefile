@@ -114,6 +114,34 @@ _TILE_SHELL_SOURCES := $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_pkg.sv \
     $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_queue.sv \
     $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell.sv
 _RTL_SOURCES_tile_shell := $(_TILE_SHELL_SOURCES)
+_RTL_SOURCES_static_mesh := $(PROJECT_ROOT)/src/rtl/building_blocks/local_switch_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/static_mesh_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/common/dff.sv \
+    $(PROJECT_ROOT)/src/rtl/common/mux.sv \
+    $(PROJECT_ROOT)/src/rtl/common/decoder.sv \
+    $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv \
+    $(PROJECT_ROOT)/src/rtl/common/write_gate.sv \
+    $(PROJECT_ROOT)/src/rtl/common/counter.sv \
+    $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv \
+    $(PROJECT_ROOT)/src/rtl/common/lane_mask.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/register_slice.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/skid_buffer.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/context_memory.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/fifo.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/ecc.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/parity.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/banked_scratchpad_counters.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/local_switch.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_codec.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/banked_scratchpad_state.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/static_mesh_node.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/static_mesh_link.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/static_mesh_queue.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/static_mesh_control.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/static_mesh.sv
+
 _RTL_SOURCES_mst := $(PROJECT_ROOT)/src/rtl/basic/context_sequencer_pkg.sv \
     $(PROJECT_ROOT)/src/rtl/building_blocks/agu_pkg.sv \
     $(PROJECT_ROOT)/src/rtl/building_blocks/dma_engine_pkg.sv \
@@ -1899,6 +1927,7 @@ help:
 		'make stream-formatter-regression  Check canonical frames, lanes and elastic output' \
 		'make store-engine-regression  Check atomic writes, framing and ordered completions' \
 		'make load-engine-regression  Check tagged reads, ordered retirement and fatal drain' \
+		'make static-mesh-regression Check static mesh RTL with PyUVM' \
 		'make mst-regression        Check memory/stream tile RTL with PyUVM' \
 		'make banked-scratchpad-regression Check region-managed scratchpad with real banks' \
 		'make vct-regression     Check vector tile execution and shell integration' \
@@ -2054,3 +2083,15 @@ mst-regression:
 		--seed "$(MST_SEED)" --random-cycles "$(MST_RANDOM_CYCLES)" \
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(MAKE)" \
 		$(if $(strip $(_MST_SIM_BIN_DIR)),--sim-bin-dir "$(_MST_SIM_BIN_DIR)")
+
+STATIC_MESH_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/static_mesh/regression
+STATIC_MESH_SEED ?= 20261025
+STATIC_MESH_RANDOM_CYCLES ?= 1000
+_STATIC_MESH_SIM_BIN_DIR := $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+.PHONY: static-mesh-regression
+static-mesh-regression:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/val/mosaic_blocks/static_mesh/run_static_mesh_regression.py" \
+		--sim "$(SIM)" --build-dir "$(STATIC_MESH_REGRESSION_BUILD)" \
+		--seed "$(STATIC_MESH_SEED)" --random-cycles "$(STATIC_MESH_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(MAKE)" \
+		$(if $(strip $(_STATIC_MESH_SIM_BIN_DIR)),--sim-bin-dir "$(_STATIC_MESH_SIM_BIN_DIR)")
