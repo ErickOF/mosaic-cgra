@@ -22,7 +22,8 @@ module static_mesh_link #(
     output wire o_idle,
     output wire o_transfer,
     output wire o_parity_bad,
-    output wire o_bad
+    output wire o_bad,
+    output wire [WIDTH-1:0] o_observed_data
 );
     wire raw_ready;
     wire raw_valid;
@@ -36,6 +37,8 @@ module static_mesh_link #(
         (admit && i_valid &&!deliver));
     assign o_ready = admit && raw_ready;
     assign o_valid = admit && raw_valid &&!parity_bad;
+    // Observation does not acknowledge or release a quarantined beat.
+    assign o_observed_data = received_packet[0+:WIDTH];
     assign o_data = o_valid ? received_packet[0+:WIDTH] : '0;
     assign o_transfer = i_valid && o_ready;
     assign o_idle = raw_ready === 1'b1;
