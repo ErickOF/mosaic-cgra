@@ -1442,3 +1442,10 @@ swaps, ordered completions, masked accesses, faults, drain/flush and power hooks
 See the [banked-scratchpad ABI and validation details](src/val/mosaic_blocks/banked_scratchpad/README.md)
 for parameter profiles, descriptor packing, counters and evidence. Validation is
 Python-only; Design Compiler synthesis remains deferred.
+
+
+The [MST PyUVM suite](src/val/mosaic_blocks/mst/README.md) validates the memory
+and stream tile using the existing shell, load/store engines, AGU, conversion,
+and protected buffering blocks. Run `make mst-regression SIM=icarus` locally or
+select `SIM=vcs` on the licensed server. This is a Python-only campaign;
+Design Compiler synthesis is deferred.
