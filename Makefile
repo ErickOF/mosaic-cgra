@@ -114,6 +114,57 @@ _TILE_SHELL_SOURCES := $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_pkg.sv \
     $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_queue.sv \
     $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell.sv
 _RTL_SOURCES_tile_shell := $(_TILE_SHELL_SOURCES)
+_RTL_SOURCES_mst := $(PROJECT_ROOT)/src/rtl/basic/context_sequencer_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/agu_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/dma_engine_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/load_engine_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/store_engine_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/stream_formatter_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/tile_power_controller_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/mst_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/async_fifo.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/context_memory.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/context_sequencer.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/data_aligner.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/ecc.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/fifo.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/packer.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/parity.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/performance_counters.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/register_slice.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/round_robin_arbiter.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/width_converter.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/agu.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/dma_engine_bounds.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/dma_engine_command_queue.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/load_engine.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/store_engine.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/stream_formatter.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/tile_power_controller.sv \
+    $(PROJECT_ROOT)/src/rtl/common/counter.sv \
+    $(PROJECT_ROOT)/src/rtl/common/decoder.sv \
+    $(PROJECT_ROOT)/src/rtl/common/dff.sv \
+    $(PROJECT_ROOT)/src/rtl/common/lane_mask.sv \
+    $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv \
+    $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv \
+    $(PROJECT_ROOT)/src/rtl/common/reset_synchronizer.sv \
+    $(PROJECT_ROOT)/src/rtl/common/write_gate.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/banked_scratchpad_counters.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/banked_scratchpad_state.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/mst.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/mst_body.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/mst_channel.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/mst_command_queue.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/mst_element_converter.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/mst_fragment_adapter.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/mst_validate.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_codec.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_queue.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_state.sv
 _BCT_SOURCES := $(_TILE_SHELL_SOURCES) $(PROJECT_ROOT)/src/rtl/mosaic_blocks/bct_pkg.sv \
     $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu_pkg.sv \
     $(PROJECT_ROOT)/src/rtl/building_blocks/predicate_unit_pkg.sv \
@@ -1848,6 +1899,7 @@ help:
 		'make stream-formatter-regression  Check canonical frames, lanes and elastic output' \
 		'make store-engine-regression  Check atomic writes, framing and ordered completions' \
 		'make load-engine-regression  Check tagged reads, ordered retirement and fatal drain' \
+		'make mst-regression        Check memory/stream tile RTL with PyUVM' \
 		'make banked-scratchpad-regression Check region-managed scratchpad with real banks' \
 		'make vct-regression     Check vector tile execution and shell integration' \
 		'make bct-regression     Check scalar tile execution and shell integration' \
@@ -1990,3 +2042,15 @@ banked-scratchpad-regression:
 		--seed "$(BANKED_SCRATCHPAD_SEED)" --random-cycles "$(BANKED_SCRATCHPAD_RANDOM_CYCLES)" \
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(MAKE)" \
 		$(if $(strip $(_BANKED_SCRATCHPAD_SIM_BIN_DIR)),--sim-bin-dir "$(_BANKED_SCRATCHPAD_SIM_BIN_DIR)")
+
+MST_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/mst/regression
+MST_RANDOM_CYCLES ?= 30
+MST_SEED ?= 20261025
+_MST_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+.PHONY: mst-regression
+mst-regression:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/val/mosaic_blocks/mst/run_mst_regression.py" \
+		--sim "$(SIM)" --build-dir "$(MST_REGRESSION_BUILD)" \
+		--seed "$(MST_SEED)" --random-cycles "$(MST_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(MAKE)" \
+		$(if $(strip $(_MST_SIM_BIN_DIR)),--sim-bin-dir "$(_MST_SIM_BIN_DIR)")

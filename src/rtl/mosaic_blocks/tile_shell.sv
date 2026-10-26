@@ -42,8 +42,12 @@ module tile_shell #(
     parameter ASYNC_RESET = 0,
     // Optional synchronous body request, accepted only at an empty safe boundary.
     parameter BODY_CONTEXT_ADVANCE = 0,
+    // Memory tiles can finish accepted effects after runtime termination. Keep
+    // their owned terminal events deliverable while returning to READY.
+    parameter BODY_DRAIN_EVENTS = 0,
     localparam bit GEOMETRY_VALID =
         ((BODY_CONTEXT_ADVANCE === 0) || (BODY_CONTEXT_ADVANCE === 1)) &&
+        ((BODY_DRAIN_EVENTS === 0) || (BODY_DRAIN_EVENTS === 1)) &&
         ((TILE_ID_WIDTH >= 1) === 1'b1) && (^ TILE_ID_WIDTH !== 1'bx) &&
         ((ARCH_VERSION_WIDTH >= 1) === 1'b1) && (^ ARCH_VERSION_WIDTH !== 1'bx) &&
         ((CAPABILITY_ID_WIDTH >= 1) === 1'b1) && (^ CAPABILITY_ID_WIDTH !== 1'bx) &&
@@ -591,6 +595,9 @@ module tile_shell #(
         wire wake_pending;
         wire body_usable = healthy &&!power_reset && o_body_clock_enable &&
             i_body_power_good === 1'b1 && i_body_isolation_ack === 1'b0;
+        wire terminal_event_retiring = retiring || (BODY_DRAIN_EVENTS == 1 && healthy &&
+            !flush && control.active && control.state == tile_shell_pkg::TILE_READY &&
+            i_body_busy === 1'b1);
         wire power_needs_wake = physical_power != tile_power_controller_pkg::PWR_ACTIVE &&
             physical_power != tile_power_controller_pkg::PWR_STALLED;
         wire [BY-1:0] cfg_strobe = cfg.strobe;
@@ -739,6 +746,7 @@ module tile_shell #(
 
             for (int b = 0; b < IM / 8; b++) begin
                 crc = crc ^ {24'b0, image[b*8+:8]};
+
                 for (int bit_index = 0; bit_index < 8; bit_index++)
                     crc = crc[0] ? (crc >> 1) ^ 32'h82f63b78 : crc >> 1;
             end
@@ -1140,7 +1148,7 @@ module tile_shell #(
             wire metadata_matches = (^ payload !== 1'bx) && control.active &&
                 payload[3+:CI] == selected_context && payload[3+CI+:K] == control.kernel;
             wire source_valid = i_body_event_out_valid[event_port] === 1'b1;
-            wire admission = retiring && body_usable;
+            wire admission = terminal_event_retiring && body_usable;
             wire deliver;
 
             if (event_port == 0) begin : g_completion_priority
@@ -1161,7 +1169,7 @@ module tile_shell #(
             ) u_channel (
                 .i_clk(i_clk),
                 .i_rstb(reset_b),
-                .i_flush(flush),
+                .i_flush(flush && BODY_DRAIN_EVENTS == 0),
                 .i_admit(admission && metadata_matches),
                 .i_deliver(deliver),
                 .i_valid(source_valid),
@@ -1472,6 +1480,7 @@ module tile_shell #(
                 commit_context = 1'b0;
                 next_validated[validation.context_id] = validated[validation.context_id];
             end
+
             if (cfg_fire) begin
                 cfg_response_next = '0;
                 cfg_response_next.command = cfg.command;
@@ -1487,6 +1496,7 @@ module tile_shell #(
                         for (int b = 0; b < BY; b++)
                             if (cfg_strobe[b])
                                 merged_image[word_index*W+b*8+:8] = cfg_write_data[b*8+:8];
+
                         write_context = 1'b1;
                         next_written[cfg_index][word_index] = 1'b1;
                         next_versions[cfg_index] = versions[cfg_index] + 1'b1;
@@ -1847,7 +1857,9 @@ module tile_shell #(
             ((control.state == tile_shell_pkg::TILE_ACTIVE && activity_needed) ||
             control.state == tile_shell_pkg::TILE_SUSPENDING ||
             control.state == tile_shell_pkg::TILE_DRAINING || wake_pending || validation.valid ||
-            o_body_start || o_body_resume || o_body_save || o_body_restore)));
+            o_body_start || o_body_resume || o_body_save || o_body_restore ||
+            (BODY_DRAIN_EVENTS == 1 && control.state == tile_shell_pkg::TILE_READY &&
+                i_body_busy === 1'b1))));
         assign o_monitor_clock_enable = reset_b && control.monitor;
         assign o_power_response_valid = interface_up && power_response_valid;
         assign o_power_response_state = o_power_response_valid ? power_response_state : '0;
