@@ -1428,6 +1428,20 @@ See the [VCT validation and context ABI](src/val/mosaic_blocks/vct/README.md) fo
 configuration, conservative timing, debug counters and reproducible evidence.
 Design Compiler synthesis is deferred.
 
+Run the configuration-network specification regression:
+
+```sh
+make configuration-network-regression SIM=icarus PYTHON_BIN=.venv/bin/python
+```
+
+The fabric reuses multicast forks, packet-locking arbiters, FIFOs, skid buffers
+and protected storage. Its PyUVM campaign checks packet delivery, ordered endpoint
+results, image preparation, coordinated commit, execution hold, cancellation and
+fault recovery. A separate conformance test checks the tile-shell configuration
+adapter. See the [configuration-network validation guide](src/val/mosaic_blocks/configuration_network/README.md)
+for packet and endpoint contracts, supported synchronous profiles and reproducible
+evidence. Validation is Python-only; Design Compiler synthesis is deferred.
+
 Run the region-managed banked-scratchpad specification regression:
 
 ```sh
