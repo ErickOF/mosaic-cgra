@@ -41,9 +41,12 @@ DEFAULTS = {
     "CONTROL_PROTECTION": 1,
     "RESPONSE_ORDERING": 0,
     "ASYNC_RESET": 0,
+    "USE_ALLOCATION_OWNER": 0,
 }
 
 PORTS = {
+    "i_allocation_owner_valid": ("Input", "1"),
+    "i_allocation_owner_id": ("Input", "OW"),
     "i_clk": ("Input", "1"),
     "i_reset_n": ("Input", "1"),
     "i_drain": ("Input", "1"),
