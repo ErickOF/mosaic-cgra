@@ -1479,3 +1479,19 @@ bridges, reliable events and coherent counters. See the
 [cluster validation details](src/val/mosaic_blocks/cluster/README.md) for the generated
 architecture, public ABI, supported profiles and Python-only evidence. Synthesis
 remains deferred to Design Compiler.
+
+Run the Specialized Function Tile specification campaign:
+
+```sh
+make sft-generate
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=sft
+make sft-regression SIM=icarus
+```
+
+The SFT composes the actual tile shell and reusable LUT, polynomial, reciprocal,
+rsqrt, exponential, exact reduction, scalar arithmetic, storage and formatting
+blocks. It provides four guarded fixed-point profiles with ordered retirement,
+immutable context/function-bank programming and explicit mapper-owned replay.
+See the [SFT validation details](src/val/mosaic_blocks/sft/README.md) for the local
+ABI, supported configurations and Python-only evidence. Design Compiler synthesis
+is deferred.
