@@ -114,6 +114,38 @@ _TILE_SHELL_SOURCES := $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_pkg.sv \
     $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_queue.sv \
     $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell.sv
 _RTL_SOURCES_tile_shell := $(_TILE_SHELL_SOURCES)
+_RTL_SOURCES_configuration_network := $(PROJECT_ROOT)/src/rtl/common/dff.sv \
+    $(PROJECT_ROOT)/src/rtl/common/counter.sv \
+    $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv \
+    $(PROJECT_ROOT)/src/rtl/common/write_gate.sv \
+    $(PROJECT_ROOT)/src/rtl/common/decoder.sv \
+    $(PROJECT_ROOT)/src/rtl/common/mux.sv \
+    $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/fifo.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/skid_buffer.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/register_slice.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/stream_fork.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/round_robin_arbiter.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/parity.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/ecc.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_codec.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/banked_scratchpad_state.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/banked_scratchpad_counters.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/static_mesh_queue.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/static_mesh_link.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/configuration_network_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/configuration_network_crc.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/configuration_network_serializer.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/configuration_network_receiver.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/configuration_network_link.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/configuration_network_fork.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/configuration_network_tree.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/configuration_network_tile_adapter.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/configuration_network.sv
+_RTL_SOURCES_configuration_network_tile_adapter := $(filter-out %/configuration_network.sv,$(_RTL_SOURCES_configuration_network))
+
 _RTL_SOURCES_predicate_network := $(PROJECT_ROOT)/src/rtl/building_blocks/local_switch_pkg.sv \
     $(PROJECT_ROOT)/src/rtl/mosaic_blocks/static_mesh_pkg.sv \
     $(PROJECT_ROOT)/src/rtl/common/dff.sv \
@@ -1956,6 +1988,7 @@ help:
 		'make stream-formatter-regression  Check canonical frames, lanes and elastic output' \
 		'make store-engine-regression  Check atomic writes, framing and ordered completions' \
 		'make load-engine-regression  Check tagged reads, ordered retirement and fatal drain' \
+		'make configuration-network-regression Check configuration delivery and commit with PyUVM' \
 		'make predicate-network-regression Check predicate routing and alignment with PyUVM' \
 		'make static-mesh-regression Check static mesh RTL with PyUVM' \
 		'make mst-regression        Check memory/stream tile RTL with PyUVM' \
@@ -2137,3 +2170,15 @@ predicate-network-regression:
 		--seed "$(PREDICATE_NETWORK_SEED)" --random-cycles "$(PREDICATE_NETWORK_RANDOM_CYCLES)" \
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(MAKE)" \
 		$(if $(strip $(_PREDICATE_NETWORK_SIM_BIN_DIR)),--sim-bin-dir "$(_PREDICATE_NETWORK_SIM_BIN_DIR)")
+
+CONFIGURATION_NETWORK_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/configuration_network/regression
+CONFIGURATION_NETWORK_SEED ?= 20261026
+CONFIGURATION_NETWORK_RANDOM_CYCLES ?= 1000
+_CONFIGURATION_NETWORK_SIM_BIN_DIR := $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+.PHONY: configuration-network-regression
+configuration-network-regression:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/val/mosaic_blocks/configuration_network/run_configuration_network_regression.py" \
+		--sim "$(SIM)" --build-dir "$(CONFIGURATION_NETWORK_REGRESSION_BUILD)" \
+		--seed "$(CONFIGURATION_NETWORK_SEED)" --random-cycles "$(CONFIGURATION_NETWORK_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(MAKE)" \
+		$(if $(strip $(_CONFIGURATION_NETWORK_SIM_BIN_DIR)),--sim-bin-dir "$(_CONFIGURATION_NETWORK_SIM_BIN_DIR)")
