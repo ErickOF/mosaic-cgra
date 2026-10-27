@@ -257,3 +257,12 @@ drain/flush/reset and unknown controls. The 55-profile `exp-unit-regression`
 verifies generated assets and covers exhaustive reduced-width inputs, optional
 features and representative formats. Its README links scalar accuracy evidence
 and identifies remaining formal, physical and application qualification.
+
+The generated cluster suite under `mosaic_blocks/cluster` exercises the selected
+2×2 three-BCT/one-MST MVP with actual production tiles, mesh, configuration fabric
+and SRAM banks. It checks manifests and coordinated activation, load/compute/store
+readback, metadata conservation, ownership, safe-point suspend/resume, drain,
+completion/event backpressure, clock gating and fail-stop behavior. Independent
+profiles include changed placement/IDs, smaller SRAM and a 4×4 control smoke test.
+The [suite README](mosaic_blocks/cluster/README.md) defines the MVP limits and
+Python-only evidence; Design Compiler synthesis and physical signoff are deferred.

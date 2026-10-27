@@ -43,6 +43,9 @@ module configuration_network #(
     parameter CONTROL_PROTECTION = 1,
     parameter RESPONSE_ORDERING = 0,
     parameter ASYNC_RESET = 0,
+    // A cluster-exclusive allocation may supply the current owner dynamically.
+    // Endpoint read/write/admin rights still come from the permission table.
+    parameter USE_ALLOCATION_OWNER = 0,
     localparam int NM = ((NUM_MASTERS >= 1 && NUM_MASTERS <= 4) === 1'b1) ?
         NUM_MASTERS : 1,
     localparam int NE = ((NUM_ENDPOINTS >= 1 && NUM_ENDPOINTS <= 128) === 1'b1) ?
@@ -132,6 +135,8 @@ module configuration_network #(
     input wire i_execution_release,
     input wire i_release_safe,
     input wire i_commit_valid,
+    input wire i_allocation_owner_valid,
+    input wire [OW-1:0] i_allocation_owner_id,
     input wire [NM-1:0] i_cfg_request_valid,
     output logic [NM-1:0] o_cfg_request_ready,
     input wire [NM*(C)-1:0] i_cfg_request_command,
@@ -501,6 +506,7 @@ module configuration_network #(
         (SUPPORT_READBACK === 0 || SUPPORT_READBACK === 1) &&
         (ENABLE_PACKET_CRC === 0 || ENABLE_PACKET_CRC === 1) &&
         (ASYNC_RESET === 0 || ASYNC_RESET === 1) &&
+        (USE_ALLOCATION_OWNER === 0 || USE_ALLOCATION_OWNER === 1) &&
         SUPPORT_ASYNC_ENDPOINTS === 0 &&
         SUPPORT_PACKET_RETRY === 0 &&
         RESPONSE_ORDERING === 0 &&
@@ -746,6 +752,9 @@ module configuration_network #(
             if (^ingress_command === 1'bx || ingress_command.protocol != 1 ||
                 (ingress_command.flags & 8'hfe) != 0) admission_error = CFG_ERR_UNKNOWN;
             else if (ingress_command.epoch != q.epoch) admission_error = CFG_ERR_EPOCH;
+            else if (USE_ALLOCATION_OWNER == 1 && (i_allocation_owner_valid !== 1'b1 ||
+                ingress_command.owner !== i_allocation_owner_id))
+                admission_error = CFG_ERR_PERMISSION;
             else if (ingress_command.command > C'(CFG_FLUSH) ||
                 ingress_command.command == C'(CFG_COMMIT)) admission_error = CFG_ERR_COMMAND;
             else if (ingress_command.command >= C'(CFG_WRITE) &&
@@ -771,9 +780,12 @@ module configuration_network #(
 
                     if (!ENDPOINT_CAPABILITY_TABLE[e*CAP+int'(ingress_command.command)])
                         admission_error = CFG_ERR_CAPABILITY;
-                    else if ((ingress_command.owner != permission[0+:OW] &&
+                    else if ((USE_ALLOCATION_OWNER == 1 ?
+                        (i_allocation_owner_valid !== 1'b1 ||
+                        ingress_command.owner !== i_allocation_owner_id) :
+                        (ingress_command.owner != permission[0+:OW] &&
                         !(ingress_command.flags[0] && permission[OW+3] &&
-                            ingress_command.owner == 0)) ||
+                            ingress_command.owner == 0))) ||
                         (ingress_command.command == C'(CFG_WRITE) &&!permission[OW+1]) ||
                         (ingress_command.command == C'(CFG_READ) &&!permission[OW]) ||
                         (ingress_command.command >= C'(CFG_VALIDATE) &&!permission[OW+2]))
@@ -790,6 +802,7 @@ module configuration_network #(
                     if (ingress_command.command == C'(CFG_WRITE)) begin
                         if (schema_valid && schema != ENDPOINT_SCHEMA_TABLE[e*32+:32])
                             admission_error = CFG_ERR_SCHEMA;
+
                         schema_valid = 1'b1;
                         schema = ENDPOINT_SCHEMA_TABLE[e*32+:32];
                     end
@@ -1070,6 +1083,7 @@ module configuration_network #(
                                 offered_frame_error || !envelope_ok ? CFG_ERR_FRAME :
                                 !crc_ok ? CFG_ERR_CRC : offered.epoch != q.epoch ?
                                 CFG_ERR_EPOCH : CFG_ERR_DESTINATION);
+
                             // Trust the separately carried envelope for transport
                             // failure attribution, never corrupted payload IDs.
                             next_state.request.master = offered_envelope[NE+TI+EP+32+:MI];
@@ -1458,6 +1472,7 @@ module configuration_network #(
 
             always @* begin
                 endpoint_type = '0;
+
                 for (int e = 0; e < NE; e++)
                     if (!retired.synthetic
                         && ENDPOINT_ID_TABLE[e*EI+:EI] == retired.response.endpoint)
@@ -1896,6 +1911,7 @@ module configuration_network #(
                             for (int e = 0; e < NE; e++)
                                 if (target_mask[e]) item_results[e*RB+:RB] =
                                     response_for(request, e, CFG_CANCELED, CFG_ERR_CANCELED);
+
                             item.results = item_results;
                             item.done = target_mask;
                             item.failure = item.failure | item.success | target_mask;

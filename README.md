@@ -1463,3 +1463,19 @@ and stream tile using the existing shell, load/store engines, AGU, conversion,
 and protected buffering blocks. Run `make mst-regression SIM=icarus` locally or
 select `SIM=vcs` on the licensed server. This is a Python-only campaign;
 Design Compiler synthesis is deferred.
+
+Run the generated Cluster-MVP specification campaign:
+
+```sh
+make cluster-generate
+make cluster-regression SIM=icarus
+make cluster-regression
+```
+
+The selected 2×2 cluster composes three real BCTs, one MST, the static mesh,
+configuration network and banked scratchpad. It adds exclusive allocation,
+manifest-checked coordinated commit, lifecycle fanout, explicit metadata/memory
+bridges, reliable events and coherent counters. See the
+[cluster validation details](src/val/mosaic_blocks/cluster/README.md) for the generated
+architecture, public ABI, supported profiles and Python-only evidence. Synthesis
+remains deferred to Design Compiler.

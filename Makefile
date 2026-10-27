@@ -476,6 +476,7 @@ _RTL_SOURCES_stream_join := $(_STREAM_JOIN_SOURCES)
 SRAM_BACKEND_SOURCE ?= $(PROJECT_ROOT)/src/rtl/basic/sram_wrapper_backend.sv
 _SRAM_WRAPPER_SOURCES = $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(SRAM_BACKEND_SOURCE) $(PROJECT_ROOT)/src/rtl/basic/sram_wrapper.sv
 _RTL_SOURCES_sram_wrapper = $(_SRAM_WRAPPER_SOURCES)
+_RTL_SOURCES_cluster = $(addprefix $(PROJECT_ROOT)/,$(file <$(PROJECT_ROOT)/src/gen/cluster/generated/sources.f))
 VERILOG_SOURCES ?= $(or $(_RTL_SOURCES_$(COCOTB_TOPLEVEL)),$(firstword $(wildcard $(PROJECT_ROOT)/src/rtl/*/$(COCOTB_TOPLEVEL).sv)),$(PROJECT_ROOT)/src/rtl/common/$(COCOTB_TOPLEVEL).sv)
 SIM_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/$(COCOTB_TOPLEVEL)
 COCOTB_RESULTS_FILE ?= $(SIM_BUILD)/results.xml
@@ -2182,3 +2183,19 @@ configuration-network-regression:
 		--seed "$(CONFIGURATION_NETWORK_SEED)" --random-cycles "$(CONFIGURATION_NETWORK_RANDOM_CYCLES)" \
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(MAKE)" \
 		$(if $(strip $(_CONFIGURATION_NETWORK_SIM_BIN_DIR)),--sim-bin-dir "$(_CONFIGURATION_NETWORK_SIM_BIN_DIR)")
+
+# The generated file list is an architectural release artifact. The generator's
+# Python source owns the dependency closure; no JSON dependency loader is used.
+CLUSTER_DESCRIPTOR ?= $(PROJECT_ROOT)/src/gen/cluster/mvp.toml
+CLUSTER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/cluster/regression
+CLUSTER_SEED ?= 20261026
+CLUSTER_RANDOM_CYCLES ?= 1000
+.PHONY: cluster-generate cluster-regression
+cluster-generate:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/gen/cluster/generate.py" --descriptor "$(CLUSTER_DESCRIPTOR)"
+
+cluster-regression:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/val/mosaic_blocks/cluster/run_cluster_regression.py" \
+		--sim "$(SIM)" --build-dir "$(CLUSTER_REGRESSION_BUILD)" \
+		--seed "$(CLUSTER_SEED)" --random-cycles "$(CLUSTER_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(MAKE)"
