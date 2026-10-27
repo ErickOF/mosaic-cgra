@@ -1,0 +1,445 @@
+{
+  "schema": "mosaic-sft-local-v1",
+  "parameters": {
+    "TILE_ID": 0,
+    "TILE_ID_WIDTH": 16,
+    "ARCH_VERSION_WIDTH": 16,
+    "CAPABILITY_ID_WIDTH": 32,
+    "SHELL_DATA_WIDTH": 64,
+    "DATA_METADATA_WIDTH": 256,
+    "DATA_INPUT_PORTS": 2,
+    "DATA_OUTPUT_PORTS": 2,
+    "INPUT_BUFFER_DEPTH": 1,
+    "OUTPUT_BUFFER_DEPTH": 1,
+    "PREDICATE_WIDTH": 1,
+    "PREDICATE_METADATA_WIDTH": 16,
+    "PREDICATE_INPUT_PORTS": 1,
+    "PREDICATE_OUTPUT_PORTS": 1,
+    "EVENT_WIDTH": 32,
+    "EVENT_INPUT_PORTS": 1,
+    "EVENT_OUTPUT_PORTS": 1,
+    "CONTEXT_DEPTH": 4,
+    "CONFIG_DATA_WIDTH": 64,
+    "CONTEXT_CHECKSUM_WIDTH": 32,
+    "SUPPORT_CONTEXT_CHECKSUM": 1,
+    "CONFIG_ASYNC": 0,
+    "CONFIG_QUEUE_DEPTH": 4,
+    "OWNER_ID_WIDTH": 16,
+    "KERNEL_ID_WIDTH": 16,
+    "CONTEXT_VERSION_WIDTH": 16,
+    "RUNTIME_TAG_WIDTH": 8,
+    "STALL_REASON_WIDTH": 8,
+    "ERROR_CODE_WIDTH": 8,
+    "TRACE_WIDTH": 64,
+    "SUPPORT_TRACE": 0,
+    "SUPPORT_RETENTION": 0,
+    "SUPPORT_POWER_OFF": 0,
+    "CONTEXT_PROTECTION": 0,
+    "CONTROL_PROTECTION": 0,
+    "ASYNC_RESET": 0,
+    "INPUT_WIDTH": 16,
+    "INPUT_FRAC_BITS": 8,
+    "OUTPUT_WIDTH": 16,
+    "OUTPUT_FRAC_BITS": 12,
+    "INTERNAL_WIDTH": 32,
+    "INTERNAL_FRAC_BITS": 20,
+    "LUT_ADDRESS_WIDTH": 8,
+    "LUT_INDEX_FRACTION_WIDTH": 8,
+    "LUT_BANKS": 4,
+    "LUT_PIPELINE_DEPTH": 2,
+    "POLY_COEFFICIENT_WIDTH": 18,
+    "POLY_MAX_DEGREE": 4,
+    "POLY_BANKS": 4,
+    "POLY_EVALUATION_ARCH": 0,
+    "RECIP_INTERNAL_WIDTH": 24,
+    "RECIP_INTERNAL_FRAC_BITS": 20,
+    "RECIP_SEED_ADDRESS_WIDTH": 6,
+    "RECIP_MAX_ITERATIONS": 2,
+    "RSQRT_INTERNAL_WIDTH": 28,
+    "RSQRT_INTERNAL_FRAC_BITS": 22,
+    "RSQRT_SEED_ADDRESS_WIDTH": 6,
+    "RSQRT_MAX_ITERATIONS": 2,
+    "EXP_RANGE_WIDTH": 40,
+    "EXP_TABLE_ADDRESS_WIDTH": 6,
+    "EXP_PIPELINE_DEPTH": 5,
+    "REDUCTION_LANES": 4,
+    "REDUCTION_ELEMENT_WIDTH": 16,
+    "REDUCTION_ACC_WIDTH": 48,
+    "MAX_REDUCTION_ELEMENTS": 1024,
+    "FU_PROFILE": 1,
+    "LOCAL_RF_DEPTH": 8,
+    "LOCAL_RF_READ_PORTS": 2,
+    "LOCAL_RF_WRITE_PORTS": 1,
+    "REDUCTION_STATE_DEPTH": 2,
+    "INPUT_FIFO_DEPTH": 4,
+    "RESULT_QUEUE_DEPTH": 8,
+    "MAX_INFLIGHT": 8,
+    "BYPASS_PROFILE": 1,
+    "SYNC_PROFILE": 2,
+    "SUPPORT_SPATIAL_TEMPORAL": 1,
+    "SUPPORT_INTERPOLATION": 1,
+    "SUPPORT_SATURATION": 1,
+    "SUPPORT_PREDICATED_TOKEN": 1,
+    "SUPPORT_LOCAL_CHAINING": 1,
+    "SUPPORT_FP16": 0,
+    "SUPPORT_BF16": 0,
+    "REQUIRE_CANONICAL_FORMAT": 1,
+    "TABLE_PROTECTION": 0,
+    "COEFFICIENT_PROTECTION": 0,
+    "CONFIG_WORD_COUNT": 74,
+    "INPUT_ELASTIC_MASK": 3,
+    "OUTPUT_ELASTIC_MASK": 3
+  },
+  "fu_inventory": [
+    "lut",
+    "scalar_alu",
+    "exact_reduction",
+    "sumsq_multiplier",
+    "accumulator",
+    "polynomial",
+    "scalar_multiplier"
+  ],
+  "context_fields": {
+    "schema": {
+      "offset": 0,
+      "width": 8
+    },
+    "operation": {
+      "offset": 8,
+      "width": 8
+    },
+    "datatype": {
+      "offset": 16,
+      "width": 2
+    },
+    "signed_data": {
+      "offset": 18,
+      "width": 1
+    },
+    "rounding": {
+      "offset": 19,
+      "width": 1
+    },
+    "saturate": {
+      "offset": 20,
+      "width": 1
+    },
+    "interpolate": {
+      "offset": 21,
+      "width": 1
+    },
+    "base": {
+      "offset": 22,
+      "width": 1
+    },
+    "false_token": {
+      "offset": 23,
+      "width": 1
+    },
+    "predicate_mode": {
+      "offset": 24,
+      "width": 2
+    },
+    "source_a": {
+      "offset": 26,
+      "width": 3
+    },
+    "source_b": {
+      "offset": 29,
+      "width": 3
+    },
+    "rf_a": {
+      "offset": 32,
+      "width": 8
+    },
+    "rf_b": {
+      "offset": 40,
+      "width": 8
+    },
+    "rf_write": {
+      "offset": 48,
+      "width": 8
+    },
+    "write_rf": {
+      "offset": 56,
+      "width": 1
+    },
+    "write_acc": {
+      "offset": 57,
+      "width": 1
+    },
+    "phase": {
+      "offset": 58,
+      "width": 3
+    },
+    "reduction": {
+      "offset": 61,
+      "width": 3
+    },
+    "state_id": {
+      "offset": 64,
+      "width": 8
+    },
+    "bank": {
+      "offset": 72,
+      "width": 8
+    },
+    "quality": {
+      "offset": 80,
+      "width": 2
+    },
+    "range_error": {
+      "offset": 82,
+      "width": 1
+    },
+    "empty_policy": {
+      "offset": 83,
+      "width": 2
+    },
+    "terminal": {
+      "offset": 85,
+      "width": 1
+    },
+    "advance_context": {
+      "offset": 86,
+      "width": 1
+    },
+    "invalidate": {
+      "offset": 87,
+      "width": 1
+    },
+    "steps": {
+      "offset": 88,
+      "width": 16
+    },
+    "next_context": {
+      "offset": 104,
+      "width": 8
+    },
+    "mask": {
+      "offset": 112,
+      "width": 16
+    },
+    "iterations": {
+      "offset": 128,
+      "width": 8
+    },
+    "degree": {
+      "offset": 136,
+      "width": 8
+    },
+    "shift": {
+      "offset": 144,
+      "width": 8
+    },
+    "model": {
+      "offset": 152,
+      "width": 32
+    },
+    "immediate": {
+      "offset": 192,
+      "width": 64
+    },
+    "x_min": {
+      "offset": 256,
+      "width": 32
+    },
+    "x_max": {
+      "offset": 288,
+      "width": 32
+    },
+    "epsilon": {
+      "offset": 320,
+      "width": 32
+    },
+    "table_id": {
+      "offset": 352,
+      "width": 16
+    },
+    "polynomial_id": {
+      "offset": 368,
+      "width": 16
+    },
+    "source_format": {
+      "offset": 384,
+      "width": 8
+    },
+    "result_format": {
+      "offset": 392,
+      "width": 8
+    },
+    "output_mask": {
+      "offset": 400,
+      "width": 8
+    },
+    "opcode": {
+      "offset": 408,
+      "width": 5
+    },
+    "dynamic_phase": {
+      "offset": 413,
+      "width": 1
+    },
+    "monitor": {
+      "offset": 414,
+      "width": 1
+    },
+    "select_condition": {
+      "offset": 415,
+      "width": 1
+    }
+  },
+  "connectivity": {
+    "operand_a": [
+      "input_a",
+      "input_b",
+      "rf_a",
+      "rf_b",
+      "accumulator",
+      "immediate",
+      "zero"
+    ],
+    "operand_b": [
+      "input_a",
+      "input_b",
+      "rf_a",
+      "rf_b",
+      "accumulator",
+      "immediate",
+      "zero"
+    ]
+  },
+  "formats": {
+    "0": "opaque native bits, without conversion",
+    "1": "input fixed-point",
+    "2": "output fixed-point",
+    "3": "exact reduction (SUMSQ has twice the input fraction)"
+  },
+  "bank_policy": "selected image in each immutable context; disjoint native physical bank slice",
+  "issue": {
+    "slots_per_cycle": 1,
+    "max_inflight": 8,
+    "execution": "one shared engine; no out-of-order FU overlap",
+    "retirement": "acceptance order",
+    "timing": "3 engine edges for exact ops; native tagged handshake latency for approximations; queue and backpressure add wait"
+  },
+  "numerical_models": {
+    "0": [
+      "0x53460000",
+      "0x53460100",
+      "0x53460200"
+    ],
+    "2": [
+      "0x53460002",
+      "0x53460102",
+      "0x53460202"
+    ],
+    "7": [
+      "0x53460007",
+      "0x53460107",
+      "0x53460207"
+    ],
+    "8": [
+      "0x53460008",
+      "0x53460108",
+      "0x53460208"
+    ],
+    "9": [
+      "0x53460009",
+      "0x53460109",
+      "0x53460209"
+    ],
+    "1": [
+      "0x53460001",
+      "0x53460101",
+      "0x53460201"
+    ],
+    "3": [
+      "0x53460003",
+      "0x53460103",
+      "0x53460203"
+    ]
+  },
+  "numerical_policy": "native fixed-point primitives; explicit format conversion only",
+  "signoff": {
+    "python_simulation": "see regression summary",
+    "synthesis": "Design Compiler (deferred)",
+    "lint": "NOT_RUN",
+    "formal": "NOT_RUN",
+    "physical": "NOT_RUN",
+    "power": "NOT_RUN"
+  },
+  "rtl_sha256": {
+    "src/rtl/mosaic_blocks/tile_shell_pkg.sv": "71e5f1abfbcd84971008df02dae1dbcea0d97393b1ffd4f59acd05eaebcf3614",
+    "src/rtl/basic/context_sequencer_pkg.sv": "367638a64c1a3796b37acdf53c3ab59a9d65cebefccdb40939bc625a9feba070",
+    "src/rtl/building_blocks/tile_power_controller_pkg.sv": "b4a598f47e491ca7689bb098597c33c9a05b68a6463e8471e6a7e20913963dd6",
+    "src/rtl/building_blocks/lut_unit_pkg.sv": "b69a27903dcbe3e5c0c4a8fde26b89c6a97b7bf918944e435ed0b3e685c21caf",
+    "src/rtl/building_blocks/polynomial_unit_pkg.sv": "917bb53f9ab307ff7e934b6d582748a610e1e8737f068574182bf5d58a6fd2f5",
+    "src/rtl/building_blocks/reciprocal_unit_pkg.sv": "b5265a0a8c3f2caa153141172eb78712ec6b01af3de52629c57558a46d6d984a",
+    "src/rtl/building_blocks/scalar_alu_pkg.sv": "e43b2a6b2934ece630f0b95a179696adbb1b5647f6c4893a8d1859abdf4f4e6b",
+    "src/rtl/building_blocks/vector_lane_pkg.sv": "010c7d0b51bbc74f91d534fd0cc62c9c8235fde07312fcbb8f4acbd4fce14217",
+    "src/rtl/building_blocks/rsqrt_unit_pkg.sv": "d45ac17cd4a5d6fec2c5942d9f156f7df2922e5c672c43fce6c0fe1d969f5973",
+    "src/rtl/building_blocks/generated/exp_unit_tables_pkg.sv": "59ade9f985fe3509d5ab63e3d01ed9c6a3714de84e973feb7b123d8e7c3ad3f3",
+    "src/rtl/building_blocks/exp_unit_pkg.sv": "163d81042c19757efccff4b5680c48c2a5fd0c03993c0635f104757815399d96",
+    "src/rtl/building_blocks/vector_reduction_pkg.sv": "3032734c9f4dc38dd64a80233ec84453d15d55d9941bf1ab25727d1a9c39ba93",
+    "src/rtl/building_blocks/accumulator_pkg.sv": "7037ca445f5accb6a68ca469cd879b6c411f8a3997efbaccabd5c5ba558ba158",
+    "src/rtl/mosaic_blocks/sft_pkg.sv": "d55332ee00f3fe1503c5fdc9e772a1981412fdeaa259150237d3c5a0a6328a70",
+    "src/rtl/common/dff.sv": "578b511eedf04e100d039f14c35998d8079653fd2006c33baad432ea4622fd38",
+    "src/rtl/common/counter.sv": "d02f311941ef1fc913b80ab2bb5d66cdc35c817dddacb459e7400b9597d8806f",
+    "src/rtl/common/decoder.sv": "ed39d268ad87f931ada335a517e850a0c300f6275d3ffce969150e5422c836cf",
+    "src/rtl/common/operand_isolation.sv": "0ee8a947cb68dcc40f0100ef9eeb5ae1cfc2c60cc0e56957dfac553bc2b5fc51",
+    "src/rtl/common/reset_synchronizer.sv": "3503d53aef9da5d7a8dd1579b807093cfa441106e9727457646d3cb89e6fe2f8",
+    "src/rtl/basic/fifo.sv": "0937c66148bce63f3ff912a300f28cd4aedc215fab7ba936b53174c170f51a79",
+    "src/rtl/basic/parity.sv": "cb503fb1f9d3ad04c9d1e307f675715e22a555c4ba108b3cad1a5ec1efb63ab6",
+    "src/rtl/basic/ecc.sv": "68220c6730934a6d640490c8c6fa8d8c119d47ef2c7522091267b7206df1bb11",
+    "src/rtl/basic/context_memory.sv": "5b160dc782ea71a5e2c89d4ec7f9c03248f15d0d2f98860b5782279099927c5e",
+    "src/rtl/basic/context_sequencer.sv": "e75a5db85861a9c6b9461d3eaf80135166852615cded2b7943c652445ecd5523",
+    "src/rtl/basic/async_fifo.sv": "f1ff5695a5f69916c9ee0bd9d98f0aad2f0b3173390f848378b5cfc21b4fe29a",
+    "src/rtl/basic/performance_counters.sv": "4790d96341d466827b2f215f51c22557c753a0409a765ad614b3efff8ccac704",
+    "src/rtl/building_blocks/event_barrier_state.sv": "0b04b66385ce678b62d08ad6b4db0a4b27f21f41c7affdb315fc855a3ff85a51",
+    "src/rtl/building_blocks/event_barrier_queue.sv": "0c3c936f9aed20e76e8c84d983dff23fb4c64748c4aea7c09954eef0ad63aca9",
+    "src/rtl/building_blocks/tile_power_controller.sv": "bb017271a05fd1de8e194016f069cbf5814d54ce6ca231bf0c313c647f9d67b4",
+    "src/rtl/mosaic_blocks/tile_shell_codec.sv": "eb760929fdc59c7ebebb4492427655c43ef3102bced68abc27882bc563749ff3",
+    "src/rtl/mosaic_blocks/tile_shell_state.sv": "79a1afc3c7cd4d55550c653a8c0142d8af575829a963a5da4c2848d18fca7c32",
+    "src/rtl/mosaic_blocks/tile_shell_queue.sv": "5aec95d93ce15f7d2320d3e8601f8031ec43655fe689a3191c81c8194c5e12b9",
+    "src/rtl/mosaic_blocks/tile_shell.sv": "0c0961b39ade8f301716906b789f5f0f9f68225e50461c417e0790d69091bbc9",
+    "src/rtl/building_blocks/lut_unit_bank.sv": "b4fa5ad5ec8c9a57971537db2cb98a25862e83a0f3b0667892d51bba8ae63903",
+    "src/rtl/building_blocks/lut_unit.sv": "6712bbf6bb6553925e0257524e070dcee852cfe42fe0c1d442e23ff3d5fcbce9",
+    "src/rtl/common/mux.sv": "4baec3ae2e53d24121c28f4012839ac6b488249baa4801530d0f5547af6602c5",
+    "src/rtl/building_blocks/multiplier.sv": "618060c9a9e3660a5dca12230fdc400acfef9d8d88e9a0036749771288c3fc7b",
+    "src/rtl/building_blocks/polynomial_unit_round.sv": "b7b2b9d9221d508c4bb675071be55a826dbc4c44f8a6aeea57b19324582e42a2",
+    "src/rtl/building_blocks/polynomial_unit_horner.sv": "d0e7e3110976e7ab80652162ff283bee8d9611100134eea57c8a6c1527b2fa00",
+    "src/rtl/building_blocks/polynomial_unit_scale.sv": "a301cf6700c0bcb5eba6bcca39195c707c05639933a45223538d308a7d748734",
+    "src/rtl/building_blocks/polynomial_unit.sv": "ea4952afcb8f092c25e200b74456fe15789b4ac0a7ef3d398dd54d87b84d0786",
+    "src/rtl/common/priority_encoder.sv": "78ae31ee0db47b901b7b3df785574cfe50436afdf7029b4aa4d3e1346ac58f4c",
+    "src/rtl/building_blocks/scalar_alu.sv": "8b584da1594f739011a9b83775cb58985bd518b7a025860f36c3aa2180d3b7cd",
+    "src/rtl/building_blocks/reciprocal_unit_normalize.sv": "c4c9976d7097d1333f24de003696f2b97e3f28a556037fad91f27961a80c2075",
+    "src/rtl/building_blocks/protected_seed_rom.sv": "f8e6e4eb33ea13e0213ac76a4c724b97861572eddd96a482e9150cc36c084573",
+    "src/rtl/building_blocks/reciprocal_unit_seed.sv": "82e584b74a3bfaea588060d4bcf686f26f9188faaa5c1a1614ba7fafb36f325c",
+    "src/rtl/building_blocks/reciprocal_unit_newton.sv": "bf18239a0f73b602b1ffca9bd07575794d2a85811054e60e010ae073d6f692bc",
+    "src/rtl/building_blocks/reciprocal_unit_scale.sv": "0005ee96d9dc969d860c66d09972563403364b8a3f757f43886a5d129de93e14",
+    "src/rtl/building_blocks/reciprocal_unit.sv": "7529a162f443dac11d3861d1bc241a93a8f335a0c641817f95c5fff6b47c0f27",
+    "src/rtl/building_blocks/rsqrt_unit_normalize.sv": "2f5b1f3e952ff6d5716a0e3775f830dfa203530d72564f9842e6daaf3291013b",
+    "src/rtl/building_blocks/rsqrt_unit_seed.sv": "737dd2c30e5e0e1f6b3e60408ad718752bb2e6eaa02437479e869fb567544a29",
+    "src/rtl/building_blocks/rsqrt_unit_newton.sv": "e5f4be2b62c72e04450fdc06b3e81424d8ce0ec5fdfc3c345e762c89ec81c0df",
+    "src/rtl/building_blocks/rsqrt_unit.sv": "7d0b604c7e90d481f9ed0ea48277c18358607a5c2e3c7390dd7429d7ebacb30c",
+    "src/rtl/building_blocks/exp_unit_interpolate.sv": "54b4f642fdd710136d7ce71fb1ee0913dadf7ba7b412c5cc587895a176a33b2a",
+    "src/rtl/building_blocks/exp_unit_rom.sv": "e87cc19bacc24d9df42f4b5a8773129fbf94b7e155045a4d3d72189295ea4d4b",
+    "src/rtl/building_blocks/exp_unit_stage.sv": "b346a7eea4f93c1de57d5d4d546f600dbb4f2d9c5273de1dc9bb49707430e72b",
+    "src/rtl/building_blocks/exp_unit.sv": "6737694baf847013f201df09aa8862decf5124b8750f78d91864366b403c6050",
+    "src/rtl/common/lane_mask.sv": "ff058d5364ced0ad56b963e8d6403b2fcb04697da1489c4dd60d8a5d3972ec61",
+    "src/rtl/basic/register_file.sv": "8c47195e840f5e4f4dc00168d983c5649c8e84624aadc6e6778d6d6d777c7bcc",
+    "src/rtl/basic/bypass_network.sv": "a2723cfcd5fdf7c69ec9496120537e265f4e5d030514dd14086a0b9b9449a13f",
+    "src/rtl/basic/stream_join.sv": "5ca00b530e83229ff8c60fef170253f4424dd545828b782bef611e759fd79fe8",
+    "src/rtl/basic/packer.sv": "4be33b1a9e8f78e25aef0fc939ee207bb700a301e15e3237b013472169064f9a",
+    "src/rtl/building_blocks/accumulator.sv": "8fef1ad83bcf950de5e0542446fc5b7ae240af4e4eaa689bcb9f4a504628bb0c",
+    "src/rtl/building_blocks/vector_reduction_tree.sv": "9e642e6f38640bc81d48da3b41e95231dc4952faeb884ad21adeb863f291c994",
+    "src/rtl/building_blocks/vector_reduction.sv": "3ef11e7ac2a285860561c64a7cd3a08e1cacc6583475b704eb5370a80a03c1ee",
+    "src/rtl/common/write_gate.sv": "cd14228f0e72f10e674cf0ed274b01d0bd1b7f7417868ae9d9009420889299b7",
+    "src/rtl/building_blocks/vector_lane_pipeline.sv": "edfbb1ed0eea838862a43a33adea6d8beba2378857eb3c599879d6bf22ae2df0",
+    "src/rtl/mosaic_blocks/sft_datapath.sv": "768877bd1f02a050e9941b53c949ec802df59e8cc06cbf7b7c8b286a209c2f1c",
+    "src/rtl/mosaic_blocks/sft_body.sv": "3ba9659668d223eeaa8e367c6acc0f354a9761b004f2cfeb6d94ffbda5016b6e",
+    "src/rtl/mosaic_blocks/sft.sv": "99adcc6c139861a73204c088f4db44757a611565e531eb12d62b7d062eae7822"
+  },
+  "contract_sha256": "81829ed28bb8150752470ac6fd4a0160a316ee5ecc687979818fe5f858786eec"
+}
