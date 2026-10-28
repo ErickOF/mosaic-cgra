@@ -504,6 +504,23 @@ _GLOBAL_NOC_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/noc_router_pkg.sv
     $(PROJECT_ROOT)/src/rtl/mosaic_blocks/global_noc_link.sv \
     $(PROJECT_ROOT)/src/rtl/mosaic_blocks/global_noc.sv
 _RTL_SOURCES_global_noc := $(_GLOBAL_NOC_SOURCES)
+_RUNTIME_CONTROLLER_SOURCES :=     $(PROJECT_ROOT)/src/rtl/mosaic_blocks/runtime_controller_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/common/dff.sv \
+    $(PROJECT_ROOT)/src/rtl/common/counter.sv \
+    $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv \
+    $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv \
+    $(PROJECT_ROOT)/src/rtl/common/decoder.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/fifo.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/parity.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/ecc.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/round_robin_arbiter.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/performance_counters.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_codec.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_state.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/runtime_controller.sv
+_RTL_SOURCES_runtime_controller := $(_RUNTIME_CONTROLLER_SOURCES)
 VERILOG_SOURCES ?= $(or $(_RTL_SOURCES_$(COCOTB_TOPLEVEL)),$(firstword $(wildcard $(PROJECT_ROOT)/src/rtl/*/$(COCOTB_TOPLEVEL).sv)),$(PROJECT_ROOT)/src/rtl/common/$(COCOTB_TOPLEVEL).sv)
 SIM_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/$(COCOTB_TOPLEVEL)
 COCOTB_RESULTS_FILE ?= $(SIM_BUILD)/results.xml
@@ -2266,3 +2283,18 @@ global-noc-regression:
 		--sim "$(SIM)" --build-dir "$(GLOBAL_NOC_REGRESSION_BUILD)" \
 		--seed "$(GLOBAL_NOC_SEED)" --random-cycles "$(GLOBAL_NOC_RANDOM_CYCLES)" \
 		$(GLOBAL_NOC_REGRESSION_ARGS)
+
+# Normalized runtime policy uses external Python peers; no synthesis or HDL assertions.
+RUNTIME_CONTROLLER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/runtime_controller/regression
+RUNTIME_CONTROLLER_SEED ?= 20261027
+RUNTIME_CONTROLLER_RANDOM_CYCLES ?= 2000
+RUNTIME_CONTROLLER_REGRESSION_ARGS ?=
+.PHONY: runtime-controller-generate runtime-controller-regression
+runtime-controller-generate:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/gen/runtime_controller/generate.py"
+runtime-controller-regression:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/val/mosaic_blocks/runtime_controller/run_runtime_controller_regression.py" \
+		--sim "$(SIM)" --build-dir "$(RUNTIME_CONTROLLER_REGRESSION_BUILD)" \
+		--seed "$(RUNTIME_CONTROLLER_SEED)" --random-cycles "$(RUNTIME_CONTROLLER_RANDOM_CYCLES)" \
+		--make "$(MAKE)" $(if $(filter vcs,$(SIM)),$(if $(VCS_BIN_DIR),--sim-bin-dir "$(VCS_BIN_DIR)"),$(if $(ICARUS_BIN_DIR),--sim-bin-dir "$(ICARUS_BIN_DIR)")) \
+		$(RUNTIME_CONTROLLER_REGRESSION_ARGS)
