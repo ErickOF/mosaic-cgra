@@ -12,6 +12,9 @@ module noc_router #(
     parameter INPUT_VC_DEPTH = 2,
     parameter FLOW_CONTROL = 1,
     parameter OUTPUT_INITIAL_CREDITS = 2,
+    // Zero preserves wormhole admission. A fixed-envelope fabric may require
+    // complete downstream packet capacity before acquiring any input/output lock.
+    parameter PACKET_CREDIT_RESERVATION = 0,
     parameter ROUTING_ALGORITHM = 0,
     parameter NUM_TRAFFIC_CLASSES = 8,
     parameter ENABLE_QOS = 1,
@@ -31,6 +34,9 @@ module noc_router #(
     parameter OUTPUT_PIPELINE = 1,
     parameter ASYNC_RESET = 0,
     localparam bit GEOMETRY_VALID =
+        ((PACKET_CREDIT_RESERVATION >= 0 &&
+            PACKET_CREDIT_RESERVATION <= OUTPUT_INITIAL_CREDITS) === 1'b1) &&
+        (^PACKET_CREDIT_RESERVATION !== 1'bx) &&
         ((MESH_X >= 1) === 1'b1) && ( ^ MESH_X !== 1'bx) &&
         ((MESH_Y >= 1) === 1'b1) && ( ^ MESH_Y !== 1'bx) &&
         ((FLIT_DATA_WIDTH >= 1) === 1'b1) && ( ^ FLIT_DATA_WIDTH !== 1'bx) &&
@@ -907,7 +913,9 @@ module noc_router #(
                                 os = port_state[destination];
 
                                 if (!usable[destination] || !cardinal_legal(destination) ||
-                                    (!os.output_locked))
+                                    (!os.output_locked && (FLOW_CONTROL != 32'(FLOW_CREDIT) ||
+                                    PACKET_CREDIT_RESERVATION == 0 ||
+                                    32'(credits[destination*V+v]) >= PACKET_CREDIT_RESERVATION)))
                                     input_requests[p][v] = 1'b1;
                             end
                         end

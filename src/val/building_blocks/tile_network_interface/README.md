@@ -117,3 +117,12 @@ adds a processing bubble per VC; other VCs can use intervening service cycles.
 Continuous TX can launch one flit per clock; packet throughput is at most one beat
 per `FLITS_PER_PACKET` launches, subject to credit availability and backpressure.
 These are RTL simulation timing rules, not physical timing or power estimates.
+
+
+`PACKET_CREDIT_RESERVATION` is an optional credit threshold for selecting a new
+TX packet. Zero preserves the original standalone behavior; a positive value must
+fit `TX_INITIAL_CREDITS_PER_VC`. Once a packet starts, serialization remains
+nonpreemptive and each flit requires positive credit. The global NoC reserves a
+complete fixed-envelope packet and dedicates the last TX/RX channel to critical
+traffic. Its [integration suite](../../mosaic_blocks/global_noc/README.md) checks
+that mode using actual routers and reruns selected standalone TNI Python profiles.

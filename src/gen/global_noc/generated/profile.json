@@ -1,0 +1,1033 @@
+{
+  "schema": "mosaic-global-noc-v1",
+  "parameters": {
+    "NOC_X": 2,
+    "NOC_Y": 2,
+    "NUM_ROUTERS": 4,
+    "NUM_ENDPOINTS": 4,
+    "NOC_PROFILE": 1,
+    "FLIT_DATA_WIDTH": 32,
+    "ENDPOINT_DATA_WIDTH": 128,
+    "NUM_VCS": 4,
+    "INPUT_VC_DEPTH": 4,
+    "FLOW_CONTROL": 1,
+    "ROUTING_ALGORITHM": 0,
+    "ROUTER_OUTPUT_PIPELINE": 1,
+    "LINK_PIPELINE_STAGES": 0,
+    "CREDIT_RETURN_PIPELINE_STAGES": 0,
+    "NUM_TRAFFIC_CLASSES": 8,
+    "ENABLE_QOS": 1,
+    "HIGH_SERVICE_BURST_LIMIT": 8,
+    "MAX_PACKET_FLITS": 16,
+    "NUM_TX_CHANNELS_PER_ENDPOINT": 4,
+    "NUM_RX_CHANNELS_PER_ENDPOINT": 4,
+    "ENDPOINT_TX_QUEUE_DEPTH": 2,
+    "ENDPOINT_RX_VC_DEPTH": 4,
+    "ENDPOINT_RX_QUEUE_DEPTH": 2,
+    "MAX_ACTIVE_FLOWS": 16,
+    "FLOW_ID_WIDTH": 16,
+    "OWNER_ID_WIDTH": 16,
+    "KERNEL_ID_WIDTH": 16,
+    "PACKAGE_ID_WIDTH": 32,
+    "NODE_ID_WIDTH": 8,
+    "ENDPOINT_ID_WIDTH": 8,
+    "CONTEXT_ID_WIDTH": 8,
+    "MESSAGE_TYPE_WIDTH": 4,
+    "PACKET_ID_WIDTH": 16,
+    "FRAGMENT_INDEX_WIDTH": 4,
+    "USER_METADATA_WIDTH": 64,
+    "ERROR_WIDTH": 8,
+    "LINK_EPOCH_WIDTH": 4,
+    "EXECUTION_EPOCH_WIDTH": 8,
+    "ALLOCATION_GENERATION_WIDTH": 16,
+    "PACKAGE_SLOT_WIDTH": 8,
+    "FLOW_SEQUENCE_WIDTH": 16,
+    "FENCE_ID_WIDTH": 8,
+    "CONFIG_DATA_WIDTH": 64,
+    "CONFIG_VERSION_WIDTH": 16,
+    "CONFIG_TAG_WIDTH": 16,
+    "CONFIG_CRC_WIDTH": 32,
+    "RUNTIME_TAG_WIDTH": 16,
+    "DRAIN_TIMEOUT_CYCLES": 65535,
+    "ENABLE_LINK_PARITY": 0,
+    "BUFFER_PROTECTION": 0,
+    "CONTROL_PROTECTION": 0,
+    "ENABLE_FAULT_MASKS": 1,
+    "ENABLE_COUNTERS": 1,
+    "ENABLE_TRACE": 0,
+    "ASYNC_ENDPOINT_MASK": 0,
+    "ASYNC_RESET": 0,
+    "TRAFFIC_CLASS_TO_VC": 3984,
+    "TRAFFIC_CLASS_TO_SERVICE": 48
+  },
+  "layout_signature": 9912309107371750652,
+  "nodes": [
+    {
+      "id": 0,
+      "x": 0,
+      "y": 0,
+      "endpoint": 0,
+      "tx_channels": 4,
+      "rx_channels": 4
+    },
+    {
+      "id": 1,
+      "x": 1,
+      "y": 0,
+      "endpoint": 1,
+      "tx_channels": 4,
+      "rx_channels": 4
+    },
+    {
+      "id": 2,
+      "x": 0,
+      "y": 1,
+      "endpoint": 2,
+      "tx_channels": 4,
+      "rx_channels": 4
+    },
+    {
+      "id": 3,
+      "x": 1,
+      "y": 1,
+      "endpoint": 3,
+      "tx_channels": 4,
+      "rx_channels": 4
+    }
+  ],
+  "links": [
+    {
+      "id": 0,
+      "source": 0,
+      "port": 2,
+      "destination": 1,
+      "flit_stages": 0,
+      "requested_extra_flit_stages": 0,
+      "protection_boundary_stages": 0,
+      "credit_stages": 0,
+      "clock_domain": "noc",
+      "flow_control": 1
+    },
+    {
+      "id": 1,
+      "source": 0,
+      "port": 3,
+      "destination": 2,
+      "flit_stages": 0,
+      "requested_extra_flit_stages": 0,
+      "protection_boundary_stages": 0,
+      "credit_stages": 0,
+      "clock_domain": "noc",
+      "flow_control": 1
+    },
+    {
+      "id": 2,
+      "source": 1,
+      "port": 3,
+      "destination": 3,
+      "flit_stages": 0,
+      "requested_extra_flit_stages": 0,
+      "protection_boundary_stages": 0,
+      "credit_stages": 0,
+      "clock_domain": "noc",
+      "flow_control": 1
+    },
+    {
+      "id": 3,
+      "source": 1,
+      "port": 4,
+      "destination": 0,
+      "flit_stages": 0,
+      "requested_extra_flit_stages": 0,
+      "protection_boundary_stages": 0,
+      "credit_stages": 0,
+      "clock_domain": "noc",
+      "flow_control": 1
+    },
+    {
+      "id": 4,
+      "source": 2,
+      "port": 1,
+      "destination": 0,
+      "flit_stages": 0,
+      "requested_extra_flit_stages": 0,
+      "protection_boundary_stages": 0,
+      "credit_stages": 0,
+      "clock_domain": "noc",
+      "flow_control": 1
+    },
+    {
+      "id": 5,
+      "source": 2,
+      "port": 2,
+      "destination": 3,
+      "flit_stages": 0,
+      "requested_extra_flit_stages": 0,
+      "protection_boundary_stages": 0,
+      "credit_stages": 0,
+      "clock_domain": "noc",
+      "flow_control": 1
+    },
+    {
+      "id": 6,
+      "source": 3,
+      "port": 1,
+      "destination": 1,
+      "flit_stages": 0,
+      "requested_extra_flit_stages": 0,
+      "protection_boundary_stages": 0,
+      "credit_stages": 0,
+      "clock_domain": "noc",
+      "flow_control": 1
+    },
+    {
+      "id": 7,
+      "source": 3,
+      "port": 4,
+      "destination": 2,
+      "flit_stages": 0,
+      "requested_extra_flit_stages": 0,
+      "protection_boundary_stages": 0,
+      "credit_stages": 0,
+      "clock_domain": "noc",
+      "flow_control": 1
+    }
+  ],
+  "ports": {
+    "i_noc_clk": [
+      "Input",
+      "1"
+    ],
+    "i_noc_rstb": [
+      "Input",
+      "1"
+    ],
+    "i_run": [
+      "Input",
+      "1"
+    ],
+    "i_error_clear": [
+      "Input",
+      "1"
+    ],
+    "i_endpoint_clk": [
+      "Input",
+      "NE"
+    ],
+    "i_endpoint_rstb": [
+      "Input",
+      "NE"
+    ],
+    "i_drain_valid": [
+      "Input",
+      "1"
+    ],
+    "o_drain_ready": [
+      "Output",
+      "1"
+    ],
+    "i_drain_tag": [
+      "Input",
+      "RT"
+    ],
+    "i_flush_valid": [
+      "Input",
+      "1"
+    ],
+    "o_flush_ready": [
+      "Output",
+      "1"
+    ],
+    "i_flush_tag": [
+      "Input",
+      "RT"
+    ],
+    "i_drain_all": [
+      "Input",
+      "1"
+    ],
+    "i_drain_flow_mask": [
+      "Input",
+      "MF"
+    ],
+    "o_lifecycle_valid": [
+      "Output",
+      "1"
+    ],
+    "i_lifecycle_ready": [
+      "Input",
+      "1"
+    ],
+    "o_lifecycle_tag": [
+      "Output",
+      "RT"
+    ],
+    "o_lifecycle_status": [
+      "Output",
+      "3"
+    ],
+    "i_cfg_valid": [
+      "Input",
+      "1"
+    ],
+    "o_cfg_ready": [
+      "Output",
+      "1"
+    ],
+    "i_cfg_command": [
+      "Input",
+      "3"
+    ],
+    "i_cfg_owner_id": [
+      "Input",
+      "16"
+    ],
+    "i_cfg_kernel_id": [
+      "Input",
+      "16"
+    ],
+    "i_cfg_package_id": [
+      "Input",
+      "32"
+    ],
+    "i_cfg_expected_version": [
+      "Input",
+      "16"
+    ],
+    "i_cfg_word_index": [
+      "Input",
+      "16"
+    ],
+    "i_cfg_write_data": [
+      "Input",
+      "64"
+    ],
+    "i_cfg_write_strobe": [
+      "Input",
+      "8"
+    ],
+    "i_cfg_expected_crc": [
+      "Input",
+      "32"
+    ],
+    "i_cfg_tag": [
+      "Input",
+      "16"
+    ],
+    "o_cfg_response_valid": [
+      "Output",
+      "1"
+    ],
+    "i_cfg_response_ready": [
+      "Input",
+      "1"
+    ],
+    "o_cfg_response_status": [
+      "Output",
+      "4"
+    ],
+    "o_cfg_response_data": [
+      "Output",
+      "64"
+    ],
+    "o_cfg_response_version": [
+      "Output",
+      "16"
+    ],
+    "o_cfg_response_crc": [
+      "Output",
+      "32"
+    ],
+    "o_cfg_response_tag": [
+      "Output",
+      "16"
+    ],
+    "i_tile_tx_valid": [
+      "Input",
+      "NE*TX"
+    ],
+    "o_tile_tx_ready": [
+      "Output",
+      "NE*TX"
+    ],
+    "i_tile_tx_data": [
+      "Input",
+      "NE*TX*TD"
+    ],
+    "i_tile_tx_keep": [
+      "Input",
+      "NE*TX*TB"
+    ],
+    "i_tile_tx_last": [
+      "Input",
+      "NE*TX*1"
+    ],
+    "i_tile_tx_context_id": [
+      "Input",
+      "NE*TX*CX"
+    ],
+    "i_tile_tx_message_type": [
+      "Input",
+      "NE*TX*MT"
+    ],
+    "i_tile_tx_traffic_class": [
+      "Input",
+      "NE*TX*TC"
+    ],
+    "i_tile_tx_packet_id": [
+      "Input",
+      "NE*TX*PI"
+    ],
+    "i_tile_tx_user_metadata": [
+      "Input",
+      "NE*TX*U"
+    ],
+    "i_tile_tx_error": [
+      "Input",
+      "NE*TX*ER"
+    ],
+    "i_tile_tx_destination_node": [
+      "Input",
+      "NE*TX*N"
+    ],
+    "i_tile_tx_destination_endpoint": [
+      "Input",
+      "NE*TX*EP"
+    ],
+    "o_tile_rx_valid": [
+      "Output",
+      "NE*RX"
+    ],
+    "i_tile_rx_ready": [
+      "Input",
+      "NE*RX"
+    ],
+    "o_tile_rx_data": [
+      "Output",
+      "NE*RX*TD"
+    ],
+    "o_tile_rx_keep": [
+      "Output",
+      "NE*RX*TB"
+    ],
+    "o_tile_rx_last": [
+      "Output",
+      "NE*RX*1"
+    ],
+    "o_tile_rx_context_id": [
+      "Output",
+      "NE*RX*CX"
+    ],
+    "o_tile_rx_message_type": [
+      "Output",
+      "NE*RX*MT"
+    ],
+    "o_tile_rx_traffic_class": [
+      "Output",
+      "NE*RX*TC"
+    ],
+    "o_tile_rx_packet_id": [
+      "Output",
+      "NE*RX*PI"
+    ],
+    "o_tile_rx_user_metadata": [
+      "Output",
+      "NE*RX*U"
+    ],
+    "o_tile_rx_error": [
+      "Output",
+      "NE*RX*ER"
+    ],
+    "o_tile_rx_source_node": [
+      "Output",
+      "NE*RX*N"
+    ],
+    "o_tile_rx_source_endpoint": [
+      "Output",
+      "NE*RX*EP"
+    ],
+    "i_response_reserved": [
+      "Input",
+      "NE*TX"
+    ],
+    "o_configured": [
+      "Output",
+      "1"
+    ],
+    "o_running": [
+      "Output",
+      "1"
+    ],
+    "o_idle": [
+      "Output",
+      "1"
+    ],
+    "o_quiescent": [
+      "Output",
+      "1"
+    ],
+    "o_draining": [
+      "Output",
+      "1"
+    ],
+    "o_flushing": [
+      "Output",
+      "1"
+    ],
+    "o_router_idle": [
+      "Output",
+      "NN"
+    ],
+    "o_endpoint_idle": [
+      "Output",
+      "NE"
+    ],
+    "o_link_idle": [
+      "Output",
+      "NN*5"
+    ],
+    "o_flow_valid": [
+      "Output",
+      "MF"
+    ],
+    "o_flow_outstanding": [
+      "Output",
+      "MF*16"
+    ],
+    "o_link_epoch": [
+      "Output",
+      "NN*5*E"
+    ],
+    "o_execution_epoch": [
+      "Output",
+      "8"
+    ],
+    "o_active_version": [
+      "Output",
+      "16"
+    ],
+    "o_active_package_id": [
+      "Output",
+      "32"
+    ],
+    "o_router_input_vc_occupancy": [
+      "Output",
+      "NN*5*V*OCC"
+    ],
+    "o_router_output_credit_count": [
+      "Output",
+      "NN*5*V*CW"
+    ],
+    "o_endpoint_tx_queue_occupancy": [
+      "Output",
+      "NE*TX*TO"
+    ],
+    "o_endpoint_rx_vc_occupancy": [
+      "Output",
+      "NE*V*VO"
+    ],
+    "o_endpoint_rx_queue_occupancy": [
+      "Output",
+      "NE*RX*RO"
+    ],
+    "o_fault_mask": [
+      "Output",
+      "NN*5"
+    ],
+    "o_error": [
+      "Output",
+      "1"
+    ],
+    "o_error_code": [
+      "Output",
+      "8"
+    ],
+    "o_fatal_error": [
+      "Output",
+      "1"
+    ],
+    "o_error_flow": [
+      "Output",
+      "16"
+    ],
+    "o_error_endpoint": [
+      "Output",
+      "N"
+    ],
+    "o_accepted_packets": [
+      "Output",
+      "64"
+    ],
+    "o_delivered_packets": [
+      "Output",
+      "64"
+    ],
+    "o_discarded_packets": [
+      "Output",
+      "64"
+    ],
+    "o_class_packets": [
+      "Output",
+      "8*32"
+    ],
+    "o_flow_packets": [
+      "Output",
+      "MF*32"
+    ]
+  },
+  "dependency_graph": {
+    "nodes": [
+      [
+        0,
+        2,
+        0
+      ],
+      [
+        0,
+        2,
+        1
+      ],
+      [
+        0,
+        2,
+        2
+      ],
+      [
+        0,
+        2,
+        3
+      ],
+      [
+        0,
+        3,
+        0
+      ],
+      [
+        0,
+        3,
+        1
+      ],
+      [
+        0,
+        3,
+        2
+      ],
+      [
+        0,
+        3,
+        3
+      ],
+      [
+        1,
+        3,
+        0
+      ],
+      [
+        1,
+        3,
+        1
+      ],
+      [
+        1,
+        3,
+        2
+      ],
+      [
+        1,
+        3,
+        3
+      ],
+      [
+        1,
+        4,
+        0
+      ],
+      [
+        1,
+        4,
+        1
+      ],
+      [
+        1,
+        4,
+        2
+      ],
+      [
+        1,
+        4,
+        3
+      ],
+      [
+        2,
+        1,
+        0
+      ],
+      [
+        2,
+        1,
+        1
+      ],
+      [
+        2,
+        1,
+        2
+      ],
+      [
+        2,
+        1,
+        3
+      ],
+      [
+        2,
+        2,
+        0
+      ],
+      [
+        2,
+        2,
+        1
+      ],
+      [
+        2,
+        2,
+        2
+      ],
+      [
+        2,
+        2,
+        3
+      ],
+      [
+        3,
+        1,
+        0
+      ],
+      [
+        3,
+        1,
+        1
+      ],
+      [
+        3,
+        1,
+        2
+      ],
+      [
+        3,
+        1,
+        3
+      ],
+      [
+        3,
+        4,
+        0
+      ],
+      [
+        3,
+        4,
+        1
+      ],
+      [
+        3,
+        4,
+        2
+      ],
+      [
+        3,
+        4,
+        3
+      ]
+    ],
+    "edges": [
+      [
+        [
+          0,
+          2,
+          0
+        ],
+        [
+          1,
+          3,
+          0
+        ]
+      ],
+      [
+        [
+          0,
+          2,
+          1
+        ],
+        [
+          1,
+          3,
+          1
+        ]
+      ],
+      [
+        [
+          0,
+          2,
+          2
+        ],
+        [
+          1,
+          3,
+          2
+        ]
+      ],
+      [
+        [
+          0,
+          2,
+          3
+        ],
+        [
+          1,
+          3,
+          3
+        ]
+      ],
+      [
+        [
+          1,
+          4,
+          0
+        ],
+        [
+          0,
+          3,
+          0
+        ]
+      ],
+      [
+        [
+          1,
+          4,
+          1
+        ],
+        [
+          0,
+          3,
+          1
+        ]
+      ],
+      [
+        [
+          1,
+          4,
+          2
+        ],
+        [
+          0,
+          3,
+          2
+        ]
+      ],
+      [
+        [
+          1,
+          4,
+          3
+        ],
+        [
+          0,
+          3,
+          3
+        ]
+      ],
+      [
+        [
+          2,
+          2,
+          0
+        ],
+        [
+          3,
+          1,
+          0
+        ]
+      ],
+      [
+        [
+          2,
+          2,
+          1
+        ],
+        [
+          3,
+          1,
+          1
+        ]
+      ],
+      [
+        [
+          2,
+          2,
+          2
+        ],
+        [
+          3,
+          1,
+          2
+        ]
+      ],
+      [
+        [
+          2,
+          2,
+          3
+        ],
+        [
+          3,
+          1,
+          3
+        ]
+      ],
+      [
+        [
+          3,
+          4,
+          0
+        ],
+        [
+          2,
+          1,
+          0
+        ]
+      ],
+      [
+        [
+          3,
+          4,
+          1
+        ],
+        [
+          2,
+          1,
+          1
+        ]
+      ],
+      [
+        [
+          3,
+          4,
+          2
+        ],
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      [
+        [
+          3,
+          4,
+          3
+        ],
+        [
+          2,
+          1,
+          3
+        ]
+      ]
+    ],
+    "acyclic": true,
+    "scope": "router dimension-order channels only; external protocol proof deferred"
+  },
+  "components": [
+    "noc_router",
+    "tile_network_interface",
+    "skid_buffer",
+    "dff",
+    "event_barrier_queue",
+    "fifo",
+    "counter",
+    "round_robin_arbiter",
+    "parity",
+    "ecc"
+  ],
+  "metadata": {
+    "flow_id": [
+      0,
+      16
+    ],
+    "allocation_generation": [
+      16,
+      16
+    ],
+    "execution_epoch": [
+      32,
+      8
+    ],
+    "package_slot": [
+      40,
+      8
+    ],
+    "sequence": [
+      48,
+      16
+    ]
+  },
+  "config": {
+    "words": 70,
+    "crc": "CRC32C, reflected, init/final xor FFFFFFFF, little-endian words",
+    "header": [
+      "layout_signature",
+      "protocol_id"
+    ],
+    "flow_words": 4
+  },
+  "assumptions": [
+    "response capacity reserved before request acceptance",
+    "dedicated critical RX channel remains serviceable",
+    "application fences wait for selected drain completion before acknowledgement",
+    "endpoint consumption is eventually fair",
+    "dedicated configuration hierarchy authenticates infrastructure control"
+  ],
+  "unsupported": [
+    "asynchronous endpoint clocks/reset",
+    "clock/power-domain switching",
+    "control-state protection",
+    "trace",
+    "sparse topologies",
+    "adaptive routing",
+    "beat segmentation beyond fixed envelope",
+    "hardware multicast/reduction",
+    "autonomous request trackers/fence generation/response acknowledgements"
+  ],
+  "signoff": {
+    "python_simulation": "see regression summary",
+    "hdl_assertions": "NOT_RUN",
+    "formal": "NOT_RUN",
+    "lint": "NOT_RUN",
+    "synthesis": "Design Compiler (deferred)",
+    "physical": "NOT_RUN",
+    "power": "NOT_RUN"
+  },
+  "source_sha256": {
+    "src/rtl/building_blocks/noc_router_pkg.sv": "3454a194a26083391d1f8190d0bcb92c0ba84d0fa99746c8bf5179012c72b3d3",
+    "src/rtl/building_blocks/tile_network_interface_pkg.sv": "2fb8ad9f03f9b8871b172d0e5a8bb7701f818323e63285d3b39d70a3192ac6a2",
+    "src/rtl/mosaic_blocks/global_noc_pkg.sv": "326c7a1d42a4ec3251f88cd2302f0c8cbd547e4cea8b7e6372828c7beae4b967",
+    "src/rtl/common/dff.sv": "578b511eedf04e100d039f14c35998d8079653fd2006c33baad432ea4622fd38",
+    "src/rtl/common/counter.sv": "d02f311941ef1fc913b80ab2bb5d66cdc35c817dddacb459e7400b9597d8806f",
+    "src/rtl/common/decoder.sv": "ed39d268ad87f931ada335a517e850a0c300f6275d3ffce969150e5422c836cf",
+    "src/rtl/common/mux.sv": "4baec3ae2e53d24121c28f4012839ac6b488249baa4801530d0f5547af6602c5",
+    "src/rtl/common/operand_isolation.sv": "0ee8a947cb68dcc40f0100ef9eeb5ae1cfc2c60cc0e56957dfac553bc2b5fc51",
+    "src/rtl/common/priority_encoder.sv": "78ae31ee0db47b901b7b3df785574cfe50436afdf7029b4aa4d3e1346ac58f4c",
+    "src/rtl/basic/fifo.sv": "0937c66148bce63f3ff912a300f28cd4aedc215fab7ba936b53174c170f51a79",
+    "src/rtl/basic/parity.sv": "cb503fb1f9d3ad04c9d1e307f675715e22a555c4ba108b3cad1a5ec1efb63ab6",
+    "src/rtl/basic/ecc.sv": "68220c6730934a6d640490c8c6fa8d8c119d47ef2c7522091267b7206df1bb11",
+    "src/rtl/basic/round_robin_arbiter.sv": "82b9032c942a8221c373b36b4aca58ef03175f4923553a5532d25d1c157d5720",
+    "src/rtl/basic/skid_buffer.sv": "9a7aa4b79f426f3d22058ed0f8fade17be96d67cdffa4cb0c8d711318c0a68c6",
+    "src/rtl/building_blocks/event_barrier_state.sv": "0b04b66385ce678b62d08ad6b4db0a4b27f21f41c7affdb315fc855a3ff85a51",
+    "src/rtl/building_blocks/event_barrier_queue.sv": "0c3c936f9aed20e76e8c84d983dff23fb4c64748c4aea7c09954eef0ad63aca9",
+    "src/rtl/building_blocks/noc_router_codec.sv": "f661fb75c22125a2a173271a9f685e03c62abce06b59b7bc884a2d966756f335",
+    "src/rtl/building_blocks/noc_router_buffer.sv": "91a15f115a63f044a4e48a4903ec9686ef5616ef3b5048686fde675d53840e9c",
+    "src/rtl/building_blocks/noc_router.sv": "36ea3a2e76bcb0e2e49e1fad805911456cc32dfda5ee88baa895e0bfbb984578",
+    "src/rtl/building_blocks/tile_network_interface.sv": "fdc22ab96a18c0c133708645bf79a1d82bc829ef74b42fb212e48f043be7eeb0",
+    "src/rtl/mosaic_blocks/global_noc_link.sv": "a9a2d872565b2b48c3c6b0c6b2222e250c15b71f56af72070d5bf800332b2f7c",
+    "src/rtl/mosaic_blocks/global_noc.sv": "a84183eda2fcd905911d71b4733234664afe08c008de914feefde8a98f2387fc"
+  },
+  "contract_sha256": "a5c6008764d035d3f914aa4d2ff0b53bde369277de4be08e6c3c7b351310194a"
+}

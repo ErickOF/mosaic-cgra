@@ -1510,3 +1510,18 @@ Local and Cluster profiles support reliable event records and explicit tagged
 coordination. See the [CPT validation contract](src/val/mosaic_blocks/cpt/README.md)
 for the public ABI, supported limits and Python-only evidence. Synthesis remains
 deferred to Design Compiler.
+
+Run the global NoC specification campaign:
+
+```sh
+make global-noc-generate
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=global_noc
+make global-noc-regression SIM=icarus
+```
+
+The global NoC composes real routers and tile network interfaces into a rectangular
+mesh, with flow bindings, dedicated configuration, packet credit reservations,
+epochs, coordinated drain/flush and public accounting. See the
+[global NoC validation contract](src/val/mosaic_blocks/global_noc/README.md) for the
+ABI, supported profiles, endpoint integration obligations and Python-only test
+coverage. Synthesis remains deferred to Design Compiler.
