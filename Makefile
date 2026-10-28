@@ -481,6 +481,29 @@ _RTL_SOURCES_sft := $(_SFT_SOURCES)
 _CPT_SOURCES := $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_pkg.sv $(PROJECT_ROOT)/src/rtl/basic/context_sequencer_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/tile_power_controller_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/predicate_unit_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/loop_controller_pkg.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/cpt_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/reset_synchronizer.sv $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv $(PROJECT_ROOT)/src/rtl/common/write_gate.sv $(PROJECT_ROOT)/src/rtl/common/lane_mask.sv $(PROJECT_ROOT)/src/rtl/common/mux.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/ecc.sv $(PROJECT_ROOT)/src/rtl/basic/context_memory.sv $(PROJECT_ROOT)/src/rtl/basic/context_sequencer.sv $(PROJECT_ROOT)/src/rtl/basic/async_fifo.sv $(PROJECT_ROOT)/src/rtl/basic/performance_counters.sv $(PROJECT_ROOT)/src/rtl/basic/register_file.sv $(PROJECT_ROOT)/src/rtl/basic/packer.sv $(PROJECT_ROOT)/src/rtl/basic/stream_join.sv $(PROJECT_ROOT)/src/rtl/basic/round_robin_arbiter.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier.sv $(PROJECT_ROOT)/src/rtl/building_blocks/loop_controller.sv $(PROJECT_ROOT)/src/rtl/building_blocks/tile_power_controller.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_codec.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_state.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_queue.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell.sv $(PROJECT_ROOT)/src/rtl/building_blocks/predicate_unit.sv $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/cpt_actions.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/cpt_egress.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/cpt_body.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/cpt.sv
 _RTL_SOURCES_cpt := $(_CPT_SOURCES)
 _RTL_SOURCES_cluster = $(addprefix $(PROJECT_ROOT)/,$(file <$(PROJECT_ROOT)/src/gen/cluster/generated/sources.f))
+_GLOBAL_NOC_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/noc_router_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/tile_network_interface_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/global_noc_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/common/dff.sv \
+    $(PROJECT_ROOT)/src/rtl/common/counter.sv \
+    $(PROJECT_ROOT)/src/rtl/common/decoder.sv \
+    $(PROJECT_ROOT)/src/rtl/common/mux.sv \
+    $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv \
+    $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/fifo.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/parity.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/ecc.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/round_robin_arbiter.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/skid_buffer.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/noc_router_codec.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/noc_router_buffer.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/noc_router.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/tile_network_interface.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/global_noc_link.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/global_noc.sv
+_RTL_SOURCES_global_noc := $(_GLOBAL_NOC_SOURCES)
 VERILOG_SOURCES ?= $(or $(_RTL_SOURCES_$(COCOTB_TOPLEVEL)),$(firstword $(wildcard $(PROJECT_ROOT)/src/rtl/*/$(COCOTB_TOPLEVEL).sv)),$(PROJECT_ROOT)/src/rtl/common/$(COCOTB_TOPLEVEL).sv)
 SIM_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/$(COCOTB_TOPLEVEL)
 COCOTB_RESULTS_FILE ?= $(SIM_BUILD)/results.xml
@@ -2230,3 +2253,16 @@ cpt-regression:
 
 cpt-generate:
 	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/gen/cpt/generate.py"
+
+GLOBAL_NOC_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/global_noc/regression
+GLOBAL_NOC_SEED ?= 20261027
+GLOBAL_NOC_RANDOM_CYCLES ?= 2000
+GLOBAL_NOC_REGRESSION_ARGS ?=
+.PHONY: global-noc-generate global-noc-regression
+global-noc-generate:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/gen/global_noc/generate.py"
+global-noc-regression:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/val/mosaic_blocks/global_noc/run_global_noc_regression.py" \
+		--sim "$(SIM)" --build-dir "$(GLOBAL_NOC_REGRESSION_BUILD)" \
+		--seed "$(GLOBAL_NOC_SEED)" --random-cycles "$(GLOBAL_NOC_RANDOM_CYCLES)" \
+		$(GLOBAL_NOC_REGRESSION_ARGS)
