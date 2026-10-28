@@ -1,0 +1,1375 @@
+{
+  "schema": "mosaic-runtime-controller-v1",
+  "reconciliation_abi": 5571608052282425345,
+  "parameters": {
+    "RUNTIME_PROFILE": 1,
+    "NUM_CLUSTERS": 4,
+    "MAX_PENDING_KERNELS": 8,
+    "MAX_ACTIVE_KERNELS": 4,
+    "MAX_OWNERS": 4,
+    "MAX_PACKAGE_VARIANTS": 4,
+    "MAX_CLUSTERS_PER_KERNEL": 4,
+    "MAX_DMA_CHANNELS": 4,
+    "MAX_MEMORY_PORTS": 4,
+    "MAX_SCRATCHPAD_REGIONS": 16,
+    "MAX_EVENT_NAMESPACES": 16,
+    "MAX_NOC_QOS_PROFILES": 4,
+    "MAX_MEMORY_QOS_PROFILES": 4,
+    "MAX_POWER_PROFILES": 4,
+    "NUM_PRIORITY_LEVELS": 4,
+    "SUBMISSION_QUEUE_DEPTH": 8,
+    "ACTION_QUEUE_DEPTH": 8,
+    "RESPONSE_QUEUE_DEPTH": 8,
+    "EVENT_QUEUE_DEPTH": 16,
+    "COUNTER_SNAPSHOT_SLOTS": 4,
+    "AGE_COUNTER_WIDTH": 16,
+    "HIGH_PRIORITY_BURST_LIMIT": 8,
+    "AGE_ESCALATION_CYCLES": 4096,
+    "POLICY_SAMPLE_INTERVAL": 4096,
+    "ACTION_TIMEOUT_CYCLES": 1048575,
+    "KERNEL_TIMEOUT_CYCLES": 0,
+    "ENABLE_QOS": 1,
+    "ENABLE_DEADLINE_MONITORING": 1,
+    "ENABLE_SAFE_SUSPEND": 1,
+    "ENABLE_RESOURCE_RESIZING": 0,
+    "ENABLE_MIGRATION": 0,
+    "ENABLE_POWER_POLICY": 1,
+    "ENABLE_COUNTER_FEEDBACK": 1,
+    "ENABLE_FAULT_AWARE_ALLOCATION": 1,
+    "ENABLE_TRACE": 0,
+    "CONTROL_PROTECTION": 0,
+    "ASYNC_SYSTEM_CLOCK": 0,
+    "ASYNC_ARRAY_CLOCK": 0,
+    "ASYNC_EVENT_CLOCK": 0,
+    "ASYNC_RESET": 0,
+    "ARCHITECTURE_ID": 1297044225,
+    "PROTOCOL_PROOF_ID": 1,
+    "MEMORY_BANDWIDTH_CAPACITY": 1000,
+    "NOC_BANDWIDTH_CAPACITY": 1000,
+    "POWER_CAPACITY": 1000,
+    "ENFORCED_SERVICE_MASK": 63,
+    "OWNER_ID_WIDTH": 16,
+    "KERNEL_ID_WIDTH": 16,
+    "DESCRIPTOR_ID_WIDTH": 16,
+    "DESCRIPTOR_GENERATION_WIDTH": 16,
+    "PACKAGE_ID_WIDTH": 32,
+    "MAPPING_ID_WIDTH": 32,
+    "CONTEXT_ID_WIDTH": 8,
+    "CLUSTER_ID_WIDTH": 8,
+    "EXECUTION_EPOCH_WIDTH": 8,
+    "ALLOCATION_GENERATION_WIDTH": 16,
+    "RUNTIME_TAG_WIDTH": 16,
+    "EVENT_SEQUENCE_WIDTH": 16,
+    "TIMESTAMP_WIDTH": 64,
+    "DEADLINE_WIDTH": 64,
+    "ESTIMATED_CYCLES_WIDTH": 48,
+    "BANDWIDTH_WIDTH": 32,
+    "POWER_BUDGET_WIDTH": 32,
+    "ENERGY_BUDGET_WIDTH": 48,
+    "CLUSTER_PRESENT_MASK": 15,
+    "CLUSTER_CAPABILITY_TABLE": 340282366920938463463374607431768211455,
+    "CLUSTER_COMPATIBILITY_TABLE": 4222189076152335,
+    "CLUSTER_MEMORY_PORT_TABLE": 4222189076152335,
+    "CLUSTER_SCRATCHPAD_REGION_TABLE": 5192217631581220737344928932233215,
+    "OWNER_ID_TABLE": 1125912791875585
+  },
+  "clusters": [
+    {
+      "id": 0,
+      "present": true,
+      "capabilities": 4294967295,
+      "compatible_clusters": 15,
+      "memory_ports": 15,
+      "scratchpad_regions": 65535,
+      "clock_domain": "runtime_sync",
+      "power_domain": "external_peer"
+    },
+    {
+      "id": 1,
+      "present": true,
+      "capabilities": 4294967295,
+      "compatible_clusters": 15,
+      "memory_ports": 15,
+      "scratchpad_regions": 65535,
+      "clock_domain": "runtime_sync",
+      "power_domain": "external_peer"
+    },
+    {
+      "id": 2,
+      "present": true,
+      "capabilities": 4294967295,
+      "compatible_clusters": 15,
+      "memory_ports": 15,
+      "scratchpad_regions": 65535,
+      "clock_domain": "runtime_sync",
+      "power_domain": "external_peer"
+    },
+    {
+      "id": 3,
+      "present": true,
+      "capabilities": 4294967295,
+      "compatible_clusters": 15,
+      "memory_ports": 15,
+      "scratchpad_regions": 65535,
+      "clock_domain": "runtime_sync",
+      "power_domain": "external_peer"
+    }
+  ],
+  "ports": {
+    "i_clk": [
+      "input",
+      "1"
+    ],
+    "i_rstb": [
+      "input",
+      "1"
+    ],
+    "i_clock_ready": [
+      "input",
+      "1"
+    ],
+    "i_power_good": [
+      "input",
+      "1"
+    ],
+    "i_test_mode": [
+      "input",
+      "1"
+    ],
+    "i_scan_enable": [
+      "input",
+      "1"
+    ],
+    "o_clock_enable": [
+      "output",
+      "1"
+    ],
+    "o_retention_save": [
+      "output",
+      "1"
+    ],
+    "o_retention_restore": [
+      "output",
+      "1"
+    ],
+    "o_isolation_enable": [
+      "output",
+      "1"
+    ],
+    "o_idle": [
+      "output",
+      "1"
+    ],
+    "o_quiescent": [
+      "output",
+      "1"
+    ],
+    "o_recovery_required": [
+      "output",
+      "1"
+    ],
+    "o_integrity_error": [
+      "output",
+      "1"
+    ],
+    "i_reconcile_valid": [
+      "input",
+      "1"
+    ],
+    "i_reconcile_clean": [
+      "input",
+      "1"
+    ],
+    "o_reconcile_ready": [
+      "output",
+      "1"
+    ],
+    "i_reconcile_manifest": [
+      "input",
+      "64"
+    ],
+    "i_reconcile_cluster_busy_mask": [
+      "input",
+      "NUM_CLUSTERS"
+    ],
+    "i_reconcile_service_busy": [
+      "input",
+      "6"
+    ],
+    "i_reconcile_tag_base": [
+      "input",
+      "16"
+    ],
+    "i_reconcile_allocation_base": [
+      "input",
+      "16"
+    ],
+    "i_reconcile_epoch_base": [
+      "input",
+      "8"
+    ],
+    "i_submit_valid": [
+      "input",
+      "1"
+    ],
+    "i_submit_integrity_valid": [
+      "input",
+      "1"
+    ],
+    "i_submit_admission_class": [
+      "input",
+      "1"
+    ],
+    "o_submit_ready": [
+      "output",
+      "1"
+    ],
+    "i_submit_descriptor_id": [
+      "input",
+      "16"
+    ],
+    "i_submit_descriptor_generation": [
+      "input",
+      "16"
+    ],
+    "i_submit_owner_id": [
+      "input",
+      "16"
+    ],
+    "i_submit_kernel_id": [
+      "input",
+      "16"
+    ],
+    "i_submit_contract_version": [
+      "input",
+      "16"
+    ],
+    "i_submit_priority": [
+      "input",
+      "8"
+    ],
+    "i_submit_deadline": [
+      "input",
+      "64"
+    ],
+    "i_submit_estimated_cycles": [
+      "input",
+      "48"
+    ],
+    "i_submit_required_clusters": [
+      "input",
+      "8"
+    ],
+    "i_submit_preferred_clusters": [
+      "input",
+      "8"
+    ],
+    "i_submit_required_capabilities": [
+      "input",
+      "32"
+    ],
+    "i_submit_variant_count": [
+      "input",
+      "8"
+    ],
+    "i_submit_variant_records": [
+      "input",
+      "MAX_PACKAGE_VARIANTS*256"
+    ],
+    "i_submit_resource_record": [
+      "input",
+      "256"
+    ],
+    "i_submit_qos_record": [
+      "input",
+      "128"
+    ],
+    "i_submit_power_record": [
+      "input",
+      "128"
+    ],
+    "i_submit_lifecycle_record": [
+      "input",
+      "128"
+    ],
+    "i_submit_tag": [
+      "input",
+      "16"
+    ],
+    "o_admission_valid": [
+      "output",
+      "1"
+    ],
+    "i_admission_ready": [
+      "input",
+      "1"
+    ],
+    "o_admission_record": [
+      "output",
+      "199"
+    ],
+    "o_result_valid": [
+      "output",
+      "1"
+    ],
+    "i_result_ready": [
+      "input",
+      "1"
+    ],
+    "o_result_record": [
+      "output",
+      "199"
+    ],
+    "o_runtime_event_valid": [
+      "output",
+      "1"
+    ],
+    "i_runtime_event_ready": [
+      "input",
+      "1"
+    ],
+    "o_runtime_event_record": [
+      "output",
+      "228"
+    ],
+    "o_policy_response_valid": [
+      "output",
+      "1"
+    ],
+    "i_policy_response_ready": [
+      "input",
+      "1"
+    ],
+    "o_policy_response_record": [
+      "output",
+      "184"
+    ],
+    "i_policy_valid": [
+      "input",
+      "1"
+    ],
+    "o_policy_ready": [
+      "output",
+      "1"
+    ],
+    "i_policy_record": [
+      "input",
+      "278"
+    ],
+    "i_event_valid": [
+      "input",
+      "1"
+    ],
+    "o_event_ready": [
+      "output",
+      "1"
+    ],
+    "i_event_record": [
+      "input",
+      "294"
+    ],
+    "i_snapshot_valid": [
+      "input",
+      "1"
+    ],
+    "o_snapshot_ready": [
+      "output",
+      "1"
+    ],
+    "i_snapshot_record": [
+      "input",
+      "505"
+    ],
+    "o_array_runtime_valid": [
+      "output",
+      "1"
+    ],
+    "i_array_runtime_ready": [
+      "input",
+      "1"
+    ],
+    "o_array_runtime_record": [
+      "output",
+      "917"
+    ],
+    "i_array_runtime_response_valid": [
+      "input",
+      "1"
+    ],
+    "o_array_runtime_response_ready": [
+      "output",
+      "1"
+    ],
+    "i_array_runtime_response_record": [
+      "input",
+      "216"
+    ],
+    "o_service_valid": [
+      "output",
+      "6"
+    ],
+    "i_service_ready": [
+      "input",
+      "6"
+    ],
+    "o_service_record": [
+      "output",
+      "5502"
+    ],
+    "i_service_response_valid": [
+      "input",
+      "6"
+    ],
+    "o_service_response_ready": [
+      "output",
+      "6"
+    ],
+    "i_service_response_record": [
+      "input",
+      "1296"
+    ],
+    "o_cluster_reserved_mask": [
+      "output",
+      "NUM_CLUSTERS"
+    ],
+    "o_cluster_fault_mask": [
+      "output",
+      "NUM_CLUSTERS"
+    ],
+    "o_pending_count": [
+      "output",
+      "8"
+    ],
+    "o_active_count": [
+      "output",
+      "8"
+    ],
+    "o_record_valid": [
+      "output",
+      "MAX_PENDING_KERNELS"
+    ],
+    "o_record_state": [
+      "output",
+      "MAX_PENDING_KERNELS*5"
+    ],
+    "o_record_identity": [
+      "output",
+      "MAX_PENDING_KERNELS*152"
+    ],
+    "o_record_cluster_mask": [
+      "output",
+      "MAX_PENDING_KERNELS*16"
+    ],
+    "o_record_age": [
+      "output",
+      "MAX_PENDING_KERNELS*AGE_COUNTER_WIDTH"
+    ],
+    "o_record_run_cycles": [
+      "output",
+      "MAX_PENDING_KERNELS*64"
+    ],
+    "o_record_snapshot_metrics": [
+      "output",
+      "MAX_PENDING_KERNELS*256"
+    ],
+    "o_time": [
+      "output",
+      "64"
+    ],
+    "o_action_active": [
+      "output",
+      "1"
+    ],
+    "o_action_sent": [
+      "output",
+      "1"
+    ],
+    "o_action_timed_out": [
+      "output",
+      "1"
+    ],
+    "o_action_record": [
+      "output",
+      "917"
+    ],
+    "o_action_endpoint": [
+      "output",
+      "3"
+    ],
+    "o_action_timer": [
+      "output",
+      "32"
+    ],
+    "o_error_code": [
+      "output",
+      "8"
+    ],
+    "i_counter_read": [
+      "input",
+      "1"
+    ],
+    "i_counter_index": [
+      "input",
+      "4"
+    ],
+    "i_counter_snapshot": [
+      "input",
+      "1"
+    ],
+    "o_counter_valid": [
+      "output",
+      "1"
+    ],
+    "o_counter_data": [
+      "output",
+      "64"
+    ],
+    "o_counter_overflow": [
+      "output",
+      "1"
+    ],
+    "o_record_deadline_warned": [
+      "output",
+      "MAX_PENDING_KERNELS"
+    ],
+    "o_diagnostic_overflow": [
+      "output",
+      "1"
+    ],
+    "o_record_reserved": [
+      "output",
+      "MAX_PENDING_KERNELS"
+    ],
+    "o_record_array_owned": [
+      "output",
+      "MAX_PENDING_KERNELS"
+    ],
+    "o_record_service_owned": [
+      "output",
+      "MAX_PENDING_KERNELS*6"
+    ],
+    "o_record_allocated_cycles": [
+      "output",
+      "MAX_PENDING_KERNELS*64"
+    ],
+    "o_scheduler_eligible": [
+      "output",
+      "MAX_PENDING_KERNELS"
+    ],
+    "o_scheduler_rank": [
+      "output",
+      "MAX_PENDING_KERNELS*8"
+    ],
+    "o_scheduler_grant_valid": [
+      "output",
+      "1"
+    ],
+    "o_scheduler_grant_index": [
+      "output",
+      "4"
+    ],
+    "o_dma_reserved_mask": [
+      "output",
+      "16"
+    ],
+    "o_memory_reserved_mask": [
+      "output",
+      "16"
+    ],
+    "o_scratchpad_reserved_mask": [
+      "output",
+      "32"
+    ],
+    "o_event_reserved_mask": [
+      "output",
+      "32"
+    ],
+    "o_counter_reserved_mask": [
+      "output",
+      "16"
+    ],
+    "o_memory_bandwidth_reserved": [
+      "output",
+      "64"
+    ],
+    "o_noc_bandwidth_reserved": [
+      "output",
+      "64"
+    ],
+    "o_power_reserved": [
+      "output",
+      "64"
+    ],
+    "i_counter_read_snapshot": [
+      "input",
+      "1"
+    ],
+    "o_counter_snapshot_valid": [
+      "output",
+      "1"
+    ]
+  },
+  "layouts": {
+    "identity": {
+      "owner_id": {
+        "lsb": 0,
+        "width": 16
+      },
+      "kernel_id": {
+        "lsb": 16,
+        "width": 16
+      },
+      "descriptor_id": {
+        "lsb": 32,
+        "width": 16
+      },
+      "descriptor_generation": {
+        "lsb": 48,
+        "width": 16
+      },
+      "package_id": {
+        "lsb": 64,
+        "width": 32
+      },
+      "mapping_id": {
+        "lsb": 96,
+        "width": 32
+      },
+      "allocation_generation": {
+        "lsb": 128,
+        "width": 16
+      },
+      "epoch": {
+        "lsb": 144,
+        "width": 8
+      }
+    },
+    "variant": {
+      "package_id": {
+        "lsb": 0,
+        "width": 32
+      },
+      "mapping_id": {
+        "lsb": 32,
+        "width": 32
+      },
+      "cluster_mask": {
+        "lsb": 64,
+        "width": 16
+      },
+      "cluster_count": {
+        "lsb": 80,
+        "width": 8
+      },
+      "required_capabilities": {
+        "lsb": 88,
+        "width": 32
+      },
+      "architecture_id": {
+        "lsb": 120,
+        "width": 32
+      },
+      "proof_id": {
+        "lsb": 152,
+        "width": 32
+      },
+      "noc_profile": {
+        "lsb": 184,
+        "width": 4
+      },
+      "memory_profile": {
+        "lsb": 188,
+        "width": 4
+      },
+      "power_profile": {
+        "lsb": 192,
+        "width": 4
+      },
+      "flags": {
+        "lsb": 196,
+        "width": 8
+      },
+      "energy_model_id": {
+        "lsb": 204,
+        "width": 32
+      },
+      "reserved": {
+        "lsb": 236,
+        "width": 20
+      }
+    },
+    "resource": {
+      "dma_mask": {
+        "lsb": 0,
+        "width": 16
+      },
+      "memory_mask": {
+        "lsb": 16,
+        "width": 16
+      },
+      "scratchpad_mask": {
+        "lsb": 32,
+        "width": 32
+      },
+      "event_mask": {
+        "lsb": 64,
+        "width": 32
+      },
+      "noc_bandwidth": {
+        "lsb": 96,
+        "width": 32
+      },
+      "memory_bandwidth": {
+        "lsb": 128,
+        "width": 32
+      },
+      "power": {
+        "lsb": 160,
+        "width": 32
+      },
+      "counter_mask": {
+        "lsb": 192,
+        "width": 16
+      },
+      "services": {
+        "lsb": 208,
+        "width": 6
+      },
+      "flags": {
+        "lsb": 214,
+        "width": 8
+      },
+      "reserved": {
+        "lsb": 222,
+        "width": 34
+      }
+    },
+    "qos": {
+      "memory_minimum": {
+        "lsb": 0,
+        "width": 32
+      },
+      "noc_minimum": {
+        "lsb": 32,
+        "width": 32
+      },
+      "latency_limit": {
+        "lsb": 64,
+        "width": 32
+      },
+      "flags": {
+        "lsb": 96,
+        "width": 8
+      },
+      "reserved": {
+        "lsb": 104,
+        "width": 24
+      }
+    },
+    "power": {
+      "budget": {
+        "lsb": 0,
+        "width": 32
+      },
+      "energy_budget": {
+        "lsb": 32,
+        "width": 48
+      },
+      "profile_mask": {
+        "lsb": 80,
+        "width": 16
+      },
+      "flags": {
+        "lsb": 96,
+        "width": 8
+      },
+      "reserved": {
+        "lsb": 104,
+        "width": 24
+      }
+    },
+    "lifecycle": {
+      "flags": {
+        "lsb": 0,
+        "width": 8
+      },
+      "action_timeout": {
+        "lsb": 8,
+        "width": 32
+      },
+      "kernel_timeout": {
+        "lsb": 40,
+        "width": 32
+      },
+      "safe_point_id": {
+        "lsb": 72,
+        "width": 8
+      },
+      "resume_cookie": {
+        "lsb": 80,
+        "width": 32
+      },
+      "reserved": {
+        "lsb": 112,
+        "width": 16
+      }
+    },
+    "action": {
+      "identity": {
+        "lsb": 0,
+        "width": 152
+      },
+      "command": {
+        "lsb": 152,
+        "width": 5
+      },
+      "cluster_mask": {
+        "lsb": 157,
+        "width": 16
+      },
+      "resource_mask": {
+        "lsb": 173,
+        "width": 64
+      },
+      "profile": {
+        "lsb": 237,
+        "width": 8
+      },
+      "flags": {
+        "lsb": 245,
+        "width": 16
+      },
+      "tag": {
+        "lsb": 261,
+        "width": 16
+      },
+      "resources": {
+        "lsb": 277,
+        "width": 256
+      },
+      "qos": {
+        "lsb": 533,
+        "width": 128
+      },
+      "power": {
+        "lsb": 661,
+        "width": 128
+      },
+      "lifecycle": {
+        "lsb": 789,
+        "width": 128
+      }
+    },
+    "ack": {
+      "identity": {
+        "lsb": 0,
+        "width": 152
+      },
+      "command": {
+        "lsb": 152,
+        "width": 5
+      },
+      "cluster_mask": {
+        "lsb": 157,
+        "width": 16
+      },
+      "status": {
+        "lsb": 173,
+        "width": 3
+      },
+      "error": {
+        "lsb": 176,
+        "width": 8
+      },
+      "flags": {
+        "lsb": 184,
+        "width": 16
+      },
+      "tag": {
+        "lsb": 200,
+        "width": 16
+      }
+    },
+    "notice": {
+      "identity": {
+        "lsb": 0,
+        "width": 152
+      },
+      "status": {
+        "lsb": 152,
+        "width": 3
+      },
+      "error": {
+        "lsb": 155,
+        "width": 8
+      },
+      "cluster_mask": {
+        "lsb": 163,
+        "width": 16
+      },
+      "tag": {
+        "lsb": 179,
+        "width": 16
+      },
+      "slot": {
+        "lsb": 195,
+        "width": 4
+      }
+    },
+    "policy": {
+      "identity": {
+        "lsb": 0,
+        "width": 152
+      },
+      "command": {
+        "lsb": 152,
+        "width": 4
+      },
+      "authorized": {
+        "lsb": 156,
+        "width": 1
+      },
+      "destructive": {
+        "lsb": 157,
+        "width": 1
+      },
+      "priority_limit": {
+        "lsb": 158,
+        "width": 8
+      },
+      "power_budget": {
+        "lsb": 166,
+        "width": 32
+      },
+      "bandwidth_budget": {
+        "lsb": 198,
+        "width": 32
+      },
+      "resume_cookie": {
+        "lsb": 230,
+        "width": 32
+      },
+      "tag": {
+        "lsb": 262,
+        "width": 16
+      }
+    },
+    "policy_reply": {
+      "identity": {
+        "lsb": 0,
+        "width": 152
+      },
+      "status": {
+        "lsb": 152,
+        "width": 3
+      },
+      "error": {
+        "lsb": 155,
+        "width": 8
+      },
+      "state": {
+        "lsb": 163,
+        "width": 5
+      },
+      "tag": {
+        "lsb": 168,
+        "width": 16
+      }
+    },
+    "event": {
+      "identity": {
+        "lsb": 0,
+        "width": 152
+      },
+      "event_type": {
+        "lsb": 152,
+        "width": 4
+      },
+      "source": {
+        "lsb": 156,
+        "width": 8
+      },
+      "cluster_mask": {
+        "lsb": 164,
+        "width": 16
+      },
+      "sequence_id": {
+        "lsb": 180,
+        "width": 16
+      },
+      "timestamp": {
+        "lsb": 196,
+        "width": 64
+      },
+      "payload": {
+        "lsb": 260,
+        "width": 32
+      },
+      "severity": {
+        "lsb": 292,
+        "width": 2
+      }
+    },
+    "snapshot": {
+      "identity": {
+        "lsb": 0,
+        "width": 152
+      },
+      "generation": {
+        "lsb": 152,
+        "width": 16
+      },
+      "timestamp": {
+        "lsb": 168,
+        "width": 64
+      },
+      "validity": {
+        "lsb": 232,
+        "width": 16
+      },
+      "metrics": {
+        "lsb": 248,
+        "width": 256
+      },
+      "critical": {
+        "lsb": 504,
+        "width": 1
+      }
+    },
+    "diagnostic": {
+      "identity": {
+        "lsb": 0,
+        "width": 152
+      },
+      "event_type": {
+        "lsb": 152,
+        "width": 4
+      },
+      "error": {
+        "lsb": 156,
+        "width": 8
+      },
+      "timestamp": {
+        "lsb": 164,
+        "width": 64
+      }
+    }
+  },
+  "encodings": {
+    "kernel_state": {
+      "0": "FREE",
+      "1": "SUBMITTED",
+      "2": "VALIDATING",
+      "3": "WAIT_RESOURCES",
+      "4": "RESERVING",
+      "5": "ALLOCATING",
+      "6": "CONFIGURING",
+      "7": "READY",
+      "8": "STARTING",
+      "9": "RUNNING",
+      "10": "SUSPEND_PENDING",
+      "11": "SUSPENDED",
+      "12": "RESIZE_PENDING",
+      "13": "MIGRATE_PENDING",
+      "14": "DRAINING",
+      "15": "COMPLETED",
+      "16": "TERMINATING",
+      "17": "ERROR",
+      "18": "RELEASING"
+    },
+    "command": {
+      "0": "ALLOCATE",
+      "1": "RESERVE",
+      "2": "WAKE",
+      "3": "LOAD",
+      "4": "VALIDATE",
+      "5": "PREPARE",
+      "6": "COMMIT",
+      "7": "ACTIVATE",
+      "8": "START",
+      "9": "DRAIN",
+      "10": "RELEASE",
+      "11": "SUSPEND",
+      "12": "RESUME",
+      "13": "ABORT",
+      "14": "IDLE"
+    },
+    "policy_command": {
+      "0": "QUERY",
+      "1": "ENABLE",
+      "2": "DISABLE",
+      "3": "UPDATE_BOUNDS",
+      "4": "REQUEST_SUSPEND",
+      "5": "REQUEST_RESUME",
+      "6": "CANCEL",
+      "7": "FORCE_ABORT"
+    },
+    "event_type": {
+      "0": "COMPUTE_DONE",
+      "1": "EXTERNAL_DONE",
+      "2": "INPUT_READY",
+      "3": "OUTPUT_SPACE",
+      "4": "SAFE_POINT",
+      "5": "FAULT",
+      "6": "COUNTERS_CHANGED"
+    },
+    "error": {
+      "0": "NONE",
+      "1": "DESCRIPTOR",
+      "2": "OWNER",
+      "3": "DUPLICATE",
+      "4": "CAPABILITY",
+      "5": "PROOF",
+      "6": "BUDGET",
+      "7": "UNSUPPORTED",
+      "8": "AUTHORIZATION",
+      "9": "IDENTITY",
+      "10": "BACKEND",
+      "11": "TIMEOUT",
+      "12": "PARTIAL",
+      "13": "SEQUENCE",
+      "14": "DEADLINE",
+      "15": "FAULTED",
+      "16": "EXHAUSTED",
+      "17": "INTEGRITY",
+      "18": "BUSY"
+    },
+    "notice_status": {
+      "0": "ADMITTED",
+      "1": "REJECTED",
+      "2": "CANCELED",
+      "3": "FAILED",
+      "4": "SUCCEEDED",
+      "5": "ABORTED"
+    },
+    "ack_status": {
+      "0": "OK",
+      "1": "NO_EFFECT",
+      "2": "UNCERTAIN"
+    },
+    "endpoint": {
+      "0": "CONFIG",
+      "1": "DMA",
+      "2": "MEMORY",
+      "3": "NOC",
+      "4": "EVENT",
+      "5": "POWER",
+      "6": "ARRAY"
+    },
+    "phase": {
+      "0": "ARRAY_ALLOCATE",
+      "1": "RESERVE_SERVICES",
+      "2": "ADMISSION",
+      "3": "POWER_WAKE",
+      "4": "CONFIG_LOAD",
+      "5": "CONFIG_VALIDATE",
+      "6": "CONFIG_PREPARE",
+      "7": "ARRAY_COMMIT",
+      "8": "ACTIVATE_SERVICES",
+      "9": "WAIT_IO",
+      "10": "ARRAY_START",
+      "11": "EXECUTING",
+      "12": "ARRAY_SUSPEND",
+      "13": "PRESERVE_SERVICES",
+      "14": "SLEEPING",
+      "15": "RESUME_SERVICES",
+      "16": "ARRAY_RESUME",
+      "17": "ARRAY_DRAIN",
+      "18": "DRAIN_SERVICES",
+      "19": "RELEASE_SERVICES",
+      "20": "ARRAY_RELEASE",
+      "21": "POWER_IDLE",
+      "22": "FINISH",
+      "23": "CONTAINED"
+    }
+  },
+  "owners": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "services": [
+    "configuration",
+    "dma",
+    "memory",
+    "noc",
+    "event",
+    "power"
+  ],
+  "mandatory_services": [
+    "configuration",
+    "event",
+    "power when enabled"
+  ],
+  "resource_model": {
+    "exclusive": [
+      "complete clusters",
+      "DMA channels",
+      "memory ports",
+      "scratchpad regions",
+      "event namespaces",
+      "counter namespaces"
+    ],
+    "shared": [
+      "memory bandwidth",
+      "NoC bandwidth",
+      "power reservation units"
+    ],
+    "minimum_reservations": "No loans of reserved capacity to best effort",
+    "units": "Normalized platform reservation units; watts/bytes-per-second are adapter contracts"
+  },
+  "package_selection": "Closest legal exact precompiled mask to preferred count, then variant index",
+  "scheduler": {
+    "ranking": "min(priority + age // AGE_ESCALATION_CYCLES, levels - 1)",
+    "ties": "accepted-grant round robin; infeasible requests do not consume fairness budget",
+    "burst": "After burst limit, select minimum eligible rank; then normal maximum rank",
+    "bound": "In accepted admissions while eligible; finite pending set ages to top rank",
+    "wall_clock_bound": "Requires eventually responding peers, input/output readiness and finite kernels"
+  },
+  "action_model": {
+    "outstanding": 1,
+    "tag_reuse": false,
+    "timer_starts": "command acceptance",
+    "response": "Full identity, endpoint, command and tag; complete mask required on success",
+    "timeout": "Keep the original action and shadow ownership; accept only its late terminal",
+    "late_success": "Rollback pre-start or abort/drain post-start; never continue launch",
+    "uncertain": "Contain; explicit authorized destructive recovery must drain and release"
+  },
+  "state_graph": {
+    "launch": [
+      "SUBMITTED",
+      "VALIDATING",
+      "WAIT_RESOURCES",
+      "RESERVING",
+      "ALLOCATING",
+      "CONFIGURING",
+      "READY",
+      "STARTING",
+      "RUNNING"
+    ],
+    "completion": [
+      "RUNNING",
+      "DRAINING",
+      "COMPLETED",
+      "RELEASING",
+      "FREE"
+    ],
+    "suspend": [
+      "RUNNING",
+      "SUSPEND_PENDING",
+      "SUSPENDED",
+      "STARTING",
+      "RUNNING"
+    ],
+    "recovery": [
+      "ERROR",
+      "TERMINATING",
+      "RELEASING",
+      "FREE"
+    ]
+  },
+  "event_contract": {
+    "source_ids": "clusters 0..N-1, authoritative array/system adapter N",
+    "completion": "Aggregated full-mask compute event plus external visibility when requested",
+    "ordering": "Per full kernel identity and source; starts at sequence 0; no wrap",
+    "gaps": "Contain and require authorized destructive recovery",
+    "diagnostic_overflow": "Sticky status; terminal notices and critical ingress use separate queues"
+  },
+  "clock_contract": {
+    "domain": "one synchronous controller/adapter clock",
+    "reset": "Local reset requires global clean reconciliation; never implies remote release",
+    "clock_enable": "Root request only; no generated clocks",
+    "test": "Functional handshakes suppressed during test/scan",
+    "power": "Ready/good qualification; external WAKE/IDLE sequencing; no physical power gating"
+  },
+  "counters": {
+    "width": 64,
+    "saturating": true,
+    "index": {
+      "0": "submission_cycles",
+      "1": "admitted_cycles",
+      "2": "rejected_cycles",
+      "3": "success_result_cycles",
+      "4": "failed_result_cycles",
+      "5": "accepted_action_cycles",
+      "6": "matching_response_cycles",
+      "7": "quarantined_response_cycles",
+      "8": "applied_event_cycles",
+      "9": "foreign_event_cycles",
+      "10": "duplicate_event_cycles",
+      "11": "event_gap_cycles",
+      "12": "deadline_warning_cycles",
+      "13": "coherent_snapshot_cycles",
+      "14": "action_timeout_cycles",
+      "15": "corrected_state_cycles"
+    },
+    "note": "Coincident events coalesce per cycle; per-kernel run/allocated cycles saturate"
+  },
+  "components": [
+    "round_robin_arbiter",
+    "priority_encoder",
+    "counter",
+    "performance_counters",
+    "event_barrier_queue",
+    "fifo",
+    "tile_shell_state",
+    "dff",
+    "parity",
+    "ecc"
+  ],
+  "assumptions": [
+    "System authenticates and normalizes descriptors and policy commands",
+    "Array and service adapters are authoritative and return exactly one terminal per accepted action",
+    "NO_EFFECT means no side effects; uncertain effects are never reported as NO_EFFECT",
+    "Guaranteed reservations are physically enforced by the configured service adapters",
+    "Service ACTIVATE/RESUME installs the new epoch; array START/RESUME accepts it atomically",
+    "Drain/abort acknowledgements include externally visible DMA/memory obligations",
+    "Clean reconciliation proves all old actions, events, remote resources and output obligations invalidated",
+    "Controller-owned event namespaces carry only events that require runtime policy"
+  ],
+  "unsupported": [
+    "Adaptive profile",
+    "resizing",
+    "migration",
+    "online mapping",
+    "CDC/asynchronous reset",
+    "physical retention/isolation/clock or voltage switching",
+    "trace",
+    "hard latency guarantees and nonzero energy budgets",
+    "automatic timeout query/replay",
+    "arbitrary preemption",
+    "vertical RTL integration of the absent array/system adapters"
+  ],
+  "signoff": {
+    "python_simulation": "see regression summary",
+    "hdl_assertions": "NOT_RUN",
+    "lint": "NOT_RUN",
+    "formal": "NOT_RUN",
+    "synthesis": "Design Compiler (deferred)",
+    "physical": "NOT_RUN",
+    "power": "NOT_RUN"
+  },
+  "source_sha256": {
+    "src/rtl/mosaic_blocks/runtime_controller_pkg.sv": "ef36cacdb21596c5e4096a7f5f1486a442a12370b5c857ccb9d2d58fb5e33c31",
+    "src/rtl/common/dff.sv": "578b511eedf04e100d039f14c35998d8079653fd2006c33baad432ea4622fd38",
+    "src/rtl/common/counter.sv": "d02f311941ef1fc913b80ab2bb5d66cdc35c817dddacb459e7400b9597d8806f",
+    "src/rtl/common/priority_encoder.sv": "78ae31ee0db47b901b7b3df785574cfe50436afdf7029b4aa4d3e1346ac58f4c",
+    "src/rtl/common/operand_isolation.sv": "0ee8a947cb68dcc40f0100ef9eeb5ae1cfc2c60cc0e56957dfac553bc2b5fc51",
+    "src/rtl/common/decoder.sv": "ed39d268ad87f931ada335a517e850a0c300f6275d3ffce969150e5422c836cf",
+    "src/rtl/basic/fifo.sv": "0937c66148bce63f3ff912a300f28cd4aedc215fab7ba936b53174c170f51a79",
+    "src/rtl/basic/parity.sv": "cb503fb1f9d3ad04c9d1e307f675715e22a555c4ba108b3cad1a5ec1efb63ab6",
+    "src/rtl/basic/ecc.sv": "68220c6730934a6d640490c8c6fa8d8c119d47ef2c7522091267b7206df1bb11",
+    "src/rtl/basic/round_robin_arbiter.sv": "82b9032c942a8221c373b36b4aca58ef03175f4923553a5532d25d1c157d5720",
+    "src/rtl/basic/performance_counters.sv": "4790d96341d466827b2f215f51c22557c753a0409a765ad614b3efff8ccac704",
+    "src/rtl/building_blocks/event_barrier_state.sv": "0b04b66385ce678b62d08ad6b4db0a4b27f21f41c7affdb315fc855a3ff85a51",
+    "src/rtl/building_blocks/event_barrier_queue.sv": "0c3c936f9aed20e76e8c84d983dff23fb4c64748c4aea7c09954eef0ad63aca9",
+    "src/rtl/mosaic_blocks/tile_shell_codec.sv": "eb760929fdc59c7ebebb4492427655c43ef3102bced68abc27882bc563749ff3",
+    "src/rtl/mosaic_blocks/tile_shell_state.sv": "79a1afc3c7cd4d55550c653a8c0142d8af575829a963a5da4c2848d18fca7c32",
+    "src/rtl/mosaic_blocks/runtime_controller.sv": "561af8df1b5cd02f0bbf6528114ea5181260c7563f2e6dfe96d6abb33e5705bb",
+    "src/gen/runtime_controller/generate.py": "4c2d4c9743625371fe013adb6abf12b923da0a3bd4fa71356cab709d61a8304c",
+    "src/gen/runtime_controller/runtime_controller_contract.py": "02fcb701f8e6f038b956069a8381d0fe340115818ddab2c9067f4b9683f60624",
+    "src/gen/runtime_controller/runtime_controller_sources.py": "b3fe1222241fc5d73c3af27f1d08f912f0dc5e3a566c99852373d67fbf7dee65"
+  },
+  "contract_sha256": "70794e32ef3bee4a6ad592ec0a438b7435bc5083e7f33a8e781dba7857e4b0b0"
+}

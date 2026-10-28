@@ -1525,3 +1525,20 @@ epochs, coordinated drain/flush and public accounting. See the
 [global NoC validation contract](src/val/mosaic_blocks/global_noc/README.md) for the
 ABI, supported profiles, endpoint integration obligations and Python-only test
 coverage. Synthesis remains deferred to Design Compiler.
+
+Run the runtime-controller specification campaign:
+
+```sh
+make runtime-controller-generate
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=runtime_controller
+make runtime-controller-regression SIM=icarus
+```
+
+The runtime controller reuses the existing queues, arbitration, counters and
+protected-state blocks for Static and Partitioned admission, complete-cluster
+reservations, authoritative lifecycle handshakes, rollback, safe suspend/resume
+and monitoring. See the
+[runtime-controller validation contract](src/val/mosaic_blocks/runtime_controller/README.md)
+for the normalized peer ABI, resource ownership and recovery requirements,
+supported limits and Python-only evidence. Synthesis remains deferred to
+Design Compiler.
