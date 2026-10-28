@@ -1495,3 +1495,18 @@ immutable context/function-bank programming and explicit mapper-owned replay.
 See the [SFT validation details](src/val/mosaic_blocks/sft/README.md) for the local
 ABI, supported configurations and Python-only evidence. Design Compiler synthesis
 is deferred.
+
+Run the Control and Predicate Tile specification campaign:
+
+```sh
+make cpt-generate
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=cpt
+make cpt-regression SIM=icarus
+```
+
+The CPT composes the released shell, predicate, comparison, nested-loop,
+event/barrier, typed control-register, queue, arbitration and counter modules.
+Local and Cluster profiles support reliable event records and explicit tagged
+coordination. See the [CPT validation contract](src/val/mosaic_blocks/cpt/README.md)
+for the public ABI, supported limits and Python-only evidence. Synthesis remains
+deferred to Design Compiler.

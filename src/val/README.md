@@ -274,3 +274,11 @@ coefficient programming, context chains, replay, ownership, lifecycle and protec
 state. Run `make sft-regression SIM=icarus`; the [suite README](mosaic_blocks/sft/README.md)
 records the local ABI and current limits. Only Python-driven verification is run;
 Design Compiler synthesis and later physical/numerical release gates are deferred.
+
+The `mosaic_blocks/cpt` suite exercises the real Control and Predicate Tile with
+structured PyUVM components and independent control models. It covers predicates,
+comparisons, typed registers, nested-loop frames, events, waits, barriers,
+coordination transactions, backpressure and lifecycle behavior. Run
+`make cpt-regression SIM=icarus`; the [suite README](mosaic_blocks/cpt/README.md)
+defines the local record ABI and supported Local/Cluster configurations. Only
+Python-driven validation is run; synthesis is deferred to Design Compiler.
