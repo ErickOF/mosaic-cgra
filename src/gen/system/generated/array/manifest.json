@@ -1,0 +1,507 @@
+{
+  "schema": "mosaic-array-contract-v1",
+  "descriptor": {
+    "schema": "mosaic-array-v1",
+    "profile": "Array-MVP",
+    "array_id": 0,
+    "rows": 1,
+    "cols": 2,
+    "lifecycle_timeout": 65535,
+    "clock_gating": true,
+    "power_gating": false,
+    "dvfs": false,
+    "async_clocks": false,
+    "migration": false,
+    "resizing": false,
+    "clusters": [
+      {
+        "id": 0,
+        "row": 0,
+        "col": 0,
+        "scratchpad_banks": 2,
+        "scratchpad_bank_words": 32,
+        "noc_ingress": 2,
+        "noc_egress": 1
+      },
+      {
+        "id": 1,
+        "row": 0,
+        "col": 1,
+        "scratchpad_banks": 2,
+        "scratchpad_bank_words": 32,
+        "noc_ingress": 2,
+        "noc_egress": 1
+      }
+    ]
+  },
+  "noc_parameters": {
+    "NOC_X": 2,
+    "NOC_Y": 1,
+    "NUM_ROUTERS": 2,
+    "NUM_ENDPOINTS": 2,
+    "NOC_PROFILE": 1,
+    "FLIT_DATA_WIDTH": 128,
+    "ENDPOINT_DATA_WIDTH": 640,
+    "NUM_VCS": 4,
+    "INPUT_VC_DEPTH": 8,
+    "FLOW_CONTROL": 1,
+    "ROUTING_ALGORITHM": 0,
+    "ROUTER_OUTPUT_PIPELINE": 1,
+    "LINK_PIPELINE_STAGES": 0,
+    "CREDIT_RETURN_PIPELINE_STAGES": 0,
+    "NUM_TRAFFIC_CLASSES": 8,
+    "ENABLE_QOS": 1,
+    "HIGH_SERVICE_BURST_LIMIT": 8,
+    "MAX_PACKET_FLITS": 16,
+    "NUM_TX_CHANNELS_PER_ENDPOINT": 2,
+    "NUM_RX_CHANNELS_PER_ENDPOINT": 2,
+    "ENDPOINT_TX_QUEUE_DEPTH": 2,
+    "ENDPOINT_RX_VC_DEPTH": 8,
+    "ENDPOINT_RX_QUEUE_DEPTH": 2,
+    "MAX_ACTIVE_FLOWS": 2,
+    "FLOW_ID_WIDTH": 16,
+    "OWNER_ID_WIDTH": 16,
+    "KERNEL_ID_WIDTH": 16,
+    "PACKAGE_ID_WIDTH": 32,
+    "NODE_ID_WIDTH": 8,
+    "ENDPOINT_ID_WIDTH": 8,
+    "CONTEXT_ID_WIDTH": 8,
+    "MESSAGE_TYPE_WIDTH": 4,
+    "PACKET_ID_WIDTH": 16,
+    "FRAGMENT_INDEX_WIDTH": 4,
+    "USER_METADATA_WIDTH": 64,
+    "ERROR_WIDTH": 8,
+    "LINK_EPOCH_WIDTH": 4,
+    "EXECUTION_EPOCH_WIDTH": 8,
+    "ALLOCATION_GENERATION_WIDTH": 16,
+    "PACKAGE_SLOT_WIDTH": 8,
+    "FLOW_SEQUENCE_WIDTH": 16,
+    "FENCE_ID_WIDTH": 8,
+    "CONFIG_DATA_WIDTH": 64,
+    "CONFIG_VERSION_WIDTH": 16,
+    "CONFIG_TAG_WIDTH": 16,
+    "CONFIG_CRC_WIDTH": 32,
+    "RUNTIME_TAG_WIDTH": 16,
+    "DRAIN_TIMEOUT_CYCLES": 65535,
+    "ENABLE_LINK_PARITY": 0,
+    "BUFFER_PROTECTION": 0,
+    "CONTROL_PROTECTION": 0,
+    "ENABLE_FAULT_MASKS": 1,
+    "ENABLE_COUNTERS": 1,
+    "ENABLE_TRACE": 0,
+    "ASYNC_ENDPOINT_MASK": 0,
+    "ASYNC_RESET": 0,
+    "TRAFFIC_CLASS_TO_VC": 3984,
+    "TRAFFIC_CLASS_TO_SERVICE": 48
+  },
+  "cluster_table": [
+    {
+      "slot": 0,
+      "id": 0,
+      "row": 0,
+      "col": 0,
+      "scratchpad_banks": 2,
+      "scratchpad_bank_words": 32,
+      "noc_ingress": 2,
+      "noc_egress": 1,
+      "manifest_sha256": "9299269c3073e3854d405f5ad0457bd6bdaab5c5efae0af661f8a1dc6fab8896",
+      "tile_count": 4,
+      "capacity": 512,
+      "profile": "Cluster-MVP",
+      "memory_boundary": 0,
+      "config_gateway": 0,
+      "noc_endpoint": 0,
+      "clock": "i_clk",
+      "reset": "i_rstb"
+    },
+    {
+      "slot": 1,
+      "id": 1,
+      "row": 0,
+      "col": 1,
+      "scratchpad_banks": 2,
+      "scratchpad_bank_words": 32,
+      "noc_ingress": 2,
+      "noc_egress": 1,
+      "manifest_sha256": "1aac1b5e78b3e3b4df206352104cf597563a8f3abfc802d7b4f659f36cd00472",
+      "tile_count": 4,
+      "capacity": 512,
+      "profile": "Cluster-MVP",
+      "memory_boundary": 1,
+      "config_gateway": 1,
+      "noc_endpoint": 1,
+      "clock": "i_clk",
+      "reset": "i_rstb"
+    }
+  ],
+  "packet": {
+    "endpoint_bits": 640,
+    "flit_bits": 128,
+    "fragments": 5,
+    "vc": 0,
+    "envelope": [
+      32,
+      512
+    ],
+    "padding": [
+      544,
+      96
+    ]
+  },
+  "allocation": "disjoint whole clusters, immutable mask per owner/kernel; no resize",
+  "configuration": "one reserved array gateway; native configuration_network roots",
+  "commit": "all PREPARE/manifests, captured versions; native COMMIT then VALIDATE; held START",
+  "events": "dedicated ungated parity-protected control network; payload256/sequence32",
+  "epoch": "8-bit array ABI restricted to native nonwrapping epochs 0..15; reset at exhaustion",
+  "noc_epoch": "independent transport epoch; privileged configuration only while all clusters free",
+  "memory": "three native permission-checked SRAM clients and one MST per cluster",
+  "power": "native clock gating; common clock; always powered",
+  "unsupported": [
+    "balanced/heterogeneous/sparse arrays",
+    "standalone services",
+    "global barriers",
+    "power gating/retention/DVFS",
+    "CDC/asynchronous reset",
+    "migration/resizing",
+    "NoC reconfiguration/flush while allocated",
+    "per-class inter-cluster request/response protocols"
+  ],
+  "dependency_sha256": {
+    "src/rtl/mosaic_blocks/cluster_pkg.sv": "28b9152e21ccad352549f12fc1d5e1b75067a2c0ec76629a4008a37506264c2b",
+    "src/rtl/mosaic_blocks/tile_shell_pkg.sv": "71e5f1abfbcd84971008df02dae1dbcea0d97393b1ffd4f59acd05eaebcf3614",
+    "src/rtl/basic/context_sequencer_pkg.sv": "367638a64c1a3796b37acdf53c3ab59a9d65cebefccdb40939bc625a9feba070",
+    "src/rtl/building_blocks/tile_power_controller_pkg.sv": "b4a598f47e491ca7689bb098597c33c9a05b68a6463e8471e6a7e20913963dd6",
+    "src/rtl/mosaic_blocks/bct_pkg.sv": "8a819e0801c56f7da28065acadb8cdf3d8ab1ca5c3f3ef619956f23761ca0a21",
+    "src/rtl/building_blocks/scalar_alu_pkg.sv": "e43b2a6b2934ece630f0b95a179696adbb1b5647f6c4893a8d1859abdf4f4e6b",
+    "src/rtl/building_blocks/predicate_unit_pkg.sv": "8efbedace49cfad4dec5a7a04fe184ba91a8bdc7fb7079b748fa37979ceb7d5c",
+    "src/rtl/building_blocks/accumulator_pkg.sv": "7037ca445f5accb6a68ca469cd879b6c411f8a3997efbaccabd5c5ba558ba158",
+    "src/rtl/building_blocks/agu_pkg.sv": "e0abf3ed40742f0553ecd85eeb962b15eca29a7b45ff5bae21d6651dfbbbc90f",
+    "src/rtl/building_blocks/dma_engine_pkg.sv": "0837b73ee53b1ab1ec98829e879449f1fc2b5384880a05549a13ac4116ca634c",
+    "src/rtl/building_blocks/load_engine_pkg.sv": "ff01a7a243b66765597ffafcf049c7852075bca8f926231dad351751e9eb32f1",
+    "src/rtl/building_blocks/store_engine_pkg.sv": "47d481f591593df3801860c2d4b077a7dd8520c48803ee0f9e4c7c581ae0f6ee",
+    "src/rtl/building_blocks/stream_formatter_pkg.sv": "790a0e0b7b8dc134d3bcc2acaee8e6185ce345c51147ab44970ccf7e87196c98",
+    "src/rtl/mosaic_blocks/mst_pkg.sv": "c55b7372d97359563cee68a87101d90ecb124f9fe89772af484e9c3ec6724c31",
+    "src/rtl/building_blocks/local_switch_pkg.sv": "ed88b6d4c655c15b2f24e0c7bd31ff820072b36c1f72b37fd72b860b7851529e",
+    "src/rtl/mosaic_blocks/static_mesh_pkg.sv": "6c441d037d29e34749a8d0138060a582af50b07231d9f5d1db38a9884259450f",
+    "src/rtl/mosaic_blocks/banked_scratchpad_pkg.sv": "356f1acf659203d2b5fa71f6894ed52fb77c542d6bfe7268803a797f5aab60c7",
+    "src/rtl/building_blocks/scratchpad_bank_pkg.sv": "189f724cb6442662b060d51983d47742cd4b3baa7a5cf2ea0610264ca6f54aa4",
+    "src/rtl/building_blocks/scratchpad_controller_pkg.sv": "1522a63712f07d0566fa1fc70b1601b04cd152e83bdf962f89bea8a9e94c1075",
+    "src/rtl/mosaic_blocks/configuration_network_pkg.sv": "e51cf82ff95212bb4ee1088314a6bcf8bd3388c3e98abc8d5e868fbce1d31968",
+    "src/rtl/common/dff.sv": "578b511eedf04e100d039f14c35998d8079653fd2006c33baad432ea4622fd38",
+    "src/rtl/common/counter.sv": "d02f311941ef1fc913b80ab2bb5d66cdc35c817dddacb459e7400b9597d8806f",
+    "src/rtl/common/decoder.sv": "ed39d268ad87f931ada335a517e850a0c300f6275d3ffce969150e5422c836cf",
+    "src/rtl/common/operand_isolation.sv": "0ee8a947cb68dcc40f0100ef9eeb5ae1cfc2c60cc0e56957dfac553bc2b5fc51",
+    "src/rtl/common/reset_synchronizer.sv": "3503d53aef9da5d7a8dd1579b807093cfa441106e9727457646d3cb89e6fe2f8",
+    "src/rtl/basic/fifo.sv": "0937c66148bce63f3ff912a300f28cd4aedc215fab7ba936b53174c170f51a79",
+    "src/rtl/basic/parity.sv": "cb503fb1f9d3ad04c9d1e307f675715e22a555c4ba108b3cad1a5ec1efb63ab6",
+    "src/rtl/basic/ecc.sv": "68220c6730934a6d640490c8c6fa8d8c119d47ef2c7522091267b7206df1bb11",
+    "src/rtl/basic/context_memory.sv": "5b160dc782ea71a5e2c89d4ec7f9c03248f15d0d2f98860b5782279099927c5e",
+    "src/rtl/basic/context_sequencer.sv": "e75a5db85861a9c6b9461d3eaf80135166852615cded2b7943c652445ecd5523",
+    "src/rtl/basic/async_fifo.sv": "f1ff5695a5f69916c9ee0bd9d98f0aad2f0b3173390f848378b5cfc21b4fe29a",
+    "src/rtl/basic/performance_counters.sv": "4790d96341d466827b2f215f51c22557c753a0409a765ad614b3efff8ccac704",
+    "src/rtl/building_blocks/event_barrier_state.sv": "0b04b66385ce678b62d08ad6b4db0a4b27f21f41c7affdb315fc855a3ff85a51",
+    "src/rtl/building_blocks/event_barrier_queue.sv": "0c3c936f9aed20e76e8c84d983dff23fb4c64748c4aea7c09954eef0ad63aca9",
+    "src/rtl/building_blocks/tile_power_controller.sv": "bb017271a05fd1de8e194016f069cbf5814d54ce6ca231bf0c313c647f9d67b4",
+    "src/rtl/mosaic_blocks/tile_shell_codec.sv": "eb760929fdc59c7ebebb4492427655c43ef3102bced68abc27882bc563749ff3",
+    "src/rtl/mosaic_blocks/tile_shell_state.sv": "79a1afc3c7cd4d55550c653a8c0142d8af575829a963a5da4c2848d18fca7c32",
+    "src/rtl/mosaic_blocks/tile_shell_queue.sv": "5aec95d93ce15f7d2320d3e8601f8031ec43655fe689a3191c81c8194c5e12b9",
+    "src/rtl/mosaic_blocks/tile_shell.sv": "0c0961b39ade8f301716906b789f5f0f9f68225e50461c417e0790d69091bbc9",
+    "src/rtl/common/write_gate.sv": "cd14228f0e72f10e674cf0ed274b01d0bd1b7f7417868ae9d9009420889299b7",
+    "src/rtl/common/lane_mask.sv": "ff058d5364ced0ad56b963e8d6403b2fcb04697da1489c4dd60d8a5d3972ec61",
+    "src/rtl/common/mux.sv": "4baec3ae2e53d24121c28f4012839ac6b488249baa4801530d0f5547af6602c5",
+    "src/rtl/basic/register_file.sv": "8c47195e840f5e4f4dc00168d983c5649c8e84624aadc6e6778d6d6d777c7bcc",
+    "src/rtl/basic/bypass_network.sv": "a2723cfcd5fdf7c69ec9496120537e265f4e5d030514dd14086a0b9b9449a13f",
+    "src/rtl/basic/rdu.sv": "4f8d418805b6e87206c8abf6be8e5cca75e79c8a22be0b3180d95fb25bcc4fc6",
+    "src/rtl/basic/stream_join.sv": "5ca00b530e83229ff8c60fef170253f4424dd545828b782bef611e759fd79fe8",
+    "src/rtl/building_blocks/scalar_alu.sv": "8b584da1594f739011a9b83775cb58985bd518b7a025860f36c3aa2180d3b7cd",
+    "src/rtl/building_blocks/multiplier.sv": "618060c9a9e3660a5dca12230fdc400acfef9d8d88e9a0036749771288c3fc7b",
+    "src/rtl/building_blocks/dot_product.sv": "b335ec7c2877251edab63c5745a89492d60d82c6fbbfab714dd04e6426919423",
+    "src/rtl/building_blocks/mac.sv": "c66aab429e7e003b077ec030b5bcba8b0cd8cf72e229dba8d7a138da052c7d68",
+    "src/rtl/building_blocks/accumulator.sv": "8fef1ad83bcf950de5e0542446fc5b7ae240af4e4eaa689bcb9f4a504628bb0c",
+    "src/rtl/building_blocks/predicate_unit.sv": "bab0eb80cd2ce054859e84387cfb6512c4f75a06415101411c5a5e2799c0fe9d",
+    "src/rtl/mosaic_blocks/bct_body.sv": "676d3374114e6370d9443d01205dce1e511219c5bb8515c617f37d350d8eb536",
+    "src/rtl/mosaic_blocks/bct.sv": "0c6f16bc0c788e8e038a8b14ca933756d117baf3ebc74bf67bc4762e00ab0606",
+    "src/rtl/basic/data_aligner.sv": "a49bb28f1ee3873e6edd3b34b64ba9823e5fd4b29c4c08749b7c210a1d134384",
+    "src/rtl/basic/packer.sv": "4be33b1a9e8f78e25aef0fc939ee207bb700a301e15e3237b013472169064f9a",
+    "src/rtl/basic/register_slice.sv": "81bbd5a9bf527e6d5f2fb41f3e81de29e7321eb4a87fd2b988c49338e9f07523",
+    "src/rtl/basic/round_robin_arbiter.sv": "82b9032c942a8221c373b36b4aca58ef03175f4923553a5532d25d1c157d5720",
+    "src/rtl/basic/width_converter.sv": "9e503fbf3349cc46bddcddb66bef0cd2777ab1d840d70897f26537e1e2714426",
+    "src/rtl/building_blocks/agu.sv": "7abd32c4b0f96fc855c6d0d848c15ecc8ff9e95dac3783617028e80d9e2bf3b0",
+    "src/rtl/building_blocks/dma_engine_bounds.sv": "bcef82cbb28e986b6cc296f7725030579dcbaa5e550c8660160f5ae6bb27b2f7",
+    "src/rtl/building_blocks/dma_engine_command_queue.sv": "5cb12eda2295d293a318e7f5cd81bda178953d1b5e0f2961aeb9c7bce4285724",
+    "src/rtl/building_blocks/load_engine.sv": "3b5c2c646b9c8bf6bcc9127b1c0c608f555cf451ba9ef21d2a31a11e514fc9f0",
+    "src/rtl/building_blocks/store_engine.sv": "75f055fcba907673115a1492c02ad77e6abb5f24d23e30fb41795c2608eeeb3e",
+    "src/rtl/building_blocks/stream_formatter.sv": "77e541b3b76411daae557bdae07d4a8ce048330f19b75b8df49f586e837d2c7d",
+    "src/rtl/common/priority_encoder.sv": "78ae31ee0db47b901b7b3df785574cfe50436afdf7029b4aa4d3e1346ac58f4c",
+    "src/rtl/mosaic_blocks/banked_scratchpad_counters.sv": "33a938045eb833774cfd42bbc8a8bfacdd76942dcf6d592f2eed3549adbbc98c",
+    "src/rtl/mosaic_blocks/banked_scratchpad_state.sv": "45dc256ef85658665097e4ebf145350da017191f57a4ab6ef92571a006c7e65a",
+    "src/rtl/mosaic_blocks/mst_body.sv": "314309030778c6b012901c6d7204b8b290c228e123b9382e65e301700c047887",
+    "src/rtl/mosaic_blocks/mst_channel.sv": "ee995ed6cf1fa1d843ebbdbaa96a152bf68069499ea86ad4f8531ce400d6b861",
+    "src/rtl/mosaic_blocks/mst_command_queue.sv": "08fbfcdeb5232611c128d45f406739958dd3facc71b34a68e534018c68adcaa9",
+    "src/rtl/mosaic_blocks/mst_element_converter.sv": "1ced1a3fd799cbf3d37e44b052d78a4fefba145ec06384ff6dc432b53626b5ab",
+    "src/rtl/mosaic_blocks/mst_fragment_adapter.sv": "17525bfbd1bf4c77c5a35d2dc385de22b0883548c6fd46674157987137505e71",
+    "src/rtl/mosaic_blocks/mst_validate.sv": "02850a7c6ece833857907fdf178dc3e9a29617f39d44e01ef9c721d6df250b7b",
+    "src/rtl/mosaic_blocks/mst.sv": "d38b273a20e1f3532bc05567f80ec837523874d8cbe83c93afea5cd4a9edb31d",
+    "src/rtl/basic/skid_buffer.sv": "9a7aa4b79f426f3d22058ed0f8fade17be96d67cdffa4cb0c8d711318c0a68c6",
+    "src/rtl/building_blocks/local_switch.sv": "b8ff5a5a77b3533b9605bc17d383018e6ae545c66f528c8e060ace550c6cf5f3",
+    "src/rtl/mosaic_blocks/static_mesh_node.sv": "3347b8b44e5912e178581fb90f951a11048e92e5e6ca136cfa0075be87cea785",
+    "src/rtl/mosaic_blocks/static_mesh_link.sv": "27d85be7e2c51e700b452d180b6a61a50fc9023f0f013cd65be42e1e2038e5d1",
+    "src/rtl/mosaic_blocks/static_mesh_queue.sv": "dd59821c220ab0b47e5dc9ec6f2c0106253ee961f1a86e68faf0fe7dfa2afd76",
+    "src/rtl/mosaic_blocks/static_mesh_control.sv": "b2d0f3884189060e76f1ac85ec87674e6c35fc054dd0f87824c684993cefd43e",
+    "src/rtl/mosaic_blocks/static_mesh.sv": "c57c6ed3a24506bed686e12eabf79e48b793ddddaa8036aacf98c278d71c7172",
+    "src/rtl/basic/sram_wrapper_backend.sv": "5bfb4bee3a449f73181b0041c6e81605f11aeeb8e1d151881966741ef8679168",
+    "src/rtl/basic/sram_wrapper.sv": "40c9057867adc5be9b40a5f1ddd1cc50fd2a93b84a1ae0c0283b25c1af8135c6",
+    "src/rtl/building_blocks/scratchpad_bank_counters.sv": "ee8fde0a20f2b5fb746c84390a91962ab6a93ee841b82fa51bd48c4df7a379d7",
+    "src/rtl/building_blocks/scratchpad_controller_counters.sv": "67641f891f2500c9d701ba96f35bcf1048d390c38160680a4f752c410020f708",
+    "src/rtl/building_blocks/scratchpad_bank.sv": "48e899d8e6811f465f39eb52d32c993eb5ec22c3a0e5c3885d6394509c905c64",
+    "src/rtl/building_blocks/scratchpad_controller.sv": "470dcff107bde34b1fd9926e5a40adcdb05552268653160cf7e723d9a66c7d42",
+    "src/rtl/mosaic_blocks/banked_scratchpad_power.sv": "d46701b0e19d0477fc19acc83410c5fdfd0cd5a6c39b290e5e98fd6162be785b",
+    "src/rtl/mosaic_blocks/banked_scratchpad.sv": "157f817577cd4e15d1ab3e477c226d50520f275c1fffa1d5cf7e59cf7584004a",
+    "src/rtl/basic/stream_fork.sv": "0df516513964d127cf59dd7d8f747f6573f0b812a9a34c5a4e5cc0ecda465501",
+    "src/rtl/mosaic_blocks/configuration_network_crc.sv": "39e833f83d47f811483359c5a7e22838aee6f1bbb9a5d99f4de7e98170049b3c",
+    "src/rtl/mosaic_blocks/configuration_network_serializer.sv": "dc31af3ada02a80a48538b7e8a9cdb15a2e4cf9d4359084f4779fe9cc9a6e335",
+    "src/rtl/mosaic_blocks/configuration_network_receiver.sv": "49049e29b65ca0b6a85ed4d813320d1066815ecd5ee007629ef1ed1751f16b1d",
+    "src/rtl/mosaic_blocks/configuration_network_link.sv": "93510bd3d04383581881621ce292c6a3307df81abc216c3dc5dd03b0ff4ab9f9",
+    "src/rtl/mosaic_blocks/configuration_network_fork.sv": "68f1f11416682ae9ea5d51e90483eb2640244c51371d604847aa77c540fe0e62",
+    "src/rtl/mosaic_blocks/configuration_network_tree.sv": "f1604fefea85ad37eb194a63e0583c8756bd2617b6b18f8d8ca52943a60f0802",
+    "src/rtl/mosaic_blocks/configuration_network_tile_adapter.sv": "5047c0478c213383430eb2e5705df5c1cfc6171b82e494892f7573464cac6749",
+    "src/rtl/mosaic_blocks/configuration_network.sv": "c72ad86cd17b8f1a03507e13d57eaf2229363ebf9b49f0dbd0b6366ca0082684",
+    "src/rtl/common/clock_gate.sv": "41f9e1ff400938b76e5ca1514de781f9c040abad09ad66842c3bf224d9a7d1f9",
+    "src/rtl/mosaic_blocks/cluster_package.sv": "a02cb6dc5c2c9f0b6d304c356bd2a13b1c2eaa6d6beb17b7ba888306b7104907",
+    "src/rtl/mosaic_blocks/cluster_control.sv": "a3abfccf5ce3b42306a0078bed0ce8211cb3d89377cc53f2715bf879d00c0437",
+    "src/rtl/mosaic_blocks/cluster_events.sv": "6789b938fec9689fefdf609e33ea56bd62d3131313a0b3469eb713887fa49d28",
+    "src/rtl/mosaic_blocks/cluster_infrastructure.sv": "2c9821c16e6aae430060d9bd5ab48ca135c4f093331b8936614dc9146045fe33",
+    "src/rtl/mosaic_blocks/cluster_memory_bridge.sv": "22b90fe5e133fac38d254551c178fbffdcaea89c20168e62cac28dba10b719ba",
+    "src/rtl/mosaic_blocks/cluster_stream_adapter.sv": "f3bb8822d470346820cf3345c81da78d3665d1104d531d2226ad6d553758eb39",
+    "src/rtl/building_blocks/noc_router_pkg.sv": "3454a194a26083391d1f8190d0bcb92c0ba84d0fa99746c8bf5179012c72b3d3",
+    "src/rtl/building_blocks/tile_network_interface_pkg.sv": "2fb8ad9f03f9b8871b172d0e5a8bb7701f818323e63285d3b39d70a3192ac6a2",
+    "src/rtl/mosaic_blocks/global_noc_pkg.sv": "326c7a1d42a4ec3251f88cd2302f0c8cbd547e4cea8b7e6372828c7beae4b967",
+    "src/rtl/building_blocks/noc_router_codec.sv": "f661fb75c22125a2a173271a9f685e03c62abce06b59b7bc884a2d966756f335",
+    "src/rtl/building_blocks/noc_router_buffer.sv": "91a15f115a63f044a4e48a4903ec9686ef5616ef3b5048686fde675d53840e9c",
+    "src/rtl/building_blocks/noc_router.sv": "36ea3a2e76bcb0e2e49e1fad805911456cc32dfda5ee88baa895e0bfbb984578",
+    "src/rtl/building_blocks/tile_network_interface.sv": "fdc22ab96a18c0c133708645bf79a1d82bc829ef74b42fb212e48f043be7eeb0",
+    "src/rtl/mosaic_blocks/global_noc_link.sv": "a9a2d872565b2b48c3c6b0c6b2222e250c15b71f56af72070d5bf800332b2f7c",
+    "src/rtl/mosaic_blocks/global_noc.sv": "a84183eda2fcd905911d71b4733234664afe08c008de914feefde8a98f2387fc",
+    "src/rtl/mosaic_blocks/array_pkg.sv": "d6210d586b08f636683486696cbbf59ce05a4ada14423d119b8ded16de03d6c5",
+    "src/rtl/mosaic_blocks/array_control.sv": "3d5cc587db738c4b6d7e69e90bb4e510827d26bea1ae654da6057c76775adf0e",
+    "src/rtl/mosaic_blocks/array_events.sv": "c0f18d5ee489e5eaea40835c374c0334c9853c32a1a22f30a9c08bb56950c4a3",
+    "src/rtl/mosaic_blocks/array_noc_gateway.sv": "d5dd11b4bbdb5e08db02ad3ded0c5d832db68d9ec8168fcf1975b43df2799618"
+  },
+  "generator_sha256": {
+    "src/gen/array/generate.py": "18980e44d20182910ffa6d06bd458072c629dc52837b96946f7e3f5062806f6e",
+    "src/gen/cluster/generate.py": "57d450235b31f70a652803045bea279bff0ca6c092af5d718a5c4a2b20450ef5",
+    "src/gen/cluster/sources.py": "b5bc73ded1701382370789c76db7f0264104db97833c89d433f1f1a4be6b7b84",
+    "src/gen/global_noc/generate.py": "b31ba94676d6ad41e734ffa4e0b821a53565b21b5f4e20632fb68fd010aaa78a",
+    "src/gen/global_noc/global_noc_contract.py": "ad61de2a838c826c26fbe37940b4cee3046f25bd5d5ac7c2873f1e2765df7997",
+    "src/gen/global_noc/global_noc_sources.py": "9284c8565dab16a52a7604ef28da3d67bbcc3696decc90c794c6d5428ff40eb1"
+  },
+  "signoff": {
+    "validation": "Python-only",
+    "synthesis": "Design Compiler (deferred)",
+    "lint": "NOT_RUN",
+    "formal": "NOT_RUN",
+    "physical": "NOT_CHARACTERIZED"
+  },
+  "features": {
+    "global_noc": true,
+    "synchronous": true,
+    "cluster_exclusive": true,
+    "clock_gating": true,
+    "power_gating": false,
+    "migration": false,
+    "resizing": false
+  },
+  "tables": {
+    "CLUSTER_PRESENT_MASK": 3,
+    "CLUSTER_ID_TABLE": [
+      0,
+      1
+    ],
+    "CLUSTER_PROFILE_TABLE": [
+      "Cluster-MVP",
+      "Cluster-MVP"
+    ],
+    "CLUSTER_MANIFEST_HASH_TABLE": [
+      "9299269c3073e3854d405f5ad0457bd6bdaab5c5efae0af661f8a1dc6fab8896",
+      "1aac1b5e78b3e3b4df206352104cf597563a8f3abfc802d7b4f659f36cd00472"
+    ],
+    "CLUSTER_COORDINATE_TABLE": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "CLUSTER_CAPABILITY_TABLE": [
+      {
+        "BCT": 3,
+        "MST": 1,
+        "context_depth": 4
+      },
+      {
+        "BCT": 3,
+        "MST": 1,
+        "context_depth": 4
+      }
+    ],
+    "CLUSTER_TILE_COUNT_TABLE": [
+      4,
+      4
+    ],
+    "CLUSTER_SCRATCHPAD_TABLE": [
+      {
+        "capacity": 512,
+        "banks": 2
+      },
+      {
+        "capacity": 512,
+        "banks": 2
+      }
+    ],
+    "CLUSTER_CLOCK_DOMAIN_TABLE": [
+      "i_clk",
+      "i_clk"
+    ],
+    "CLUSTER_POWER_DOMAIN_TABLE": [
+      "always_powered",
+      "always_powered"
+    ],
+    "STANDALONE_TILE_TABLE": [],
+    "GLOBAL_ROUTER_TABLE": [
+      {
+        "id": 0,
+        "x": 0,
+        "y": 0
+      },
+      {
+        "id": 1,
+        "x": 1,
+        "y": 0
+      }
+    ],
+    "GLOBAL_LINK_TABLE": [
+      {
+        "source": 0,
+        "destination": 1,
+        "port": 2
+      },
+      {
+        "source": 1,
+        "destination": 0,
+        "port": 4
+      }
+    ],
+    "NOC_ENDPOINT_TABLE": [
+      {
+        "cluster": 0,
+        "endpoint": 0,
+        "channel": 0,
+        "ingress": 2,
+        "egress": 1
+      },
+      {
+        "cluster": 1,
+        "endpoint": 1,
+        "channel": 0,
+        "ingress": 2,
+        "egress": 1
+      }
+    ],
+    "TRAFFIC_CLASS_TO_VC_TABLE": [
+      0,
+      0,
+      1,
+      2,
+      3,
+      3,
+      0,
+      0
+    ],
+    "TRAFFIC_CLASS_TO_SERVICE_TABLE": [
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0
+    ],
+    "CHANNEL_DEPENDENCY_TABLE": {
+      "data": "VC0 complete-packet reservations",
+      "events": "dedicated ungated control network",
+      "configuration": "dedicated gateway",
+      "proof": "router XY graph only; system/application deadlock proof deferred"
+    },
+    "CONFIG_GATEWAY_TABLE": [
+      {
+        "cluster": 0,
+        "slot": 0,
+        "local_endpoints": 6
+      },
+      {
+        "cluster": 1,
+        "slot": 1,
+        "local_endpoints": 6
+      }
+    ],
+    "EVENT_ENDPOINT_TABLE": [
+      {
+        "cluster": 0,
+        "slot": 0
+      },
+      {
+        "cluster": 1,
+        "slot": 1
+      }
+    ],
+    "MEMORY_BOUNDARY_TABLE": [
+      {
+        "cluster": 0,
+        "slot": 0,
+        "clients": 3,
+        "mst_channels": 1,
+        "arbitration": "native round-robin permission-checked banked scratchpad"
+      },
+      {
+        "cluster": 1,
+        "slot": 1,
+        "clients": 3,
+        "mst_channels": 1,
+        "arbitration": "native round-robin permission-checked banked scratchpad"
+      }
+    ],
+    "ALLOCATION_REGION_TABLE": [
+      {
+        "cluster": 0,
+        "mask": 1
+      },
+      {
+        "cluster": 1,
+        "mask": 2
+      }
+    ],
+    "COUNTER_SOURCE_TABLE": [
+      "per-cluster eight saturating 48-bit coherent counters",
+      "NoC accepted/delivered packet counters"
+    ],
+    "ERROR_SOURCE_TABLE": [
+      "array control",
+      "cluster native faults",
+      "protected event queue",
+      "NoC transport and authenticated stream gateways"
+    ],
+    "RESET_ORDER_TABLE": [
+      "common synchronous assertion, gate wake, native validity reset",
+      "explicit configuration and runtime launch after reset"
+    ],
+    "POWER_SEQUENCE_TABLE": [
+      "always powered; native gate-safe clock enable only"
+    ]
+  },
+  "manifest_sha256": "00904136aac6de10a34647bf9216dced3a5c57b20463d37abdeb7ac142eb476c",
+  "generated_rtl_sha256": "e82b0da68ee36a46c7281d327782549d4950a26b30676718a83fa582a9f7ffe2"
+}

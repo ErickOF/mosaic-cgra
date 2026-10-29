@@ -1,0 +1,30 @@
+schema = "mosaic-array-v1"
+profile = "Array-MVP"
+array_id = 0
+rows = 1
+cols = 2
+lifecycle_timeout = 65535
+clock_gating = true
+power_gating = false
+dvfs = false
+async_clocks = false
+migration = false
+resizing = false
+
+[[clusters]]
+id = 0
+row = 0
+col = 0
+scratchpad_banks = 2
+scratchpad_bank_words = 32
+noc_ingress = 2
+noc_egress = 1
+
+[[clusters]]
+id = 1
+row = 0
+col = 1
+scratchpad_banks = 2
+scratchpad_bank_words = 32
+noc_ingress = 2
+noc_egress = 1

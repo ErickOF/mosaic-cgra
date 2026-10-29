@@ -1,0 +1,931 @@
+{
+  "layout": {
+    "bytes": 256,
+    "alignment": 256,
+    "payload_offset": 64,
+    "payload_bits": 1536,
+    "magic": 1398362957,
+    "schema": 1,
+    "crc": "CRC32C whole record with bytes 28..31 zero",
+    "header_fields": {
+      "magic": [
+        0,
+        32
+      ],
+      "schema": [
+        32,
+        16
+      ],
+      "kind": [
+        48,
+        8
+      ],
+      "flags": [
+        56,
+        8
+      ],
+      "owner": [
+        64,
+        16
+      ],
+      "kernel": [
+        80,
+        16
+      ],
+      "package": [
+        96,
+        32
+      ],
+      "generation": [
+        128,
+        16
+      ],
+      "epoch": [
+        144,
+        8
+      ],
+      "slot": [
+        152,
+        8
+      ],
+      "payload_bits": [
+        160,
+        16
+      ],
+      "tag": [
+        192,
+        16
+      ],
+      "crc": [
+        224,
+        32
+      ],
+      "system_hash": [
+        256,
+        256
+      ]
+    }
+  },
+  "groups": {
+    "0": {
+      "name": "runtime",
+      "fields": [
+        [
+          "i_runtime_command",
+          5
+        ],
+        [
+          "i_runtime_cluster_mask",
+          2
+        ],
+        [
+          "i_runtime_allocation_generation",
+          16
+        ],
+        [
+          "i_runtime_execution_epoch",
+          8
+        ],
+        [
+          "i_runtime_context_id",
+          8
+        ],
+        [
+          "i_runtime_local_package_ids",
+          64
+        ],
+        [
+          "i_runtime_context_versions",
+          192
+        ],
+        [
+          "i_runtime_mapping_variant",
+          8
+        ],
+        [
+          "i_runtime_qos_profile",
+          8
+        ],
+        [
+          "i_runtime_power_profile",
+          8
+        ],
+        [
+          "i_runtime_flags",
+          8
+        ]
+      ],
+      "valid": "i_runtime_valid",
+      "ready": "o_runtime_ready",
+      "response": "o_runtime_response_valid",
+      "response_ready": "i_runtime_response_ready",
+      "error": "o_runtime_response_error_code",
+      "tag": "o_runtime_response_tag",
+      "outputs": [
+        "o_runtime_response_command",
+        "o_runtime_response_status",
+        "o_runtime_response_error_code",
+        "o_runtime_response_cluster_mask",
+        "o_runtime_response_tag",
+        "o_runtime_response_array_state"
+      ],
+      "kind": 0,
+      "payload": [
+        {
+          "name": "i_runtime_command",
+          "offset": 0,
+          "width": 5
+        },
+        {
+          "name": "i_runtime_cluster_mask",
+          "offset": 5,
+          "width": 2
+        },
+        {
+          "name": "i_runtime_allocation_generation",
+          "offset": 7,
+          "width": 16
+        },
+        {
+          "name": "i_runtime_execution_epoch",
+          "offset": 23,
+          "width": 8
+        },
+        {
+          "name": "i_runtime_context_id",
+          "offset": 31,
+          "width": 8
+        },
+        {
+          "name": "i_runtime_local_package_ids",
+          "offset": 39,
+          "width": 64
+        },
+        {
+          "name": "i_runtime_context_versions",
+          "offset": 103,
+          "width": 192
+        },
+        {
+          "name": "i_runtime_mapping_variant",
+          "offset": 295,
+          "width": 8
+        },
+        {
+          "name": "i_runtime_qos_profile",
+          "offset": 303,
+          "width": 8
+        },
+        {
+          "name": "i_runtime_power_profile",
+          "offset": 311,
+          "width": 8
+        },
+        {
+          "name": "i_runtime_flags",
+          "offset": 319,
+          "width": 8
+        }
+      ],
+      "payload_bits": 327,
+      "response_payload": [
+        {
+          "name": "o_runtime_response_command",
+          "offset": 0,
+          "width": 5
+        },
+        {
+          "name": "o_runtime_response_status",
+          "offset": 5,
+          "width": 4
+        },
+        {
+          "name": "o_runtime_response_error_code",
+          "offset": 9,
+          "width": 8
+        },
+        {
+          "name": "o_runtime_response_cluster_mask",
+          "offset": 17,
+          "width": 2
+        },
+        {
+          "name": "o_runtime_response_tag",
+          "offset": 19,
+          "width": 16
+        },
+        {
+          "name": "o_runtime_response_array_state",
+          "offset": 35,
+          "width": 4
+        }
+      ]
+    },
+    "1": {
+      "name": "configuration",
+      "fields": [
+        [
+          "i_cfg_request_command",
+          5
+        ],
+        [
+          "i_cfg_request_destination_mask",
+          6
+        ],
+        [
+          "i_cfg_request_package_id",
+          32
+        ],
+        [
+          "i_cfg_request_context_id",
+          8
+        ],
+        [
+          "i_cfg_request_expected_version",
+          16
+        ],
+        [
+          "i_cfg_request_word_index",
+          16
+        ],
+        [
+          "i_cfg_request_write_data",
+          64
+        ],
+        [
+          "i_cfg_request_write_strobe",
+          8
+        ],
+        [
+          "i_cfg_request_expected_crc",
+          32
+        ],
+        [
+          "i_cfg_request_epoch",
+          4
+        ],
+        [
+          "i_cfg_request_flags",
+          8
+        ],
+        [
+          "i_cfg_request_protocol",
+          8
+        ]
+      ],
+      "valid": "i_cfg_request_valid",
+      "ready": "o_cfg_request_ready",
+      "response": "o_cfg_response_valid",
+      "response_ready": "i_cfg_response_ready",
+      "error": "o_cfg_response_error_code",
+      "tag": "o_cfg_response_tag",
+      "last": "o_cfg_response_last",
+      "outputs": [
+        "o_cfg_response_command",
+        "o_cfg_response_transaction_id",
+        "o_cfg_response_endpoint_id",
+        "o_cfg_response_endpoint_type",
+        "o_cfg_response_status",
+        "o_cfg_response_error_code",
+        "o_cfg_response_read_data",
+        "o_cfg_response_context_id",
+        "o_cfg_response_context_version",
+        "o_cfg_response_crc",
+        "o_cfg_response_tag",
+        "o_cfg_response_epoch",
+        "o_cfg_response_first",
+        "o_cfg_response_last",
+        "o_cfg_response_prepared",
+        "o_cfg_response_committed",
+        "o_cfg_response_failure_mask",
+        "o_cfg_response_success_mask",
+        "o_cfg_response_timeout_mask",
+        "o_cfg_response_not_present_mask",
+        "o_cfg_response_sequence_id",
+        "o_cfg_response_protocol",
+        "o_cfg_response_packet_crc",
+        "o_cfg_response_transaction_success"
+      ],
+      "kind": 1,
+      "payload": [
+        {
+          "name": "i_cfg_request_command",
+          "offset": 0,
+          "width": 5
+        },
+        {
+          "name": "i_cfg_request_destination_mask",
+          "offset": 5,
+          "width": 6
+        },
+        {
+          "name": "i_cfg_request_package_id",
+          "offset": 11,
+          "width": 32
+        },
+        {
+          "name": "i_cfg_request_context_id",
+          "offset": 43,
+          "width": 8
+        },
+        {
+          "name": "i_cfg_request_expected_version",
+          "offset": 51,
+          "width": 16
+        },
+        {
+          "name": "i_cfg_request_word_index",
+          "offset": 67,
+          "width": 16
+        },
+        {
+          "name": "i_cfg_request_write_data",
+          "offset": 83,
+          "width": 64
+        },
+        {
+          "name": "i_cfg_request_write_strobe",
+          "offset": 147,
+          "width": 8
+        },
+        {
+          "name": "i_cfg_request_expected_crc",
+          "offset": 155,
+          "width": 32
+        },
+        {
+          "name": "i_cfg_request_epoch",
+          "offset": 187,
+          "width": 4
+        },
+        {
+          "name": "i_cfg_request_flags",
+          "offset": 191,
+          "width": 8
+        },
+        {
+          "name": "i_cfg_request_protocol",
+          "offset": 199,
+          "width": 8
+        }
+      ],
+      "payload_bits": 207,
+      "response_payload": [
+        {
+          "name": "o_cfg_response_command",
+          "offset": 0,
+          "width": 5
+        },
+        {
+          "name": "o_cfg_response_transaction_id",
+          "offset": 5,
+          "width": 8
+        },
+        {
+          "name": "o_cfg_response_endpoint_id",
+          "offset": 13,
+          "width": 8
+        },
+        {
+          "name": "o_cfg_response_endpoint_type",
+          "offset": 21,
+          "width": 4
+        },
+        {
+          "name": "o_cfg_response_status",
+          "offset": 25,
+          "width": 4
+        },
+        {
+          "name": "o_cfg_response_error_code",
+          "offset": 29,
+          "width": 8
+        },
+        {
+          "name": "o_cfg_response_read_data",
+          "offset": 37,
+          "width": 64
+        },
+        {
+          "name": "o_cfg_response_context_id",
+          "offset": 101,
+          "width": 8
+        },
+        {
+          "name": "o_cfg_response_context_version",
+          "offset": 109,
+          "width": 16
+        },
+        {
+          "name": "o_cfg_response_crc",
+          "offset": 125,
+          "width": 32
+        },
+        {
+          "name": "o_cfg_response_tag",
+          "offset": 157,
+          "width": 16
+        },
+        {
+          "name": "o_cfg_response_epoch",
+          "offset": 173,
+          "width": 4
+        },
+        {
+          "name": "o_cfg_response_first",
+          "offset": 177,
+          "width": 1
+        },
+        {
+          "name": "o_cfg_response_last",
+          "offset": 178,
+          "width": 1
+        },
+        {
+          "name": "o_cfg_response_prepared",
+          "offset": 179,
+          "width": 1
+        },
+        {
+          "name": "o_cfg_response_committed",
+          "offset": 180,
+          "width": 1
+        },
+        {
+          "name": "o_cfg_response_failure_mask",
+          "offset": 181,
+          "width": 6
+        },
+        {
+          "name": "o_cfg_response_success_mask",
+          "offset": 187,
+          "width": 6
+        },
+        {
+          "name": "o_cfg_response_timeout_mask",
+          "offset": 193,
+          "width": 6
+        },
+        {
+          "name": "o_cfg_response_not_present_mask",
+          "offset": 199,
+          "width": 6
+        },
+        {
+          "name": "o_cfg_response_sequence_id",
+          "offset": 205,
+          "width": 32
+        },
+        {
+          "name": "o_cfg_response_protocol",
+          "offset": 237,
+          "width": 8
+        },
+        {
+          "name": "o_cfg_response_packet_crc",
+          "offset": 245,
+          "width": 32
+        },
+        {
+          "name": "o_cfg_response_transaction_success",
+          "offset": 277,
+          "width": 1
+        }
+      ]
+    },
+    "2": {
+      "name": "package",
+      "fields": [
+        [
+          "i_cluster_package_id",
+          32
+        ],
+        [
+          "i_cluster_package_context_id",
+          8
+        ],
+        [
+          "i_cluster_package_allocation_generation",
+          16
+        ],
+        [
+          "i_cluster_package_architecture_hash",
+          256
+        ],
+        [
+          "i_cluster_package_topology_id",
+          32
+        ],
+        [
+          "i_cluster_package_contract_version",
+          16
+        ],
+        [
+          "i_cluster_package_requirements",
+          16
+        ],
+        [
+          "i_cluster_package_resource_mask",
+          4
+        ],
+        [
+          "i_cluster_package_endpoint_mask",
+          6
+        ],
+        [
+          "i_cluster_package_context_versions",
+          96
+        ],
+        [
+          "i_cluster_package_image_crcs",
+          192
+        ],
+        [
+          "i_cluster_package_epoch",
+          4
+        ],
+        [
+          "i_cluster_package_suspend_safe",
+          1
+        ]
+      ],
+      "valid": "i_cluster_package_valid",
+      "ready": "o_cluster_package_ready",
+      "response": "o_cluster_package_response_valid",
+      "response_ready": "i_cluster_package_response_ready",
+      "error": "o_cluster_package_response_error_code",
+      "tag": "o_cluster_package_response_tag",
+      "outputs": [
+        "o_cluster_package_response_error_code",
+        "o_cluster_package_response_tag"
+      ],
+      "local": true,
+      "kind": 2,
+      "payload": [
+        {
+          "name": "i_cluster_package_id",
+          "offset": 0,
+          "width": 32
+        },
+        {
+          "name": "i_cluster_package_context_id",
+          "offset": 32,
+          "width": 8
+        },
+        {
+          "name": "i_cluster_package_allocation_generation",
+          "offset": 40,
+          "width": 16
+        },
+        {
+          "name": "i_cluster_package_architecture_hash",
+          "offset": 56,
+          "width": 256
+        },
+        {
+          "name": "i_cluster_package_topology_id",
+          "offset": 312,
+          "width": 32
+        },
+        {
+          "name": "i_cluster_package_contract_version",
+          "offset": 344,
+          "width": 16
+        },
+        {
+          "name": "i_cluster_package_requirements",
+          "offset": 360,
+          "width": 16
+        },
+        {
+          "name": "i_cluster_package_resource_mask",
+          "offset": 376,
+          "width": 4
+        },
+        {
+          "name": "i_cluster_package_endpoint_mask",
+          "offset": 380,
+          "width": 6
+        },
+        {
+          "name": "i_cluster_package_context_versions",
+          "offset": 386,
+          "width": 96
+        },
+        {
+          "name": "i_cluster_package_image_crcs",
+          "offset": 482,
+          "width": 192
+        },
+        {
+          "name": "i_cluster_package_epoch",
+          "offset": 674,
+          "width": 4
+        },
+        {
+          "name": "i_cluster_package_suspend_safe",
+          "offset": 678,
+          "width": 1
+        }
+      ],
+      "payload_bits": 679,
+      "response_payload": [
+        {
+          "name": "o_cluster_package_response_error_code",
+          "offset": 0,
+          "width": 8
+        },
+        {
+          "name": "o_cluster_package_response_tag",
+          "offset": 8,
+          "width": 16
+        }
+      ]
+    },
+    "3": {
+      "name": "region",
+      "fields": [
+        [
+          "i_cluster_mst_region_index",
+          4
+        ],
+        [
+          "i_cluster_mst_region_record",
+          142
+        ]
+      ],
+      "valid": "i_cluster_mst_region_valid",
+      "ready": "o_cluster_mst_region_ready",
+      "response": "o_cluster_mst_region_response_valid",
+      "response_ready": "i_cluster_mst_region_response_ready",
+      "error": "o_cluster_mst_region_response_code",
+      "local": true,
+      "outputs": [
+        "o_cluster_mst_region_response_code"
+      ],
+      "kind": 3,
+      "payload": [
+        {
+          "name": "i_cluster_mst_region_index",
+          "offset": 0,
+          "width": 4
+        },
+        {
+          "name": "i_cluster_mst_region_record",
+          "offset": 4,
+          "width": 142
+        }
+      ],
+      "payload_bits": 146,
+      "response_payload": [
+        {
+          "name": "o_cluster_mst_region_response_code",
+          "offset": 0,
+          "width": 8
+        }
+      ]
+    },
+    "4": {
+      "name": "buffer",
+      "fields": [
+        [
+          "i_cluster_mst_buffer_index",
+          8
+        ],
+        [
+          "i_cluster_mst_buffer_record",
+          175
+        ]
+      ],
+      "valid": "i_cluster_mst_buffer_valid",
+      "ready": "o_cluster_mst_buffer_ready",
+      "response": "o_cluster_mst_buffer_response_valid",
+      "response_ready": "i_cluster_mst_buffer_response_ready",
+      "error": "o_cluster_mst_buffer_response_code",
+      "local": true,
+      "outputs": [
+        "o_cluster_mst_buffer_response_code"
+      ],
+      "kind": 4,
+      "payload": [
+        {
+          "name": "i_cluster_mst_buffer_index",
+          "offset": 0,
+          "width": 8
+        },
+        {
+          "name": "i_cluster_mst_buffer_record",
+          "offset": 8,
+          "width": 175
+        }
+      ],
+      "payload_bits": 183,
+      "response_payload": [
+        {
+          "name": "o_cluster_mst_buffer_response_code",
+          "offset": 0,
+          "width": 8
+        }
+      ]
+    },
+    "5": {
+      "name": "descriptor",
+      "fields": [
+        [
+          "i_cluster_mst_descriptor_identity",
+          134
+        ],
+        [
+          "i_cluster_mst_descriptor_mode",
+          8
+        ],
+        [
+          "i_cluster_mst_descriptor_source",
+          146
+        ],
+        [
+          "i_cluster_mst_descriptor_destination",
+          146
+        ],
+        [
+          "i_cluster_mst_descriptor_format",
+          16
+        ],
+        [
+          "i_cluster_mst_descriptor_events",
+          88
+        ],
+        [
+          "i_cluster_mst_descriptor_control",
+          52
+        ]
+      ],
+      "valid": "i_cluster_mst_descriptor_valid",
+      "ready": "o_cluster_mst_descriptor_ready",
+      "response": "o_cluster_mst_descriptor_accepted",
+      "error": "o_cluster_mst_rejection_code",
+      "local": true,
+      "outputs": [
+        "o_cluster_mst_rejection_code"
+      ],
+      "kind": 5,
+      "payload": [
+        {
+          "name": "i_cluster_mst_descriptor_identity",
+          "offset": 0,
+          "width": 134
+        },
+        {
+          "name": "i_cluster_mst_descriptor_mode",
+          "offset": 134,
+          "width": 8
+        },
+        {
+          "name": "i_cluster_mst_descriptor_source",
+          "offset": 142,
+          "width": 146
+        },
+        {
+          "name": "i_cluster_mst_descriptor_destination",
+          "offset": 288,
+          "width": 146
+        },
+        {
+          "name": "i_cluster_mst_descriptor_format",
+          "offset": 434,
+          "width": 16
+        },
+        {
+          "name": "i_cluster_mst_descriptor_events",
+          "offset": 450,
+          "width": 88
+        },
+        {
+          "name": "i_cluster_mst_descriptor_control",
+          "offset": 538,
+          "width": 52
+        }
+      ],
+      "payload_bits": 590,
+      "response_payload": [
+        {
+          "name": "o_cluster_mst_rejection_code",
+          "offset": 0,
+          "width": 8
+        }
+      ]
+    },
+    "6": {
+      "name": "noc",
+      "fields": [
+        [
+          "i_noc_cfg_command",
+          3
+        ],
+        [
+          "i_noc_cfg_package_id",
+          32
+        ],
+        [
+          "i_noc_cfg_expected_version",
+          16
+        ],
+        [
+          "i_noc_cfg_word_index",
+          16
+        ],
+        [
+          "i_noc_cfg_write_data",
+          64
+        ],
+        [
+          "i_noc_cfg_write_strobe",
+          8
+        ],
+        [
+          "i_noc_cfg_expected_crc",
+          32
+        ]
+      ],
+      "valid": "i_noc_cfg_valid",
+      "ready": "o_noc_cfg_ready",
+      "response": "o_noc_cfg_response_valid",
+      "response_ready": "i_noc_cfg_response_ready",
+      "error": "o_noc_cfg_response_status",
+      "tag": "o_noc_cfg_response_tag",
+      "outputs": [
+        "o_noc_cfg_response_status",
+        "o_noc_cfg_response_data",
+        "o_noc_cfg_response_version",
+        "o_noc_cfg_response_crc",
+        "o_noc_cfg_response_tag"
+      ],
+      "kind": 6,
+      "payload": [
+        {
+          "name": "i_noc_cfg_command",
+          "offset": 0,
+          "width": 3
+        },
+        {
+          "name": "i_noc_cfg_package_id",
+          "offset": 3,
+          "width": 32
+        },
+        {
+          "name": "i_noc_cfg_expected_version",
+          "offset": 35,
+          "width": 16
+        },
+        {
+          "name": "i_noc_cfg_word_index",
+          "offset": 51,
+          "width": 16
+        },
+        {
+          "name": "i_noc_cfg_write_data",
+          "offset": 67,
+          "width": 64
+        },
+        {
+          "name": "i_noc_cfg_write_strobe",
+          "offset": 131,
+          "width": 8
+        },
+        {
+          "name": "i_noc_cfg_expected_crc",
+          "offset": 139,
+          "width": 32
+        }
+      ],
+      "payload_bits": 171,
+      "response_payload": [
+        {
+          "name": "o_noc_cfg_response_status",
+          "offset": 0,
+          "width": 4
+        },
+        {
+          "name": "o_noc_cfg_response_data",
+          "offset": 4,
+          "width": 64
+        },
+        {
+          "name": "o_noc_cfg_response_version",
+          "offset": 68,
+          "width": 16
+        },
+        {
+          "name": "o_noc_cfg_response_crc",
+          "offset": 84,
+          "width": 32
+        },
+        {
+          "name": "o_noc_cfg_response_tag",
+          "offset": 116,
+          "width": 16
+        }
+      ]
+    }
+  }
+}
