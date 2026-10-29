@@ -16,6 +16,7 @@ sys.path[:0] = [str(ROOT/'src/val/lib'),str(TEST_DIR.parent),str(ROOT/'src/gen/c
 from mosaic_uvm.regression import (campaign_status, finish_summary, parse_args, passed_test,
     require_simulator, run_simulation, verification_hashes, license_unavailable, parameter_guard)
 from cluster.test_model import ModelTests
+from cluster.events_regression import EVENT_PROFILES, EVENT_INVALID, run_events
 from sources import SOURCES
 import generate
 
@@ -100,7 +101,7 @@ def main():
     args=parse_args('cluster',__doc__,profiles=PROFILES,seed=20261026,rtl_category='mosaic_blocks')
     build=args.build_dir.resolve()
     build.mkdir(parents=True,exist_ok=True)
-    summary=dict(status='NOT_RUN',framework='PyUVM',simulator=args.sim,profiles=[],parameter_checks=[],
+    summary=dict(status='NOT_RUN',framework='PyUVM',simulator=args.sim,profiles=[],event_profiles=[],parameter_checks=[],
         validation_mode='Python-only',synthesis='Design Compiler (deferred)',lint='NOT_RUN',
         started_at_utc=datetime.now(timezone.utc).isoformat())
     try:
@@ -117,8 +118,13 @@ def main():
         if not 1<=jobs<=8: raise ValueError('CLUSTER_JOBS must be between 1 and 8')
         selected=[n for n in PROFILES if not args.case or n in args.case]
         with ThreadPoolExecutor(max_workers=jobs) as pool:
-            summary['profiles']=list(pool.map(run_profile,[(args,build,i,n) for i,n in enumerate(selected)]))
+            summary['profiles']=list(pool.map(run_profile,[(args,build,PROFILES.index(n),n) for n in selected]))
         dependencies=tuple(ROOT/f'src/rtl/{name}.sv' for name in SOURCES)
+        event_sources=' '.join(map(str, dependencies))
+        with ThreadPoolExecutor(max_workers=jobs) as pool:
+            summary['event_profiles']=list(pool.map(run_events, [
+                (args,ROOT,TEST_DIR,build,len(PROFILES)+i,n,p,event_sources)
+                for i,(n,p) in enumerate(EVENT_PROFILES)]))
         # Python drives strict elaboration guards; these are not synthesis or lint.
         invalid=(('tiles_zero',dict(NUM_TILES=0)),('tiles_over',dict(NUM_TILES=65)),
                  ('timeout_short',dict(TIMEOUT_CYCLES=1)),
@@ -133,9 +139,15 @@ def main():
                 ROOT/'src/rtl/mosaic_blocks/configuration_network.sv','configuration_network',label,
                 dict(USE_ALLOCATION_OWNER=value),'configuration_network_parameters_must_be_valid',
                 dependencies=tuple(s for s in dependencies if s.name!='configuration_network.sv')))
+        summary['parameter_checks'].extend(parameter_guard(args,build,
+            ROOT/'src/rtl/mosaic_blocks/cluster_events.sv','cluster_events',label,p,
+            'cluster_events_parameters_must_be_valid',dependencies=tuple(
+                source for source in dependencies if source.name!='cluster_events.sv'))
+            for label,p in EVENT_INVALID)
         summary['sources_stable']=before==hashes()
-        summary['status']=campaign_status((*summary['profiles'],*summary['parameter_checks'],
-            summary['python_model_checks']),summary['sources_stable'] and len(summary['profiles'])==len(selected))
+        summary['status']=campaign_status((*summary['profiles'],*summary['event_profiles'],*summary['parameter_checks'],
+            summary['python_model_checks']),summary['sources_stable'] and len(summary['profiles'])==len(selected) and
+            len(summary['event_profiles'])==len(EVENT_PROFILES))
     except (OSError,ValueError,KeyError) as error:
         summary['error']=str(error)
     finally:

@@ -16,3 +16,13 @@ The [cluster validation README](../../val/mosaic_blocks/cluster/README.md) descr
 package loading, lifecycle commands, memory ownership, metadata adaptation and the
 scope of the Python-only validation. Generated domains and interfaces are physical
 integration inputs; they are not timing, power, UPF or Design Compiler signoff.
+
+The manifest also publishes event admission priority, the protected queue and
+completion-directory contract, nonwrapping sequence semantics and event-fault
+source 245. These properties describe actual instances; corrupt collector state
+feeds the cluster lifecycle containment input. Generated RTL, implementation
+hashes and package architecture fingerprints change together after this update.
+
+The architecture remains the selected BCT/MST MVP. Other released tile classes,
+the global NoC and cluster power manager require explicit class/domain adapters
+and a separately generated composition before they can be enabled here.

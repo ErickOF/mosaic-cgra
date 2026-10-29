@@ -136,7 +136,7 @@ def validate(d):
         if set(tile) != {"id", "class", "row", "col"}:
             raise ValueError("Tile entries require id, class, row and col")
         if tile["class"] not in ("BCT", "MST"):
-            raise ValueError(f"Missing MVP dependency/adapter: {tile['class']}")
+            raise ValueError(f"Unsupported Cluster-MVP tile class or adapter: {tile['class']}")
         coordinate = tile["row"], tile["col"]
         if (not 0 <= tile["id"] < 240 or tile["id"] in ids or
             coordinate in coordinates or not 0 <= tile["row"] < d["rows"] or
@@ -207,8 +207,21 @@ class Wrapper:
         header.append(");")
         header += ["    wire " + (f"[{width - 1}:0] " if width > 1 else "") + name + ";"
                    for name, width in self.wires.items()]
-        return "\n".join(header + self.statements + self.instances +
-                         ["endmodule", "`default_nettype wire", ""])
+        # Preserve readable boundaries in generated procedural blocks and
+        # between instances, so formatting survives architecture regeneration.
+        statements = []
+        for line in self.statements:
+            previous = statements[-1] if statements else ""
+            begins_block = line.startswith(("    always", "    // Capture"))
+            follows_block = previous == "    end"
+            begins_condition = line.lstrip().startswith("if (") and not previous.endswith("begin")
+            if previous and not previous.lstrip().startswith("//") and (
+                    begins_block or follows_block or begins_condition):
+                statements.append("")
+            statements.append(line)
+        instances = "\n\n".join(self.instances)
+        return "\n".join(header + statements + ["", instances,
+                         "endmodule", "`default_nettype wire", ""])
 
 
 def packed(values, width):
@@ -562,8 +575,13 @@ def finish(w, d, g, root, mesh, sp, tiles, proxies, mst, mst_index):
             f"            next_prepared_crcs[{e*32}+:32] = o_cfg_response_crc;"]
     w.statements += ["    end"]
     w.instances.append(f"""    tile_shell_state #(.WIDTH({ne*32}), .PROTECTION(1)) u_prepared_crcs (
-        .i_clk(gclk), .i_rstb(i_rstb), .i_enable(1'b1), .i_data(next_prepared_crcs),
-        .o_data(prepared_crcs), .o_bad(prepared_crc_bad), .o_corrected()
+        .i_clk(gclk),
+        .i_rstb(i_rstb),
+        .i_enable(1'b1),
+        .i_data(next_prepared_crcs),
+        .o_data(prepared_crcs),
+        .o_bad(prepared_crc_bad),
+        .o_corrected()
     );""")
     package_public = {p:p for p in ports("cluster_package",dict(N=n,E=ne))
                       if p.startswith(("i_package_","o_package_")) or p=="i_package_id"}
@@ -638,9 +656,11 @@ def finish(w, d, g, root, mesh, sp, tiles, proxies, mst, mst_index):
         "i_rstb !== 1'b1 || allocated || i_runtime_valid === 1'b1 || o_runtime_response_valid || "
         "!cfg_idle || !event_empty || i_test_mode === 1'b1 || i_scan_enable === 1'b1")
     w.assign("o_boundary_isolation_enable", "!boundary_enable")
-    w.instances.append("    clock_gate u_clock_gate (.i_clk(i_clk), "
-        ".i_enable(o_cluster_clock_enable),\n"
-        "        .i_test_enable(i_test_mode === 1'b1 || i_scan_enable === 1'b1), .o_gclk(gclk));")
+    w.instances.append("""    clock_gate u_clock_gate (
+        .i_clk(i_clk),
+        .i_enable(o_cluster_clock_enable),
+        .i_test_enable(i_test_mode === 1'b1 || i_scan_enable === 1'b1),
+        .o_gclk(gclk));""")
 
     # Store bindings are explicit one-command directories. An accepted descriptor
     # is remembered across the native admission pulse; failed admissions do not bind.
@@ -778,7 +798,9 @@ def finish(w, d, g, root, mesh, sp, tiles, proxies, mst, mst_index):
         i_owner_id="owner", i_kernel_id="kernel", i_context_id="context_id",
         i_package_id="commit_inflight ? commit_package : package_id",
         i_epoch="commit_inflight ? commit_epoch : epoch", o_empty="event_empty",
-        o_completion_mask="completion_mask", o_duplicate_completion="duplicate_completion")
+        o_completion_mask="completion_mask", o_duplicate_completion="duplicate_completion",
+        o_error="event_error")
+    wire("event_error")
     wire("snapshot_clear_completion")
 
     wire("memory_event_payload", 256)
@@ -803,9 +825,9 @@ def finish(w, d, g, root, mesh, sp, tiles, proxies, mst, mst_index):
         f"{mesh['o_error']} || {sp['o_error']} || {bridge['o_error']} || "
         "(|metadata_error) || (|boundary_bad) || duplicate_completion || "
         f"{proxies[0]['o_error']} || {proxies[1]['o_error']} || "
-        "package_o_error || prepared_crc_bad || counter_snapshot_bad")
+        "package_o_error || prepared_crc_bad || counter_snapshot_bad || event_error")
     w.assign("fault_code", "(|metadata_error) || (|boundary_bad) ? 8'd14 : "
-        "duplicate_completion ? 8'd15 : cfg_fail_stop ? 8'd11 : "
+        "event_error ? 8'd17 : duplicate_completion ? 8'd15 : cfg_fail_stop ? 8'd11 : "
         f"{mesh['o_error']} ? 8'd12 : {sp['o_error']} || {bridge['o_error']} ? 8'd13 : 8'd9")
     tile_source = "8'hff"
     metadata_source = "8'hff"
@@ -813,7 +835,7 @@ def finish(w, d, g, root, mesh, sp, tiles, proxies, mst, mst_index):
         tile_source = f"tile_fatal[{t}] || (running && tile_error[{t}]) ? 8'd{ids[t]} : " + tile_source
         metadata_source = f"(|metadata_error[{t*2}+:2]) ? 8'd{ids[t]} : " + metadata_source
     w.assign("fault_source", "(|boundary_bad) ? 8'd246 : (|metadata_error) ? ("+
-        metadata_source+") : duplicate_completion ? 8'd245 : cfg_fail_stop ? 8'd242 : "+
+        metadata_source+") : event_error || duplicate_completion ? 8'd245 : cfg_fail_stop ? 8'd242 : "+
         "mesh_o_error ? 8'd240 : sp_o_error || memory_bridge_o_error ? 8'd241 : "+
         "package_o_error || prepared_crc_bad || counter_snapshot_bad ? 8'd244 : ("+tile_source+")")
     status = dict(topology_id=(32, mesh["o_topology_id"]),
@@ -850,9 +872,13 @@ def finish(w, d, g, root, mesh, sp, tiles, proxies, mst, mst_index):
                            counter_native_value=48).items(): wire(name,width)
     w.instances.append("""    // A new allocation cannot authorize the previous owner's snapshot.
     tile_shell_state #(.WIDTH(1), .PROTECTION(1)) u_counter_ownership (
-        .i_clk(i_clk), .i_rstb(i_rstb), .i_enable(counter_clear || snapshot),
-        .i_data(snapshot && !counter_clear), .o_data(counter_snapshot_current),
-        .o_bad(counter_snapshot_bad), .o_corrected()
+        .i_clk(i_clk),
+        .i_rstb(i_rstb),
+        .i_enable(counter_clear || snapshot),
+        .i_data(snapshot && !counter_clear),
+        .o_data(counter_snapshot_current),
+        .o_bad(counter_snapshot_bad),
+        .o_corrected()
     );""")
     wire("counter_access")
     w.assign("counter_access", "allocated && counter_snapshot_current && !counter_snapshot_bad && "
@@ -865,13 +891,28 @@ def finish(w, d, g, root, mesh, sp, tiles, proxies, mst, mst_index):
     w.assign("counter_events", "{fault, cfg_commit_complete, o_mst_completion_valid && "
         "i_mst_completion_ready, (|mesh_o_boundary_tx_valid), (|mesh_i_boundary_rx_valid), "
         "o_runtime_ready && i_runtime_valid, running, allocated}")
-    w.instances.append("""    performance_counters #(.COUNTER_WIDTH(48), .NUM_COUNTERS(8),
-        .NUM_EVENTS(8), .INCREMENT_WIDTH(1), .HAS_THRESHOLD(0)) u_counters (
-        .i_clk(i_clk), .i_rstb(i_rstb), .i_global_enable(allocated), .i_freeze(1'b0),
-        .i_counter_enable(8'hff), .i_clear({8{counter_clear}}),
-        .i_event_select(24'hfac688), .i_event_valid(counter_events),
-        .i_event_increment(8'hff), .i_threshold_enable(8'd0), .i_threshold_value(384'd0),
-        .i_snapshot(snapshot), .i_read_enable(counter_access), .i_read_snapshot(1'b1), .i_read_index(i_counter_index),
+    w.instances.append("""    performance_counters #(
+        .COUNTER_WIDTH(48),
+        .NUM_COUNTERS(8),
+        .NUM_EVENTS(8),
+        .INCREMENT_WIDTH(1),
+        .HAS_THRESHOLD(0)
+    ) u_counters (
+        .i_clk(i_clk),
+        .i_rstb(i_rstb),
+        .i_global_enable(allocated),
+        .i_freeze(1'b0),
+        .i_counter_enable(8'hff),
+        .i_clear({8{counter_clear}}),
+        .i_event_select(24'hfac688),
+        .i_event_valid(counter_events),
+        .i_event_increment(8'hff),
+        .i_threshold_enable(8'd0),
+        .i_threshold_value(384'd0),
+        .i_snapshot(snapshot),
+        .i_read_enable(counter_access),
+        .i_read_snapshot(1'b1),
+        .i_read_index(i_counter_index),
         .o_read_data(counter_native_value), .o_read_overflow(), .o_read_valid(counter_native_valid),
         .o_counter_overflow(), .o_threshold_event(), .o_config_error(),
         .o_snapshot_valid(counter_native_snapshot_valid)
@@ -903,6 +944,11 @@ def generate(descriptor: Path, output: Path, artifacts: Path):
         features=dict(predicate_network=False, express_links=False, global_noc=False,
                       power_gating=False, retention=False, dvfs=False, async_clocks=False,
                       partitioning=False, dma="released MST streaming ingress/egress"),
+        event_transport=dict(arbitration="fault, terminal, memory, then held round-robin tile grant",
+            queue="released parity-protected event_barrier_queue",
+            identity="captured in full at admission", sequence="32-bit nonwrapping, reset-only recovery",
+            failure="sticky integrity fault source 245; corrupt export is invalid until global reset",
+            critical_fairness="tiles progress only when higher-priority sources eventually deassert"),
         metadata=dict(schema="mosaic-cluster-stream-v1", width=512, native_common_width=256,
                       routing_prefix_bits=56, common_offset=64, owner_offset=320,
                       package_offset=336, producer_offset=368, reserved_from=376),

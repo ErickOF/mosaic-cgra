@@ -10,7 +10,10 @@ the integrated blocks.
 
 The shared implementation reuses `configuration_network_tile_adapter`,
 `tile_shell_state`/`tile_shell_codec`, parity/ECC, `dff`, `counter`,
-`performance_counters`, `fifo` and the approved `clock_gate` wrapper. Native BCT/MST
+`performance_counters`, `fifo` and the approved `clock_gate` wrapper. The cluster
+event collector now directly reuses `round_robin_arbiter`, a saturating `counter`,
+`event_barrier_queue` and `tile_shell_state`, replacing its private rotating cursor,
+wrapping sequence register and unprotected export FIFO. Native BCT/MST
 bodies also reuse their existing ALU, register-file, stream, event/barrier,
 load/store and memory-service components. The cluster accesses published ports;
 functional control never depends on a tile-body hierarchy path. The fault tests
@@ -50,9 +53,13 @@ qualifies 2×2. The 4×4 case qualifies reset, allocation, command fanout and re
 it does not claim a 4×4 kernel/route campaign. Duplicate IDs/coordinates, missing
 positions, unsupported geometries and unavailable tile dependencies fail generation.
 
-SFT, CPT, VCT adapters, express links, a dedicated predicate network, inter-cluster
-NoC, partitioning, asynchronous clocks, power gating, retention and DVFS are absent
-from this MVP. Requests for those descriptor fields or package requirements fail;
+Released SFT, CPT, VCT, global-NoC and cluster-power-manager RTL are available
+in the repository. Their class-specific context, metadata, predicate, lifecycle
+and clock-domain adapters are not part of the previously selected MVP descriptor.
+They cannot be substituted for BCT/MST or tied into an unused power interface
+without a new generated integration contract. Express links, a dedicated
+predicate network, inter-cluster NoC, partitioning, asynchronous clocks, power
+gating, retention and DVFS are absent from this MVP. Requests for those descriptor fields or package requirements fail;
 there are no placeholder tile bodies. Native predicate outputs remain
 backpressured, and packages must leave predicate transport disabled. The MST
 retains its actual external DMA *stream* ports; the cluster does not invent an AXI
@@ -210,9 +217,51 @@ zero reserved bits, and 256 for MST. The export header captures owner, kernel,
 context, package, epoch, logical source, severity and monotonic sequence at queue
 admission. Native completion is counted once per tile/epoch. The terminal kernel
 event follows native completions; stalled events prevent release. A sticky first
-fault records its source, isolates execution and generates one fault event.
+fault records its source, isolates execution and generates one fault event when
+the export transport remains healthy.
 Protected lifecycle-state failure uses an independent sticky integrity latch so
 re-encoding cannot accidentally clear fail-stop state.
+
+## Event admission, protection and recovery
+
+Events use the existing 377-bit export format and the same stable logical source
+IDs. Fault, terminal-kernel and scratchpad events take precedence over native tile
+events. The released round-robin arbiter holds a selected tile through queue or
+critical-source backpressure and advances only when that tile's beat is admitted.
+Tile fairness is bounded in accepted tile grants; eventual tile progress assumes
+higher-priority sources eventually deassert and the export sink eventually accepts.
+
+The collector captures all owner, kernel, context, package, epoch, source, severity
+and native payload fields at admission. Changing later allocation inputs cannot
+change an already queued or stalled record. The protected queue checks occupancy,
+read/write pointers and occupied payloads. Completion and duplicate state use
+released protected storage as well. Unknown valid/control fields, unknown selected
+payloads and withdrawal of a held tile request fail closed.
+
+The common 32-bit counter saturates. Sequence `0xffffffff` can be accepted and
+exported once; subsequent ingress is disabled. It never silently wraps into an
+old namespace. Completion clear and a coincident new completion are atomic;
+clearing completion bits does not clear the sticky duplicate diagnostic or reset
+the event sequence.
+
+An ingress protocol fault or exhausted namespace stops admission while intact
+accepted records can still retire. A corrupt export queue invalidates that
+transport until coordinated reset; it cannot export untrusted data or acknowledge
+more ingress. Its sticky failure keeps `o_empty` low even if occupancy becomes
+zero, so it cannot authorize release or idle clock shutdown. The cluster reports
+integrity error 17 from event source 245, retains the allocation, asserts boundary
+isolation and keeps the interrupt pending. If the event transport itself failed,
+software must use the independent sticky status/interrupt and coordinated reset;
+no additional record can be promised through the failed transport.
+
+`make pyuvm SIM=icarus COCOTB_TOPLEVEL=cluster_events` runs a focused PyUVM suite
+against the production collector ports. It reuses the cluster driver, passive
+monitor, transaction type and common agent/environment construction. A separate
+Python ledger predicts arbitration, complete immutable records, exact admission
+and retirement, FIFO capacity, simultaneous pop/push and completion accounting.
+The normal source agents retain every offered payload until its handshake. Named
+parity/counter probes are used only for corruption and namespace-exhaustion tests.
+Intentional producer protocol faults and coordinated reset are explicit cases.
 
 ## Counters and validation evidence
 
@@ -239,11 +288,20 @@ The campaign covers:
 - Full metadata conservation and explicit epoch/version adaptation
 - Native fault containment, protected controller failure and partial commit failure
 - Four-by-four allocation/fanout/release smoke and Python-driven elaboration guards
+- Native event-collector integrity faults propagated into cluster containment
+- Seven focused event profiles: one, four, sixteen and 64 sources, permuted IDs,
+  one-entry/full queues and optional parity
+- Event priority, held arbitration, every payload/identity bit, full-queue pop/push,
+  unknown inputs, withdrawn producers, sequence exhaustion and real parity injection
 
 ```sh
 .venv/bin/python src/val/mosaic_blocks/cluster/run_cluster_regression.py \
   --sim icarus --build-dir build/icarus/cluster/selected --case mvp
 ```
+
+`CLUSTER_REGRESSION_ARGS` forwards runner options, such as `--case mvp`, through
+the Makefile. The focused event subcampaign runs for every selected cluster run.
+`ICARUS_BIN_DIR`/`VCS_BIN_DIR` select the simulator installation.
 
 `CLUSTER_JOBS` selects concurrent independent profiles; default is 2 for Icarus
 and 1 for VCS. `CLUSTER_RANDOM_CYCLES` defaults to 1000 and the minimum is 1000.
@@ -257,3 +315,23 @@ assertion suites, lint, CDC/RDC, formal, synthesis, timing, UPF, DFT, physical d
 and power/energy characterization are not run or claimed. Synthesis is deferred
 to Design Compiler. Unsupported profiles and application/physical qualification
 remain outside this MVP evidence.
+
+## Recorded Python-only evidence
+
+The updated Icarus campaign passes six cluster cases (four complete 2×2 workloads,
+4×4 control smoke and partial-commit containment), seven focused event profiles,
+26 strict elaboration guards and 21 Python model tests. The cluster cases check
+39,312 cycles; the event profiles check 8,662 cycles with 1,000 seeded traffic
+iterations each. Their ledger conserves all 4,230 accepted records: 4,110 retire
+and 120 are explicitly invalidated by the directed coordinated-reset/fault cases.
+No accepted record is silently lost during normal backpressure or arbitration.
+The 64-source case instantiates the collector alone and does not qualify an 8×8
+cluster.
+
+The campaign uses seed 20261026 with deterministic per-case offsets. Production
+and verification hashes remain unchanged throughout the passing run. Generated
+production RTL and dependency hashes match the checked-in architecture manifest.
+Both direct Makefile entry points (`cluster` and `cluster_events`) also pass.
+Reproducible results, JUnit, coverage, profile manifests and logs are under
+`build/icarus/cluster/regression/`, with the aggregate result in `summary.json`.
+VCS and physical signoff require the licensed server and were not run locally.

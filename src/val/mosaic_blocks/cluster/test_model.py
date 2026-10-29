@@ -111,4 +111,102 @@ class ModelTests(unittest.TestCase):
             self.assertEqual(len(a['config_endpoint_table']),6)
             self.assertNotIn('express_links', [e['type'] for e in a['config_endpoint_table']])
 
+    def event_inputs(self, **changes):
+        values=dict(i_tile_valid=0,i_tile_payload=3,i_fault_valid=0,i_terminal_valid=0,
+            i_memory_valid=0,i_memory_payload=11,i_fault_source=241,i_fault_code=17,
+            i_clear_completion=0,i_owner_id=37,i_kernel_id=91,i_context_id=3,
+            i_package_id=123,i_epoch=7,i_event_ready=0)
+        return values|changes
+
+    def test_event_pending_grant_and_critical_priority(self):
+        from cluster.events_model import EventLedger
+        m=EventLedger(4,1,[37,9,201,88])
+        _,accepted,_=m.step(self.event_inputs(i_tile_valid=8,i_fault_valid=1))
+        self.assertEqual(accepted,'fault')
+        expected,accepted,_=m.step(self.event_inputs(i_tile_valid=15,i_tile_payload=3<<768,
+                                                    i_event_ready=1))
+        self.assertEqual(accepted,3)
+        self.assertEqual(expected['o_tile_ready'],8)
+        self.assertEqual(m.cursor,0)
+
+    def test_event_snapshot_captures_original_identity(self):
+        from cluster.events_model import EventLedger
+        m=EventLedger(1,2,[17])
+        m.step(self.event_inputs(i_tile_valid=1))
+        out,_,_=m.step(self.event_inputs(i_owner_id=77,i_package_id=999))
+        self.assertEqual(out['o_event_owner_id'],37)
+        self.assertEqual(out['o_event_package_id'],123)
+        self.assertEqual(out['o_event_source_id'],17)
+        with self.assertRaises(AssertionError): m.drained()
+        m.step(self.event_inputs(i_event_ready=1))
+        m.drained()
+
+    def test_event_full_queue_conserves_pop_and_push(self):
+        from cluster.events_model import EventLedger
+        m=EventLedger(1,1,[17])
+        m.step(self.event_inputs(i_memory_valid=1))
+        out,accepted,_=m.step(self.event_inputs(i_memory_valid=1))
+        self.assertIsNone(accepted)
+        self.assertEqual(out['o_memory_ready'],0)
+        out,accepted,concurrent=m.step(self.event_inputs(i_memory_valid=1,i_event_ready=1))
+        self.assertEqual(accepted,'memory')
+        self.assertTrue(concurrent)
+        self.assertEqual(len(m.queue),1)
+        self.assertEqual(out['o_event_sequence'],0)
+        self.assertEqual(m.queue[0]['sequence'],1)
+
+    def test_event_clear_and_completion_are_atomic(self):
+        from cluster.events_model import EventLedger
+        m=EventLedger(1,4,[17])
+        m.step(self.event_inputs(i_tile_valid=1,i_tile_payload=0))
+        m.step(self.event_inputs(i_tile_valid=1,i_tile_payload=0,i_clear_completion=1))
+        self.assertEqual(m.completed,1)
+        self.assertFalse(m.duplicate)
+        m.step(self.event_inputs(i_tile_valid=1,i_tile_payload=0))
+        self.assertTrue(m.duplicate)
+
+    def test_event_namespace_exhaustion_preserves_last_record(self):
+        from cluster.events_model import EventLedger
+        m=EventLedger(1,1,[17])
+        m.sequence=0xffffffff
+        m.step(self.event_inputs(i_memory_valid=1))
+        out,accepted,_=m.step(self.event_inputs(i_memory_valid=1,i_event_ready=1))
+        self.assertEqual(out['o_event_sequence'],0xffffffff)
+        self.assertEqual(out['o_error'],1)
+        self.assertIsNone(accepted)
+        m.drained()
+
+    def test_event_unknown_input_preserves_queued_record(self):
+        from cluster.events_model import EventLedger
+        m=EventLedger(1,2,[17])
+        m.step(self.event_inputs(i_memory_valid=1))
+        out,accepted,_=m.step(self.event_inputs(i_tile_valid=None))
+        self.assertEqual(out['o_error'],1)
+        self.assertEqual(out['o_event_payload'],11)
+        self.assertIsNone(accepted)
+        out,_,_=m.step(self.event_inputs())
+        self.assertEqual(out['o_error'],1)
+
+    def test_event_corrupt_transport_cannot_authorize_release(self):
+        from cluster.events_model import EventLedger
+        m=EventLedger(1,2,[17])
+        m.step(self.event_inputs(i_memory_valid=1))
+        m.step(self.event_inputs(),corruption='queue')
+        out,_,_=m.step(self.event_inputs(i_event_ready=1))
+        self.assertEqual(out['o_event_valid'],0)
+        self.assertEqual(out['o_error'],1)
+        self.assertEqual(out['o_empty'],0)
+        with self.assertRaises(AssertionError): m.drained()
+
+    def test_event_withdrawn_pending_owner_never_grants_another_source(self):
+        from cluster.events_model import EventLedger
+        m=EventLedger(4,1,[37,9,201,88])
+        m.step(self.event_inputs(i_tile_valid=8,i_fault_valid=1))
+        out,accepted,_=m.step(self.event_inputs(i_tile_valid=7,i_event_ready=1))
+        self.assertIsNone(accepted)
+        self.assertEqual(out['o_tile_ready'],0)
+        out,accepted,_=m.step(self.event_inputs(i_tile_valid=15))
+        self.assertIsNone(accepted)
+        self.assertEqual(out['o_error'],1)
+
 if __name__=='__main__': unittest.main()

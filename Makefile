@@ -12,7 +12,7 @@ COCOTB_TOPLEVEL ?= counter
 COCOTB_TEST_MODULES ?= test_$(COCOTB_TOPLEVEL)
 # Discover validation modules by top name across RTL/validation categories.
 # Override the directory when a top has multiple suites or lives elsewhere.
-PYUVM_TEST_DIR ?= $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/$(COCOTB_TOPLEVEL)))
+PYUVM_TEST_DIR ?= $(if $(filter cluster_events,$(COCOTB_TOPLEVEL)),$(PROJECT_ROOT)/src/val/mosaic_blocks/cluster,$(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/$(COCOTB_TOPLEVEL))))
 ACCUMULATOR_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/accumulator))
 PREDICATE_UNIT_TEST_DIR := $(PROJECT_ROOT)/src/val/building_blocks/predicate_unit
 VECTOR_REDUCTION_TEST_DIR := $(PROJECT_ROOT)/src/val/building_blocks/vector_reduction
@@ -481,6 +481,7 @@ _RTL_SOURCES_sft := $(_SFT_SOURCES)
 _CPT_SOURCES := $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_pkg.sv $(PROJECT_ROOT)/src/rtl/basic/context_sequencer_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/tile_power_controller_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/predicate_unit_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/loop_controller_pkg.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/cpt_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/reset_synchronizer.sv $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv $(PROJECT_ROOT)/src/rtl/common/write_gate.sv $(PROJECT_ROOT)/src/rtl/common/lane_mask.sv $(PROJECT_ROOT)/src/rtl/common/mux.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/ecc.sv $(PROJECT_ROOT)/src/rtl/basic/context_memory.sv $(PROJECT_ROOT)/src/rtl/basic/context_sequencer.sv $(PROJECT_ROOT)/src/rtl/basic/async_fifo.sv $(PROJECT_ROOT)/src/rtl/basic/performance_counters.sv $(PROJECT_ROOT)/src/rtl/basic/register_file.sv $(PROJECT_ROOT)/src/rtl/basic/packer.sv $(PROJECT_ROOT)/src/rtl/basic/stream_join.sv $(PROJECT_ROOT)/src/rtl/basic/round_robin_arbiter.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier.sv $(PROJECT_ROOT)/src/rtl/building_blocks/loop_controller.sv $(PROJECT_ROOT)/src/rtl/building_blocks/tile_power_controller.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_codec.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_state.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_queue.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell.sv $(PROJECT_ROOT)/src/rtl/building_blocks/predicate_unit.sv $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/cpt_actions.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/cpt_egress.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/cpt_body.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/cpt.sv
 _RTL_SOURCES_cpt := $(_CPT_SOURCES)
 _RTL_SOURCES_cluster = $(addprefix $(PROJECT_ROOT)/,$(file <$(PROJECT_ROOT)/src/gen/cluster/generated/sources.f))
+_RTL_SOURCES_cluster_events = $(filter-out $(PROJECT_ROOT)/src/rtl/mosaic_blocks/cluster.sv,$(_RTL_SOURCES_cluster))
 _GLOBAL_NOC_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/noc_router_pkg.sv \
     $(PROJECT_ROOT)/src/rtl/building_blocks/tile_network_interface_pkg.sv \
     $(PROJECT_ROOT)/src/rtl/mosaic_blocks/global_noc_pkg.sv \
@@ -2273,6 +2274,7 @@ CLUSTER_DESCRIPTOR ?= $(PROJECT_ROOT)/src/gen/cluster/mvp.toml
 CLUSTER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/cluster/regression
 CLUSTER_SEED ?= 20261026
 CLUSTER_RANDOM_CYCLES ?= 1000
+CLUSTER_REGRESSION_ARGS ?=
 .PHONY: cluster-generate cluster-regression
 cluster-generate:
 	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/gen/cluster/generate.py" --descriptor "$(CLUSTER_DESCRIPTOR)"
@@ -2281,7 +2283,9 @@ cluster-regression:
 	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/val/mosaic_blocks/cluster/run_cluster_regression.py" \
 		--sim "$(SIM)" --build-dir "$(CLUSTER_REGRESSION_BUILD)" \
 		--seed "$(CLUSTER_SEED)" --random-cycles "$(CLUSTER_RANDOM_CYCLES)" \
-		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(MAKE)"
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(MAKE)" \
+		$(if $(filter vcs,$(SIM)),$(if $(VCS_BIN_DIR),--sim-bin-dir "$(VCS_BIN_DIR)"),$(if $(ICARUS_BIN_DIR),--sim-bin-dir "$(ICARUS_BIN_DIR)")) \
+		$(CLUSTER_REGRESSION_ARGS)
 
 SFT_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/sft/regression
 SFT_SEED ?= 20261027

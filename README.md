@@ -1475,7 +1475,10 @@ make cluster-regression
 The selected 2×2 cluster composes three real BCTs, one MST, the static mesh,
 configuration network and banked scratchpad. It adds exclusive allocation,
 manifest-checked coordinated commit, lifecycle fanout, explicit metadata/memory
-bridges, reliable events and coherent counters. See the
+bridges, reliable events and coherent counters. Event aggregation reuses the
+released round-robin arbiter, saturating counter and protected queue; its Python
+campaign also checks focused event-path profiles and integrated integrity-fault
+containment. See the
 [cluster validation details](src/val/mosaic_blocks/cluster/README.md) for the generated
 architecture, public ABI, supported profiles and Python-only evidence. Synthesis
 remains deferred to Design Compiler.

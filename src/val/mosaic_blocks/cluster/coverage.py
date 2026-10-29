@@ -20,7 +20,7 @@ class ClusterCoverage(CoverageCollector):
             'boundary_metadata_all_bits_preserved','optional_power_rejected','orderly_drain',
             'native_fault_containment','protected_controller_fail_stop','random_clock_wakeup',
             'unknown_runtime_fail_closed','new_owner_has_no_stale_snapshot_or_region',
-            'abort_preserves_accepted_stores')
+            'abort_preserves_accepted_stores','protected_event_collector_fail_stop')
         if not self.config.parameters['clock_gating']:
             required=tuple('compute_abort_at_empty_boundary' if n=='orderly_drain' else n
                            for n in required)

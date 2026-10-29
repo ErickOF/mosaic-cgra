@@ -531,6 +531,26 @@ class ClusterSequence(uvm_sequence):
         await self.reset()
         self.coverage.hit('protected_controller_fail_stop')
 
+    async def protected_event_fault(self):
+        await self.reset()
+        await self.runtime(1, state=1)
+        # Named parity probe only: corruption is injected into actual collector
+        # metadata, never substituted for normal functional event production.
+        await self.cycle('event_directory_fault', i_event_ready=0,
+            fault=('u_events.g_events.u_queue.u_metadata.g_protection.u_parity_bit.o_q', 1))
+        await self.idle(5)
+        assert self.last['o_status_fatal_error']
+        assert self.last['o_status_first_error_code'] == 17
+        assert self.last['o_status_first_error_source'] == 245
+        assert self.last['o_boundary_isolation_enable'] and not self.last['o_status_quiescent']
+        assert self.last['o_status_owner_id'] == self.owner
+        await self.cycle('event_directory_release', fault=('release',), i_event_ready=1)
+        await self.idle(5)
+        assert self.last['o_status_fatal_error'] and self.last['o_interrupt']
+        await self.runtime(10, error=4)
+        await self.reset()
+        self.coverage.hit('protected_event_collector_fail_stop')
+
     async def body(self):
         await self.reset()
         await self.runtime(0,state=0)
@@ -540,6 +560,7 @@ class ClusterSequence(uvm_sequence):
         await self.boundary_lifecycle()
         await self.drain_abort()
         await self.protected_control_fault()
+        await self.protected_event_fault()
         for _ in range(self.c.random_cycles):
             if self.rng.randrange(50)==0:
                 await self.runtime(0,state=0,hold=self.rng.randrange(1,4))
