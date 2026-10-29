@@ -1,0 +1,1546 @@
+{
+  "schema": "mosaic-cluster-power-manager-v1",
+  "parameters": {
+    "POWER_PROFILE": 0,
+    "CLUSTER_ID": 0,
+    "NUM_TILES": 16,
+    "NUM_CLOCK_GROUPS": 8,
+    "NUM_WAKE_SOURCES": 16,
+    "NUM_STALL_REASONS": 8,
+    "NUM_ISOLATION_GROUPS": 4,
+    "NUM_RETENTION_GROUPS": 4,
+    "NUM_POWER_SWITCH_GROUPS": 1,
+    "NUM_RESET_GROUPS": 4,
+    "NUM_OPERATING_POINTS": 1,
+    "NUM_SRAM_POWER_GROUPS": 1,
+    "NUM_BOUNDARY_ENDPOINTS": 4,
+    "IDLE_ENTRY_CYCLES": 32,
+    "MIN_GATED_RESIDENCY_CYCLES": 8,
+    "MIN_RETENTION_RESIDENCY_CYCLES": 1024,
+    "MIN_OFF_RESIDENCY_CYCLES": 4096,
+    "CLOCK_STABLE_CYCLES": 4,
+    "POWER_STABLE_CYCLES": 8,
+    "ISOLATION_SETUP_CYCLES": 2,
+    "ISOLATION_HOLD_CYCLES": 2,
+    "RESET_HOLD_CYCLES": 8,
+    "WAKEUP_STABILIZE_CYCLES": 4,
+    "DRAIN_TIMEOUT_CYCLES": 65535,
+    "TILE_ACK_TIMEOUT_CYCLES": 4095,
+    "RETENTION_TIMEOUT_CYCLES": 4095,
+    "POWER_TIMEOUT_CYCLES": 65535,
+    "CLOCK_TIMEOUT_CYCLES": 65535,
+    "VOLTAGE_TIMEOUT_CYCLES": 65535,
+    "RELOAD_TIMEOUT_CYCLES": 1048575,
+    "POWER_GOOD_SYNC_STAGES": 2,
+    "CLOCK_STATUS_SYNC_STAGES": 2,
+    "VOLTAGE_STATUS_SYNC_STAGES": 2,
+    "AUTO_CLOCK_GATE_ENABLE": 1,
+    "SUPPORT_RETENTION": 0,
+    "SUPPORT_POWER_GATING": 0,
+    "SUPPORT_DVFS": 0,
+    "SUPPORT_SRAM_LOW_POWER": 0,
+    "SUPPORT_ROLLBACK": 1,
+    "ENABLE_BREAK_EVEN_CHECK": 1,
+    "ENABLE_COUNTERS": 1,
+    "ENABLE_TRACE": 0,
+    "CONTROL_PROTECTION": 0,
+    "ASYNC_PHYSICAL_STATUS": 1,
+    "ASYNC_ARRAY_COMMAND": 0,
+    "ASYNC_RESET": 0,
+    "EVENT_QUEUE_DEPTH": 8,
+    "PHYSICAL_ACK_STABLE_CYCLES": 2,
+    "CLUSTER_ID_WIDTH": 8,
+    "OWNER_ID_WIDTH": 16,
+    "KERNEL_ID_WIDTH": 16,
+    "PACKAGE_ID_WIDTH": 32,
+    "ALLOCATION_GENERATION_WIDTH": 16,
+    "EXECUTION_EPOCH_WIDTH": 8,
+    "POWER_TAG_WIDTH": 16,
+    "POWER_SEQUENCE_WIDTH": 16,
+    "STATE_POLICY_ID_WIDTH": 8,
+    "OPERATING_POINT_ID_WIDTH": 4,
+    "EXPECTED_IDLE_WIDTH": 48,
+    "TIMESTAMP_WIDTH": 64,
+    "TILE_CLOCK_GROUP_TABLE": 275730608604808,
+    "BOUNDARY_ISOLATION_TABLE": 228
+  },
+  "ports": {
+    "i_aon_clk": [
+      "input",
+      "1"
+    ],
+    "i_aon_rstb": [
+      "input",
+      "1"
+    ],
+    "i_functional_clk": [
+      "input",
+      "1"
+    ],
+    "i_command_valid": [
+      "input",
+      "1"
+    ],
+    "i_command_authorized": [
+      "input",
+      "1"
+    ],
+    "i_system_privileged": [
+      "input",
+      "1"
+    ],
+    "i_cancel_valid": [
+      "input",
+      "1"
+    ],
+    "i_config_valid": [
+      "input",
+      "1"
+    ],
+    "i_config_auto_clock_gate": [
+      "input",
+      "1"
+    ],
+    "i_config_owner_check": [
+      "input",
+      "1"
+    ],
+    "i_config_break_even": [
+      "input",
+      "1"
+    ],
+    "i_cluster_allocated": [
+      "input",
+      "1"
+    ],
+    "i_array_execution_hold": [
+      "input",
+      "1"
+    ],
+    "i_array_transition_authorized": [
+      "input",
+      "1"
+    ],
+    "i_system_transition_authorized": [
+      "input",
+      "1"
+    ],
+    "i_global_endpoint_drained": [
+      "input",
+      "1"
+    ],
+    "i_configuration_idle": [
+      "input",
+      "1"
+    ],
+    "i_runtime_wakeup_required": [
+      "input",
+      "1"
+    ],
+    "i_fault_excluded": [
+      "input",
+      "1"
+    ],
+    "i_cluster_busy": [
+      "input",
+      "1"
+    ],
+    "i_cluster_quiescent": [
+      "input",
+      "1"
+    ],
+    "i_cluster_drain_done": [
+      "input",
+      "1"
+    ],
+    "i_scratchpad_idle": [
+      "input",
+      "1"
+    ],
+    "i_memory_boundary_idle": [
+      "input",
+      "1"
+    ],
+    "i_local_network_idle": [
+      "input",
+      "1"
+    ],
+    "i_event_idle": [
+      "input",
+      "1"
+    ],
+    "i_counter_snapshot_idle": [
+      "input",
+      "1"
+    ],
+    "i_debug_idle": [
+      "input",
+      "1"
+    ],
+    "i_voltage_ready": [
+      "input",
+      "1"
+    ],
+    "i_clock_source_ready": [
+      "input",
+      "1"
+    ],
+    "i_clock_stopped": [
+      "input",
+      "1"
+    ],
+    "i_thermal_emergency": [
+      "input",
+      "1"
+    ],
+    "i_voltage_fault": [
+      "input",
+      "1"
+    ],
+    "i_clock_fault": [
+      "input",
+      "1"
+    ],
+    "i_test_mode": [
+      "input",
+      "1"
+    ],
+    "i_scan_enable": [
+      "input",
+      "1"
+    ],
+    "i_mbist_enable": [
+      "input",
+      "1"
+    ],
+    "i_test_clock_enable": [
+      "input",
+      "1"
+    ],
+    "i_test_authorized": [
+      "input",
+      "1"
+    ],
+    "i_response_ready": [
+      "input",
+      "1"
+    ],
+    "i_event_ready": [
+      "input",
+      "1"
+    ],
+    "i_revalidate_ready": [
+      "input",
+      "1"
+    ],
+    "i_revalidate_response_valid": [
+      "input",
+      "1"
+    ],
+    "i_counter_read": [
+      "input",
+      "1"
+    ],
+    "i_counter_read_snapshot": [
+      "input",
+      "1"
+    ],
+    "i_counter_snapshot": [
+      "input",
+      "1"
+    ],
+    "i_command_cluster_id": [
+      "input",
+      "8"
+    ],
+    "i_command_owner_id": [
+      "input",
+      "16"
+    ],
+    "i_command_kernel_id": [
+      "input",
+      "16"
+    ],
+    "i_command_package_id": [
+      "input",
+      "32"
+    ],
+    "i_command_allocation_generation": [
+      "input",
+      "16"
+    ],
+    "i_command_execution_epoch": [
+      "input",
+      "8"
+    ],
+    "i_command": [
+      "input",
+      "4"
+    ],
+    "i_command_target_state": [
+      "input",
+      "5"
+    ],
+    "i_command_operating_point": [
+      "input",
+      "4"
+    ],
+    "i_command_expected_idle_cycles": [
+      "input",
+      "48"
+    ],
+    "i_command_state_policy_id": [
+      "input",
+      "8"
+    ],
+    "i_command_flags": [
+      "input",
+      "16"
+    ],
+    "i_command_tag": [
+      "input",
+      "16"
+    ],
+    "i_cancel_identity": [
+      "input",
+      "96"
+    ],
+    "i_cancel_tag": [
+      "input",
+      "16"
+    ],
+    "i_config_idle_entry_cycles": [
+      "input",
+      "32"
+    ],
+    "i_config_min_gated_residency": [
+      "input",
+      "32"
+    ],
+    "i_config_wake_enable": [
+      "input",
+      "NUM_WAKE_SOURCES"
+    ],
+    "i_config_allowed_states": [
+      "input",
+      "32"
+    ],
+    "i_config_allowed_points": [
+      "input",
+      "1"
+    ],
+    "i_allocation_owner_id": [
+      "input",
+      "16"
+    ],
+    "i_allocation_kernel_id": [
+      "input",
+      "16"
+    ],
+    "i_allocation_package_id": [
+      "input",
+      "32"
+    ],
+    "i_allocation_generation": [
+      "input",
+      "16"
+    ],
+    "i_execution_epoch": [
+      "input",
+      "8"
+    ],
+    "i_system_reset_generation": [
+      "input",
+      "16"
+    ],
+    "i_tile_busy_mask": [
+      "input",
+      "NUM_TILES"
+    ],
+    "i_tile_quiescent_mask": [
+      "input",
+      "NUM_TILES"
+    ],
+    "i_tile_drain_done_mask": [
+      "input",
+      "NUM_TILES"
+    ],
+    "i_tile_stall_reason": [
+      "input",
+      "NUM_TILES*NUM_STALL_REASONS"
+    ],
+    "i_stall_reason": [
+      "input",
+      "NUM_STALL_REASONS"
+    ],
+    "i_clock_group_request": [
+      "input",
+      "NUM_CLOCK_GROUPS"
+    ],
+    "i_wakeup_event": [
+      "input",
+      "NUM_WAKE_SOURCES"
+    ],
+    "i_wakeup_identity": [
+      "input",
+      "96"
+    ],
+    "i_power_good": [
+      "input",
+      "NUM_POWER_SWITCH_GROUPS"
+    ],
+    "i_power_switch_ack": [
+      "input",
+      "NUM_POWER_SWITCH_GROUPS"
+    ],
+    "i_isolation_ack": [
+      "input",
+      "NUM_ISOLATION_GROUPS"
+    ],
+    "i_retention_save_ack": [
+      "input",
+      "NUM_RETENTION_GROUPS"
+    ],
+    "i_retention_restore_ack": [
+      "input",
+      "NUM_RETENTION_GROUPS"
+    ],
+    "i_sram_power_ack": [
+      "input",
+      "NUM_SRAM_POWER_GROUPS"
+    ],
+    "i_reset_ack": [
+      "input",
+      "NUM_RESET_GROUPS"
+    ],
+    "i_boundary_endpoint_ack": [
+      "input",
+      "NUM_BOUNDARY_ENDPOINTS"
+    ],
+    "i_boundary_drained": [
+      "input",
+      "NUM_BOUNDARY_ENDPOINTS"
+    ],
+    "i_boundary_source_valid": [
+      "input",
+      "NUM_BOUNDARY_ENDPOINTS"
+    ],
+    "i_boundary_source_ready": [
+      "input",
+      "NUM_BOUNDARY_ENDPOINTS"
+    ],
+    "i_revalidate_response_record": [
+      "input",
+      "150"
+    ],
+    "i_counter_index": [
+      "input",
+      "5"
+    ],
+    "o_command_ready": [
+      "output",
+      "1"
+    ],
+    "o_response_valid": [
+      "output",
+      "1"
+    ],
+    "o_cancel_ready": [
+      "output",
+      "1"
+    ],
+    "o_cancel_accepted": [
+      "output",
+      "1"
+    ],
+    "o_cancel_rejected": [
+      "output",
+      "1"
+    ],
+    "o_config_ready": [
+      "output",
+      "1"
+    ],
+    "o_config_accepted": [
+      "output",
+      "1"
+    ],
+    "o_config_rejected": [
+      "output",
+      "1"
+    ],
+    "o_event_valid": [
+      "output",
+      "1"
+    ],
+    "o_cluster_accept_enable": [
+      "output",
+      "1"
+    ],
+    "o_cluster_execution_hold": [
+      "output",
+      "1"
+    ],
+    "o_cluster_drain_request": [
+      "output",
+      "1"
+    ],
+    "o_cluster_clock_enable": [
+      "output",
+      "1"
+    ],
+    "o_cluster_clk": [
+      "output",
+      "1"
+    ],
+    "o_operand_isolation": [
+      "output",
+      "1"
+    ],
+    "o_write_disable": [
+      "output",
+      "1"
+    ],
+    "o_wakeup_request": [
+      "output",
+      "1"
+    ],
+    "o_wakeup_ack": [
+      "output",
+      "1"
+    ],
+    "o_transition_active": [
+      "output",
+      "1"
+    ],
+    "o_idle": [
+      "output",
+      "1"
+    ],
+    "o_quiescent": [
+      "output",
+      "1"
+    ],
+    "o_fatal_error": [
+      "output",
+      "1"
+    ],
+    "o_state_valid": [
+      "output",
+      "1"
+    ],
+    "o_test_active": [
+      "output",
+      "1"
+    ],
+    "o_revalidate_valid": [
+      "output",
+      "1"
+    ],
+    "o_revalidate_response_ready": [
+      "output",
+      "1"
+    ],
+    "o_counter_valid": [
+      "output",
+      "1"
+    ],
+    "o_counter_snapshot_valid": [
+      "output",
+      "1"
+    ],
+    "o_counter_overflow": [
+      "output",
+      "1"
+    ],
+    "o_diagnostic_overflow": [
+      "output",
+      "1"
+    ],
+    "o_integrity_error": [
+      "output",
+      "1"
+    ],
+    "o_response_command": [
+      "output",
+      "4"
+    ],
+    "o_response_status": [
+      "output",
+      "3"
+    ],
+    "o_response_error_code": [
+      "output",
+      "8"
+    ],
+    "o_response_reached_state": [
+      "output",
+      "5"
+    ],
+    "o_response_operating_point": [
+      "output",
+      "4"
+    ],
+    "o_response_allocation_generation": [
+      "output",
+      "16"
+    ],
+    "o_response_transition_cycles": [
+      "output",
+      "32"
+    ],
+    "o_response_tag": [
+      "output",
+      "16"
+    ],
+    "o_response_record": [
+      "output",
+      "168"
+    ],
+    "o_config_error_code": [
+      "output",
+      "8"
+    ],
+    "o_event_record": [
+      "output",
+      "242"
+    ],
+    "o_power_state": [
+      "output",
+      "5"
+    ],
+    "o_previous_stable_state": [
+      "output",
+      "5"
+    ],
+    "o_target_state": [
+      "output",
+      "5"
+    ],
+    "o_transition_phase": [
+      "output",
+      "5"
+    ],
+    "o_active_operating_point": [
+      "output",
+      "4"
+    ],
+    "o_requested_operating_point": [
+      "output",
+      "4"
+    ],
+    "o_requested_voltage_id": [
+      "output",
+      "4"
+    ],
+    "o_requested_clock_id": [
+      "output",
+      "4"
+    ],
+    "o_allocation_identity": [
+      "output",
+      "96"
+    ],
+    "o_error_code": [
+      "output",
+      "8"
+    ],
+    "o_first_error_phase": [
+      "output",
+      "5"
+    ],
+    "o_first_error_tag": [
+      "output",
+      "16"
+    ],
+    "o_first_error_timestamp": [
+      "output",
+      "64"
+    ],
+    "o_time": [
+      "output",
+      "64"
+    ],
+    "o_idle_count": [
+      "output",
+      "32"
+    ],
+    "o_state_residency": [
+      "output",
+      "32"
+    ],
+    "o_phase_timer": [
+      "output",
+      "32"
+    ],
+    "o_qualification_count": [
+      "output",
+      "32"
+    ],
+    "o_expected_ack_mask": [
+      "output",
+      "64"
+    ],
+    "o_observed_ack_mask": [
+      "output",
+      "64"
+    ],
+    "o_wakeup_pending": [
+      "output",
+      "NUM_WAKE_SOURCES"
+    ],
+    "o_clock_group_enable": [
+      "output",
+      "NUM_CLOCK_GROUPS"
+    ],
+    "o_group_clk": [
+      "output",
+      "NUM_CLOCK_GROUPS"
+    ],
+    "o_tile_functional_clk": [
+      "output",
+      "NUM_TILES"
+    ],
+    "o_tile_power_command": [
+      "output",
+      "NUM_TILES*3"
+    ],
+    "o_tile_command_valid": [
+      "output",
+      "NUM_TILES"
+    ],
+    "o_tile_command_ready": [
+      "output",
+      "NUM_TILES"
+    ],
+    "o_tile_command_done": [
+      "output",
+      "NUM_TILES"
+    ],
+    "o_tile_power_state": [
+      "output",
+      "NUM_TILES*4"
+    ],
+    "o_tile_clock_enable": [
+      "output",
+      "NUM_TILES"
+    ],
+    "o_tile_error": [
+      "output",
+      "NUM_TILES"
+    ],
+    "o_tile_configured": [
+      "output",
+      "NUM_TILES"
+    ],
+    "o_tile_phase_accepted": [
+      "output",
+      "NUM_TILES"
+    ],
+    "o_tile_phase_completed": [
+      "output",
+      "NUM_TILES"
+    ],
+    "o_boundary_endpoint_enable": [
+      "output",
+      "NUM_BOUNDARY_ENDPOINTS"
+    ],
+    "o_boundary_injection_enable": [
+      "output",
+      "NUM_BOUNDARY_ENDPOINTS"
+    ],
+    "o_boundary_valid": [
+      "output",
+      "NUM_BOUNDARY_ENDPOINTS"
+    ],
+    "o_boundary_ready": [
+      "output",
+      "NUM_BOUNDARY_ENDPOINTS"
+    ],
+    "o_isolation_enable": [
+      "output",
+      "NUM_ISOLATION_GROUPS"
+    ],
+    "o_retention_save": [
+      "output",
+      "NUM_RETENTION_GROUPS"
+    ],
+    "o_retention_restore": [
+      "output",
+      "NUM_RETENTION_GROUPS"
+    ],
+    "o_cluster_reset_request": [
+      "output",
+      "NUM_RESET_GROUPS"
+    ],
+    "o_functional_rstb": [
+      "output",
+      "NUM_RESET_GROUPS"
+    ],
+    "o_power_switch_enable": [
+      "output",
+      "NUM_POWER_SWITCH_GROUPS"
+    ],
+    "o_sram_power_mode": [
+      "output",
+      "NUM_SRAM_POWER_GROUPS*2"
+    ],
+    "o_qualified_power": [
+      "output",
+      "NUM_POWER_SWITCH_GROUPS"
+    ],
+    "o_qualified_clock": [
+      "output",
+      "1"
+    ],
+    "o_qualified_voltage": [
+      "output",
+      "1"
+    ],
+    "o_revalidate_record": [
+      "output",
+      "145"
+    ],
+    "o_counter_data": [
+      "output",
+      "64"
+    ],
+    "o_wake_source_count": [
+      "output",
+      "NUM_WAKE_SOURCES*32"
+    ],
+    "o_group_gated_cycles": [
+      "output",
+      "NUM_CLOCK_GROUPS*32"
+    ]
+  },
+  "layouts": {
+    "identity": {
+      "cluster_id": {
+        "lsb": 0,
+        "width": 8
+      },
+      "owner_id": {
+        "lsb": 8,
+        "width": 16
+      },
+      "kernel_id": {
+        "lsb": 24,
+        "width": 16
+      },
+      "package_id": {
+        "lsb": 40,
+        "width": 32
+      },
+      "allocation_generation": {
+        "lsb": 72,
+        "width": 16
+      },
+      "epoch": {
+        "lsb": 88,
+        "width": 8
+      }
+    },
+    "command": {
+      "identity": {
+        "lsb": 0,
+        "width": 96
+      },
+      "command": {
+        "lsb": 96,
+        "width": 4
+      },
+      "target": {
+        "lsb": 100,
+        "width": 5
+      },
+      "point": {
+        "lsb": 105,
+        "width": 4
+      },
+      "expected_idle": {
+        "lsb": 109,
+        "width": 48
+      },
+      "state_policy": {
+        "lsb": 157,
+        "width": 8
+      },
+      "flags": {
+        "lsb": 165,
+        "width": 16
+      },
+      "tag": {
+        "lsb": 181,
+        "width": 16
+      }
+    },
+    "response": {
+      "identity": {
+        "lsb": 0,
+        "width": 96
+      },
+      "command": {
+        "lsb": 96,
+        "width": 4
+      },
+      "status": {
+        "lsb": 100,
+        "width": 3
+      },
+      "error": {
+        "lsb": 103,
+        "width": 8
+      },
+      "state": {
+        "lsb": 111,
+        "width": 5
+      },
+      "point": {
+        "lsb": 116,
+        "width": 4
+      },
+      "cycles": {
+        "lsb": 120,
+        "width": 32
+      },
+      "tag": {
+        "lsb": 152,
+        "width": 16
+      }
+    },
+    "validation": {
+      "identity": {
+        "lsb": 0,
+        "width": 96
+      },
+      "boot_generation": {
+        "lsb": 96,
+        "width": 16
+      },
+      "serial": {
+        "lsb": 112,
+        "width": 16
+      },
+      "tag": {
+        "lsb": 128,
+        "width": 16
+      },
+      "reload": {
+        "lsb": 144,
+        "width": 1
+      }
+    },
+    "validation_response": {
+      "identity": {
+        "lsb": 0,
+        "width": 96
+      },
+      "boot_generation": {
+        "lsb": 96,
+        "width": 16
+      },
+      "serial": {
+        "lsb": 112,
+        "width": 16
+      },
+      "tag": {
+        "lsb": 128,
+        "width": 16
+      },
+      "status": {
+        "lsb": 144,
+        "width": 2
+      },
+      "validity": {
+        "lsb": 146,
+        "width": 4
+      }
+    },
+    "event": {
+      "identity": {
+        "lsb": 0,
+        "width": 96
+      },
+      "boot_generation": {
+        "lsb": 96,
+        "width": 16
+      },
+      "sequence_id": {
+        "lsb": 112,
+        "width": 16
+      },
+      "timestamp": {
+        "lsb": 128,
+        "width": 64
+      },
+      "old_state": {
+        "lsb": 192,
+        "width": 5
+      },
+      "target_state": {
+        "lsb": 197,
+        "width": 5
+      },
+      "point": {
+        "lsb": 202,
+        "width": 4
+      },
+      "phase": {
+        "lsb": 206,
+        "width": 5
+      },
+      "status": {
+        "lsb": 211,
+        "width": 3
+      },
+      "error": {
+        "lsb": 214,
+        "width": 8
+      },
+      "tag": {
+        "lsb": 222,
+        "width": 16
+      },
+      "kind": {
+        "lsb": 238,
+        "width": 4
+      }
+    }
+  },
+  "encodings": {
+    "state": {
+      "0": "RESET",
+      "1": "ACTIVE",
+      "2": "STALLED",
+      "3": "IDLE_ON",
+      "4": "CLOCK_GATED",
+      "5": "DRAINING",
+      "6": "SAVING",
+      "7": "ISOLATING",
+      "8": "POWERING_DOWN",
+      "9": "RETENTION",
+      "10": "OFF",
+      "11": "POWERING_UP",
+      "12": "CLOCK_STARTING",
+      "13": "RESTORING",
+      "14": "REINITIALIZING",
+      "15": "RELOADING",
+      "16": "DVFS_DRAINING",
+      "17": "DVFS_ISOLATING",
+      "18": "DVFS_TRANSITION",
+      "19": "DVFS_STABILIZING",
+      "20": "WAKEUP",
+      "21": "ERROR",
+      "22": "TEST"
+    },
+    "phase": {
+      "0": "NONE",
+      "1": "POWER",
+      "2": "CLOCK",
+      "3": "RESET_HOLD",
+      "4": "RESET_RELEASE",
+      "5": "TILE_CONFIG",
+      "6": "TILE_RUN",
+      "7": "VALIDATE",
+      "8": "ISOLATION_HOLD",
+      "9": "DEISOLATE",
+      "10": "ENDPOINT_ENABLE",
+      "11": "STABILIZE",
+      "12": "DRAIN",
+      "13": "ENDPOINT_DISABLE",
+      "14": "TILE_IDLE",
+      "15": "CLOCK_STOP",
+      "16": "WAIT_AUTH",
+      "17": "TEST_ISOLATE"
+    },
+    "command": {
+      "0": "QUERY",
+      "1": "RUN",
+      "2": "IDLE_ON",
+      "3": "CLOCK_GATE",
+      "4": "RETENTION",
+      "5": "OFF",
+      "6": "SET_POINT",
+      "7": "CLEAR_ERROR",
+      "8": "RECOVER"
+    },
+    "error": {
+      "0": "NONE",
+      "1": "COMMAND",
+      "2": "IDENTITY",
+      "3": "AUTHORITY",
+      "4": "POLICY",
+      "5": "UNSUPPORTED",
+      "6": "RESIDENCY",
+      "7": "DRAIN_TIMEOUT",
+      "8": "TILE_TIMEOUT",
+      "9": "TILE_REJECT",
+      "10": "POWER_TIMEOUT",
+      "11": "CLOCK_TIMEOUT",
+      "12": "RESET_TIMEOUT",
+      "13": "REVALIDATE_TIMEOUT",
+      "14": "REVALIDATE_FAILED",
+      "15": "ISOLATION_TIMEOUT",
+      "16": "ENDPOINT_TIMEOUT",
+      "17": "POWER_LOSS",
+      "18": "CLOCK_LOSS",
+      "19": "VOLTAGE_FAULT",
+      "20": "THERMAL",
+      "21": "PHYSICAL_ACK",
+      "22": "UNKNOWN",
+      "23": "TEST",
+      "24": "INTEGRITY",
+      "25": "CANCELED",
+      "26": "EXHAUSTED"
+    },
+    "status": {
+      "0": "OK",
+      "1": "REJECTED",
+      "2": "TIMEOUT",
+      "3": "ROLLED_BACK",
+      "4": "ERROR"
+    },
+    "event_kind": {
+      "0": "ACCEPTED",
+      "1": "REJECTED",
+      "2": "PHASE",
+      "3": "COMPLETE",
+      "4": "WAKE",
+      "5": "FATAL",
+      "6": "BAD_WAKE",
+      "7": "POLICY",
+      "8": "OVERFLOW"
+    }
+  },
+  "power_domain_table": [
+    {
+      "name": "cluster_shared_supply",
+      "supply": "always_on",
+      "owner": "system",
+      "tile_regions": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "independent_switches": false
+    }
+  ],
+  "clock_domain_table": [
+    {
+      "name": "aon",
+      "stops": false,
+      "owner": "system"
+    },
+    {
+      "name": "functional_root",
+      "stops": true,
+      "owner": "cluster_power_manager",
+      "source": "independent i_functional_clk"
+    }
+  ],
+  "tile_region_table": [
+    {
+      "tile": 0,
+      "controller": "tile_power_controller",
+      "clock_group": 0
+    },
+    {
+      "tile": 1,
+      "controller": "tile_power_controller",
+      "clock_group": 1
+    },
+    {
+      "tile": 2,
+      "controller": "tile_power_controller",
+      "clock_group": 2
+    },
+    {
+      "tile": 3,
+      "controller": "tile_power_controller",
+      "clock_group": 3
+    },
+    {
+      "tile": 4,
+      "controller": "tile_power_controller",
+      "clock_group": 4
+    },
+    {
+      "tile": 5,
+      "controller": "tile_power_controller",
+      "clock_group": 5
+    },
+    {
+      "tile": 6,
+      "controller": "tile_power_controller",
+      "clock_group": 6
+    },
+    {
+      "tile": 7,
+      "controller": "tile_power_controller",
+      "clock_group": 7
+    },
+    {
+      "tile": 8,
+      "controller": "tile_power_controller",
+      "clock_group": 0
+    },
+    {
+      "tile": 9,
+      "controller": "tile_power_controller",
+      "clock_group": 1
+    },
+    {
+      "tile": 10,
+      "controller": "tile_power_controller",
+      "clock_group": 2
+    },
+    {
+      "tile": 11,
+      "controller": "tile_power_controller",
+      "clock_group": 3
+    },
+    {
+      "tile": 12,
+      "controller": "tile_power_controller",
+      "clock_group": 4
+    },
+    {
+      "tile": 13,
+      "controller": "tile_power_controller",
+      "clock_group": 5
+    },
+    {
+      "tile": 14,
+      "controller": "tile_power_controller",
+      "clock_group": 6
+    },
+    {
+      "tile": 15,
+      "controller": "tile_power_controller",
+      "clock_group": 7
+    }
+  ],
+  "boundary_endpoint_table": [
+    {
+      "endpoint": 0,
+      "isolation_group": 0,
+      "scope": "local injection/ejection only; transit router outside this manager"
+    },
+    {
+      "endpoint": 1,
+      "isolation_group": 1,
+      "scope": "local injection/ejection only; transit router outside this manager"
+    },
+    {
+      "endpoint": 2,
+      "isolation_group": 2,
+      "scope": "local injection/ejection only; transit router outside this manager"
+    },
+    {
+      "endpoint": 3,
+      "isolation_group": 3,
+      "scope": "local injection/ejection only; transit router outside this manager"
+    }
+  ],
+  "reset_group_table": [
+    {
+      "group": 0,
+      "order": 0,
+      "release": "functional reset_synchronizer"
+    },
+    {
+      "group": 1,
+      "order": 1,
+      "release": "functional reset_synchronizer"
+    },
+    {
+      "group": 2,
+      "order": 2,
+      "release": "functional reset_synchronizer"
+    },
+    {
+      "group": 3,
+      "order": 3,
+      "release": "functional reset_synchronizer"
+    }
+  ],
+  "stable_state_table": {
+    "RESET": {
+      "root": 0,
+      "groups": 0,
+      "isolation": "all",
+      "resets": "all",
+      "endpoints": 0,
+      "accept": 0
+    },
+    "ACTIVE": {
+      "root": 1,
+      "groups": "tile requests OR busy OR not-quiescent",
+      "isolation": 0,
+      "resets": 0,
+      "endpoints": "validated",
+      "accept": "authorized and not held"
+    },
+    "STALLED": {
+      "root": 1,
+      "groups": "tile requests OR busy OR not-quiescent",
+      "isolation": 0,
+      "resets": 0,
+      "endpoints": "validated",
+      "accept": "authorized and not held"
+    },
+    "IDLE_ON": {
+      "root": 1,
+      "groups": "tile requests OR busy OR not-quiescent",
+      "isolation": 0,
+      "resets": 0,
+      "endpoints": "validated",
+      "accept": 0
+    },
+    "CLOCK_GATED": {
+      "root": 0,
+      "groups": 0,
+      "isolation": 0,
+      "resets": 0,
+      "endpoints": 0,
+      "accept": 0
+    },
+    "ERROR": {
+      "root": 0,
+      "groups": 0,
+      "isolation": "all",
+      "resets": "all",
+      "endpoints": 0,
+      "accept": 0
+    },
+    "TEST": {
+      "root": "authorized safe test override",
+      "groups": "same as root",
+      "isolation": "all",
+      "resets": "all",
+      "endpoints": 0,
+      "accept": 0
+    }
+  },
+  "operating_point_table": [
+    {
+      "point": 0,
+      "voltage_id": 0,
+      "clock_id": 0,
+      "voltage": null,
+      "frequency": null,
+      "characterization": "external platform, NOT_RUN"
+    }
+  ],
+  "state_policy_table": [
+    {
+      "id": 0,
+      "states": [
+        "RESET",
+        "ACTIVE",
+        "STALLED",
+        "IDLE_ON",
+        "CLOCK_GATED",
+        "ERROR",
+        "TEST"
+      ],
+      "supply": "always on",
+      "retention": false,
+      "off": false,
+      "dvfs": false,
+      "sram_mode": 0
+    }
+  ],
+  "retained_state_table": [],
+  "transition_table": {
+    "gate": [
+      "hold execution/injection",
+      "complete drain",
+      "endpoint disable ACK",
+      "all tile IDLE terminals",
+      "root/group clock stop",
+      "qualified stopped ACK"
+    ],
+    "wake": [
+      "root/groups enabled",
+      "qualified source/voltage/clock ACK",
+      "tile configure/RUN",
+      "full-identity package/endpoint validation",
+      "deisolation ACK",
+      "endpoint enable ACK",
+      "stabilization and array authorization"
+    ],
+    "recovery": [
+      "safe clamps/reset",
+      "power qualification",
+      "clock qualification",
+      "ordered reset release",
+      "tile configuration/RUN",
+      "reload and revalidation",
+      "deisolation/endpoint acknowledgements",
+      "IDLE_ON"
+    ]
+  },
+  "emergency_table": {
+    "action": "registered ERROR row, no retries or implicit release",
+    "errors": [
+      "power loss",
+      "clock loss",
+      "voltage fault",
+      "thermal",
+      "identity/control unknown",
+      "unexpected physical ACK",
+      "integrity",
+      "post-drain timeout"
+    ]
+  },
+  "clock_wrapper_table": {
+    "root": "common/clock_gate",
+    "groups": "common/clock_gate",
+    "reset": "common/reset_synchronizer",
+    "clamps": "common/isolation_cell",
+    "mapping": "behavioral RTL cells; PDK mapping and UPF deferred"
+  },
+  "energy_table": {
+    "characterized": false,
+    "watts": null,
+    "joules": null,
+    "break_even": null,
+    "interpretation": "Clock pulse counts are functional evidence, not energy or PPA signoff"
+  },
+  "counter_table": {
+    "width": 64,
+    "saturating": true,
+    "index": {
+      "0": "RESET",
+      "1": "ACTIVE",
+      "2": "STALLED",
+      "3": "IDLE_ON",
+      "4": "CLOCK_GATED",
+      "5": "DRAINING",
+      "6": "SAVING",
+      "7": "ISOLATING",
+      "8": "POWERING_DOWN",
+      "9": "RETENTION",
+      "10": "OFF",
+      "11": "POWERING_UP",
+      "12": "CLOCK_STARTING",
+      "13": "RESTORING",
+      "14": "REINITIALIZING",
+      "15": "RELOADING",
+      "16": "DVFS_DRAINING",
+      "17": "DVFS_ISOLATING",
+      "18": "DVFS_TRANSITION",
+      "19": "DVFS_STABILIZING",
+      "20": "WAKEUP",
+      "21": "ERROR",
+      "22": "TEST",
+      "23": "transitions",
+      "24": "wakes",
+      "25": "timeouts",
+      "26": "rollbacks",
+      "27": "commands_accepted",
+      "28": "commands_rejected",
+      "29": "bad_wakes",
+      "30": "fatal_cycles",
+      "31": "corrected_control_cycles"
+    },
+    "wake_source_width": 32,
+    "group_gated_cycle_width": 32
+  },
+  "transport": {
+    "frontend": "synchronous AON ready/valid, one outstanding command",
+    "terminal": "one immutable response per accepted command except coordinated global reset",
+    "validation": "full identity plus nonwrapping serial/tag and external boot generation",
+    "events": "delivery sequence is assigned at dequeue; first fatal has dedicated storage",
+    "overflow": "diagnostic overflow is sticky; reserved terminal storage is independent",
+    "physical_status": "independent stable levels through selectable synchronizers; no bus CDC"
+  },
+  "integration": {
+    "instantiated": [
+      "one released tile controller per region",
+      "root/group clock gates",
+      "ordered functional reset synchronizers",
+      "endpoint isolation clamps",
+      "protected storage",
+      "queues and counters"
+    ],
+    "modeled": [
+      "cluster workload and scratchpad/local network drain",
+      "array authorization",
+      "package and endpoint validation authority",
+      "physical status acknowledgements"
+    ],
+    "required": [
+      "Route real cluster drain/status and endpoint signals through this interface",
+      "AON inputs and synchronous peers must remain powered and clocked",
+      "System reset must reconcile all old obligations and change i_system_reset_generation",
+      "Physical ACK peers must acknowledge actual controls, never inferred state labels",
+      "Retiring operations remain enabled during drain; suppress writes only after full drain"
+    ]
+  },
+  "unsupported": [
+    "Retention",
+    "OFF",
+    "DVFS",
+    "SRAM low power",
+    "asynchronous command bus",
+    "trace",
+    "full cluster/array vertical RTL integration",
+    "physical net energy claims"
+  ],
+  "signoff": {
+    "python_simulation": "see regression summary",
+    "hdl_assertions": "NOT_RUN",
+    "lint": "NOT_RUN",
+    "formal": "NOT_RUN",
+    "synthesis": "Design Compiler (deferred)",
+    "cdc": "NOT_RUN",
+    "upf": "NOT_RUN",
+    "sta": "NOT_RUN",
+    "power": "NOT_RUN",
+    "ppa": "NOT_RUN"
+  },
+  "source_sha256": {
+    "src/rtl/building_blocks/tile_power_controller_pkg.sv": "b4a598f47e491ca7689bb098597c33c9a05b68a6463e8471e6a7e20913963dd6",
+    "src/rtl/mosaic_blocks/cluster_power_manager_pkg.sv": "a47b64a1fd3b8f4075d737c4dc635e1ab22353028e435ad6e8ab72d0bd8ea132",
+    "src/rtl/common/dff.sv": "578b511eedf04e100d039f14c35998d8079653fd2006c33baad432ea4622fd38",
+    "src/rtl/common/counter.sv": "d02f311941ef1fc913b80ab2bb5d66cdc35c817dddacb459e7400b9597d8806f",
+    "src/rtl/common/clock_gate.sv": "41f9e1ff400938b76e5ca1514de781f9c040abad09ad66842c3bf224d9a7d1f9",
+    "src/rtl/common/reset_synchronizer.sv": "3503d53aef9da5d7a8dd1579b807093cfa441106e9727457646d3cb89e6fe2f8",
+    "src/rtl/common/isolation_cell.sv": "cb9781d605035aa73a9cc52d542cecf16241409d15f7abfd951f671ad48f43b6",
+    "src/rtl/common/decoder.sv": "ed39d268ad87f931ada335a517e850a0c300f6275d3ffce969150e5422c836cf",
+    "src/rtl/common/operand_isolation.sv": "0ee8a947cb68dcc40f0100ef9eeb5ae1cfc2c60cc0e56957dfac553bc2b5fc51",
+    "src/rtl/basic/fifo.sv": "0937c66148bce63f3ff912a300f28cd4aedc215fab7ba936b53174c170f51a79",
+    "src/rtl/basic/parity.sv": "cb503fb1f9d3ad04c9d1e307f675715e22a555c4ba108b3cad1a5ec1efb63ab6",
+    "src/rtl/basic/ecc.sv": "68220c6730934a6d640490c8c6fa8d8c119d47ef2c7522091267b7206df1bb11",
+    "src/rtl/basic/performance_counters.sv": "4790d96341d466827b2f215f51c22557c753a0409a765ad614b3efff8ccac704",
+    "src/rtl/building_blocks/event_barrier_state.sv": "0b04b66385ce678b62d08ad6b4db0a4b27f21f41c7affdb315fc855a3ff85a51",
+    "src/rtl/building_blocks/event_barrier_queue.sv": "0c3c936f9aed20e76e8c84d983dff23fb4c64748c4aea7c09954eef0ad63aca9",
+    "src/rtl/building_blocks/tile_power_controller.sv": "bb017271a05fd1de8e194016f069cbf5814d54ce6ca231bf0c313c647f9d67b4",
+    "src/rtl/mosaic_blocks/tile_shell_codec.sv": "eb760929fdc59c7ebebb4492427655c43ef3102bced68abc27882bc563749ff3",
+    "src/rtl/mosaic_blocks/tile_shell_state.sv": "79a1afc3c7cd4d55550c653a8c0142d8af575829a963a5da4c2848d18fca7c32",
+    "src/rtl/mosaic_blocks/cluster_power_manager_sync.sv": "4aac5d607c9d12e476a911fd5293944a1a44b93314f188f63f43287d79933579",
+    "src/rtl/mosaic_blocks/cluster_power_manager_tiles.sv": "404fb021cb17a39182ec1ccd43916694dd9458ccd19aa29f1e9abda5f18daf1a",
+    "src/rtl/mosaic_blocks/cluster_power_manager_events.sv": "302a96a1c8a0fb767094e7ba307a91183b642e2eb4b080f3cfc31ea154dd0c7f",
+    "src/rtl/mosaic_blocks/cluster_power_manager.sv": "1d0109ee77158aa50d2ac38f76d4f77ffcbd22966b327862c7032d236043ceb8",
+    "src/gen/cluster_power_manager/cluster_power_manager_contract.py": "aea2c3511f613333fc56c992bcc067cb5066970b915c4b08c3e8aa53b73525df",
+    "src/gen/cluster_power_manager/cluster_power_manager_sources.py": "4058e0b4691fb00f18114f41d3ed8a2356bd186adadf30ae29890860a3f4f419",
+    "src/gen/cluster_power_manager/generate.py": "1b1d62c64303a4c53270340a4e3cc1d1b7b661c3a0ebff16a5cd962ac5e23fe9"
+  },
+  "contract_sha256": "7adfdace95539c076189b9be28fd0d8b8e8974e71230fe81345eccd70c24d579"
+}

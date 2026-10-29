@@ -1542,3 +1542,19 @@ and monitoring. See the
 for the normalized peer ABI, resource ownership and recovery requirements,
 supported limits and Python-only evidence. Synthesis remains deferred to
 Design Compiler.
+
+Run the cluster power manager specification campaign:
+
+```sh
+make cluster-power-manager-generate
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=cluster_power_manager
+make cluster-power-manager-regression SIM=icarus
+```
+
+The manager composes released tile power controllers, actual root/group clock
+gates, reset synchronizers, isolation cells, counters, queues and protected
+storage for Clocked and Protected Clocked operation. See the
+[cluster power manager validation contract](src/val/mosaic_blocks/cluster_power_manager/README.md)
+for the AON ABI, authorization and recovery requirements, Python peer integration
+boundary and guarded advanced physical profiles. Synthesis remains deferred to
+Design Compiler.

@@ -521,6 +521,32 @@ _RUNTIME_CONTROLLER_SOURCES :=     $(PROJECT_ROOT)/src/rtl/mosaic_blocks/runtime
     $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_state.sv \
     $(PROJECT_ROOT)/src/rtl/mosaic_blocks/runtime_controller.sv
 _RTL_SOURCES_runtime_controller := $(_RUNTIME_CONTROLLER_SOURCES)
+
+_CLUSTER_POWER_MANAGER_SOURCES := \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/tile_power_controller_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/cluster_power_manager_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/common/dff.sv \
+    $(PROJECT_ROOT)/src/rtl/common/counter.sv \
+    $(PROJECT_ROOT)/src/rtl/common/clock_gate.sv \
+    $(PROJECT_ROOT)/src/rtl/common/reset_synchronizer.sv \
+    $(PROJECT_ROOT)/src/rtl/common/isolation_cell.sv \
+    $(PROJECT_ROOT)/src/rtl/common/decoder.sv \
+    $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/fifo.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/parity.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/ecc.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/performance_counters.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/tile_power_controller.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_codec.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_state.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/cluster_power_manager_sync.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/cluster_power_manager_tiles.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/cluster_power_manager_events.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/cluster_power_manager.sv
+_RTL_SOURCES_cluster_power_manager := $(_CLUSTER_POWER_MANAGER_SOURCES)
+
 VERILOG_SOURCES ?= $(or $(_RTL_SOURCES_$(COCOTB_TOPLEVEL)),$(firstword $(wildcard $(PROJECT_ROOT)/src/rtl/*/$(COCOTB_TOPLEVEL).sv)),$(PROJECT_ROOT)/src/rtl/common/$(COCOTB_TOPLEVEL).sv)
 SIM_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/$(COCOTB_TOPLEVEL)
 COCOTB_RESULTS_FILE ?= $(SIM_BUILD)/results.xml
@@ -1092,6 +1118,19 @@ ifneq ($(strip $(SDF_FILE)),)
 # VCS unified SDF annotation is a compilation option, not a simv option.
 COMPILE_ARGS += -sdf $(SDF_CORNER):$(SDF_SCOPE):$(abspath $(SDF_FILE))
 CUSTOM_COMPILE_DEPS += $(abspath $(SDF_FILE))
+endif
+endif
+# Short simulation timeout overrides keep negative PyUVM tests bounded. RTL
+# defaults retain the specification values; the campaign supplies its own flags.
+ifeq ($(COCOTB_TOPLEVEL),cluster_power_manager)
+ifneq ($(_GATE_RUN),1)
+export CLUSTER_POWER_MANAGER_DRAIN_TIMEOUT_CYCLES ?= 256
+export CLUSTER_POWER_MANAGER_TILE_ACK_TIMEOUT_CYCLES ?= 128
+export CLUSTER_POWER_MANAGER_POWER_TIMEOUT_CYCLES ?= 128
+export CLUSTER_POWER_MANAGER_CLOCK_TIMEOUT_CYCLES ?= 128
+export CLUSTER_POWER_MANAGER_RELOAD_TIMEOUT_CYCLES ?= 128
+_CPM_TEST_TIMERS := DRAIN_TIMEOUT_CYCLES TILE_ACK_TIMEOUT_CYCLES POWER_TIMEOUT_CYCLES CLOCK_TIMEOUT_CYCLES RELOAD_TIMEOUT_CYCLES
+COMPILE_ARGS += $(foreach name,$(_CPM_TEST_TIMERS),$(if $(filter vcs,$(SIM)),-pvalue+,-P)cluster_power_manager.$(name)=$(CLUSTER_POWER_MANAGER_$(name)))
 endif
 endif
 include $(shell "$(PYTHON_BIN)" -m cocotb_tools.config --makefiles)/Makefile.sim
@@ -2298,3 +2337,18 @@ runtime-controller-regression:
 		--seed "$(RUNTIME_CONTROLLER_SEED)" --random-cycles "$(RUNTIME_CONTROLLER_RANDOM_CYCLES)" \
 		--make "$(MAKE)" $(if $(filter vcs,$(SIM)),$(if $(VCS_BIN_DIR),--sim-bin-dir "$(VCS_BIN_DIR)"),$(if $(ICARUS_BIN_DIR),--sim-bin-dir "$(ICARUS_BIN_DIR)")) \
 		$(RUNTIME_CONTROLLER_REGRESSION_ARGS)
+
+# AON sequencing, released tile controllers and physical Python peers only.
+CLUSTER_POWER_MANAGER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/cluster_power_manager/regression
+CLUSTER_POWER_MANAGER_SEED ?= 20261028
+CLUSTER_POWER_MANAGER_RANDOM_CYCLES ?= 1000
+CLUSTER_POWER_MANAGER_REGRESSION_ARGS ?=
+.PHONY: cluster-power-manager-generate cluster-power-manager-regression
+cluster-power-manager-generate:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/gen/cluster_power_manager/generate.py"
+cluster-power-manager-regression:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/val/mosaic_blocks/cluster_power_manager/run_cluster_power_manager_regression.py" \
+		--sim "$(SIM)" --build-dir "$(CLUSTER_POWER_MANAGER_REGRESSION_BUILD)" \
+		--seed "$(CLUSTER_POWER_MANAGER_SEED)" --random-cycles "$(CLUSTER_POWER_MANAGER_RANDOM_CYCLES)" \
+		--make "$(MAKE)" $(if $(filter vcs,$(SIM)),$(if $(VCS_BIN_DIR),--sim-bin-dir "$(VCS_BIN_DIR)"),$(if $(ICARUS_BIN_DIR),--sim-bin-dir "$(ICARUS_BIN_DIR)")) \
+		$(CLUSTER_POWER_MANAGER_REGRESSION_ARGS)
