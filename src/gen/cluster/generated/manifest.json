@@ -337,6 +337,14 @@
     "partitioning": false,
     "dma": "released MST streaming ingress/egress"
   },
+  "event_transport": {
+    "arbitration": "fault, terminal, memory, then held round-robin tile grant",
+    "queue": "released parity-protected event_barrier_queue",
+    "identity": "captured in full at admission",
+    "sequence": "32-bit nonwrapping, reset-only recovery",
+    "failure": "sticky integrity fault source 245; corrupt export is invalid until global reset",
+    "critical_fairness": "tiles progress only when higher-priority sources eventually deassert"
+  },
   "metadata": {
     "schema": "mosaic-cluster-stream-v1",
     "width": 512,
@@ -451,13 +459,13 @@
     "src/rtl/common/clock_gate.sv": "41f9e1ff400938b76e5ca1514de781f9c040abad09ad66842c3bf224d9a7d1f9",
     "src/rtl/mosaic_blocks/cluster_package.sv": "a02cb6dc5c2c9f0b6d304c356bd2a13b1c2eaa6d6beb17b7ba888306b7104907",
     "src/rtl/mosaic_blocks/cluster_control.sv": "a3abfccf5ce3b42306a0078bed0ce8211cb3d89377cc53f2715bf879d00c0437",
-    "src/rtl/mosaic_blocks/cluster_events.sv": "3e3e5400e3b3ee575648d2ed7bb214705b03688552524adf1bc8525f7a252bb0",
+    "src/rtl/mosaic_blocks/cluster_events.sv": "6789b938fec9689fefdf609e33ea56bd62d3131313a0b3469eb713887fa49d28",
     "src/rtl/mosaic_blocks/cluster_infrastructure.sv": "2c9821c16e6aae430060d9bd5ab48ca135c4f093331b8936614dc9146045fe33",
     "src/rtl/mosaic_blocks/cluster_memory_bridge.sv": "22b90fe5e133fac38d254551c178fbffdcaea89c20168e62cac28dba10b719ba",
     "src/rtl/mosaic_blocks/cluster_stream_adapter.sv": "f3bb8822d470346820cf3345c81da78d3665d1104d531d2226ad6d553758eb39"
   },
   "generator_sha256": {
-    "generate.py": "5b74b11e480be30357deee210f5705c0dccf4d744c02f7673a91c824b855f65b",
+    "generate.py": "57d450235b31f70a652803045bea279bff0ca6c092af5d718a5c4a2b20450ef5",
     "sources.py": "b5bc73ded1701382370789c76db7f0264104db97833c89d433f1f1a4be6b7b84"
   },
   "signoff": {
@@ -600,6 +608,6 @@
     "memory_bridge": {},
     "events": {}
   },
-  "manifest_sha256": "c316ee8be67b137e3e20857bff0e625085048fcdd4f4c1ed7af32044144c8185",
-  "generated_rtl_sha256": "02c88053356d33ccc99364452fff7259e64ab465f80013b52d3d8eb8689b910e"
+  "manifest_sha256": "f7756e10b5accd1dbee69d27149dddf25c3f9ac84321d28921d706ba44cc1e93",
+  "generated_rtl_sha256": "e78a79468dfa95de6e9a363bd3dc7009691ad16c6e8b2f4fed3d01eb939972f2"
 }
