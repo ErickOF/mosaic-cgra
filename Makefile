@@ -480,6 +480,7 @@ _SFT_SOURCES := $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_pkg.sv $(PROJEC
 _RTL_SOURCES_sft := $(_SFT_SOURCES)
 _CPT_SOURCES := $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_pkg.sv $(PROJECT_ROOT)/src/rtl/basic/context_sequencer_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/tile_power_controller_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/predicate_unit_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/loop_controller_pkg.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/cpt_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/reset_synchronizer.sv $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv $(PROJECT_ROOT)/src/rtl/common/write_gate.sv $(PROJECT_ROOT)/src/rtl/common/lane_mask.sv $(PROJECT_ROOT)/src/rtl/common/mux.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/ecc.sv $(PROJECT_ROOT)/src/rtl/basic/context_memory.sv $(PROJECT_ROOT)/src/rtl/basic/context_sequencer.sv $(PROJECT_ROOT)/src/rtl/basic/async_fifo.sv $(PROJECT_ROOT)/src/rtl/basic/performance_counters.sv $(PROJECT_ROOT)/src/rtl/basic/register_file.sv $(PROJECT_ROOT)/src/rtl/basic/packer.sv $(PROJECT_ROOT)/src/rtl/basic/stream_join.sv $(PROJECT_ROOT)/src/rtl/basic/round_robin_arbiter.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier.sv $(PROJECT_ROOT)/src/rtl/building_blocks/loop_controller.sv $(PROJECT_ROOT)/src/rtl/building_blocks/tile_power_controller.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_codec.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_state.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_queue.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell.sv $(PROJECT_ROOT)/src/rtl/building_blocks/predicate_unit.sv $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/cpt_actions.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/cpt_egress.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/cpt_body.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/cpt.sv
 _RTL_SOURCES_cpt := $(_CPT_SOURCES)
+_RTL_SOURCES_array = $(addprefix $(PROJECT_ROOT)/,$(file <$(PROJECT_ROOT)/src/gen/array/generated/sources.f))
 _RTL_SOURCES_cluster = $(addprefix $(PROJECT_ROOT)/,$(file <$(PROJECT_ROOT)/src/gen/cluster/generated/sources.f))
 _RTL_SOURCES_cluster_events = $(filter-out $(PROJECT_ROOT)/src/rtl/mosaic_blocks/cluster.sv,$(_RTL_SOURCES_cluster))
 _GLOBAL_NOC_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/noc_router_pkg.sv \
@@ -2356,3 +2357,17 @@ cluster-power-manager-regression:
 		--seed "$(CLUSTER_POWER_MANAGER_SEED)" --random-cycles "$(CLUSTER_POWER_MANAGER_RANDOM_CYCLES)" \
 		--make "$(MAKE)" $(if $(filter vcs,$(SIM)),$(if $(VCS_BIN_DIR),--sim-bin-dir "$(VCS_BIN_DIR)"),$(if $(ICARUS_BIN_DIR),--sim-bin-dir "$(ICARUS_BIN_DIR)")) \
 		$(CLUSTER_POWER_MANAGER_REGRESSION_ARGS)
+
+ARRAY_DESCRIPTOR ?= $(PROJECT_ROOT)/src/gen/array/mvp.toml
+ARRAY_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/array/regression
+ARRAY_SEED ?= 20261028
+ARRAY_RANDOM_CYCLES ?= 1000
+ARRAY_REGRESSION_ARGS ?=
+.PHONY: array-generate array-regression
+array-generate:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/gen/array/generate.py" --descriptor "$(ARRAY_DESCRIPTOR)"
+array-regression:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/val/mosaic_blocks/array/run_array_regression.py" \
+		--sim "$(SIM)" --build-dir "$(ARRAY_REGRESSION_BUILD)" \
+		--seed "$(ARRAY_SEED)" --random-cycles "$(ARRAY_RANDOM_CYCLES)" \
+		$(ARRAY_REGRESSION_ARGS)
