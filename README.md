@@ -1561,3 +1561,19 @@ storage for Clocked and Protected Clocked operation. See the
 for the AON ABI, authorization and recovery requirements, Python peer integration
 boundary and guarded advanced physical profiles. Synthesis remains deferred to
 Design Compiler.
+
+Run the generated array specification campaign:
+
+```sh
+make array-generate
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=array
+make array-regression SIM=icarus
+```
+
+The array composes actual MVP clusters, SRAM banks, configuration roots, global-NoC
+routers/TNIs and protected event infrastructure. It supports one-cluster bring-up
+and a two-cluster synchronous MVP, whole-cluster ownership, coordinated package
+commit, authenticated inter-cluster streams and independent concurrent kernels.
+See the [array validation contract](src/val/mosaic_blocks/array/README.md) for
+profiles, runtime/package setup, source provenance and deferred features. Validation
+uses Python/PyUVM only; synthesis remains deferred to Design Compiler.
