@@ -1,0 +1,374 @@
+{
+  "i_clk": [
+    "input",
+    1
+  ],
+  "i_rstb": [
+    "input",
+    1
+  ],
+  "i_test_mode": [
+    "input",
+    1
+  ],
+  "i_memory_reset_done": [
+    "input",
+    1
+  ],
+  "i_ctrl_valid": [
+    "input",
+    1
+  ],
+  "o_ctrl_ready": [
+    "output",
+    1
+  ],
+  "i_ctrl_write": [
+    "input",
+    1
+  ],
+  "i_ctrl_address": [
+    "input",
+    32
+  ],
+  "i_ctrl_write_data": [
+    "input",
+    32
+  ],
+  "i_ctrl_write_strobe": [
+    "input",
+    4
+  ],
+  "i_ctrl_requester_id": [
+    "input",
+    16
+  ],
+  "i_ctrl_privilege": [
+    "input",
+    3
+  ],
+  "i_ctrl_tag": [
+    "input",
+    8
+  ],
+  "o_ctrl_response_valid": [
+    "output",
+    1
+  ],
+  "i_ctrl_response_ready": [
+    "input",
+    1
+  ],
+  "o_ctrl_response_data": [
+    "output",
+    32
+  ],
+  "o_ctrl_response_status": [
+    "output",
+    8
+  ],
+  "o_ctrl_response_tag": [
+    "output",
+    8
+  ],
+  "o_mem_request_valid": [
+    "output",
+    1
+  ],
+  "i_mem_request_ready": [
+    "input",
+    1
+  ],
+  "o_mem_request_write": [
+    "output",
+    1
+  ],
+  "o_mem_request_address": [
+    "output",
+    64
+  ],
+  "o_mem_request_length": [
+    "output",
+    16
+  ],
+  "o_mem_request_size": [
+    "output",
+    3
+  ],
+  "o_mem_request_id": [
+    "output",
+    16
+  ],
+  "o_mem_request_requester": [
+    "output",
+    8
+  ],
+  "o_mem_request_owner": [
+    "output",
+    16
+  ],
+  "o_mem_request_kernel": [
+    "output",
+    16
+  ],
+  "o_mem_request_buffer": [
+    "output",
+    16
+  ],
+  "o_mem_request_generation": [
+    "output",
+    16
+  ],
+  "o_mem_request_descriptor_generation": [
+    "output",
+    16
+  ],
+  "o_mem_request_package": [
+    "output",
+    32
+  ],
+  "o_mem_request_epoch": [
+    "output",
+    8
+  ],
+  "o_mem_write_valid": [
+    "output",
+    1
+  ],
+  "i_mem_write_ready": [
+    "input",
+    1
+  ],
+  "o_mem_write_data": [
+    "output",
+    128
+  ],
+  "o_mem_write_strobe": [
+    "output",
+    16
+  ],
+  "o_mem_write_last": [
+    "output",
+    1
+  ],
+  "o_mem_write_id": [
+    "output",
+    16
+  ],
+  "i_mem_read_valid": [
+    "input",
+    1
+  ],
+  "o_mem_read_ready": [
+    "output",
+    1
+  ],
+  "i_mem_read_data": [
+    "input",
+    128
+  ],
+  "i_mem_read_keep": [
+    "input",
+    16
+  ],
+  "i_mem_read_last": [
+    "input",
+    1
+  ],
+  "i_mem_read_id": [
+    "input",
+    16
+  ],
+  "i_mem_read_status": [
+    "input",
+    4
+  ],
+  "i_mem_write_response_valid": [
+    "input",
+    1
+  ],
+  "o_mem_write_response_ready": [
+    "output",
+    1
+  ],
+  "i_mem_write_response_id": [
+    "input",
+    16
+  ],
+  "i_mem_write_response_status": [
+    "input",
+    4
+  ],
+  "o_fence_valid": [
+    "output",
+    1
+  ],
+  "i_fence_ready": [
+    "input",
+    1
+  ],
+  "o_fence_owner": [
+    "output",
+    16
+  ],
+  "o_fence_kernel": [
+    "output",
+    16
+  ],
+  "o_fence_buffer": [
+    "output",
+    16
+  ],
+  "o_fence_tag": [
+    "output",
+    16
+  ],
+  "i_fence_response_valid": [
+    "input",
+    1
+  ],
+  "o_fence_response_ready": [
+    "output",
+    1
+  ],
+  "i_fence_response_tag": [
+    "input",
+    16
+  ],
+  "i_fence_response_status": [
+    "input",
+    4
+  ],
+  "o_interrupt": [
+    "output",
+    1
+  ],
+  "o_fatal": [
+    "output",
+    1
+  ],
+  "o_boot_ready": [
+    "output",
+    1
+  ],
+  "o_core_phase": [
+    "output",
+    5
+  ],
+  "o_system_state": [
+    "output",
+    4
+  ],
+  "o_event_count": [
+    "output",
+    32
+  ],
+  "o_command_count": [
+    "output",
+    32
+  ],
+  "o_system_manifest_hash": [
+    "output",
+    256
+  ],
+  "i_scan_enable": [
+    "input",
+    1
+  ],
+  "o_array_allocated": [
+    "output",
+    2
+  ],
+  "o_array_running": [
+    "output",
+    2
+  ],
+  "o_array_fatal": [
+    "output",
+    2
+  ],
+  "o_array_allocation_generations": [
+    "output",
+    32
+  ],
+  "o_array_execution_epochs": [
+    "output",
+    16
+  ],
+  "o_array_local_package_ids": [
+    "output",
+    64
+  ],
+  "o_array_array_state": [
+    "output",
+    4
+  ],
+  "o_array_first_error": [
+    "output",
+    8
+  ],
+  "o_array_cluster_status_tile_versions": [
+    "output",
+    128
+  ],
+  "o_array_cluster_status_scratchpad_generation": [
+    "output",
+    32
+  ],
+  "o_array_cluster_status_manifest_hash": [
+    "output",
+    512
+  ],
+  "o_array_cluster_status_allocation_generation": [
+    "output",
+    32
+  ],
+  "o_array_cluster_mst_completion_valid": [
+    "output",
+    2
+  ],
+  "o_array_cluster_mst_completion_identity": [
+    "output",
+    268
+  ],
+  "o_array_cluster_mst_completion_bytes_read": [
+    "output",
+    74
+  ],
+  "o_array_cluster_mst_completion_bytes_written": [
+    "output",
+    74
+  ],
+  "o_array_cluster_mst_completion_status": [
+    "output",
+    4
+  ],
+  "o_array_cluster_mst_completion_partial": [
+    "output",
+    2
+  ],
+  "o_array_cluster_mst_completion_effects_unknown": [
+    "output",
+    2
+  ],
+  "o_array_cluster_mst_error": [
+    "output",
+    2
+  ],
+  "o_array_cluster_mst_idle": [
+    "output",
+    2
+  ],
+  "o_array_noc_accepted_packets": [
+    "output",
+    64
+  ],
+  "o_array_noc_delivered_packets": [
+    "output",
+    64
+  ],
+  "o_array_noc_idle": [
+    "output",
+    1
+  ]
+}

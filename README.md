@@ -1577,3 +1577,20 @@ commit, authenticated inter-cluster streams and independent concurrent kernels.
 See the [array validation contract](src/val/mosaic_blocks/array/README.md) for
 profiles, runtime/package setup, source provenance and deferred features. Validation
 uses Python/PyUVM only; synthesis remains deferred to Design Compiler.
+
+Run the generated system specification campaign:
+
+```sh
+make system-generate
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=system
+make system-regression SIM=icarus
+```
+
+The synchronous canonical System-RTL profile connects one real generated array to
+32-bit MMIO control, memory-resident configuration programs, fenced buffers,
+input/output DMA, protected events and a level interrupt. It supports one active
+whole-array kernel, one- or two-cluster MVP arrays and 64/128-bit physical-memory
+interfaces. See the [system validation contract](src/val/mosaic_blocks/system/README.md)
+for register/descriptor schemas, ownership and cache-maintenance obligations,
+verified profiles and unsupported platform features. Validation uses Python/PyUVM
+only; synthesis remains deferred to Design Compiler.

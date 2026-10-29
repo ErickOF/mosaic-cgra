@@ -1,0 +1,222 @@
+{
+  "IDENTITY": {
+    "offset": 0,
+    "access": "RO",
+    "words": 1
+  },
+  "VERSION": {
+    "offset": 4,
+    "access": "RO",
+    "words": 1
+  },
+  "GEOMETRY": {
+    "offset": 8,
+    "access": "RO",
+    "words": 1
+  },
+  "QUEUES": {
+    "offset": 12,
+    "access": "RO",
+    "words": 1
+  },
+  "STATUS": {
+    "offset": 16,
+    "access": "RO",
+    "words": 1
+  },
+  "STATE": {
+    "offset": 20,
+    "access": "RO",
+    "words": 1
+  },
+  "SYSTEM_HASH": {
+    "offset": 64,
+    "access": "RO",
+    "words": 8
+  },
+  "ARRAY_HASH": {
+    "offset": 96,
+    "access": "RO",
+    "words": 8
+  },
+  "PROGRAM_BUFFER": {
+    "offset": 4096,
+    "access": "RW",
+    "words": 1
+  },
+  "PROGRAM_OFFSET": {
+    "offset": 4100,
+    "access": "RW",
+    "words": 1
+  },
+  "PROGRAM_COUNT_GENERATION": {
+    "offset": 4104,
+    "access": "RW",
+    "words": 1
+  },
+  "PROGRAM_DOORBELL": {
+    "offset": 4108,
+    "access": "WO",
+    "words": 1
+  },
+  "NATIVE_EPOCHS": {
+    "offset": 8192,
+    "access": "RO",
+    "words": 1
+  },
+  "NATIVE_GENERATIONS": {
+    "offset": 8196,
+    "access": "RO",
+    "words": 1
+  },
+  "SCRATCHPAD_GENERATIONS": {
+    "offset": 8200,
+    "access": "RO",
+    "words": 1
+  },
+  "PROGRAM_STATUS": {
+    "offset": 4112,
+    "access": "RO",
+    "words": 1
+  },
+  "PROGRAM_DISCARD": {
+    "offset": 4120,
+    "access": "WO",
+    "words": 1
+  },
+  "PROGRAM_RESULT": {
+    "offset": 4124,
+    "access": "RO",
+    "words": 1
+  },
+  "PROGRAM_CANCEL": {
+    "offset": 4128,
+    "access": "WO",
+    "words": 1
+  },
+  "BUFFER_INDEX": {
+    "offset": 12288,
+    "access": "RW",
+    "words": 1
+  },
+  "BUFFER_BASE_LO": {
+    "offset": 12292,
+    "access": "RW",
+    "words": 1
+  },
+  "BUFFER_BASE_HI": {
+    "offset": 12296,
+    "access": "RW",
+    "words": 1
+  },
+  "BUFFER_SIZE": {
+    "offset": 12300,
+    "access": "RW",
+    "words": 1
+  },
+  "BUFFER_OWNER_KERNEL": {
+    "offset": 12304,
+    "access": "RW",
+    "words": 1
+  },
+  "BUFFER_GENERATION_PERMISSIONS": {
+    "offset": 12308,
+    "access": "RW",
+    "words": 1
+  },
+  "BUFFER_COMMIT": {
+    "offset": 12320,
+    "access": "WO",
+    "words": 1
+  },
+  "BUFFER_DISCARD": {
+    "offset": 12324,
+    "access": "WO",
+    "words": 1
+  },
+  "BUFFER_STATUS": {
+    "offset": 12328,
+    "access": "RO",
+    "words": 1
+  },
+  "BUFFER_FENCE": {
+    "offset": 12352,
+    "access": "WO",
+    "words": 1
+  },
+  "INTERRUPT_MASK": {
+    "offset": 16384,
+    "access": "RW",
+    "words": 1
+  },
+  "EVENT_COUNT": {
+    "offset": 16388,
+    "access": "RO",
+    "words": 1
+  },
+  "INTERRUPT_STATUS": {
+    "offset": 16392,
+    "access": "RO",
+    "words": 1
+  },
+  "EVENT_ACK": {
+    "offset": 16416,
+    "access": "WO",
+    "words": 1
+  },
+  "EVENT_HEAD": {
+    "offset": 16448,
+    "access": "RO",
+    "words": 16
+  },
+  "COUNTER_SNAPSHOT": {
+    "offset": 20480,
+    "access": "WO",
+    "words": 1
+  },
+  "COUNTER_VALID": {
+    "offset": 20484,
+    "access": "RO",
+    "words": 1
+  },
+  "COUNTERS": {
+    "offset": 20496,
+    "access": "RO",
+    "words": 8
+  },
+  "FIRST_ERROR": {
+    "offset": 28672,
+    "access": "RO",
+    "words": 1
+  },
+  "ERROR_CLEAR": {
+    "offset": 28676,
+    "access": "WO",
+    "words": 1
+  },
+  "DRAIN": {
+    "offset": 28680,
+    "access": "WO",
+    "words": 1
+  },
+  "ERROR_ADDRESS_LO": {
+    "offset": 28688,
+    "access": "RO",
+    "words": 1
+  },
+  "ERROR_ADDRESS_HI": {
+    "offset": 28692,
+    "access": "RO",
+    "words": 1
+  },
+  "ERROR_IDENTITY": {
+    "offset": 28696,
+    "access": "RO",
+    "words": 1
+  },
+  "LAST_ARRAY_RESPONSE": {
+    "offset": 28928,
+    "access": "RO",
+    "words": 32
+  }
+}
