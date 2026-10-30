@@ -1,2 +1,26 @@
 """Ordered source files for Python simulation; no dependency manifest."""
-DEPENDENCIES = ('mosaic_blocks/tile_shell_pkg', 'basic/context_sequencer_pkg', 'building_blocks/tile_power_controller_pkg', 'common/dff', 'common/counter', 'common/decoder', 'common/operand_isolation', 'common/reset_synchronizer', 'basic/fifo', 'basic/parity', 'basic/ecc', 'basic/context_memory', 'basic/context_sequencer', 'basic/async_fifo', 'basic/performance_counters', 'building_blocks/event_barrier_state', 'building_blocks/event_barrier_queue', 'building_blocks/tile_power_controller', 'mosaic_blocks/tile_shell_codec', 'mosaic_blocks/tile_shell_state', 'mosaic_blocks/tile_shell_queue')
+DEPENDENCIES = (
+    'common/ecc_pkg',
+    'common/crc_pkg',
+    'mosaic_blocks/tile_shell_pkg',
+    'basic/context_sequencer_pkg',
+    'building_blocks/tile_power_controller_pkg',
+    'common/dff',
+    'common/counter',
+    'common/decoder',
+    'common/operand_isolation',
+    'common/reset_synchronizer',
+    'basic/fifo',
+    'basic/parity',
+    'basic/ecc',
+    'basic/context_memory',
+    'basic/context_sequencer',
+    'basic/async_fifo',
+    'basic/performance_counters',
+    'building_blocks/event_barrier_state',
+    'building_blocks/event_barrier_queue',
+    'building_blocks/tile_power_controller',
+    'mosaic_blocks/tile_shell_codec',
+    'mosaic_blocks/tile_shell_state',
+    'mosaic_blocks/tile_shell_queue',
+)

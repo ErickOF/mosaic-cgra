@@ -106,17 +106,4 @@ package mst_pkg;
     function automatic logic load_class(input logic [2:0] mode);
         return memory_source(mode) || mode == MST_DMA_TO_STREAM;
     endfunction
-
-    function automatic int code_width(input int width, input int protection);
-        int last;
-        int bits;
-        int stripes;
-        stripes = (width + 255) / 256;
-        last = width - (stripes - 1) * 256;
-        bits = 1;
-
-        while ((64'd1 << bits) < 64'(last) + 64'(bits) + 1) bits++;
-
-        return protection == 2 ? (stripes - 1) * 266 + last + bits + 1 : width + protection;
-    endfunction
 endpackage

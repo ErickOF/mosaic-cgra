@@ -1,3 +1,5 @@
+src/rtl/common/ecc_pkg.sv
+src/rtl/common/crc_pkg.sv
 src/rtl/mosaic_blocks/cluster_pkg.sv
 src/rtl/mosaic_blocks/tile_shell_pkg.sv
 src/rtl/basic/context_sequencer_pkg.sv

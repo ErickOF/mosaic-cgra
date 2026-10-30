@@ -30,10 +30,7 @@ module tile_shell_queue #(
         assign o_bad = 1'b0;
         assign o_corrected = 1'b0;
     end else begin : g_buffer
-        localparam int STRIPES = (WIDTH + 255) / 256;
-        localparam int LAST = WIDTH - (STRIPES - 1) * 256;
-        localparam int CODE = PROTECTION == 2 ?
-            (STRIPES - 1) * 266 + LAST + hamming_bits(LAST) + 1 : WIDTH + PROTECTION;
+        localparam int CODE = ecc_pkg::code_width(WIDTH, PROTECTION);
         wire [CODE-1:0] encoded;
         wire [CODE-1:0] received;
         wire [WIDTH-1:0] decoded;
@@ -43,6 +40,7 @@ module tile_shell_queue #(
         wire bad;
         wire corrected;
         wire [$clog2(DEPTH+1)-1:0] occupancy;
+
         tile_shell_codec #(.WIDTH(WIDTH), .PROTECTION(PROTECTION)) u_codec (
             .i_data(i_data),
             .o_code(encoded),
@@ -51,6 +49,7 @@ module tile_shell_queue #(
             .o_bad(bad),
             .o_corrected(corrected)
         );
+
         event_barrier_queue #(.WIDTH(CODE), .DEPTH(DEPTH), .PROTECTED(PROTECTION != 0)) u_queue (
             .i_clk(i_clk),
             .i_rstb(i_rstb),
@@ -66,6 +65,7 @@ module tile_shell_queue #(
             .o_occupied(),
             .o_contents()
         );
+
         assign o_bad = raw_bad || (raw_valid && bad);
         assign o_corrected = raw_valid && corrected;
         assign o_ready = i_rstb &&!i_flush && i_admit && raw_ready &&!o_bad;
@@ -73,10 +73,4 @@ module tile_shell_queue #(
         assign o_data = o_valid ? decoded : '0;
         assign o_count = 32'(occupancy);
     end
-    function automatic int hamming_bits(input int width);
-        int bits;
-        bits = 1;
-        while ((64'd1 << bits) < 64'(width) + 64'(bits) + 1) bits++;
-        return bits;
-    endfunction
 endmodule

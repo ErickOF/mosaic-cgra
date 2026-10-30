@@ -5,10 +5,7 @@ module banked_scratchpad_state #(
     parameter int WIDTH = 32,
     parameter int PROTECTION = 0,
     parameter int ASYNC_RESET = 0,
-    localparam int STRIPES = (WIDTH + 255) / 256,
-    localparam int LAST = WIDTH - (STRIPES - 1) * 256,
-    localparam int CODE = PROTECTION == 2 ?
-        (STRIPES - 1) * 266 + LAST + hamming_bits(LAST) + 1 : WIDTH + PROTECTION,
+    localparam int CODE = ecc_pkg::code_width(WIDTH, PROTECTION),
     localparam int VALID_CODE = PROTECTION == 2 ? 4 : PROTECTION == 1 ? 2 : 1
 ) (
     input logic i_clk,
@@ -17,15 +14,6 @@ module banked_scratchpad_state #(
     output wire [WIDTH-1:0] o_data,
     output wire o_bad
 );
-    function automatic int hamming_bits(input int width);
-        int count;
-        count = 1;
-
-        while ((64'd1 << count) < 64'(width) + 64'(count) + 1) count++;
-
-        return count;
-    endfunction
-
     wire [VALID_CODE-1:0] encoded_valid;
     wire [VALID_CODE-1:0] stored_valid;
     wire valid;

@@ -1,5 +1,6 @@
 """Ordered production source closure; no verification RTL in the design."""
 SOURCES = (
+    'common/ecc_pkg',
     'building_blocks/noc_router_pkg',
     'building_blocks/tile_network_interface_pkg',
     'mosaic_blocks/global_noc_pkg',

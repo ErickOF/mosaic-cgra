@@ -1,6 +1,7 @@
 """Ordered production source closure for the synchronous Cluster-MVP."""
 
 SOURCES = (
+    'common/ecc_pkg', 'common/crc_pkg',
     "mosaic_blocks/cluster_pkg",
     "mosaic_blocks/tile_shell_pkg",
     "basic/context_sequencer_pkg",

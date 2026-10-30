@@ -1351,6 +1351,7 @@
     "power": "NOT_RUN"
   },
   "source_sha256": {
+    "src/rtl/common/ecc_pkg.sv": "16b496a92d3d47cf2943e452aaa1232eae92fd0ab7f679df212a731bd41235f8",
     "src/rtl/mosaic_blocks/runtime_controller_pkg.sv": "ef36cacdb21596c5e4096a7f5f1486a442a12370b5c857ccb9d2d58fb5e33c31",
     "src/rtl/common/dff.sv": "578b511eedf04e100d039f14c35998d8079653fd2006c33baad432ea4622fd38",
     "src/rtl/common/counter.sv": "d02f311941ef1fc913b80ab2bb5d66cdc35c817dddacb459e7400b9597d8806f",
@@ -1359,17 +1360,17 @@
     "src/rtl/common/decoder.sv": "ed39d268ad87f931ada335a517e850a0c300f6275d3ffce969150e5422c836cf",
     "src/rtl/basic/fifo.sv": "0937c66148bce63f3ff912a300f28cd4aedc215fab7ba936b53174c170f51a79",
     "src/rtl/basic/parity.sv": "cb503fb1f9d3ad04c9d1e307f675715e22a555c4ba108b3cad1a5ec1efb63ab6",
-    "src/rtl/basic/ecc.sv": "68220c6730934a6d640490c8c6fa8d8c119d47ef2c7522091267b7206df1bb11",
+    "src/rtl/basic/ecc.sv": "e370e1cff7d8360a2b8955621a49bcd32b93c7069de31443e03030eeb0406686",
     "src/rtl/basic/round_robin_arbiter.sv": "82b9032c942a8221c373b36b4aca58ef03175f4923553a5532d25d1c157d5720",
     "src/rtl/basic/performance_counters.sv": "4790d96341d466827b2f215f51c22557c753a0409a765ad614b3efff8ccac704",
     "src/rtl/building_blocks/event_barrier_state.sv": "0b04b66385ce678b62d08ad6b4db0a4b27f21f41c7affdb315fc855a3ff85a51",
     "src/rtl/building_blocks/event_barrier_queue.sv": "0c3c936f9aed20e76e8c84d983dff23fb4c64748c4aea7c09954eef0ad63aca9",
-    "src/rtl/mosaic_blocks/tile_shell_codec.sv": "eb760929fdc59c7ebebb4492427655c43ef3102bced68abc27882bc563749ff3",
-    "src/rtl/mosaic_blocks/tile_shell_state.sv": "79a1afc3c7cd4d55550c653a8c0142d8af575829a963a5da4c2848d18fca7c32",
+    "src/rtl/mosaic_blocks/tile_shell_codec.sv": "1b5168c1f58845865c7c2211e3f997ca6ffdd4584cf13c983a77ab63a3f02cf9",
+    "src/rtl/mosaic_blocks/tile_shell_state.sv": "b93b8685f3deb50d39f01f28828fee60fbab91503984d9befea9475dd2983f4e",
     "src/rtl/mosaic_blocks/runtime_controller.sv": "561af8df1b5cd02f0bbf6528114ea5181260c7563f2e6dfe96d6abb33e5705bb",
     "src/gen/runtime_controller/generate.py": "4c2d4c9743625371fe013adb6abf12b923da0a3bd4fa71356cab709d61a8304c",
     "src/gen/runtime_controller/runtime_controller_contract.py": "02fcb701f8e6f038b956069a8381d0fe340115818ddab2c9067f4b9683f60624",
-    "src/gen/runtime_controller/runtime_controller_sources.py": "b3fe1222241fc5d73c3af27f1d08f912f0dc5e3a566c99852373d67fbf7dee65"
+    "src/gen/runtime_controller/runtime_controller_sources.py": "767cc084ed25396e6bb6f694c67ec79d2a39de56b5519767898226fc80a68c72"
   },
-  "contract_sha256": "70794e32ef3bee4a6ad592ec0a438b7435bc5083e7f33a8e781dba7857e4b0b0"
+  "contract_sha256": "d21107aa095245fbc890af01c8781d3a76464997013e50e49522091f049cbd68"
 }

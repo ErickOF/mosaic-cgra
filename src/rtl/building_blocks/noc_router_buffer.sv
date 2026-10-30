@@ -13,7 +13,7 @@ module noc_router_buffer #(
     localparam int STRIPES = (WIDTH + 255) / 256,
     localparam int LAST = WIDTH - (STRIPES - 1) * 256,
     localparam int CODE = PROTECTION == 2 ? (STRIPES - 1) * 266 + LAST +
-        hamming_bits(LAST) + 1 + WIDTH + 1 : WIDTH + PROTECTION
+        ecc_pkg::hamming_bits(LAST) + 1 + WIDTH + 1 : WIDTH + PROTECTION
 ) (
     input logic i_clk,
     input logic i_rstb,
@@ -29,13 +29,6 @@ module noc_router_buffer #(
     output wire o_uncorrectable,
     output wire o_ownership_error
 );
-    function automatic int hamming_bits(input int width);
-        int count;
-        count = 1;
-        while ((64'd1 << count) < 64'(width) + 64'(count) + 1) count++;
-        return count;
-    endfunction
-
     wire [PTR-1:0] read_pointer;
     wire [PTR-1:0] write_pointer;
     wire metadata_bad;

@@ -1,6 +1,7 @@
 """Production RTL source closure, shared by the regression and Makefile."""
 
 DEPENDENCIES = (
+    'common/ecc_pkg', 'common/crc_pkg',
     "building_blocks/local_switch_pkg",
     "mosaic_blocks/static_mesh_pkg",
     "common/dff",

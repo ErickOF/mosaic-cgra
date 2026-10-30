@@ -20,6 +20,7 @@ from scratchpad_bank.config import DEFAULTS
 ROOT = Path(__file__).resolve().parents[4]
 TEST_DIR = Path(__file__).resolve().parent
 DEPENDENCIES = tuple(ROOT / f'src/rtl/{name}.sv' for name in (
+    'common/ecc_pkg',
     'building_blocks/scratchpad_bank_pkg', 'common/dff', 'common/counter', 'common/decoder',
     'common/operand_isolation', 'common/write_gate', 'basic/parity', 'basic/ecc',
     'basic/sram_wrapper_backend', 'basic/sram_wrapper', 'building_blocks/scratchpad_bank_counters'))

@@ -1,5 +1,6 @@
 """Ordered production RTL closure; no behavioral replacement of reused blocks."""
 DEPENDENCIES = (
+    'common/ecc_pkg',
     'mosaic_blocks/banked_scratchpad_pkg',
     'building_blocks/scratchpad_bank_pkg',
     'building_blocks/scratchpad_controller_pkg',

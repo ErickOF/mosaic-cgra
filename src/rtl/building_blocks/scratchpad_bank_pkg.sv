@@ -54,14 +54,5 @@ package scratchpad_bank_pkg;
         BANK_COUNT_STROBE = 21,
         BANK_COUNT_FLUSHES = 22
     } bank_counter_index_t;
-
-    function automatic int hamming_bits(input int width);
-        int count;
-        count = 1;
-
-        while ((64'd1 << count) < 64'(width) + 64'(count) + 1) count++;
-
-        return count;
-    endfunction
 endpackage
 `default_nettype wire

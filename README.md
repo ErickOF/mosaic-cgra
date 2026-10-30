@@ -1,5 +1,8 @@
 # Mosaic CGRA
 
+See the [RTL reuse review](doc/rtl-reuse.md) for shared ECC/CRC helpers,
+remaining duplication and the focused Python checks.
+
 Run PyUVM tests through cocotb with Synopsys VCS:
 
 ```sh
