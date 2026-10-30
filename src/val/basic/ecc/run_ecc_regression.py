@@ -17,7 +17,7 @@ from mosaic_uvm.regression import (
 
 ROOT=Path(__file__).resolve().parents[4]
 TEST_DIR=Path(__file__).resolve().parent
-DEPENDENCIES=tuple(ROOT/path for path in ('src/rtl/common/decoder.sv','src/rtl/common/operand_isolation.sv'))
+DEPENDENCIES=tuple(ROOT/path for path in ('src/rtl/common/ecc_pkg.sv','src/rtl/common/decoder.sv','src/rtl/common/operand_isolation.sv'))
 PROFILES=tuple((f'width{width}',width) for width in (1,2,4,5,8,11,12,16,26,27,32,57,58,64,120,121,128,247,248,256))
 INVALID=tuple((name,dict(DATA_WIDTH=value)) for name,value in (
     ('zero',0),('negative',-1),('above_maximum',257),('oversized',"33'h100000000"),

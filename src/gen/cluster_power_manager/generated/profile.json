@@ -1516,6 +1516,7 @@
     "ppa": "NOT_RUN"
   },
   "source_sha256": {
+    "src/rtl/common/ecc_pkg.sv": "16b496a92d3d47cf2943e452aaa1232eae92fd0ab7f679df212a731bd41235f8",
     "src/rtl/building_blocks/tile_power_controller_pkg.sv": "b4a598f47e491ca7689bb098597c33c9a05b68a6463e8471e6a7e20913963dd6",
     "src/rtl/mosaic_blocks/cluster_power_manager_pkg.sv": "a47b64a1fd3b8f4075d737c4dc635e1ab22353028e435ad6e8ab72d0bd8ea132",
     "src/rtl/common/dff.sv": "578b511eedf04e100d039f14c35998d8079653fd2006c33baad432ea4622fd38",
@@ -1527,20 +1528,20 @@
     "src/rtl/common/operand_isolation.sv": "0ee8a947cb68dcc40f0100ef9eeb5ae1cfc2c60cc0e56957dfac553bc2b5fc51",
     "src/rtl/basic/fifo.sv": "0937c66148bce63f3ff912a300f28cd4aedc215fab7ba936b53174c170f51a79",
     "src/rtl/basic/parity.sv": "cb503fb1f9d3ad04c9d1e307f675715e22a555c4ba108b3cad1a5ec1efb63ab6",
-    "src/rtl/basic/ecc.sv": "68220c6730934a6d640490c8c6fa8d8c119d47ef2c7522091267b7206df1bb11",
+    "src/rtl/basic/ecc.sv": "e370e1cff7d8360a2b8955621a49bcd32b93c7069de31443e03030eeb0406686",
     "src/rtl/basic/performance_counters.sv": "4790d96341d466827b2f215f51c22557c753a0409a765ad614b3efff8ccac704",
     "src/rtl/building_blocks/event_barrier_state.sv": "0b04b66385ce678b62d08ad6b4db0a4b27f21f41c7affdb315fc855a3ff85a51",
     "src/rtl/building_blocks/event_barrier_queue.sv": "0c3c936f9aed20e76e8c84d983dff23fb4c64748c4aea7c09954eef0ad63aca9",
     "src/rtl/building_blocks/tile_power_controller.sv": "bb017271a05fd1de8e194016f069cbf5814d54ce6ca231bf0c313c647f9d67b4",
-    "src/rtl/mosaic_blocks/tile_shell_codec.sv": "eb760929fdc59c7ebebb4492427655c43ef3102bced68abc27882bc563749ff3",
-    "src/rtl/mosaic_blocks/tile_shell_state.sv": "79a1afc3c7cd4d55550c653a8c0142d8af575829a963a5da4c2848d18fca7c32",
+    "src/rtl/mosaic_blocks/tile_shell_codec.sv": "1b5168c1f58845865c7c2211e3f997ca6ffdd4584cf13c983a77ab63a3f02cf9",
+    "src/rtl/mosaic_blocks/tile_shell_state.sv": "b93b8685f3deb50d39f01f28828fee60fbab91503984d9befea9475dd2983f4e",
     "src/rtl/mosaic_blocks/cluster_power_manager_sync.sv": "4aac5d607c9d12e476a911fd5293944a1a44b93314f188f63f43287d79933579",
     "src/rtl/mosaic_blocks/cluster_power_manager_tiles.sv": "404fb021cb17a39182ec1ccd43916694dd9458ccd19aa29f1e9abda5f18daf1a",
     "src/rtl/mosaic_blocks/cluster_power_manager_events.sv": "302a96a1c8a0fb767094e7ba307a91183b642e2eb4b080f3cfc31ea154dd0c7f",
     "src/rtl/mosaic_blocks/cluster_power_manager.sv": "1d0109ee77158aa50d2ac38f76d4f77ffcbd22966b327862c7032d236043ceb8",
     "src/gen/cluster_power_manager/cluster_power_manager_contract.py": "aea2c3511f613333fc56c992bcc067cb5066970b915c4b08c3e8aa53b73525df",
-    "src/gen/cluster_power_manager/cluster_power_manager_sources.py": "4058e0b4691fb00f18114f41d3ed8a2356bd186adadf30ae29890860a3f4f419",
+    "src/gen/cluster_power_manager/cluster_power_manager_sources.py": "cb8c91fcd2745f5f4471039d6fbba8a17738d8266eb0227cf09bedde14dd094c",
     "src/gen/cluster_power_manager/generate.py": "1b1d62c64303a4c53270340a4e3cc1d1b7b661c3a0ebff16a5cd962ac5e23fe9"
   },
-  "contract_sha256": "7adfdace95539c076189b9be28fd0d8b8e8974e71230fe81345eccd70c24d579"
+  "contract_sha256": "12d97c9496d5518bc5e5371db1a3f48ae4183e728780ae7d93988d8a4406cd09"
 }

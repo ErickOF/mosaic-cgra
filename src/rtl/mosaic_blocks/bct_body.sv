@@ -195,14 +195,7 @@ module bct_body #(
     localparam int RF_STRIPES = (D + 255) / 256;
     localparam int RF_LAST = D - (RF_STRIPES - 1) * 256;
     localparam int RC = RF_PROTECTION == 2 ? (RF_STRIPES - 1) * 266 +
-        RF_LAST + hamming_bits(RF_LAST) + 1 : D + RF_PROTECTION;
-
-    function automatic int hamming_bits(input int width);
-        int bits;
-        bits = 1;
-        while ((64'd1 << bits) < 64'(width) + bits + 1) bits++;
-        return bits;
-    endfunction
+        RF_LAST + ecc_pkg::hamming_bits(RF_LAST) + 1 : D + RF_PROTECTION;
 
     function automatic int capacity(input int channel);
         return RDU_TOTAL_DELAY_ENTRIES / NI +

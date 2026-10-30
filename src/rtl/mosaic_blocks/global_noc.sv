@@ -691,8 +691,8 @@ module global_noc #(
 
             for (int w = 0; w < WORDS; w++) begin
                 for (int b = 0; b < 64; b++) begin
-                    if (crc[0] ^ candidate[w][b]) crc = (crc >> 1) ^ 32'h82f63b78;
-                    else crc = crc >> 1;
+                    // Preserve the existing procedural branch for X/Z feedback.
+                    crc = crc_pkg::crc32c_step(crc, (crc[0] ^ candidate[w][b]) === 1'b1);
                 end
             end
 

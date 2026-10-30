@@ -3,6 +3,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SOURCES = (
+    'common/ecc_pkg',
     'mosaic_blocks/runtime_controller_pkg', 'common/dff', 'common/counter',
     'common/priority_encoder', 'common/operand_isolation', 'common/decoder',
     'basic/fifo', 'basic/parity', 'basic/ecc', 'basic/round_robin_arbiter',

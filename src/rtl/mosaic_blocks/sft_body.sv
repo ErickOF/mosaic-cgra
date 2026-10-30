@@ -735,16 +735,7 @@ module sft_body #(
 
     localparam int RW = $bits(scalar_state_t);
     localparam int RC = RW + (CONTROL_PROTECTION == 0 ? 0 :
-        CONTROL_PROTECTION == 1 ? 1 : hamming_bits(RW) + 1);
-
-    function automatic int hamming_bits(input int width);
-        int bits;
-        bits = 1;
-
-        while ((64'd1 << bits) < 64'(width) + bits + 1) bits++;
-
-        return bits;
-    endfunction
+        CONTROL_PROTECTION == 1 ? 1 : ecc_pkg::hamming_bits(RW) + 1);
 
     scalar_state_t rf_a;
     scalar_state_t rf_b;

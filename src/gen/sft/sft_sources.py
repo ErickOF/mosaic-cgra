@@ -1,5 +1,6 @@
 """Ordered production source closure, including the actual shell and FUs."""
 SOURCES = (
+    'common/ecc_pkg', 'common/crc_pkg',
     'mosaic_blocks/tile_shell_pkg',
     'basic/context_sequencer_pkg',
     'building_blocks/tile_power_controller_pkg',

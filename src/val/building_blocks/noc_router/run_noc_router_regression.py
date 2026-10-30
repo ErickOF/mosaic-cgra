@@ -30,6 +30,7 @@ TEST_DIR = Path(__file__).resolve().parent
 DEPENDENCIES = tuple(
     ROOT / f'src/rtl/{name}.sv'
     for name in (
+    'common/ecc_pkg',
         'building_blocks/noc_router_pkg',
         'common/dff',
         'common/counter',

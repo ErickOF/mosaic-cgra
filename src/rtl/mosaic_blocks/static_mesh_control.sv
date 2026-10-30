@@ -125,7 +125,7 @@ module static_mesh_control #(
 
     localparam int Y = IM / 8;
     localparam int A = CD > 1 ? $clog2(CD) : 1;
-    localparam int CODE = code_width(IM);
+    localparam int CODE = ecc_pkg::code_width(IM, CONTROL_PROTECTION);
     localparam int STORED = (CODE + 7) / 8 * 8;
     localparam int ENABLE_BASE = HEADER;
     localparam int SELECT_BASE = ENABLE_BASE + N * O;
@@ -219,29 +219,12 @@ module static_mesh_control #(
     wire [31:0] tick_modulus = 32'((N * I + 1) * (PM + 1) + 4) +
         (active_period == 0 ? 32'd1 : 32'(active_period));
 
-    function automatic int code_width(input int width);
-        int stripes;
-        int last;
-        int parity_bits;
-        stripes = (width + 255) / 256;
-        last = width - (stripes - 1) * 256;
-        parity_bits = 1;
-
-        while ((64'd1 << parity_bits) < 64'(last) + 64'(parity_bits) + 1) parity_bits++;
-
-        return CONTROL_PROTECTION == 2 ?
-            (stripes - 1) * 266 + last + parity_bits + 1 : width + CONTROL_PROTECTION;
-    endfunction
-
     function automatic logic [31:0] checksum(input logic [IM-1:0] value);
         logic [31:0] crc;
         crc = 32'hffffffff;
 
         for (int b = 0; b < IM / 8; b++) begin
-            crc = crc ^ {24'b0, value[b*8+:8]};
-
-            for (int k = 0; k < 8; k++) crc = crc[0] ?
-                (crc >> 1) ^ 32'h82f63b78 : crc >> 1;
+            crc = crc_pkg::crc32c_byte(crc, value[b*8+:8]);
         end
 
         return ~crc;

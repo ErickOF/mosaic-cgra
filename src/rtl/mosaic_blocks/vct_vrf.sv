@@ -14,7 +14,7 @@ module vct_vrf #(
     localparam int SLICES = WIDTH / SLICE,
     localparam int MASK = LANES * SLICES,
     localparam int ADDRESS = DEPTH > 1 ? $clog2(DEPTH) : 1,
-    localparam int CODE = PROTECTION == 2 ? SLICE + hamming_bits(SLICE) + 1 :
+    localparam int CODE = PROTECTION == 2 ? SLICE + ecc_pkg::hamming_bits(SLICE) + 1 :
         SLICE + PROTECTION,
     localparam int PHYSICAL = MASK * CODE
 ) (
@@ -29,15 +29,6 @@ module vct_vrf #(
     input logic [ADDRESS-1:0] i_write_address,
     input logic [LANES*WIDTH-1:0] i_write_data
 );
-    function automatic int hamming_bits(input int width);
-        int bits;
-        bits = 1;
-
-        while ((64'd1 << bits) < 64'(width) + bits + 1) bits++;
-
-        return bits;
-    endfunction
-
     wire [PHYSICAL-1:0] encoded;
     wire [READ_PORTS*PHYSICAL-1:0] codes;
     wire [2*MASK-1:0] bad;

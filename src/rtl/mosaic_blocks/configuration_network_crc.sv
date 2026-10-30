@@ -13,11 +13,11 @@ module configuration_network_crc #(
         logic [31:0] crc;
         padded = (BYTES*8)'(i_data);
         crc = 32'hffffffff;
+
         for (int b = 0; b < BYTES; b++) begin
-            crc ^= {24'b0, padded[b*8+:8]};
-            for (int k = 0; k < 8; k++)
-                crc = crc[0] ? (crc >> 1) ^ 32'h82f63b78 : crc >> 1;
+            crc = crc_pkg::crc32c_byte(crc, padded[b*8+:8]);
         end
+
         o_crc = ~crc;
     end
 endmodule

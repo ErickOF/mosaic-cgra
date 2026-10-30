@@ -21,6 +21,7 @@ from polynomial_unit.test_model import ModelTests
 ROOT = Path(__file__).resolve().parents[4]
 TEST_DIR = Path(__file__).resolve().parent
 DEPENDENCIES = tuple(ROOT / f'src/rtl/{name}.sv' for name in (
+    'common/ecc_pkg',
     'building_blocks/polynomial_unit_pkg', 'common/dff', 'common/operand_isolation',
     'common/decoder', 'common/mux', 'basic/fifo', 'basic/parity', 'basic/ecc',
     'building_blocks/event_barrier_state', 'building_blocks/event_barrier_queue',

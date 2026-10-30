@@ -105,7 +105,7 @@ package system_pkg;
         for (int bit_index = 0; bit_index < 2048; bit_index++) begin
             bit_value = bit_index >= 224 && bit_index < 256 ?
                 1'b0 : record_data[bit_index];
-            crc = (crc >> 1) ^ ((crc[0] ^ bit_value) ? 32'h82f63b78 : 32'd0);
+            crc = crc_pkg::crc32c_step(crc, crc[0] ^ bit_value);
         end
 
         return ~crc;

@@ -1,5 +1,6 @@
 """Production dependency closure; simulated helpers are not replaced by stubs."""
 DEPENDENCIES = (
+    'common/ecc_pkg', 'common/crc_pkg',
     'basic/context_sequencer_pkg',
     'building_blocks/agu_pkg',
     'building_blocks/dma_engine_pkg',

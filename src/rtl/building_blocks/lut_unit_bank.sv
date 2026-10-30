@@ -10,8 +10,7 @@ module lut_unit_bank #(
     localparam int DEPTH = 1 << ADDRESS,
     localparam int STRIPES = (WIDTH + 255) / 256,
     localparam int LAST = WIDTH - (STRIPES - 1) * 256,
-    localparam int CODE = PROTECTION == 2 ?
-        (STRIPES - 1) * 266 + LAST + entry_hamming_bits(LAST) + 1 : WIDTH + PROTECTION
+    localparam int CODE = ecc_pkg::code_width(WIDTH, PROTECTION)
 ) (
     input logic i_clk,
     input logic i_write,
@@ -25,14 +24,6 @@ module lut_unit_bank #(
     output wire [1:0] o_corrected,
     output wire [1:0] o_bad
 );
-    function automatic int entry_hamming_bits(input int width);
-        int count;
-        count = 1;
-        while ((64'd1 << count) < 64'(width) + 64'(count) + 1)
-            count++;
-        return count;
-    endfunction
-
     logic [CODE-1:0] memory[DEPTH];
     wire [CODE-1:0] encoded;
     wire [CODE-1:0] received[2];
@@ -55,7 +46,7 @@ module lut_unit_bank #(
         for (genvar port_index = 0; port_index < 2; port_index++) begin : g_port
             for (genvar stripe = 0; stripe < STRIPES; stripe++) begin : g_stripe
                 localparam int BITS = stripe == STRIPES - 1 ? LAST : 256;
-                localparam int HAMMING = entry_hamming_bits(BITS);
+                localparam int HAMMING = ecc_pkg::hamming_bits(BITS);
                 localparam int STORED = BITS + HAMMING + 1;
                 wire [STORED-1:0] unused_encoded;
                 wire [STORED-1:0] unused_corrected;

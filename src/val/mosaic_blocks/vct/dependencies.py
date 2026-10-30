@@ -1,5 +1,7 @@
 """Ordered Python simulation dependency closure."""
-DEPENDENCIES = ('mosaic_blocks/tile_shell_pkg',
+DEPENDENCIES = (
+    'common/ecc_pkg', 'common/crc_pkg',
+    'mosaic_blocks/tile_shell_pkg',
  'basic/context_sequencer_pkg',
  'building_blocks/tile_power_controller_pkg',
  'common/dff',

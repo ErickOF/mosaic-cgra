@@ -22,6 +22,7 @@ from exp_unit.test_model import ModelTests
 ROOT = Path(__file__).resolve().parents[4]
 TEST_DIR = Path(__file__).resolve().parent
 DEPENDENCIES = tuple(ROOT / f'src/rtl/{name}.sv' for name in (
+    'common/ecc_pkg',
     'building_blocks/generated/exp_unit_tables_pkg', 'building_blocks/exp_unit_pkg',
     'building_blocks/scalar_alu_pkg', 'common/mux', 'building_blocks/multiplier',
     'building_blocks/scalar_alu', 'building_blocks/polynomial_unit_round',

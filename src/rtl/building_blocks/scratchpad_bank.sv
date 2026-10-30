@@ -92,7 +92,7 @@ module scratchpad_bank #(
     if (!PARAMETERS_VALID) begin : g_invalid_parameters
         scratchpad_bank_parameters_must_be_valid invalid_parameters ();
     end else begin : g_bank
-        localparam int HAMMING_BITS = hamming_bits(D);
+        localparam int HAMMING_BITS = ecc_pkg::hamming_bits(D);
         localparam int ECC_WIDTH = D + HAMMING_BITS + 1;
         localparam int STORED_WIDTH = PROTECTION_MODE == PROTECT_NONE ? D :
             PROTECTION_MODE == PROTECT_PARITY ? D + PARITY_BITS : ECC_WIDTH;

@@ -23,6 +23,7 @@ DEPENDENCIES = tuple(ROOT / f'src/rtl/{n}.sv' for n in (
     'common/dff', 'common/counter', 'building_blocks/scratchpad_controller_counters',
     'common/priority_encoder', 'common/decoder', 'basic/round_robin_arbiter'))
 BANK_SOURCES = tuple(ROOT / f'src/rtl/{n}.sv' for n in (
+    'common/ecc_pkg',
     'common/operand_isolation', 'common/write_gate', 'basic/parity', 'basic/ecc',
     'basic/sram_wrapper_backend', 'basic/sram_wrapper', 'building_blocks/scratchpad_bank_counters',
     'building_blocks/scratchpad_bank'))

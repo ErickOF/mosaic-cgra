@@ -1,6 +1,7 @@
 """Production RTL closure, including real multicast, arbitration and storage."""
 
 DEPENDENCIES = (
+    'common/ecc_pkg', 'common/crc_pkg',
     "common/dff",
     "common/counter",
     "common/operand_isolation",

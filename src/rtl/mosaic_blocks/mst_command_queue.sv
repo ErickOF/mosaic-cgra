@@ -7,7 +7,7 @@ module mst_command_queue #(
     parameter int DEPTH = 4,
     parameter int PROTECTION = 0,
     parameter int ASYNC_RESET = 0,
-    localparam int CODE = mst_pkg::code_width(WIDTH, PROTECTION),
+    localparam int CODE = ecc_pkg::code_width(WIDTH, PROTECTION),
     localparam int OC = $clog2(DEPTH + 1)
 ) (
     input wire i_clk,

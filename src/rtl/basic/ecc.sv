@@ -8,7 +8,7 @@ module ecc #(
     parameter DATA_WIDTH = 32,
     localparam int unsigned MAX_DATA_WIDTH = 256,
     localparam int unsigned DATA_BITS = (^DATA_WIDTH !== 1'bx) && DATA_WIDTH >= 1 && DATA_WIDTH <= MAX_DATA_WIDTH ? DATA_WIDTH : 1,
-    localparam int unsigned HAMMING_PARITY_BITS = parity_bits(DATA_BITS),
+    localparam int unsigned HAMMING_PARITY_BITS = ecc_pkg::hamming_bits(DATA_BITS),
     localparam int unsigned HAMMING_WIDTH = DATA_BITS + HAMMING_PARITY_BITS,
     localparam int unsigned CODE_WIDTH = HAMMING_WIDTH + 1,
     localparam int unsigned POSITION_WIDTH = CODE_WIDTH > 1 ? $clog2(CODE_WIDTH) : 1
@@ -27,38 +27,18 @@ module ecc #(
     output logic [HAMMING_PARITY_BITS-1:0] o_syndrome,
     output logic o_overall_parity_error
 );
-    // Wide intermediate powers cannot overflow a host-sized 32-bit integer.
-    function automatic int unsigned parity_bits(input int unsigned data_width);
-        logic [63:0] capacity;
-        int unsigned count;
-        capacity = 64'd2;
-        count = 1;
-        while (capacity < 64'(data_width) + 64'(count) + 64'd1) begin
-            capacity = capacity << 1;
-            count++;
-        end
-        parity_bits = count;
-    endfunction
-
     function automatic bit is_parity(input int unsigned position);
         is_parity = (position & (position - 32'd1)) == 0;
-    endfunction
-
-    function automatic int unsigned data_index(input int unsigned position);
-        int unsigned index;
-        index = 0;
-        for (int unsigned lower = 1; lower < position; lower++) begin
-            if ((lower & (lower - 32'd1)) != 0) index++;
-        end
-        data_index = index;
     endfunction
 
     function automatic logic [HAMMING_WIDTH-1:0] coverage_mask(input int unsigned parity);
         logic [HAMMING_WIDTH-1:0] mask;
         mask = '0;
+
         for (int unsigned position = 1; position <= HAMMING_WIDTH; position++) begin
             mask[position-1] = (position & (32'd1 << parity)) != 0;
         end
+
         coverage_mask = mask;
     endfunction
 
@@ -67,16 +47,18 @@ module ecc #(
     end else begin : g_codec
         wire [HAMMING_WIDTH-1:0] placed_data;
         wire [HAMMING_WIDTH-1:0] encoded_hamming;
+
         for (genvar position = 1; position <= HAMMING_WIDTH; position++) begin : g_position
             if (is_parity(position)) begin : g_parity
                 assign placed_data[position-1] = 1'b0;
             end else begin : g_data
-                localparam int unsigned INDEX = data_index(position);
+                localparam int unsigned INDEX = ecc_pkg::data_index(position);
                 assign placed_data[position-1] = i_encode_data[INDEX];
                 assign encoded_hamming[position-1] = placed_data[position-1];
                 assign o_decoded_data[INDEX] = o_corrected_codeword[position-1];
             end
         end
+
         for (genvar parity = 0; parity < HAMMING_PARITY_BITS; parity++) begin : g_check
             localparam logic [HAMMING_WIDTH-1:0] MASK = coverage_mask(parity);
             // Static reduction sets permit balanced XOR trees. Received parity
@@ -84,6 +66,7 @@ module ecc #(
             assign encoded_hamming[(32'd1 << parity)-1] = ^(placed_data & MASK);
             assign o_syndrome[parity] = ^(i_decode_codeword[HAMMING_WIDTH-1:0] & MASK);
         end
+
         assign o_encoded_codeword = {^encoded_hamming, encoded_hamming};
         assign o_overall_parity_error = ^i_decode_codeword;
 

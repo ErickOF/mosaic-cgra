@@ -41,7 +41,7 @@ REGISTERS = {
     'ERROR_ADDRESS_HI': (0x7014, 'RO'), 'ERROR_IDENTITY': (0x7018, 'RO'),
     'LAST_ARRAY_RESPONSE': (0x7100, 'RO', 32),
 }
-HELPERS = ('mosaic_blocks/system_pkg', 'mosaic_blocks/system_core')
+HELPERS = ('common/crc_pkg', 'mosaic_blocks/system_pkg', 'mosaic_blocks/system_core')
 
 
 def digest(path):
@@ -281,7 +281,7 @@ def generate(descriptor=HERE/'rtl.toml', output=ROOT/'src/rtl/mosaic_blocks/syst
                 "            system_register_readonly = 1'b1;"]
     definitions += ['    endfunction', 'endpackage', '']
     register_package.write_text('\n'.join(definitions))
-    sources += ['src/rtl/mosaic_blocks/system_pkg.sv',
+    sources += ['src/rtl/common/crc_pkg.sv', 'src/rtl/mosaic_blocks/system_pkg.sv',
         str(register_package.relative_to(ROOT)) if register_package.is_relative_to(ROOT) else str(register_package),
         'src/rtl/mosaic_blocks/system_core.sv']
     sources += [str(output.relative_to(ROOT)) if output.is_relative_to(ROOT) else str(output)]

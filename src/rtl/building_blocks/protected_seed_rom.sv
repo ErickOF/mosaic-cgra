@@ -11,8 +11,7 @@ module protected_seed_rom #(
     localparam int DEPTH = 1 << ADDRESS,
     localparam int STRIPES = (WIDTH + 255) / 256,
     localparam int LAST = WIDTH - (STRIPES - 1) * 256,
-    localparam int CODE = PROTECTION == 2 ?
-        (STRIPES - 1) * 266 + LAST + parity_bits(LAST) + 1 : WIDTH + PROTECTION
+    localparam int CODE = ecc_pkg::code_width(WIDTH, PROTECTION)
 ) (
     input logic i_enable,
     input logic [ADDRESS-1:0] i_address,
@@ -20,15 +19,6 @@ module protected_seed_rom #(
     output wire o_corrected,
     output wire o_bad
 );
-    function automatic int parity_bits(input int width);
-        int count;
-        count = 1;
-
-        while ((64'd1 << count) < 64'(width) + 64'(count) + 1)
-            count++;
-        return count;
-    endfunction
-
     function automatic logic [CODE-1:0] encode(input logic [WIDTH-1:0] value);
         logic [CODE-1:0] result;
         logic parity_value;
@@ -42,7 +32,7 @@ module protected_seed_rom #(
         if (PROTECTION == 2) begin
             for (int stripe = 0; stripe < STRIPES; stripe++) begin
                 bits_count = stripe == STRIPES - 1 ? LAST : 256;
-                checks = parity_bits(bits_count);
+                checks = ecc_pkg::hamming_bits(bits_count);
                 stored = bits_count + checks;
                 offset = stripe * 266;
                 data_index = stripe * 256;
@@ -77,6 +67,7 @@ module protected_seed_rom #(
             if (PROTECTION == 1)
                 result[CODE-1] = ^ value;
         end
+
         return result;
     endfunction
 
@@ -107,7 +98,7 @@ module protected_seed_rom #(
 
         for (genvar stripe = 0; stripe < STRIPES; stripe++) begin : g_stripe
             localparam int BITS = stripe == STRIPES - 1 ? LAST : 256;
-            localparam int HAMMING = parity_bits(BITS);
+            localparam int HAMMING = ecc_pkg::hamming_bits(BITS);
             localparam int STORED = BITS + HAMMING + 1;
             wire [STORED-1:0] unused_encoded;
             wire [STORED-1:0] unused_corrected;

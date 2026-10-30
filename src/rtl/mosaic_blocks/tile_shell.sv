@@ -745,10 +745,7 @@ module tile_shell #(
             crc = '1;
 
             for (int b = 0; b < IM / 8; b++) begin
-                crc = crc ^ {24'b0, image[b*8+:8]};
-
-                for (int bit_index = 0; bit_index < 8; bit_index++)
-                    crc = crc[0] ? (crc >> 1) ^ 32'h82f63b78 : crc >> 1;
+                crc = crc_pkg::crc32c_byte(crc, image[b*8+:8]);
             end
 
             return ~crc;
@@ -757,10 +754,7 @@ module tile_shell #(
         // Context-memory holds protected raw words; validation is separately
         // committed. Byte merges use corrected read data and initialize unwritten
         // bytes to zero. No executable word or immutable snapshot is overwritten.
-        localparam int STRIPES = (W + 255) / 256;
-        localparam int LAST = W - (STRIPES - 1) * 256;
-        localparam int CODE = CONTEXT_PROTECTION == 2 ?
-            (STRIPES - 1) * 266 + LAST + hamming_bits(LAST) + 1 : W + CONTEXT_PROTECTION;
+        localparam int CODE = ecc_pkg::code_width(W, CONTEXT_PROTECTION);
         wire [C*N*CODE-1:0] raw_images;
         wire [N*CODE-1:0] write_image;
         wire [C*CI-1:0] read_addresses;
@@ -879,15 +873,6 @@ module tile_shell #(
             .o_loop_owner(),
             .o_loop_remaining()
         );
-
-        function automatic int hamming_bits(input int width);
-            int bits;
-            bits = 1;
-
-            while ((64'd1 << bits) < 64'(width) + 64'(bits) + 1) bits++;
-
-            return bits;
-        endfunction
 
         // Port zero occupies the least-significant packed slice. Each record
         // stores payload and metadata atomically; invalid outputs are isolated.

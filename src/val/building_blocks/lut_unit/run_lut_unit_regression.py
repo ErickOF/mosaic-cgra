@@ -18,6 +18,7 @@ from lut_unit.config import DEFAULTS
 ROOT = Path(__file__).resolve().parents[4]
 TEST_DIR = Path(__file__).resolve().parent
 DEPENDENCIES = tuple(ROOT / f'src/rtl/{name}.sv' for name in (
+    'common/ecc_pkg',
     'building_blocks/lut_unit_pkg', 'common/dff', 'common/decoder',
     'common/operand_isolation', 'basic/fifo', 'basic/parity', 'basic/ecc',
     'building_blocks/event_barrier_state', 'building_blocks/event_barrier_queue',
