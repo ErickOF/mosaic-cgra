@@ -295,7 +295,7 @@
     "src/gen/cluster/sources.py": "46d5c7a3d6bbc177f8b759b9aa2a0df88373add07843dd02b76e675b18c6dd77",
     "src/gen/global_noc/generate.py": "b31ba94676d6ad41e734ffa4e0b821a53565b21b5f4e20632fb68fd010aaa78a",
     "src/gen/global_noc/global_noc_contract.py": "ad61de2a838c826c26fbe37940b4cee3046f25bd5d5ac7c2873f1e2765df7997",
-    "src/gen/global_noc/global_noc_sources.py": "921ba76fa610efea7e957bc6f3f3b43fdbb786aabbcaab5673907c73210d4c1a"
+    "src/gen/global_noc/global_noc_sources.py": "4e63da659fe54a4bf551634ab4737174c3b42129e23ce846cc4cda7e441e9b6c"
   },
   "signoff": {
     "validation": "Python-only",
@@ -504,6 +504,6 @@
       "always powered; native gate-safe clock enable only"
     ]
   },
-  "manifest_sha256": "8d856376fb2bb33795a90c389c3941e4ba778806e0f08a340a62804fc638bf88",
-  "generated_rtl_sha256": "27da996a0f792b725d3ead0e4dd784d7bb4d23e9ffd13b8433330dfb86d1ca77"
+  "manifest_sha256": "e648cea4e9cebb22bdf72529203e53057a2fc28217b8e68bd5da5723952a9003",
+  "generated_rtl_sha256": "9a736d0a083978dd46b31bd606079ba263aaf711e446e03935c8df47750ca4b6"
 }

@@ -1007,6 +1007,7 @@
   },
   "source_sha256": {
     "src/rtl/common/ecc_pkg.sv": "16b496a92d3d47cf2943e452aaa1232eae92fd0ab7f679df212a731bd41235f8",
+    "src/rtl/common/crc_pkg.sv": "d876f4f2ab9c63e935eae6e9ca81222d4e0fe4648a974f62fd2263a0b5fb9b22",
     "src/rtl/building_blocks/noc_router_pkg.sv": "3454a194a26083391d1f8190d0bcb92c0ba84d0fa99746c8bf5179012c72b3d3",
     "src/rtl/building_blocks/tile_network_interface_pkg.sv": "2fb8ad9f03f9b8871b172d0e5a8bb7701f818323e63285d3b39d70a3192ac6a2",
     "src/rtl/mosaic_blocks/global_noc_pkg.sv": "326c7a1d42a4ec3251f88cd2302f0c8cbd547e4cea8b7e6372828c7beae4b967",
@@ -1030,5 +1031,5 @@
     "src/rtl/mosaic_blocks/global_noc_link.sv": "a9a2d872565b2b48c3c6b0c6b2222e250c15b71f56af72070d5bf800332b2f7c",
     "src/rtl/mosaic_blocks/global_noc.sv": "094fab08e2ba760becefdca12ecc134aaf08278ae3a0b9e90407b47c51381d6c"
   },
-  "contract_sha256": "66fa4d25d997eba0e10c4a038f761e07f559bca35da7beaee744404c2c93858f"
+  "contract_sha256": "201c78382d159c6c6ec317984f977e2478946dcb53be2772493df0e90ffee255"
 }

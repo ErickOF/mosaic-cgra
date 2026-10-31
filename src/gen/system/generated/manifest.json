@@ -22,7 +22,7 @@
     "system_clock_gating": false,
     "max_active_kernels": 1
   },
-  "array_manifest_sha256": "8d856376fb2bb33795a90c389c3941e4ba778806e0f08a340a62804fc638bf88",
+  "array_manifest_sha256": "e648cea4e9cebb22bdf72529203e53057a2fc28217b8e68bd5da5723952a9003",
   "register_map": {
     "IDENTITY": {
       "offset": 0,
@@ -1833,7 +1833,7 @@
       "src/gen/cluster/sources.py": "46d5c7a3d6bbc177f8b759b9aa2a0df88373add07843dd02b76e675b18c6dd77",
       "src/gen/global_noc/generate.py": "b31ba94676d6ad41e734ffa4e0b821a53565b21b5f4e20632fb68fd010aaa78a",
       "src/gen/global_noc/global_noc_contract.py": "ad61de2a838c826c26fbe37940b4cee3046f25bd5d5ac7c2873f1e2765df7997",
-      "src/gen/global_noc/global_noc_sources.py": "921ba76fa610efea7e957bc6f3f3b43fdbb786aabbcaab5673907c73210d4c1a"
+      "src/gen/global_noc/global_noc_sources.py": "4e63da659fe54a4bf551634ab4737174c3b42129e23ce846cc4cda7e441e9b6c"
     },
     "signoff": {
       "validation": "Python-only",
@@ -2042,8 +2042,8 @@
         "always powered; native gate-safe clock enable only"
       ]
     },
-    "manifest_sha256": "8d856376fb2bb33795a90c389c3941e4ba778806e0f08a340a62804fc638bf88",
-    "generated_rtl_sha256": "27da996a0f792b725d3ead0e4dd784d7bb4d23e9ffd13b8433330dfb86d1ca77"
+    "manifest_sha256": "e648cea4e9cebb22bdf72529203e53057a2fc28217b8e68bd5da5723952a9003",
+    "generated_rtl_sha256": "9a736d0a083978dd46b31bd606079ba263aaf711e446e03935c8df47750ca4b6"
   },
   "dependency_sha256": {
     "src/rtl/common/crc_pkg.sv": "d876f4f2ab9c63e935eae6e9ca81222d4e0fe4648a974f62fd2263a0b5fb9b22",
@@ -2091,11 +2091,11 @@
     "formal": "NOT_RUN",
     "physical": "NOT_CHARACTERIZED"
   },
-  "manifest_sha256": "2306fc10c3107c0c721699658e33b4263dfaa71e53adcb13dbd8947288cfebc2",
-  "generated_rtl_sha256": "75198f2d934eebe735d8e5c0491950e2ea3744441ae60f5c8301981a65eb1d21",
+  "manifest_sha256": "3f8b0046ee828bf81d3f74632abff8cd210444475d680fd4564400001980432e",
+  "generated_rtl_sha256": "ce4f27a0b02819c06db5eef37211f5fa74f93439aadc10ad039f56591d049f8e",
   "artifact_sha256": {
     "system_registers_pkg.sv": "050cb3f6951979f4276236a01220f61a033ff7b8329055f962a34e12aa266686",
-    "system.h": "84e77a47d8834cc25232a71c54069d9c02bbb7e5b7d5628d2fda20b795b6b1b3",
+    "system.h": "5cc8cfd936f1efd9bb6b4f338051ddb563f081eb9006400031488185eacf9983",
     "registers.json": "9b80e10bfab8333984eb3bed19d38fa7115b94c2d83a845c05a835dae248345a",
     "descriptors.json": "c4701b4831f428fab9693f25890b45e73ef94721e4a970945e534f53e644df3e",
     "ports.json": "e037f98be248ddeb7e6ed3d4bda0a5607706c7fc086846eb20bfdc3e3b48a3ee"
