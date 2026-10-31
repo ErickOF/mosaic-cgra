@@ -1,0 +1,34 @@
+schema = "mosaic-cluster-v1"
+profile = "Cluster-MVP"
+cluster_id = 1
+rows = 2
+cols = 2
+context_depth = 4
+scratchpad_banks = 2
+scratchpad_bank_words = 32
+clock_gating = true
+lifecycle_timeout = 65535
+
+[[tiles]]
+id = 0
+class = "BCT"
+row = 0
+col = 0
+
+[[tiles]]
+id = 1
+class = "BCT"
+row = 0
+col = 1
+
+[[tiles]]
+id = 2
+class = "BCT"
+row = 1
+col = 0
+
+[[tiles]]
+id = 3
+class = "MST"
+row = 1
+col = 1

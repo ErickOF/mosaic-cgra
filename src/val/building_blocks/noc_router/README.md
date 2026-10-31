@@ -160,8 +160,9 @@ both dimension orders, and one/two VCs. Every source/destination pair is exercis
 followed by randomized congestion, delayed credits, backpressure and coordinated
 flush. Independent endpoint ledgers check exact delivery, packet ordering and
 noninterleaving. `generate_mesh.py` reproducibly generates the checked-in fixture.
-TNI RTL is absent in this repository, so endpoints implement the flit contract
-behaviorally and TNI integration remains `NOT_RUN`.
+This router-only fixture uses behavioral flit endpoints. The separate
+[global NoC suite](../../mosaic_blocks/global_noc/README.md) now composes the released
+TNI RTL with actual routers and checks endpoint-to-endpoint traffic in Python.
 
 `analyze_topology.py` enumerates all source/destination paths for every router
 profile and topologically sorts directed link/VC dependencies. It rejects invalid
@@ -173,3 +174,14 @@ elaboration with structural and combinational-loop checks. This is RTL functiona
 validation. Commercial VCS execution, temporal formal harnesses, technology mapping,
 sequential equivalence, CDC/RDC, DFT, UPF/VC LP, place-and-route, extracted timing,
 and PrimePower/physical energy remain separate `NOT_RUN` release checks.
+
+
+`PACKET_CREDIT_RESERVATION` optionally requires a fixed number of downstream
+credits before a packet head becomes eligible for router input/output acquisition.
+Zero preserves the original standalone wormhole behavior. The global NoC sets it
+to the complete fixed-envelope packet length, so a data packet cannot hold a
+partially transmitted output ahead of critical traffic. The reservation must fit
+`OUTPUT_INITIAL_CREDITS`; it does not add storage or credits. Bodies and tails
+retain the normal positive-credit launch rule. The global NoC campaign checks
+this mode and reruns selected legacy router Python profiles with HDL assertions
+disabled; the router's full standalone campaign remains separately available.

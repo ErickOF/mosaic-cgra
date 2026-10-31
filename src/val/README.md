@@ -257,3 +257,28 @@ drain/flush/reset and unknown controls. The 55-profile `exp-unit-regression`
 verifies generated assets and covers exhaustive reduced-width inputs, optional
 features and representative formats. Its README links scalar accuracy evidence
 and identifies remaining formal, physical and application qualification.
+
+The generated cluster suite under `mosaic_blocks/cluster` exercises the selected
+2×2 three-BCT/one-MST MVP with actual production tiles, mesh, configuration fabric
+and SRAM banks. It checks manifests and coordinated activation, load/compute/store
+readback, metadata conservation, ownership, safe-point suspend/resume, drain,
+completion/event backpressure, clock gating and fail-stop behavior. Independent
+profiles include changed placement/IDs, smaller SRAM and a 4×4 control smoke test.
+The [suite README](mosaic_blocks/cluster/README.md) defines the MVP limits and
+Python-only evidence; Design Compiler synthesis and physical signoff are deferred.
+
+The `mosaic_blocks/sft` suite validates the real Specialized Function Tile across
+Minimal, Balanced, Norm and Transformer profiles. It checks native numerical
+results and flags, exact reductions, ordered local/output commit, table and
+coefficient programming, context chains, replay, ownership, lifecycle and protected
+state. Run `make sft-regression SIM=icarus`; the [suite README](mosaic_blocks/sft/README.md)
+records the local ABI and current limits. Only Python-driven verification is run;
+Design Compiler synthesis and later physical/numerical release gates are deferred.
+
+The `mosaic_blocks/cpt` suite exercises the real Control and Predicate Tile with
+structured PyUVM components and independent control models. It covers predicates,
+comparisons, typed registers, nested-loop frames, events, waits, barriers,
+coordination transactions, backpressure and lifecycle behavior. Run
+`make cpt-regression SIM=icarus`; the [suite README](mosaic_blocks/cpt/README.md)
+defines the local record ABI and supported Local/Cluster configurations. Only
+Python-driven validation is run; synthesis is deferred to Design Compiler.

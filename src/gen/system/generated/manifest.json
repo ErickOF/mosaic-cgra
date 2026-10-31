@@ -1,0 +1,2103 @@
+{
+  "schema": "mosaic-system-v1",
+  "descriptor": {
+    "schema": "mosaic-system-v1",
+    "profile": "System-RTL",
+    "clusters": 2,
+    "buffers": 4,
+    "command_depth": 2,
+    "event_depth": 8,
+    "memory_data_width": 128,
+    "memory_timeout": 65535,
+    "control_protocol": "canonical",
+    "memory_protocol": "canonical",
+    "hardware_runtime": false,
+    "async_clocks": false,
+    "power_gating": false,
+    "dvfs": false,
+    "coherence": false,
+    "translation": false,
+    "trace": false,
+    "direct_results": false,
+    "system_clock_gating": false,
+    "max_active_kernels": 1
+  },
+  "array_manifest_sha256": "e648cea4e9cebb22bdf72529203e53057a2fc28217b8e68bd5da5723952a9003",
+  "register_map": {
+    "IDENTITY": {
+      "offset": 0,
+      "access": "RO",
+      "words": 1
+    },
+    "VERSION": {
+      "offset": 4,
+      "access": "RO",
+      "words": 1
+    },
+    "GEOMETRY": {
+      "offset": 8,
+      "access": "RO",
+      "words": 1
+    },
+    "QUEUES": {
+      "offset": 12,
+      "access": "RO",
+      "words": 1
+    },
+    "STATUS": {
+      "offset": 16,
+      "access": "RO",
+      "words": 1
+    },
+    "STATE": {
+      "offset": 20,
+      "access": "RO",
+      "words": 1
+    },
+    "SYSTEM_HASH": {
+      "offset": 64,
+      "access": "RO",
+      "words": 8
+    },
+    "ARRAY_HASH": {
+      "offset": 96,
+      "access": "RO",
+      "words": 8
+    },
+    "PROGRAM_BUFFER": {
+      "offset": 4096,
+      "access": "RW",
+      "words": 1
+    },
+    "PROGRAM_OFFSET": {
+      "offset": 4100,
+      "access": "RW",
+      "words": 1
+    },
+    "PROGRAM_COUNT_GENERATION": {
+      "offset": 4104,
+      "access": "RW",
+      "words": 1
+    },
+    "PROGRAM_DOORBELL": {
+      "offset": 4108,
+      "access": "WO",
+      "words": 1
+    },
+    "NATIVE_EPOCHS": {
+      "offset": 8192,
+      "access": "RO",
+      "words": 1
+    },
+    "NATIVE_GENERATIONS": {
+      "offset": 8196,
+      "access": "RO",
+      "words": 1
+    },
+    "SCRATCHPAD_GENERATIONS": {
+      "offset": 8200,
+      "access": "RO",
+      "words": 1
+    },
+    "PROGRAM_STATUS": {
+      "offset": 4112,
+      "access": "RO",
+      "words": 1
+    },
+    "PROGRAM_DISCARD": {
+      "offset": 4120,
+      "access": "WO",
+      "words": 1
+    },
+    "PROGRAM_RESULT": {
+      "offset": 4124,
+      "access": "RO",
+      "words": 1
+    },
+    "PROGRAM_CANCEL": {
+      "offset": 4128,
+      "access": "WO",
+      "words": 1
+    },
+    "BUFFER_INDEX": {
+      "offset": 12288,
+      "access": "RW",
+      "words": 1
+    },
+    "BUFFER_BASE_LO": {
+      "offset": 12292,
+      "access": "RW",
+      "words": 1
+    },
+    "BUFFER_BASE_HI": {
+      "offset": 12296,
+      "access": "RW",
+      "words": 1
+    },
+    "BUFFER_SIZE": {
+      "offset": 12300,
+      "access": "RW",
+      "words": 1
+    },
+    "BUFFER_OWNER_KERNEL": {
+      "offset": 12304,
+      "access": "RW",
+      "words": 1
+    },
+    "BUFFER_GENERATION_PERMISSIONS": {
+      "offset": 12308,
+      "access": "RW",
+      "words": 1
+    },
+    "BUFFER_COMMIT": {
+      "offset": 12320,
+      "access": "WO",
+      "words": 1
+    },
+    "BUFFER_DISCARD": {
+      "offset": 12324,
+      "access": "WO",
+      "words": 1
+    },
+    "BUFFER_STATUS": {
+      "offset": 12328,
+      "access": "RO",
+      "words": 1
+    },
+    "BUFFER_FENCE": {
+      "offset": 12352,
+      "access": "WO",
+      "words": 1
+    },
+    "INTERRUPT_MASK": {
+      "offset": 16384,
+      "access": "RW",
+      "words": 1
+    },
+    "EVENT_COUNT": {
+      "offset": 16388,
+      "access": "RO",
+      "words": 1
+    },
+    "INTERRUPT_STATUS": {
+      "offset": 16392,
+      "access": "RO",
+      "words": 1
+    },
+    "EVENT_ACK": {
+      "offset": 16416,
+      "access": "WO",
+      "words": 1
+    },
+    "EVENT_HEAD": {
+      "offset": 16448,
+      "access": "RO",
+      "words": 16
+    },
+    "COUNTER_SNAPSHOT": {
+      "offset": 20480,
+      "access": "WO",
+      "words": 1
+    },
+    "COUNTER_VALID": {
+      "offset": 20484,
+      "access": "RO",
+      "words": 1
+    },
+    "COUNTERS": {
+      "offset": 20496,
+      "access": "RO",
+      "words": 8
+    },
+    "FIRST_ERROR": {
+      "offset": 28672,
+      "access": "RO",
+      "words": 1
+    },
+    "ERROR_CLEAR": {
+      "offset": 28676,
+      "access": "WO",
+      "words": 1
+    },
+    "DRAIN": {
+      "offset": 28680,
+      "access": "WO",
+      "words": 1
+    },
+    "ERROR_ADDRESS_LO": {
+      "offset": 28688,
+      "access": "RO",
+      "words": 1
+    },
+    "ERROR_ADDRESS_HI": {
+      "offset": 28692,
+      "access": "RO",
+      "words": 1
+    },
+    "ERROR_IDENTITY": {
+      "offset": 28696,
+      "access": "RO",
+      "words": 1
+    },
+    "LAST_ARRAY_RESPONSE": {
+      "offset": 28928,
+      "access": "RO",
+      "words": 32
+    }
+  },
+  "groups": {
+    "0": {
+      "name": "runtime",
+      "fields": [
+        [
+          "i_runtime_command",
+          5
+        ],
+        [
+          "i_runtime_cluster_mask",
+          2
+        ],
+        [
+          "i_runtime_allocation_generation",
+          16
+        ],
+        [
+          "i_runtime_execution_epoch",
+          8
+        ],
+        [
+          "i_runtime_context_id",
+          8
+        ],
+        [
+          "i_runtime_local_package_ids",
+          64
+        ],
+        [
+          "i_runtime_context_versions",
+          192
+        ],
+        [
+          "i_runtime_mapping_variant",
+          8
+        ],
+        [
+          "i_runtime_qos_profile",
+          8
+        ],
+        [
+          "i_runtime_power_profile",
+          8
+        ],
+        [
+          "i_runtime_flags",
+          8
+        ]
+      ],
+      "valid": "i_runtime_valid",
+      "ready": "o_runtime_ready",
+      "response": "o_runtime_response_valid",
+      "response_ready": "i_runtime_response_ready",
+      "error": "o_runtime_response_error_code",
+      "tag": "o_runtime_response_tag",
+      "outputs": [
+        "o_runtime_response_command",
+        "o_runtime_response_status",
+        "o_runtime_response_error_code",
+        "o_runtime_response_cluster_mask",
+        "o_runtime_response_tag",
+        "o_runtime_response_array_state"
+      ],
+      "kind": 0,
+      "payload": [
+        {
+          "name": "i_runtime_command",
+          "offset": 0,
+          "width": 5
+        },
+        {
+          "name": "i_runtime_cluster_mask",
+          "offset": 5,
+          "width": 2
+        },
+        {
+          "name": "i_runtime_allocation_generation",
+          "offset": 7,
+          "width": 16
+        },
+        {
+          "name": "i_runtime_execution_epoch",
+          "offset": 23,
+          "width": 8
+        },
+        {
+          "name": "i_runtime_context_id",
+          "offset": 31,
+          "width": 8
+        },
+        {
+          "name": "i_runtime_local_package_ids",
+          "offset": 39,
+          "width": 64
+        },
+        {
+          "name": "i_runtime_context_versions",
+          "offset": 103,
+          "width": 192
+        },
+        {
+          "name": "i_runtime_mapping_variant",
+          "offset": 295,
+          "width": 8
+        },
+        {
+          "name": "i_runtime_qos_profile",
+          "offset": 303,
+          "width": 8
+        },
+        {
+          "name": "i_runtime_power_profile",
+          "offset": 311,
+          "width": 8
+        },
+        {
+          "name": "i_runtime_flags",
+          "offset": 319,
+          "width": 8
+        }
+      ],
+      "payload_bits": 327,
+      "response_payload": [
+        {
+          "name": "o_runtime_response_command",
+          "offset": 0,
+          "width": 5
+        },
+        {
+          "name": "o_runtime_response_status",
+          "offset": 5,
+          "width": 4
+        },
+        {
+          "name": "o_runtime_response_error_code",
+          "offset": 9,
+          "width": 8
+        },
+        {
+          "name": "o_runtime_response_cluster_mask",
+          "offset": 17,
+          "width": 2
+        },
+        {
+          "name": "o_runtime_response_tag",
+          "offset": 19,
+          "width": 16
+        },
+        {
+          "name": "o_runtime_response_array_state",
+          "offset": 35,
+          "width": 4
+        }
+      ]
+    },
+    "1": {
+      "name": "configuration",
+      "fields": [
+        [
+          "i_cfg_request_command",
+          5
+        ],
+        [
+          "i_cfg_request_destination_mask",
+          6
+        ],
+        [
+          "i_cfg_request_package_id",
+          32
+        ],
+        [
+          "i_cfg_request_context_id",
+          8
+        ],
+        [
+          "i_cfg_request_expected_version",
+          16
+        ],
+        [
+          "i_cfg_request_word_index",
+          16
+        ],
+        [
+          "i_cfg_request_write_data",
+          64
+        ],
+        [
+          "i_cfg_request_write_strobe",
+          8
+        ],
+        [
+          "i_cfg_request_expected_crc",
+          32
+        ],
+        [
+          "i_cfg_request_epoch",
+          4
+        ],
+        [
+          "i_cfg_request_flags",
+          8
+        ],
+        [
+          "i_cfg_request_protocol",
+          8
+        ]
+      ],
+      "valid": "i_cfg_request_valid",
+      "ready": "o_cfg_request_ready",
+      "response": "o_cfg_response_valid",
+      "response_ready": "i_cfg_response_ready",
+      "error": "o_cfg_response_error_code",
+      "tag": "o_cfg_response_tag",
+      "last": "o_cfg_response_last",
+      "outputs": [
+        "o_cfg_response_command",
+        "o_cfg_response_transaction_id",
+        "o_cfg_response_endpoint_id",
+        "o_cfg_response_endpoint_type",
+        "o_cfg_response_status",
+        "o_cfg_response_error_code",
+        "o_cfg_response_read_data",
+        "o_cfg_response_context_id",
+        "o_cfg_response_context_version",
+        "o_cfg_response_crc",
+        "o_cfg_response_tag",
+        "o_cfg_response_epoch",
+        "o_cfg_response_first",
+        "o_cfg_response_last",
+        "o_cfg_response_prepared",
+        "o_cfg_response_committed",
+        "o_cfg_response_failure_mask",
+        "o_cfg_response_success_mask",
+        "o_cfg_response_timeout_mask",
+        "o_cfg_response_not_present_mask",
+        "o_cfg_response_sequence_id",
+        "o_cfg_response_protocol",
+        "o_cfg_response_packet_crc",
+        "o_cfg_response_transaction_success"
+      ],
+      "kind": 1,
+      "payload": [
+        {
+          "name": "i_cfg_request_command",
+          "offset": 0,
+          "width": 5
+        },
+        {
+          "name": "i_cfg_request_destination_mask",
+          "offset": 5,
+          "width": 6
+        },
+        {
+          "name": "i_cfg_request_package_id",
+          "offset": 11,
+          "width": 32
+        },
+        {
+          "name": "i_cfg_request_context_id",
+          "offset": 43,
+          "width": 8
+        },
+        {
+          "name": "i_cfg_request_expected_version",
+          "offset": 51,
+          "width": 16
+        },
+        {
+          "name": "i_cfg_request_word_index",
+          "offset": 67,
+          "width": 16
+        },
+        {
+          "name": "i_cfg_request_write_data",
+          "offset": 83,
+          "width": 64
+        },
+        {
+          "name": "i_cfg_request_write_strobe",
+          "offset": 147,
+          "width": 8
+        },
+        {
+          "name": "i_cfg_request_expected_crc",
+          "offset": 155,
+          "width": 32
+        },
+        {
+          "name": "i_cfg_request_epoch",
+          "offset": 187,
+          "width": 4
+        },
+        {
+          "name": "i_cfg_request_flags",
+          "offset": 191,
+          "width": 8
+        },
+        {
+          "name": "i_cfg_request_protocol",
+          "offset": 199,
+          "width": 8
+        }
+      ],
+      "payload_bits": 207,
+      "response_payload": [
+        {
+          "name": "o_cfg_response_command",
+          "offset": 0,
+          "width": 5
+        },
+        {
+          "name": "o_cfg_response_transaction_id",
+          "offset": 5,
+          "width": 8
+        },
+        {
+          "name": "o_cfg_response_endpoint_id",
+          "offset": 13,
+          "width": 8
+        },
+        {
+          "name": "o_cfg_response_endpoint_type",
+          "offset": 21,
+          "width": 4
+        },
+        {
+          "name": "o_cfg_response_status",
+          "offset": 25,
+          "width": 4
+        },
+        {
+          "name": "o_cfg_response_error_code",
+          "offset": 29,
+          "width": 8
+        },
+        {
+          "name": "o_cfg_response_read_data",
+          "offset": 37,
+          "width": 64
+        },
+        {
+          "name": "o_cfg_response_context_id",
+          "offset": 101,
+          "width": 8
+        },
+        {
+          "name": "o_cfg_response_context_version",
+          "offset": 109,
+          "width": 16
+        },
+        {
+          "name": "o_cfg_response_crc",
+          "offset": 125,
+          "width": 32
+        },
+        {
+          "name": "o_cfg_response_tag",
+          "offset": 157,
+          "width": 16
+        },
+        {
+          "name": "o_cfg_response_epoch",
+          "offset": 173,
+          "width": 4
+        },
+        {
+          "name": "o_cfg_response_first",
+          "offset": 177,
+          "width": 1
+        },
+        {
+          "name": "o_cfg_response_last",
+          "offset": 178,
+          "width": 1
+        },
+        {
+          "name": "o_cfg_response_prepared",
+          "offset": 179,
+          "width": 1
+        },
+        {
+          "name": "o_cfg_response_committed",
+          "offset": 180,
+          "width": 1
+        },
+        {
+          "name": "o_cfg_response_failure_mask",
+          "offset": 181,
+          "width": 6
+        },
+        {
+          "name": "o_cfg_response_success_mask",
+          "offset": 187,
+          "width": 6
+        },
+        {
+          "name": "o_cfg_response_timeout_mask",
+          "offset": 193,
+          "width": 6
+        },
+        {
+          "name": "o_cfg_response_not_present_mask",
+          "offset": 199,
+          "width": 6
+        },
+        {
+          "name": "o_cfg_response_sequence_id",
+          "offset": 205,
+          "width": 32
+        },
+        {
+          "name": "o_cfg_response_protocol",
+          "offset": 237,
+          "width": 8
+        },
+        {
+          "name": "o_cfg_response_packet_crc",
+          "offset": 245,
+          "width": 32
+        },
+        {
+          "name": "o_cfg_response_transaction_success",
+          "offset": 277,
+          "width": 1
+        }
+      ]
+    },
+    "2": {
+      "name": "package",
+      "fields": [
+        [
+          "i_cluster_package_id",
+          32
+        ],
+        [
+          "i_cluster_package_context_id",
+          8
+        ],
+        [
+          "i_cluster_package_allocation_generation",
+          16
+        ],
+        [
+          "i_cluster_package_architecture_hash",
+          256
+        ],
+        [
+          "i_cluster_package_topology_id",
+          32
+        ],
+        [
+          "i_cluster_package_contract_version",
+          16
+        ],
+        [
+          "i_cluster_package_requirements",
+          16
+        ],
+        [
+          "i_cluster_package_resource_mask",
+          4
+        ],
+        [
+          "i_cluster_package_endpoint_mask",
+          6
+        ],
+        [
+          "i_cluster_package_context_versions",
+          96
+        ],
+        [
+          "i_cluster_package_image_crcs",
+          192
+        ],
+        [
+          "i_cluster_package_epoch",
+          4
+        ],
+        [
+          "i_cluster_package_suspend_safe",
+          1
+        ]
+      ],
+      "valid": "i_cluster_package_valid",
+      "ready": "o_cluster_package_ready",
+      "response": "o_cluster_package_response_valid",
+      "response_ready": "i_cluster_package_response_ready",
+      "error": "o_cluster_package_response_error_code",
+      "tag": "o_cluster_package_response_tag",
+      "outputs": [
+        "o_cluster_package_response_error_code",
+        "o_cluster_package_response_tag"
+      ],
+      "local": true,
+      "kind": 2,
+      "payload": [
+        {
+          "name": "i_cluster_package_id",
+          "offset": 0,
+          "width": 32
+        },
+        {
+          "name": "i_cluster_package_context_id",
+          "offset": 32,
+          "width": 8
+        },
+        {
+          "name": "i_cluster_package_allocation_generation",
+          "offset": 40,
+          "width": 16
+        },
+        {
+          "name": "i_cluster_package_architecture_hash",
+          "offset": 56,
+          "width": 256
+        },
+        {
+          "name": "i_cluster_package_topology_id",
+          "offset": 312,
+          "width": 32
+        },
+        {
+          "name": "i_cluster_package_contract_version",
+          "offset": 344,
+          "width": 16
+        },
+        {
+          "name": "i_cluster_package_requirements",
+          "offset": 360,
+          "width": 16
+        },
+        {
+          "name": "i_cluster_package_resource_mask",
+          "offset": 376,
+          "width": 4
+        },
+        {
+          "name": "i_cluster_package_endpoint_mask",
+          "offset": 380,
+          "width": 6
+        },
+        {
+          "name": "i_cluster_package_context_versions",
+          "offset": 386,
+          "width": 96
+        },
+        {
+          "name": "i_cluster_package_image_crcs",
+          "offset": 482,
+          "width": 192
+        },
+        {
+          "name": "i_cluster_package_epoch",
+          "offset": 674,
+          "width": 4
+        },
+        {
+          "name": "i_cluster_package_suspend_safe",
+          "offset": 678,
+          "width": 1
+        }
+      ],
+      "payload_bits": 679,
+      "response_payload": [
+        {
+          "name": "o_cluster_package_response_error_code",
+          "offset": 0,
+          "width": 8
+        },
+        {
+          "name": "o_cluster_package_response_tag",
+          "offset": 8,
+          "width": 16
+        }
+      ]
+    },
+    "3": {
+      "name": "region",
+      "fields": [
+        [
+          "i_cluster_mst_region_index",
+          4
+        ],
+        [
+          "i_cluster_mst_region_record",
+          142
+        ]
+      ],
+      "valid": "i_cluster_mst_region_valid",
+      "ready": "o_cluster_mst_region_ready",
+      "response": "o_cluster_mst_region_response_valid",
+      "response_ready": "i_cluster_mst_region_response_ready",
+      "error": "o_cluster_mst_region_response_code",
+      "local": true,
+      "outputs": [
+        "o_cluster_mst_region_response_code"
+      ],
+      "kind": 3,
+      "payload": [
+        {
+          "name": "i_cluster_mst_region_index",
+          "offset": 0,
+          "width": 4
+        },
+        {
+          "name": "i_cluster_mst_region_record",
+          "offset": 4,
+          "width": 142
+        }
+      ],
+      "payload_bits": 146,
+      "response_payload": [
+        {
+          "name": "o_cluster_mst_region_response_code",
+          "offset": 0,
+          "width": 8
+        }
+      ]
+    },
+    "4": {
+      "name": "buffer",
+      "fields": [
+        [
+          "i_cluster_mst_buffer_index",
+          8
+        ],
+        [
+          "i_cluster_mst_buffer_record",
+          175
+        ]
+      ],
+      "valid": "i_cluster_mst_buffer_valid",
+      "ready": "o_cluster_mst_buffer_ready",
+      "response": "o_cluster_mst_buffer_response_valid",
+      "response_ready": "i_cluster_mst_buffer_response_ready",
+      "error": "o_cluster_mst_buffer_response_code",
+      "local": true,
+      "outputs": [
+        "o_cluster_mst_buffer_response_code"
+      ],
+      "kind": 4,
+      "payload": [
+        {
+          "name": "i_cluster_mst_buffer_index",
+          "offset": 0,
+          "width": 8
+        },
+        {
+          "name": "i_cluster_mst_buffer_record",
+          "offset": 8,
+          "width": 175
+        }
+      ],
+      "payload_bits": 183,
+      "response_payload": [
+        {
+          "name": "o_cluster_mst_buffer_response_code",
+          "offset": 0,
+          "width": 8
+        }
+      ]
+    },
+    "5": {
+      "name": "descriptor",
+      "fields": [
+        [
+          "i_cluster_mst_descriptor_identity",
+          134
+        ],
+        [
+          "i_cluster_mst_descriptor_mode",
+          8
+        ],
+        [
+          "i_cluster_mst_descriptor_source",
+          146
+        ],
+        [
+          "i_cluster_mst_descriptor_destination",
+          146
+        ],
+        [
+          "i_cluster_mst_descriptor_format",
+          16
+        ],
+        [
+          "i_cluster_mst_descriptor_events",
+          88
+        ],
+        [
+          "i_cluster_mst_descriptor_control",
+          52
+        ]
+      ],
+      "valid": "i_cluster_mst_descriptor_valid",
+      "ready": "o_cluster_mst_descriptor_ready",
+      "response": "o_cluster_mst_descriptor_accepted",
+      "error": "o_cluster_mst_rejection_code",
+      "local": true,
+      "outputs": [
+        "o_cluster_mst_rejection_code"
+      ],
+      "kind": 5,
+      "payload": [
+        {
+          "name": "i_cluster_mst_descriptor_identity",
+          "offset": 0,
+          "width": 134
+        },
+        {
+          "name": "i_cluster_mst_descriptor_mode",
+          "offset": 134,
+          "width": 8
+        },
+        {
+          "name": "i_cluster_mst_descriptor_source",
+          "offset": 142,
+          "width": 146
+        },
+        {
+          "name": "i_cluster_mst_descriptor_destination",
+          "offset": 288,
+          "width": 146
+        },
+        {
+          "name": "i_cluster_mst_descriptor_format",
+          "offset": 434,
+          "width": 16
+        },
+        {
+          "name": "i_cluster_mst_descriptor_events",
+          "offset": 450,
+          "width": 88
+        },
+        {
+          "name": "i_cluster_mst_descriptor_control",
+          "offset": 538,
+          "width": 52
+        }
+      ],
+      "payload_bits": 590,
+      "response_payload": [
+        {
+          "name": "o_cluster_mst_rejection_code",
+          "offset": 0,
+          "width": 8
+        }
+      ]
+    },
+    "6": {
+      "name": "noc",
+      "fields": [
+        [
+          "i_noc_cfg_command",
+          3
+        ],
+        [
+          "i_noc_cfg_package_id",
+          32
+        ],
+        [
+          "i_noc_cfg_expected_version",
+          16
+        ],
+        [
+          "i_noc_cfg_word_index",
+          16
+        ],
+        [
+          "i_noc_cfg_write_data",
+          64
+        ],
+        [
+          "i_noc_cfg_write_strobe",
+          8
+        ],
+        [
+          "i_noc_cfg_expected_crc",
+          32
+        ]
+      ],
+      "valid": "i_noc_cfg_valid",
+      "ready": "o_noc_cfg_ready",
+      "response": "o_noc_cfg_response_valid",
+      "response_ready": "i_noc_cfg_response_ready",
+      "error": "o_noc_cfg_response_status",
+      "tag": "o_noc_cfg_response_tag",
+      "outputs": [
+        "o_noc_cfg_response_status",
+        "o_noc_cfg_response_data",
+        "o_noc_cfg_response_version",
+        "o_noc_cfg_response_crc",
+        "o_noc_cfg_response_tag"
+      ],
+      "kind": 6,
+      "payload": [
+        {
+          "name": "i_noc_cfg_command",
+          "offset": 0,
+          "width": 3
+        },
+        {
+          "name": "i_noc_cfg_package_id",
+          "offset": 3,
+          "width": 32
+        },
+        {
+          "name": "i_noc_cfg_expected_version",
+          "offset": 35,
+          "width": 16
+        },
+        {
+          "name": "i_noc_cfg_word_index",
+          "offset": 51,
+          "width": 16
+        },
+        {
+          "name": "i_noc_cfg_write_data",
+          "offset": 67,
+          "width": 64
+        },
+        {
+          "name": "i_noc_cfg_write_strobe",
+          "offset": 131,
+          "width": 8
+        },
+        {
+          "name": "i_noc_cfg_expected_crc",
+          "offset": 139,
+          "width": 32
+        }
+      ],
+      "payload_bits": 171,
+      "response_payload": [
+        {
+          "name": "o_noc_cfg_response_status",
+          "offset": 0,
+          "width": 4
+        },
+        {
+          "name": "o_noc_cfg_response_data",
+          "offset": 4,
+          "width": 64
+        },
+        {
+          "name": "o_noc_cfg_response_version",
+          "offset": 68,
+          "width": 16
+        },
+        {
+          "name": "o_noc_cfg_response_crc",
+          "offset": 84,
+          "width": 32
+        },
+        {
+          "name": "o_noc_cfg_response_tag",
+          "offset": 116,
+          "width": 16
+        }
+      ]
+    }
+  },
+  "tables": {
+    "REGISTER_BLOCK_TABLE": [
+      {
+        "base": 0,
+        "size": 4096
+      },
+      {
+        "base": 4096,
+        "size": 4096
+      },
+      {
+        "base": 8192,
+        "size": 4096
+      },
+      {
+        "base": 12288,
+        "size": 4096
+      },
+      {
+        "base": 16384,
+        "size": 4096
+      },
+      {
+        "base": 20480,
+        "size": 4096
+      },
+      {
+        "base": 24576,
+        "size": 4096
+      },
+      {
+        "base": 28672,
+        "size": 4096
+      },
+      {
+        "base": 32768,
+        "size": 4096
+      }
+    ],
+    "REGISTER_FIELD_TABLE": {
+      "IDENTITY": {
+        "offset": 0,
+        "access": "RO",
+        "words": 1
+      },
+      "VERSION": {
+        "offset": 4,
+        "access": "RO",
+        "words": 1
+      },
+      "GEOMETRY": {
+        "offset": 8,
+        "access": "RO",
+        "words": 1
+      },
+      "QUEUES": {
+        "offset": 12,
+        "access": "RO",
+        "words": 1
+      },
+      "STATUS": {
+        "offset": 16,
+        "access": "RO",
+        "words": 1
+      },
+      "STATE": {
+        "offset": 20,
+        "access": "RO",
+        "words": 1
+      },
+      "SYSTEM_HASH": {
+        "offset": 64,
+        "access": "RO",
+        "words": 8
+      },
+      "ARRAY_HASH": {
+        "offset": 96,
+        "access": "RO",
+        "words": 8
+      },
+      "PROGRAM_BUFFER": {
+        "offset": 4096,
+        "access": "RW",
+        "words": 1
+      },
+      "PROGRAM_OFFSET": {
+        "offset": 4100,
+        "access": "RW",
+        "words": 1
+      },
+      "PROGRAM_COUNT_GENERATION": {
+        "offset": 4104,
+        "access": "RW",
+        "words": 1
+      },
+      "PROGRAM_DOORBELL": {
+        "offset": 4108,
+        "access": "WO",
+        "words": 1
+      },
+      "NATIVE_EPOCHS": {
+        "offset": 8192,
+        "access": "RO",
+        "words": 1
+      },
+      "NATIVE_GENERATIONS": {
+        "offset": 8196,
+        "access": "RO",
+        "words": 1
+      },
+      "SCRATCHPAD_GENERATIONS": {
+        "offset": 8200,
+        "access": "RO",
+        "words": 1
+      },
+      "PROGRAM_STATUS": {
+        "offset": 4112,
+        "access": "RO",
+        "words": 1
+      },
+      "PROGRAM_DISCARD": {
+        "offset": 4120,
+        "access": "WO",
+        "words": 1
+      },
+      "PROGRAM_RESULT": {
+        "offset": 4124,
+        "access": "RO",
+        "words": 1
+      },
+      "PROGRAM_CANCEL": {
+        "offset": 4128,
+        "access": "WO",
+        "words": 1
+      },
+      "BUFFER_INDEX": {
+        "offset": 12288,
+        "access": "RW",
+        "words": 1
+      },
+      "BUFFER_BASE_LO": {
+        "offset": 12292,
+        "access": "RW",
+        "words": 1
+      },
+      "BUFFER_BASE_HI": {
+        "offset": 12296,
+        "access": "RW",
+        "words": 1
+      },
+      "BUFFER_SIZE": {
+        "offset": 12300,
+        "access": "RW",
+        "words": 1
+      },
+      "BUFFER_OWNER_KERNEL": {
+        "offset": 12304,
+        "access": "RW",
+        "words": 1
+      },
+      "BUFFER_GENERATION_PERMISSIONS": {
+        "offset": 12308,
+        "access": "RW",
+        "words": 1
+      },
+      "BUFFER_COMMIT": {
+        "offset": 12320,
+        "access": "WO",
+        "words": 1
+      },
+      "BUFFER_DISCARD": {
+        "offset": 12324,
+        "access": "WO",
+        "words": 1
+      },
+      "BUFFER_STATUS": {
+        "offset": 12328,
+        "access": "RO",
+        "words": 1
+      },
+      "BUFFER_FENCE": {
+        "offset": 12352,
+        "access": "WO",
+        "words": 1
+      },
+      "INTERRUPT_MASK": {
+        "offset": 16384,
+        "access": "RW",
+        "words": 1
+      },
+      "EVENT_COUNT": {
+        "offset": 16388,
+        "access": "RO",
+        "words": 1
+      },
+      "INTERRUPT_STATUS": {
+        "offset": 16392,
+        "access": "RO",
+        "words": 1
+      },
+      "EVENT_ACK": {
+        "offset": 16416,
+        "access": "WO",
+        "words": 1
+      },
+      "EVENT_HEAD": {
+        "offset": 16448,
+        "access": "RO",
+        "words": 16
+      },
+      "COUNTER_SNAPSHOT": {
+        "offset": 20480,
+        "access": "WO",
+        "words": 1
+      },
+      "COUNTER_VALID": {
+        "offset": 20484,
+        "access": "RO",
+        "words": 1
+      },
+      "COUNTERS": {
+        "offset": 20496,
+        "access": "RO",
+        "words": 8
+      },
+      "FIRST_ERROR": {
+        "offset": 28672,
+        "access": "RO",
+        "words": 1
+      },
+      "ERROR_CLEAR": {
+        "offset": 28676,
+        "access": "WO",
+        "words": 1
+      },
+      "DRAIN": {
+        "offset": 28680,
+        "access": "WO",
+        "words": 1
+      },
+      "ERROR_ADDRESS_LO": {
+        "offset": 28688,
+        "access": "RO",
+        "words": 1
+      },
+      "ERROR_ADDRESS_HI": {
+        "offset": 28692,
+        "access": "RO",
+        "words": 1
+      },
+      "ERROR_IDENTITY": {
+        "offset": 28696,
+        "access": "RO",
+        "words": 1
+      },
+      "LAST_ARRAY_RESPONSE": {
+        "offset": 28928,
+        "access": "RO",
+        "words": 32
+      }
+    },
+    "ADDRESS_REGION_TABLE": [
+      {
+        "base": 1048576,
+        "limit": "2^64",
+        "translation": "physical"
+      }
+    ],
+    "REQUESTER_PERMISSION_TABLE": {
+      "owner": "requester_id",
+      "privileged_min": 4,
+      "administrator": 1
+    },
+    "KERNEL_SLOT_TABLE": [
+      {
+        "slot": 0,
+        "clusters": 2
+      }
+    ],
+    "PACKAGE_SLOT_TABLE": [
+      "array resident package"
+    ],
+    "BUFFER_DESCRIPTOR_TABLE": {
+      "count": 4,
+      "generation_bits": 16,
+      "ownership": [
+        "host",
+        "dma",
+        "transfer",
+        "invalid"
+      ]
+    },
+    "DMA_CHANNEL_TABLE": [
+      {
+        "channel": 0,
+        "kind": "serialized canonical memory to native SRAM bridge",
+        "max_bytes": 4096
+      }
+    ],
+    "MEMORY_REQUESTER_TABLE": [
+      "program/configuration fetch",
+      "input/output transfer"
+    ],
+    "MEMORY_PORT_ROUTE_TABLE": [
+      {
+        "port": 0,
+        "outstanding": 1,
+        "id_bits": 16,
+        "read_burst_bytes": 256,
+        "write_burst_bytes": 16
+      }
+    ],
+    "EVENT_ROUTE_TABLE": {
+      "record_bits": 512,
+      "sequence_bits": 32,
+      "ack": "explicit full sequence",
+      "depth": 8
+    },
+    "INTERRUPT_ROUTE_TABLE": {
+      "output": 0,
+      "kind": "level",
+      "mask_bits": 8,
+      "fatal": "unmaskable"
+    },
+    "COUNTER_SELECT_TABLE": [
+      "host accepted controls",
+      "external read bytes",
+      "committed write bytes",
+      "queued events"
+    ],
+    "ERROR_SOURCE_TABLE": [
+      "host",
+      "descriptor",
+      "buffer",
+      "memory",
+      "fence",
+      "array",
+      "protected queues"
+    ],
+    "CLOCK_DOMAIN_TABLE": [
+      "i_clk common synchronous"
+    ],
+    "RESET_DOMAIN_TABLE": [
+      "i_rstb common synchronous"
+    ],
+    "POWER_DOMAIN_TABLE": [
+      "always powered"
+    ],
+    "RESET_ORDER_TABLE": [
+      "platform drains old memory and acknowledges reset",
+      "native array manifest match",
+      "doorbell admission"
+    ],
+    "POWER_SEQUENCE_TABLE": [
+      "native array clock gates only"
+    ],
+    "TEST_MODE_TABLE": [
+      "idle-only test entry",
+      "functional doorbells blocked",
+      "native scan override"
+    ]
+  },
+  "descriptor_layout": {
+    "bytes": 256,
+    "alignment": 256,
+    "payload_offset": 64,
+    "payload_bits": 1536,
+    "magic": 1398362957,
+    "schema": 1,
+    "crc": "CRC32C whole record with bytes 28..31 zero",
+    "header_fields": {
+      "magic": [
+        0,
+        32
+      ],
+      "schema": [
+        32,
+        16
+      ],
+      "kind": [
+        48,
+        8
+      ],
+      "flags": [
+        56,
+        8
+      ],
+      "owner": [
+        64,
+        16
+      ],
+      "kernel": [
+        80,
+        16
+      ],
+      "package": [
+        96,
+        32
+      ],
+      "generation": [
+        128,
+        16
+      ],
+      "epoch": [
+        144,
+        8
+      ],
+      "slot": [
+        152,
+        8
+      ],
+      "payload_bits": [
+        160,
+        16
+      ],
+      "tag": [
+        192,
+        16
+      ],
+      "crc": [
+        224,
+        32
+      ],
+      "system_hash": [
+        256,
+        256
+      ]
+    }
+  },
+  "array": {
+    "schema": "mosaic-array-contract-v1",
+    "descriptor": {
+      "schema": "mosaic-array-v1",
+      "profile": "Array-MVP",
+      "array_id": 0,
+      "rows": 1,
+      "cols": 2,
+      "lifecycle_timeout": 65535,
+      "clock_gating": true,
+      "power_gating": false,
+      "dvfs": false,
+      "async_clocks": false,
+      "migration": false,
+      "resizing": false,
+      "clusters": [
+        {
+          "id": 0,
+          "row": 0,
+          "col": 0,
+          "scratchpad_banks": 2,
+          "scratchpad_bank_words": 32,
+          "noc_ingress": 2,
+          "noc_egress": 1
+        },
+        {
+          "id": 1,
+          "row": 0,
+          "col": 1,
+          "scratchpad_banks": 2,
+          "scratchpad_bank_words": 32,
+          "noc_ingress": 2,
+          "noc_egress": 1
+        }
+      ]
+    },
+    "noc_parameters": {
+      "NOC_X": 2,
+      "NOC_Y": 1,
+      "NUM_ROUTERS": 2,
+      "NUM_ENDPOINTS": 2,
+      "NOC_PROFILE": 1,
+      "FLIT_DATA_WIDTH": 128,
+      "ENDPOINT_DATA_WIDTH": 640,
+      "NUM_VCS": 4,
+      "INPUT_VC_DEPTH": 8,
+      "FLOW_CONTROL": 1,
+      "ROUTING_ALGORITHM": 0,
+      "ROUTER_OUTPUT_PIPELINE": 1,
+      "LINK_PIPELINE_STAGES": 0,
+      "CREDIT_RETURN_PIPELINE_STAGES": 0,
+      "NUM_TRAFFIC_CLASSES": 8,
+      "ENABLE_QOS": 1,
+      "HIGH_SERVICE_BURST_LIMIT": 8,
+      "MAX_PACKET_FLITS": 16,
+      "NUM_TX_CHANNELS_PER_ENDPOINT": 2,
+      "NUM_RX_CHANNELS_PER_ENDPOINT": 2,
+      "ENDPOINT_TX_QUEUE_DEPTH": 2,
+      "ENDPOINT_RX_VC_DEPTH": 8,
+      "ENDPOINT_RX_QUEUE_DEPTH": 2,
+      "MAX_ACTIVE_FLOWS": 2,
+      "FLOW_ID_WIDTH": 16,
+      "OWNER_ID_WIDTH": 16,
+      "KERNEL_ID_WIDTH": 16,
+      "PACKAGE_ID_WIDTH": 32,
+      "NODE_ID_WIDTH": 8,
+      "ENDPOINT_ID_WIDTH": 8,
+      "CONTEXT_ID_WIDTH": 8,
+      "MESSAGE_TYPE_WIDTH": 4,
+      "PACKET_ID_WIDTH": 16,
+      "FRAGMENT_INDEX_WIDTH": 4,
+      "USER_METADATA_WIDTH": 64,
+      "ERROR_WIDTH": 8,
+      "LINK_EPOCH_WIDTH": 4,
+      "EXECUTION_EPOCH_WIDTH": 8,
+      "ALLOCATION_GENERATION_WIDTH": 16,
+      "PACKAGE_SLOT_WIDTH": 8,
+      "FLOW_SEQUENCE_WIDTH": 16,
+      "FENCE_ID_WIDTH": 8,
+      "CONFIG_DATA_WIDTH": 64,
+      "CONFIG_VERSION_WIDTH": 16,
+      "CONFIG_TAG_WIDTH": 16,
+      "CONFIG_CRC_WIDTH": 32,
+      "RUNTIME_TAG_WIDTH": 16,
+      "DRAIN_TIMEOUT_CYCLES": 65535,
+      "ENABLE_LINK_PARITY": 0,
+      "BUFFER_PROTECTION": 0,
+      "CONTROL_PROTECTION": 0,
+      "ENABLE_FAULT_MASKS": 1,
+      "ENABLE_COUNTERS": 1,
+      "ENABLE_TRACE": 0,
+      "ASYNC_ENDPOINT_MASK": 0,
+      "ASYNC_RESET": 0,
+      "TRAFFIC_CLASS_TO_VC": 3984,
+      "TRAFFIC_CLASS_TO_SERVICE": 48
+    },
+    "cluster_table": [
+      {
+        "slot": 0,
+        "id": 0,
+        "row": 0,
+        "col": 0,
+        "scratchpad_banks": 2,
+        "scratchpad_bank_words": 32,
+        "noc_ingress": 2,
+        "noc_egress": 1,
+        "manifest_sha256": "c187e87a3f408097b044b86ff514c8031ed2f3d142b81d5e52b512cb0d74b774",
+        "tile_count": 4,
+        "capacity": 512,
+        "profile": "Cluster-MVP",
+        "memory_boundary": 0,
+        "config_gateway": 0,
+        "noc_endpoint": 0,
+        "clock": "i_clk",
+        "reset": "i_rstb"
+      },
+      {
+        "slot": 1,
+        "id": 1,
+        "row": 0,
+        "col": 1,
+        "scratchpad_banks": 2,
+        "scratchpad_bank_words": 32,
+        "noc_ingress": 2,
+        "noc_egress": 1,
+        "manifest_sha256": "524f5574dfdc34f334596ccb5a2e02c50e998e4c173b0212ba205570cf869cef",
+        "tile_count": 4,
+        "capacity": 512,
+        "profile": "Cluster-MVP",
+        "memory_boundary": 1,
+        "config_gateway": 1,
+        "noc_endpoint": 1,
+        "clock": "i_clk",
+        "reset": "i_rstb"
+      }
+    ],
+    "packet": {
+      "endpoint_bits": 640,
+      "flit_bits": 128,
+      "fragments": 5,
+      "vc": 0,
+      "envelope": [
+        32,
+        512
+      ],
+      "padding": [
+        544,
+        96
+      ]
+    },
+    "allocation": "disjoint whole clusters, immutable mask per owner/kernel; no resize",
+    "configuration": "one reserved array gateway; native configuration_network roots",
+    "commit": "all PREPARE/manifests, captured versions; native COMMIT then VALIDATE; held START",
+    "events": "dedicated ungated parity-protected control network; payload256/sequence32",
+    "epoch": "8-bit array ABI restricted to native nonwrapping epochs 0..15; reset at exhaustion",
+    "noc_epoch": "independent transport epoch; privileged configuration only while all clusters free",
+    "memory": "three native permission-checked SRAM clients and one MST per cluster",
+    "power": "native clock gating; common clock; always powered",
+    "unsupported": [
+      "balanced/heterogeneous/sparse arrays",
+      "standalone services",
+      "global barriers",
+      "power gating/retention/DVFS",
+      "CDC/asynchronous reset",
+      "migration/resizing",
+      "NoC reconfiguration/flush while allocated",
+      "per-class inter-cluster request/response protocols"
+    ],
+    "dependency_sha256": {
+      "src/rtl/common/ecc_pkg.sv": "16b496a92d3d47cf2943e452aaa1232eae92fd0ab7f679df212a731bd41235f8",
+      "src/rtl/common/crc_pkg.sv": "d876f4f2ab9c63e935eae6e9ca81222d4e0fe4648a974f62fd2263a0b5fb9b22",
+      "src/rtl/mosaic_blocks/cluster_pkg.sv": "28b9152e21ccad352549f12fc1d5e1b75067a2c0ec76629a4008a37506264c2b",
+      "src/rtl/mosaic_blocks/tile_shell_pkg.sv": "71e5f1abfbcd84971008df02dae1dbcea0d97393b1ffd4f59acd05eaebcf3614",
+      "src/rtl/basic/context_sequencer_pkg.sv": "367638a64c1a3796b37acdf53c3ab59a9d65cebefccdb40939bc625a9feba070",
+      "src/rtl/building_blocks/tile_power_controller_pkg.sv": "b4a598f47e491ca7689bb098597c33c9a05b68a6463e8471e6a7e20913963dd6",
+      "src/rtl/mosaic_blocks/bct_pkg.sv": "8a819e0801c56f7da28065acadb8cdf3d8ab1ca5c3f3ef619956f23761ca0a21",
+      "src/rtl/building_blocks/scalar_alu_pkg.sv": "e43b2a6b2934ece630f0b95a179696adbb1b5647f6c4893a8d1859abdf4f4e6b",
+      "src/rtl/building_blocks/predicate_unit_pkg.sv": "8efbedace49cfad4dec5a7a04fe184ba91a8bdc7fb7079b748fa37979ceb7d5c",
+      "src/rtl/building_blocks/accumulator_pkg.sv": "7037ca445f5accb6a68ca469cd879b6c411f8a3997efbaccabd5c5ba558ba158",
+      "src/rtl/building_blocks/agu_pkg.sv": "e0abf3ed40742f0553ecd85eeb962b15eca29a7b45ff5bae21d6651dfbbbc90f",
+      "src/rtl/building_blocks/dma_engine_pkg.sv": "0837b73ee53b1ab1ec98829e879449f1fc2b5384880a05549a13ac4116ca634c",
+      "src/rtl/building_blocks/load_engine_pkg.sv": "ff01a7a243b66765597ffafcf049c7852075bca8f926231dad351751e9eb32f1",
+      "src/rtl/building_blocks/store_engine_pkg.sv": "47d481f591593df3801860c2d4b077a7dd8520c48803ee0f9e4c7c581ae0f6ee",
+      "src/rtl/building_blocks/stream_formatter_pkg.sv": "790a0e0b7b8dc134d3bcc2acaee8e6185ce345c51147ab44970ccf7e87196c98",
+      "src/rtl/mosaic_blocks/mst_pkg.sv": "bf93306c8c8021a7197e9d1441420adfe42f94baeffd26e37b28f0283f747f00",
+      "src/rtl/building_blocks/local_switch_pkg.sv": "ed88b6d4c655c15b2f24e0c7bd31ff820072b36c1f72b37fd72b860b7851529e",
+      "src/rtl/mosaic_blocks/static_mesh_pkg.sv": "6c441d037d29e34749a8d0138060a582af50b07231d9f5d1db38a9884259450f",
+      "src/rtl/mosaic_blocks/banked_scratchpad_pkg.sv": "356f1acf659203d2b5fa71f6894ed52fb77c542d6bfe7268803a797f5aab60c7",
+      "src/rtl/building_blocks/scratchpad_bank_pkg.sv": "bba2ca00f6fd1c95562bc15bee0a25f2faab1d63a6c947a0d1494c40fc21271f",
+      "src/rtl/building_blocks/scratchpad_controller_pkg.sv": "1522a63712f07d0566fa1fc70b1601b04cd152e83bdf962f89bea8a9e94c1075",
+      "src/rtl/mosaic_blocks/configuration_network_pkg.sv": "e51cf82ff95212bb4ee1088314a6bcf8bd3388c3e98abc8d5e868fbce1d31968",
+      "src/rtl/common/dff.sv": "578b511eedf04e100d039f14c35998d8079653fd2006c33baad432ea4622fd38",
+      "src/rtl/common/counter.sv": "d02f311941ef1fc913b80ab2bb5d66cdc35c817dddacb459e7400b9597d8806f",
+      "src/rtl/common/decoder.sv": "ed39d268ad87f931ada335a517e850a0c300f6275d3ffce969150e5422c836cf",
+      "src/rtl/common/operand_isolation.sv": "0ee8a947cb68dcc40f0100ef9eeb5ae1cfc2c60cc0e56957dfac553bc2b5fc51",
+      "src/rtl/common/reset_synchronizer.sv": "3503d53aef9da5d7a8dd1579b807093cfa441106e9727457646d3cb89e6fe2f8",
+      "src/rtl/basic/fifo.sv": "0937c66148bce63f3ff912a300f28cd4aedc215fab7ba936b53174c170f51a79",
+      "src/rtl/basic/parity.sv": "cb503fb1f9d3ad04c9d1e307f675715e22a555c4ba108b3cad1a5ec1efb63ab6",
+      "src/rtl/basic/ecc.sv": "e370e1cff7d8360a2b8955621a49bcd32b93c7069de31443e03030eeb0406686",
+      "src/rtl/basic/context_memory.sv": "5b160dc782ea71a5e2c89d4ec7f9c03248f15d0d2f98860b5782279099927c5e",
+      "src/rtl/basic/context_sequencer.sv": "e75a5db85861a9c6b9461d3eaf80135166852615cded2b7943c652445ecd5523",
+      "src/rtl/basic/async_fifo.sv": "f1ff5695a5f69916c9ee0bd9d98f0aad2f0b3173390f848378b5cfc21b4fe29a",
+      "src/rtl/basic/performance_counters.sv": "4790d96341d466827b2f215f51c22557c753a0409a765ad614b3efff8ccac704",
+      "src/rtl/building_blocks/event_barrier_state.sv": "0b04b66385ce678b62d08ad6b4db0a4b27f21f41c7affdb315fc855a3ff85a51",
+      "src/rtl/building_blocks/event_barrier_queue.sv": "0c3c936f9aed20e76e8c84d983dff23fb4c64748c4aea7c09954eef0ad63aca9",
+      "src/rtl/building_blocks/tile_power_controller.sv": "bb017271a05fd1de8e194016f069cbf5814d54ce6ca231bf0c313c647f9d67b4",
+      "src/rtl/mosaic_blocks/tile_shell_codec.sv": "1b5168c1f58845865c7c2211e3f997ca6ffdd4584cf13c983a77ab63a3f02cf9",
+      "src/rtl/mosaic_blocks/tile_shell_state.sv": "b93b8685f3deb50d39f01f28828fee60fbab91503984d9befea9475dd2983f4e",
+      "src/rtl/mosaic_blocks/tile_shell_queue.sv": "6008d3817c7c5f117ab371b67d4b28401161d51d1ade28ee26032a49bb00ed49",
+      "src/rtl/mosaic_blocks/tile_shell.sv": "c7ec7e7bd6069578d0cee8d6ede47b73e5a98831795c7a7c03191c6f38076212",
+      "src/rtl/common/write_gate.sv": "cd14228f0e72f10e674cf0ed274b01d0bd1b7f7417868ae9d9009420889299b7",
+      "src/rtl/common/lane_mask.sv": "ff058d5364ced0ad56b963e8d6403b2fcb04697da1489c4dd60d8a5d3972ec61",
+      "src/rtl/common/mux.sv": "4baec3ae2e53d24121c28f4012839ac6b488249baa4801530d0f5547af6602c5",
+      "src/rtl/basic/register_file.sv": "8c47195e840f5e4f4dc00168d983c5649c8e84624aadc6e6778d6d6d777c7bcc",
+      "src/rtl/basic/bypass_network.sv": "a2723cfcd5fdf7c69ec9496120537e265f4e5d030514dd14086a0b9b9449a13f",
+      "src/rtl/basic/rdu.sv": "4f8d418805b6e87206c8abf6be8e5cca75e79c8a22be0b3180d95fb25bcc4fc6",
+      "src/rtl/basic/stream_join.sv": "5ca00b530e83229ff8c60fef170253f4424dd545828b782bef611e759fd79fe8",
+      "src/rtl/building_blocks/scalar_alu.sv": "8b584da1594f739011a9b83775cb58985bd518b7a025860f36c3aa2180d3b7cd",
+      "src/rtl/building_blocks/multiplier.sv": "618060c9a9e3660a5dca12230fdc400acfef9d8d88e9a0036749771288c3fc7b",
+      "src/rtl/building_blocks/dot_product.sv": "b335ec7c2877251edab63c5745a89492d60d82c6fbbfab714dd04e6426919423",
+      "src/rtl/building_blocks/mac.sv": "c66aab429e7e003b077ec030b5bcba8b0cd8cf72e229dba8d7a138da052c7d68",
+      "src/rtl/building_blocks/accumulator.sv": "8fef1ad83bcf950de5e0542446fc5b7ae240af4e4eaa689bcb9f4a504628bb0c",
+      "src/rtl/building_blocks/predicate_unit.sv": "bab0eb80cd2ce054859e84387cfb6512c4f75a06415101411c5a5e2799c0fe9d",
+      "src/rtl/mosaic_blocks/bct_body.sv": "67f48ac27306ae5e491aa02898ac64e781eda5d6791b84a76a1ce70d6f41df3b",
+      "src/rtl/mosaic_blocks/bct.sv": "0c6f16bc0c788e8e038a8b14ca933756d117baf3ebc74bf67bc4762e00ab0606",
+      "src/rtl/basic/data_aligner.sv": "a49bb28f1ee3873e6edd3b34b64ba9823e5fd4b29c4c08749b7c210a1d134384",
+      "src/rtl/basic/packer.sv": "4be33b1a9e8f78e25aef0fc939ee207bb700a301e15e3237b013472169064f9a",
+      "src/rtl/basic/register_slice.sv": "81bbd5a9bf527e6d5f2fb41f3e81de29e7321eb4a87fd2b988c49338e9f07523",
+      "src/rtl/basic/round_robin_arbiter.sv": "82b9032c942a8221c373b36b4aca58ef03175f4923553a5532d25d1c157d5720",
+      "src/rtl/basic/width_converter.sv": "9e503fbf3349cc46bddcddb66bef0cd2777ab1d840d70897f26537e1e2714426",
+      "src/rtl/building_blocks/agu.sv": "7abd32c4b0f96fc855c6d0d848c15ecc8ff9e95dac3783617028e80d9e2bf3b0",
+      "src/rtl/building_blocks/dma_engine_bounds.sv": "bcef82cbb28e986b6cc296f7725030579dcbaa5e550c8660160f5ae6bb27b2f7",
+      "src/rtl/building_blocks/dma_engine_command_queue.sv": "5cb12eda2295d293a318e7f5cd81bda178953d1b5e0f2961aeb9c7bce4285724",
+      "src/rtl/building_blocks/load_engine.sv": "3b5c2c646b9c8bf6bcc9127b1c0c608f555cf451ba9ef21d2a31a11e514fc9f0",
+      "src/rtl/building_blocks/store_engine.sv": "75f055fcba907673115a1492c02ad77e6abb5f24d23e30fb41795c2608eeeb3e",
+      "src/rtl/building_blocks/stream_formatter.sv": "77e541b3b76411daae557bdae07d4a8ce048330f19b75b8df49f586e837d2c7d",
+      "src/rtl/common/priority_encoder.sv": "78ae31ee0db47b901b7b3df785574cfe50436afdf7029b4aa4d3e1346ac58f4c",
+      "src/rtl/mosaic_blocks/banked_scratchpad_counters.sv": "33a938045eb833774cfd42bbc8a8bfacdd76942dcf6d592f2eed3549adbbc98c",
+      "src/rtl/mosaic_blocks/banked_scratchpad_state.sv": "f68d5d72219b43e6c13caa3756730c83cf0d4b1423eed6abd11c681faf8007d6",
+      "src/rtl/mosaic_blocks/mst_body.sv": "314309030778c6b012901c6d7204b8b290c228e123b9382e65e301700c047887",
+      "src/rtl/mosaic_blocks/mst_channel.sv": "ee995ed6cf1fa1d843ebbdbaa96a152bf68069499ea86ad4f8531ce400d6b861",
+      "src/rtl/mosaic_blocks/mst_command_queue.sv": "416f536d049abdd71b284f7176a9741bd5822597571bfd1089ff27378ce46509",
+      "src/rtl/mosaic_blocks/mst_element_converter.sv": "1ced1a3fd799cbf3d37e44b052d78a4fefba145ec06384ff6dc432b53626b5ab",
+      "src/rtl/mosaic_blocks/mst_fragment_adapter.sv": "17525bfbd1bf4c77c5a35d2dc385de22b0883548c6fd46674157987137505e71",
+      "src/rtl/mosaic_blocks/mst_validate.sv": "02850a7c6ece833857907fdf178dc3e9a29617f39d44e01ef9c721d6df250b7b",
+      "src/rtl/mosaic_blocks/mst.sv": "d38b273a20e1f3532bc05567f80ec837523874d8cbe83c93afea5cd4a9edb31d",
+      "src/rtl/basic/skid_buffer.sv": "9a7aa4b79f426f3d22058ed0f8fade17be96d67cdffa4cb0c8d711318c0a68c6",
+      "src/rtl/building_blocks/local_switch.sv": "b8ff5a5a77b3533b9605bc17d383018e6ae545c66f528c8e060ace550c6cf5f3",
+      "src/rtl/mosaic_blocks/static_mesh_node.sv": "3347b8b44e5912e178581fb90f951a11048e92e5e6ca136cfa0075be87cea785",
+      "src/rtl/mosaic_blocks/static_mesh_link.sv": "27d85be7e2c51e700b452d180b6a61a50fc9023f0f013cd65be42e1e2038e5d1",
+      "src/rtl/mosaic_blocks/static_mesh_queue.sv": "dd59821c220ab0b47e5dc9ec6f2c0106253ee961f1a86e68faf0fe7dfa2afd76",
+      "src/rtl/mosaic_blocks/static_mesh_control.sv": "d7309246b0b5b3be5261e584e6f09224ffe4cb5cd2000fc41ccb8e32890ef194",
+      "src/rtl/mosaic_blocks/static_mesh.sv": "c57c6ed3a24506bed686e12eabf79e48b793ddddaa8036aacf98c278d71c7172",
+      "src/rtl/basic/sram_wrapper_backend.sv": "5bfb4bee3a449f73181b0041c6e81605f11aeeb8e1d151881966741ef8679168",
+      "src/rtl/basic/sram_wrapper.sv": "40c9057867adc5be9b40a5f1ddd1cc50fd2a93b84a1ae0c0283b25c1af8135c6",
+      "src/rtl/building_blocks/scratchpad_bank_counters.sv": "ee8fde0a20f2b5fb746c84390a91962ab6a93ee841b82fa51bd48c4df7a379d7",
+      "src/rtl/building_blocks/scratchpad_controller_counters.sv": "67641f891f2500c9d701ba96f35bcf1048d390c38160680a4f752c410020f708",
+      "src/rtl/building_blocks/scratchpad_bank.sv": "2b5b059cf1482bd9f55c39c16328340076f4e41b815f310dc6d58cd6eb7a5f9d",
+      "src/rtl/building_blocks/scratchpad_controller.sv": "470dcff107bde34b1fd9926e5a40adcdb05552268653160cf7e723d9a66c7d42",
+      "src/rtl/mosaic_blocks/banked_scratchpad_power.sv": "d46701b0e19d0477fc19acc83410c5fdfd0cd5a6c39b290e5e98fd6162be785b",
+      "src/rtl/mosaic_blocks/banked_scratchpad.sv": "157f817577cd4e15d1ab3e477c226d50520f275c1fffa1d5cf7e59cf7584004a",
+      "src/rtl/basic/stream_fork.sv": "0df516513964d127cf59dd7d8f747f6573f0b812a9a34c5a4e5cc0ecda465501",
+      "src/rtl/mosaic_blocks/configuration_network_crc.sv": "da18e1c0fc199c82da803553190b40a9047f99f210e13c75c98e75c306434561",
+      "src/rtl/mosaic_blocks/configuration_network_serializer.sv": "dc31af3ada02a80a48538b7e8a9cdb15a2e4cf9d4359084f4779fe9cc9a6e335",
+      "src/rtl/mosaic_blocks/configuration_network_receiver.sv": "49049e29b65ca0b6a85ed4d813320d1066815ecd5ee007629ef1ed1751f16b1d",
+      "src/rtl/mosaic_blocks/configuration_network_link.sv": "93510bd3d04383581881621ce292c6a3307df81abc216c3dc5dd03b0ff4ab9f9",
+      "src/rtl/mosaic_blocks/configuration_network_fork.sv": "68f1f11416682ae9ea5d51e90483eb2640244c51371d604847aa77c540fe0e62",
+      "src/rtl/mosaic_blocks/configuration_network_tree.sv": "f1604fefea85ad37eb194a63e0583c8756bd2617b6b18f8d8ca52943a60f0802",
+      "src/rtl/mosaic_blocks/configuration_network_tile_adapter.sv": "5047c0478c213383430eb2e5705df5c1cfc6171b82e494892f7573464cac6749",
+      "src/rtl/mosaic_blocks/configuration_network.sv": "c72ad86cd17b8f1a03507e13d57eaf2229363ebf9b49f0dbd0b6366ca0082684",
+      "src/rtl/common/clock_gate.sv": "41f9e1ff400938b76e5ca1514de781f9c040abad09ad66842c3bf224d9a7d1f9",
+      "src/rtl/mosaic_blocks/cluster_package.sv": "a02cb6dc5c2c9f0b6d304c356bd2a13b1c2eaa6d6beb17b7ba888306b7104907",
+      "src/rtl/mosaic_blocks/cluster_control.sv": "a3abfccf5ce3b42306a0078bed0ce8211cb3d89377cc53f2715bf879d00c0437",
+      "src/rtl/mosaic_blocks/cluster_events.sv": "6789b938fec9689fefdf609e33ea56bd62d3131313a0b3469eb713887fa49d28",
+      "src/rtl/mosaic_blocks/cluster_infrastructure.sv": "2c9821c16e6aae430060d9bd5ab48ca135c4f093331b8936614dc9146045fe33",
+      "src/rtl/mosaic_blocks/cluster_memory_bridge.sv": "22b90fe5e133fac38d254551c178fbffdcaea89c20168e62cac28dba10b719ba",
+      "src/rtl/mosaic_blocks/cluster_stream_adapter.sv": "f3bb8822d470346820cf3345c81da78d3665d1104d531d2226ad6d553758eb39",
+      "src/rtl/building_blocks/noc_router_pkg.sv": "3454a194a26083391d1f8190d0bcb92c0ba84d0fa99746c8bf5179012c72b3d3",
+      "src/rtl/building_blocks/tile_network_interface_pkg.sv": "2fb8ad9f03f9b8871b172d0e5a8bb7701f818323e63285d3b39d70a3192ac6a2",
+      "src/rtl/mosaic_blocks/global_noc_pkg.sv": "326c7a1d42a4ec3251f88cd2302f0c8cbd547e4cea8b7e6372828c7beae4b967",
+      "src/rtl/building_blocks/noc_router_codec.sv": "03a9248685fd6bab524d8d710ccae97ddf13d2f2567ff9030d91925bed227269",
+      "src/rtl/building_blocks/noc_router_buffer.sv": "db68cbc1050533d312cd50d8fe7bb5c8c81c3817e8375aced8375c23f711b9bc",
+      "src/rtl/building_blocks/noc_router.sv": "36ea3a2e76bcb0e2e49e1fad805911456cc32dfda5ee88baa895e0bfbb984578",
+      "src/rtl/building_blocks/tile_network_interface.sv": "fdc22ab96a18c0c133708645bf79a1d82bc829ef74b42fb212e48f043be7eeb0",
+      "src/rtl/mosaic_blocks/global_noc_link.sv": "a9a2d872565b2b48c3c6b0c6b2222e250c15b71f56af72070d5bf800332b2f7c",
+      "src/rtl/mosaic_blocks/global_noc.sv": "094fab08e2ba760becefdca12ecc134aaf08278ae3a0b9e90407b47c51381d6c",
+      "src/rtl/mosaic_blocks/array_pkg.sv": "d6210d586b08f636683486696cbbf59ce05a4ada14423d119b8ded16de03d6c5",
+      "src/rtl/mosaic_blocks/array_control.sv": "3d5cc587db738c4b6d7e69e90bb4e510827d26bea1ae654da6057c76775adf0e",
+      "src/rtl/mosaic_blocks/array_events.sv": "c0f18d5ee489e5eaea40835c374c0334c9853c32a1a22f30a9c08bb56950c4a3",
+      "src/rtl/mosaic_blocks/array_noc_gateway.sv": "d5dd11b4bbdb5e08db02ad3ded0c5d832db68d9ec8168fcf1975b43df2799618"
+    },
+    "generator_sha256": {
+      "src/gen/array/generate.py": "18980e44d20182910ffa6d06bd458072c629dc52837b96946f7e3f5062806f6e",
+      "src/gen/cluster/generate.py": "57d450235b31f70a652803045bea279bff0ca6c092af5d718a5c4a2b20450ef5",
+      "src/gen/cluster/sources.py": "46d5c7a3d6bbc177f8b759b9aa2a0df88373add07843dd02b76e675b18c6dd77",
+      "src/gen/global_noc/generate.py": "b31ba94676d6ad41e734ffa4e0b821a53565b21b5f4e20632fb68fd010aaa78a",
+      "src/gen/global_noc/global_noc_contract.py": "ad61de2a838c826c26fbe37940b4cee3046f25bd5d5ac7c2873f1e2765df7997",
+      "src/gen/global_noc/global_noc_sources.py": "4e63da659fe54a4bf551634ab4737174c3b42129e23ce846cc4cda7e441e9b6c"
+    },
+    "signoff": {
+      "validation": "Python-only",
+      "synthesis": "Design Compiler (deferred)",
+      "lint": "NOT_RUN",
+      "formal": "NOT_RUN",
+      "physical": "NOT_CHARACTERIZED"
+    },
+    "features": {
+      "global_noc": true,
+      "synchronous": true,
+      "cluster_exclusive": true,
+      "clock_gating": true,
+      "power_gating": false,
+      "migration": false,
+      "resizing": false
+    },
+    "tables": {
+      "CLUSTER_PRESENT_MASK": 3,
+      "CLUSTER_ID_TABLE": [
+        0,
+        1
+      ],
+      "CLUSTER_PROFILE_TABLE": [
+        "Cluster-MVP",
+        "Cluster-MVP"
+      ],
+      "CLUSTER_MANIFEST_HASH_TABLE": [
+        "c187e87a3f408097b044b86ff514c8031ed2f3d142b81d5e52b512cb0d74b774",
+        "524f5574dfdc34f334596ccb5a2e02c50e998e4c173b0212ba205570cf869cef"
+      ],
+      "CLUSTER_COORDINATE_TABLE": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ]
+      ],
+      "CLUSTER_CAPABILITY_TABLE": [
+        {
+          "BCT": 3,
+          "MST": 1,
+          "context_depth": 4
+        },
+        {
+          "BCT": 3,
+          "MST": 1,
+          "context_depth": 4
+        }
+      ],
+      "CLUSTER_TILE_COUNT_TABLE": [
+        4,
+        4
+      ],
+      "CLUSTER_SCRATCHPAD_TABLE": [
+        {
+          "capacity": 512,
+          "banks": 2
+        },
+        {
+          "capacity": 512,
+          "banks": 2
+        }
+      ],
+      "CLUSTER_CLOCK_DOMAIN_TABLE": [
+        "i_clk",
+        "i_clk"
+      ],
+      "CLUSTER_POWER_DOMAIN_TABLE": [
+        "always_powered",
+        "always_powered"
+      ],
+      "STANDALONE_TILE_TABLE": [],
+      "GLOBAL_ROUTER_TABLE": [
+        {
+          "id": 0,
+          "x": 0,
+          "y": 0
+        },
+        {
+          "id": 1,
+          "x": 1,
+          "y": 0
+        }
+      ],
+      "GLOBAL_LINK_TABLE": [
+        {
+          "source": 0,
+          "destination": 1,
+          "port": 2
+        },
+        {
+          "source": 1,
+          "destination": 0,
+          "port": 4
+        }
+      ],
+      "NOC_ENDPOINT_TABLE": [
+        {
+          "cluster": 0,
+          "endpoint": 0,
+          "channel": 0,
+          "ingress": 2,
+          "egress": 1
+        },
+        {
+          "cluster": 1,
+          "endpoint": 1,
+          "channel": 0,
+          "ingress": 2,
+          "egress": 1
+        }
+      ],
+      "TRAFFIC_CLASS_TO_VC_TABLE": [
+        0,
+        0,
+        1,
+        2,
+        3,
+        3,
+        0,
+        0
+      ],
+      "TRAFFIC_CLASS_TO_SERVICE_TABLE": [
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0
+      ],
+      "CHANNEL_DEPENDENCY_TABLE": {
+        "data": "VC0 complete-packet reservations",
+        "events": "dedicated ungated control network",
+        "configuration": "dedicated gateway",
+        "proof": "router XY graph only; system/application deadlock proof deferred"
+      },
+      "CONFIG_GATEWAY_TABLE": [
+        {
+          "cluster": 0,
+          "slot": 0,
+          "local_endpoints": 6
+        },
+        {
+          "cluster": 1,
+          "slot": 1,
+          "local_endpoints": 6
+        }
+      ],
+      "EVENT_ENDPOINT_TABLE": [
+        {
+          "cluster": 0,
+          "slot": 0
+        },
+        {
+          "cluster": 1,
+          "slot": 1
+        }
+      ],
+      "MEMORY_BOUNDARY_TABLE": [
+        {
+          "cluster": 0,
+          "slot": 0,
+          "clients": 3,
+          "mst_channels": 1,
+          "arbitration": "native round-robin permission-checked banked scratchpad"
+        },
+        {
+          "cluster": 1,
+          "slot": 1,
+          "clients": 3,
+          "mst_channels": 1,
+          "arbitration": "native round-robin permission-checked banked scratchpad"
+        }
+      ],
+      "ALLOCATION_REGION_TABLE": [
+        {
+          "cluster": 0,
+          "mask": 1
+        },
+        {
+          "cluster": 1,
+          "mask": 2
+        }
+      ],
+      "COUNTER_SOURCE_TABLE": [
+        "per-cluster eight saturating 48-bit coherent counters",
+        "NoC accepted/delivered packet counters"
+      ],
+      "ERROR_SOURCE_TABLE": [
+        "array control",
+        "cluster native faults",
+        "protected event queue",
+        "NoC transport and authenticated stream gateways"
+      ],
+      "RESET_ORDER_TABLE": [
+        "common synchronous assertion, gate wake, native validity reset",
+        "explicit configuration and runtime launch after reset"
+      ],
+      "POWER_SEQUENCE_TABLE": [
+        "always powered; native gate-safe clock enable only"
+      ]
+    },
+    "manifest_sha256": "e648cea4e9cebb22bdf72529203e53057a2fc28217b8e68bd5da5723952a9003",
+    "generated_rtl_sha256": "9a736d0a083978dd46b31bd606079ba263aaf711e446e03935c8df47750ca4b6"
+  },
+  "dependency_sha256": {
+    "src/rtl/common/crc_pkg.sv": "d876f4f2ab9c63e935eae6e9ca81222d4e0fe4648a974f62fd2263a0b5fb9b22",
+    "src/rtl/mosaic_blocks/system_pkg.sv": "1720b9d85457b24021f26c009bc6e550bc2d64f13c4d20c79da10c233feda232",
+    "src/rtl/mosaic_blocks/system_core.sv": "d82095f834c68686782c1bc68beeaea674093a3b20d3fa2f189cb047592d6bf5"
+  },
+  "generator_sha256": {
+    "src/gen/system/generate.py": "0871f64ddf3b532bcb62f98180bf2eb016c282fe92cf3e25d4be845a230392ab"
+  },
+  "limits": {
+    "active_kernels": 1,
+    "whole_array_allocation": true,
+    "memory_ports": 1,
+    "outstanding": 1,
+    "max_transfer_bytes": 4096,
+    "descriptor_burst_bytes": 256,
+    "partial_writes": "IRQ mask only",
+    "byte_order": "little",
+    "async_clocks": false,
+    "system_clock_gating": false,
+    "configuration": "memory-resident canonical records"
+  },
+  "external_obligations": [
+    "trusted requester and privilege attributes",
+    "software cache clean/invalidate",
+    "platform fence visibility acknowledgement",
+    "memory reset acknowledgement only after stale responses drain"
+  ],
+  "unsupported": [
+    "balanced four-cluster array",
+    "AXI/APB/TileLink/platform adapters",
+    "hardware runtime",
+    "concurrent kernels",
+    "CDC",
+    "power gating/retention/DVFS",
+    "coherence/IOMMU",
+    "trace/direct result window",
+    "chained/strided/unaligned DMA",
+    "memory response reordering"
+  ],
+  "signoff": {
+    "validation": "Python-only",
+    "synthesis": "Design Compiler (deferred)",
+    "lint": "NOT_RUN",
+    "formal": "NOT_RUN",
+    "physical": "NOT_CHARACTERIZED"
+  },
+  "manifest_sha256": "3f8b0046ee828bf81d3f74632abff8cd210444475d680fd4564400001980432e",
+  "generated_rtl_sha256": "ce4f27a0b02819c06db5eef37211f5fa74f93439aadc10ad039f56591d049f8e",
+  "artifact_sha256": {
+    "system_registers_pkg.sv": "050cb3f6951979f4276236a01220f61a033ff7b8329055f962a34e12aa266686",
+    "system.h": "5cc8cfd936f1efd9bb6b4f338051ddb563f081eb9006400031488185eacf9983",
+    "registers.json": "9b80e10bfab8333984eb3bed19d38fa7115b94c2d83a845c05a835dae248345a",
+    "descriptors.json": "c4701b4831f428fab9693f25890b45e73ef94721e4a970945e534f53e644df3e",
+    "ports.json": "e037f98be248ddeb7e6ed3d4bda0a5607706c7fc086846eb20bfdc3e3b48a3ee"
+  }
+}

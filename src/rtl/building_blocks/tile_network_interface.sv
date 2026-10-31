@@ -15,6 +15,9 @@ module tile_network_interface #(
     parameter NUM_TRAFFIC_CLASSES = 8,
     parameter NOC_FLOW_CONTROL = 0,
     parameter TX_INITIAL_CREDITS_PER_VC = 2,
+    // Optional fixed-envelope admission prevents a partially injected data
+    // packet from monopolizing the physical serializer ahead of critical VCs.
+    parameter PACKET_CREDIT_RESERVATION = 0,
     parameter NODE_ID_WIDTH = 8,
     parameter ENDPOINT_ID_WIDTH = 4,
     parameter CONTEXT_ID_WIDTH = 8,
@@ -27,6 +30,9 @@ module tile_network_interface #(
     parameter ENABLE_LINK_PARITY = 0,
     parameter ASYNC_RESET = 0,
     localparam bit GEOMETRY_VALID =
+        ((PACKET_CREDIT_RESERVATION >= 0 &&
+            PACKET_CREDIT_RESERVATION <= TX_INITIAL_CREDITS_PER_VC) === 1'b1) &&
+        (^PACKET_CREDIT_RESERVATION !== 1'bx) &&
         ((NUM_TX_CHANNELS > 0) === 1'b1) && (^NUM_TX_CHANNELS !== 1'bx) &&
         ((NUM_RX_CHANNELS > 0) === 1'b1) && (^NUM_RX_CHANNELS !== 1'bx) &&
         ((TILE_DATA_WIDTH > 0) === 1'b1) && (^TILE_DATA_WIDTH !== 1'bx) &&
@@ -515,7 +521,8 @@ module tile_network_interface #(
                 if (tx_valid[c] && enabled_tx[c]) begin
                     if (serializer_open) tx_requests[c] = serializer_owner == TXW'(c);
                     else tx_requests[c] = NOC_FLOW_CONTROL == FLOW_VALID_READY ||
-                        credits[head.metadata.vc] != '0;
+                        (PACKET_CREDIT_RESERVATION == 0 ? credits[head.metadata.vc] != '0 :
+                         32'(credits[head.metadata.vc]) >= PACKET_CREDIT_RESERVATION);
                 end
             end
         end

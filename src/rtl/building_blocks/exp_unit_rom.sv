@@ -8,7 +8,7 @@ module exp_unit_rom #(
     parameter int ADDRESS = 6,
     parameter int PROTECTION = 0,
     localparam int DEPTH = (1 << ADDRESS) + 1,
-    localparam int HAMMING = hamming_bits(WIDTH),
+    localparam int HAMMING = ecc_pkg::hamming_bits(WIDTH),
     localparam int CODE = WIDTH + (PROTECTION == 2 ? HAMMING + 1 : PROTECTION)
 ) (
     input logic i_enable,
@@ -19,18 +19,13 @@ module exp_unit_rom #(
     output wire o_corrected,
     output wire o_uncorrectable
 );
-    function automatic int hamming_bits(input int width);
-        int bits;
-        bits = 1;
-        while ((1 << bits) < width + bits + 1) bits++;
-        return bits;
-    endfunction
 
     function automatic logic [CODE-1:0] encode_word(input logic [WIDTH-1:0] data);
         logic [CODE-1:0] codeword;
         int index;
         codeword = '0;
         index = 0;
+
         if (PROTECTION == 2) begin
             for (int position = 1; position < CODE; position++) begin
                 if ((position & (position - 1)) != 0) begin
@@ -38,6 +33,7 @@ module exp_unit_rom #(
                     index++;
                 end
             end
+
             for (int parity_bit = 0; parity_bit < HAMMING; parity_bit++)
                 for (int position = 1; position < CODE; position++)
                     if ((position & (1 << parity_bit)) != 0)
@@ -46,10 +42,12 @@ module exp_unit_rom #(
             codeword[CODE-1] = ^ codeword[CODE-2:0];
         end else if (PROTECTION == 1) codeword = CODE'({ ^ data, data});
         else codeword = CODE'(data);
+
         return codeword;
     endfunction
 
     wire [CODE-1:0] table_words[DEPTH];
+
     for (genvar index = 0; index < DEPTH; index++) begin : g_word
         localparam logic [129:0] GENERATED =
             exp_unit_tables_pkg::table_value(index, ADDRESS, FRACTION);

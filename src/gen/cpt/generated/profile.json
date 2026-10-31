@@ -1,0 +1,446 @@
+{
+  "schema": "mosaic-cpt-local-v1",
+  "parameters": {
+    "TILE_ID": 0,
+    "TILE_ID_WIDTH": 16,
+    "ARCH_VERSION_WIDTH": 16,
+    "CAPABILITY_ID_WIDTH": 32,
+    "SHELL_DATA_WIDTH": 64,
+    "DATA_METADATA_WIDTH": 128,
+    "DATA_INPUT_PORTS": 2,
+    "DATA_OUTPUT_PORTS": 1,
+    "INPUT_BUFFER_DEPTH": 1,
+    "OUTPUT_BUFFER_DEPTH": 1,
+    "PREDICATE_WIDTH": 8,
+    "PREDICATE_METADATA_WIDTH": 64,
+    "PREDICATE_INPUT_PORTS": 2,
+    "PREDICATE_OUTPUT_PORTS": 2,
+    "EVENT_WIDTH": 256,
+    "EVENT_INPUT_PORTS": 1,
+    "EVENT_OUTPUT_PORTS": 1,
+    "CONTEXT_DEPTH": 4,
+    "CONFIG_DATA_WIDTH": 64,
+    "CONTEXT_CHECKSUM_WIDTH": 32,
+    "SUPPORT_CONTEXT_CHECKSUM": 1,
+    "CONFIG_ASYNC": 0,
+    "CONFIG_QUEUE_DEPTH": 4,
+    "OWNER_ID_WIDTH": 16,
+    "KERNEL_ID_WIDTH": 16,
+    "CONTEXT_VERSION_WIDTH": 16,
+    "RUNTIME_TAG_WIDTH": 8,
+    "STALL_REASON_WIDTH": 8,
+    "ERROR_CODE_WIDTH": 8,
+    "TRACE_WIDTH": 64,
+    "SUPPORT_TRACE": 0,
+    "SUPPORT_RETENTION": 0,
+    "SUPPORT_POWER_OFF": 0,
+    "CONTEXT_PROTECTION": 0,
+    "CONTROL_PROTECTION": 0,
+    "ASYNC_RESET": 0,
+    "PREDICATE_LANES": 8,
+    "PREDICATE_DEPTH": 8,
+    "EVENT_RECORD_WIDTH": 256,
+    "CONTROL_WIDTH": 32,
+    "CONTROL_REGISTER_DEPTH": 8,
+    "FU_PROFILE": 1,
+    "MAX_LOOP_DEPTH": 4,
+    "INDEX_WIDTH": 32,
+    "TRIP_COUNT_WIDTH": 32,
+    "LINEAR_COUNT_WIDTH": 64,
+    "LOOP_II_WIDTH": 8,
+    "LOOP_EXPORT_LEVELS": 1,
+    "NUM_EVENTS": 16,
+    "EVENT_COUNT_WIDTH": 4,
+    "NUM_EVENT_NAMESPACES": 1,
+    "MAX_EVENT_SOURCES": 16,
+    "EVENT_INPUT_FIFO_DEPTH": 8,
+    "EVENT_OUTPUT_FIFO_DEPTH": 8,
+    "NUM_WAIT_SLOTS": 4,
+    "WAIT_RESULT_QUEUE_DEPTH": 4,
+    "NUM_BARRIERS": 4,
+    "MAX_PARTICIPANTS": 16,
+    "BARRIER_RELEASE_QUEUE_DEPTH": 4,
+    "BARRIER_GENERATION_WIDTH": 4,
+    "ACTION_QUEUE_DEPTH": 8,
+    "ACTION_RESPONSE_DEPTH": 8,
+    "MAX_OUTSTANDING_ACTIONS": 4,
+    "ACTION_TAG_WIDTH": 8,
+    "EVENT_SEQUENCE_WIDTH": 16,
+    "TIMEOUT_COUNTER_WIDTH": 32,
+    "MAX_PRIORITY_BURST": 8,
+    "SUPPORT_CONTEXT_COORDINATION": 1,
+    "SUPPORT_CLUSTER_LIFECYCLE": 1,
+    "SUPPORT_TIMEOUT": 1,
+    "SUPPORT_CHECKPOINT": 0,
+    "SUPPORT_PREDICATED_TOKEN": 1,
+    "REQUIRE_CANONICAL_FORMAT": 1,
+    "PREDICATE_PROTECTION": 0,
+    "EVENT_PROTECTION": 0,
+    "CONFIG_WORD_COUNT": 17,
+    "INPUT_ELASTIC_MASK": 3,
+    "OUTPUT_ELASTIC_MASK": 1
+  },
+  "inventory": [
+    "tile_shell",
+    "predicate_unit",
+    "scalar_alu",
+    "loop_controller",
+    "event_barrier",
+    "register_file",
+    "round_robin_arbiter",
+    "tile_shell_queue",
+    "performance_counters",
+    "packer",
+    "stream_join",
+    "tagged_actions",
+    "timeout_counters"
+  ],
+  "issue": {
+    "slots_per_cycle": 1,
+    "execution": "one reserved command; concurrent native event/loop/action engines",
+    "ordering": "command acceptance order; independent egress class arbitration"
+  },
+  "context_fields": {
+    "magic": [
+      0,
+      16
+    ],
+    "command_class": [
+      16,
+      4
+    ],
+    "lane_mask": [
+      32,
+      16
+    ],
+    "predicate_route": [
+      48,
+      16
+    ],
+    "event_enable": [
+      64,
+      16
+    ],
+    "epoch": [
+      80,
+      16
+    ],
+    "timeout": [
+      96,
+      32
+    ],
+    "targets": [
+      128,
+      16
+    ],
+    "package_version": [
+      144,
+      16
+    ],
+    "route_version": [
+      160,
+      16
+    ],
+    "loop_depth": [
+      176,
+      8
+    ],
+    "loop_ii": [
+      184,
+      8
+    ],
+    "loop_export": [
+      192,
+      8
+    ],
+    "loop_event": [
+      200,
+      8
+    ],
+    "command_limit": [
+      208,
+      32
+    ],
+    "sequence_enable": [
+      240,
+      1
+    ],
+    "terminal_context": [
+      241,
+      1
+    ],
+    "next_context": [
+      248,
+      8
+    ],
+    "allowed_classes": [
+      256,
+      8
+    ],
+    "register_type": [
+      264,
+      8
+    ]
+  },
+  "command_metadata": {
+    "command_class": [
+      32,
+      4
+    ],
+    "opcode": [
+      36,
+      4
+    ],
+    "source_a": [
+      40,
+      4
+    ],
+    "source_b": [
+      44,
+      4
+    ],
+    "destination": [
+      48,
+      4
+    ],
+    "write_enable": [
+      52,
+      1
+    ],
+    "signed": [
+      53,
+      1
+    ],
+    "predicate_enable": [
+      54,
+      1
+    ],
+    "false_token": [
+      55,
+      1
+    ],
+    "rf_a": [
+      56,
+      1
+    ],
+    "rf_b": [
+      57,
+      1
+    ],
+    "predicate_load": [
+      58,
+      1
+    ],
+    "consume": [
+      59,
+      1
+    ],
+    "auxiliary": [
+      60,
+      1
+    ],
+    "predicate_port": [
+      61,
+      1
+    ],
+    "mask": [
+      64,
+      16
+    ],
+    "object_id": [
+      80,
+      8
+    ],
+    "sub_id": [
+      88,
+      8
+    ],
+    "tag": [
+      96,
+      8
+    ],
+    "generation": [
+      104,
+      4
+    ],
+    "participant": [
+      108,
+      8
+    ],
+    "register_type": [
+      116,
+      4
+    ],
+    "terminal": [
+      120,
+      1
+    ]
+  },
+  "event_fields": {
+    "kind": [
+      32,
+      4
+    ],
+    "opcode": [
+      36,
+      4
+    ],
+    "event_id": [
+      40,
+      8
+    ],
+    "source": [
+      48,
+      8
+    ],
+    "namespace": [
+      56,
+      4
+    ],
+    "flags": [
+      60,
+      4
+    ],
+    "owner": [
+      64,
+      16
+    ],
+    "context_version": [
+      80,
+      16
+    ],
+    "epoch": [
+      96,
+      16
+    ],
+    "sequence": [
+      112,
+      16
+    ],
+    "tag": [
+      128,
+      8
+    ],
+    "participants": [
+      136,
+      16
+    ],
+    "package_version": [
+      152,
+      16
+    ],
+    "route_version": [
+      168,
+      16
+    ],
+    "payload": [
+      184,
+      64
+    ]
+  },
+  "connectivity": [
+    [
+      "tile_shell.data",
+      "stream_join",
+      "command_slot"
+    ],
+    [
+      "command_slot",
+      "predicate_unit/scalar_alu/register_file"
+    ],
+    [
+      "command_slot",
+      "event_barrier/loop_controller/tagged_actions"
+    ],
+    [
+      "tile_shell.events",
+      "event_input_fifo",
+      "sequence_checker",
+      "event_barrier/actions"
+    ],
+    [
+      "loop_controller",
+      "packer",
+      "tile_shell.data"
+    ],
+    [
+      "native_sources",
+      "class_queues",
+      "bounded_arbiter",
+      "event_fifo",
+      "tile_shell.events"
+    ],
+    [
+      "tile_shell.public_final_delivery",
+      "loop_controller.iteration_ready"
+    ]
+  ],
+  "actual_action_reservations": 4,
+  "event_record_bits": 256,
+  "event_policy": "shell envelope; exact per-source sequence; no sequence wrap within an epoch",
+  "action_policy": "safe-point collection plus authoritative commit; timeout queries without replay",
+  "loop_policy": "header and selected index/ordinal beats; advance after final public delivery",
+  "unsupported": [
+    "CPT-Adaptive/checkpoint",
+    "multiple namespaces",
+    "predicate-file and body-control protection",
+    "retention/power-off",
+    "asynchronous body reset"
+  ],
+  "signoff": {
+    "python_simulation": "see regression summary",
+    "synthesis": "Design Compiler (deferred)",
+    "lint": "NOT_RUN",
+    "formal": "NOT_RUN",
+    "physical": "NOT_RUN",
+    "power": "NOT_RUN"
+  },
+  "rtl_sha256": {
+    "src/rtl/common/ecc_pkg.sv": "16b496a92d3d47cf2943e452aaa1232eae92fd0ab7f679df212a731bd41235f8",
+    "src/rtl/common/crc_pkg.sv": "d876f4f2ab9c63e935eae6e9ca81222d4e0fe4648a974f62fd2263a0b5fb9b22",
+    "src/rtl/mosaic_blocks/tile_shell_pkg.sv": "71e5f1abfbcd84971008df02dae1dbcea0d97393b1ffd4f59acd05eaebcf3614",
+    "src/rtl/basic/context_sequencer_pkg.sv": "367638a64c1a3796b37acdf53c3ab59a9d65cebefccdb40939bc625a9feba070",
+    "src/rtl/building_blocks/tile_power_controller_pkg.sv": "b4a598f47e491ca7689bb098597c33c9a05b68a6463e8471e6a7e20913963dd6",
+    "src/rtl/building_blocks/predicate_unit_pkg.sv": "8efbedace49cfad4dec5a7a04fe184ba91a8bdc7fb7079b748fa37979ceb7d5c",
+    "src/rtl/building_blocks/scalar_alu_pkg.sv": "e43b2a6b2934ece630f0b95a179696adbb1b5647f6c4893a8d1859abdf4f4e6b",
+    "src/rtl/building_blocks/event_barrier_pkg.sv": "b865ad4115837d0d158ffa7d39aa03a5a42f4d9a0b9cfdcfa32fe48869698fc7",
+    "src/rtl/building_blocks/loop_controller_pkg.sv": "7be341b7c832e866694d23a8c142082741333ef173c7489de4cec533a04fce59",
+    "src/rtl/mosaic_blocks/cpt_pkg.sv": "b953978557f5b7f0f21002ea033b7f360d0d83d6cc0d1edea63bd579bfc00108",
+    "src/rtl/common/dff.sv": "578b511eedf04e100d039f14c35998d8079653fd2006c33baad432ea4622fd38",
+    "src/rtl/common/counter.sv": "d02f311941ef1fc913b80ab2bb5d66cdc35c817dddacb459e7400b9597d8806f",
+    "src/rtl/common/decoder.sv": "ed39d268ad87f931ada335a517e850a0c300f6275d3ffce969150e5422c836cf",
+    "src/rtl/common/operand_isolation.sv": "0ee8a947cb68dcc40f0100ef9eeb5ae1cfc2c60cc0e56957dfac553bc2b5fc51",
+    "src/rtl/common/reset_synchronizer.sv": "3503d53aef9da5d7a8dd1579b807093cfa441106e9727457646d3cb89e6fe2f8",
+    "src/rtl/common/priority_encoder.sv": "78ae31ee0db47b901b7b3df785574cfe50436afdf7029b4aa4d3e1346ac58f4c",
+    "src/rtl/common/write_gate.sv": "cd14228f0e72f10e674cf0ed274b01d0bd1b7f7417868ae9d9009420889299b7",
+    "src/rtl/common/lane_mask.sv": "ff058d5364ced0ad56b963e8d6403b2fcb04697da1489c4dd60d8a5d3972ec61",
+    "src/rtl/common/mux.sv": "4baec3ae2e53d24121c28f4012839ac6b488249baa4801530d0f5547af6602c5",
+    "src/rtl/basic/fifo.sv": "0937c66148bce63f3ff912a300f28cd4aedc215fab7ba936b53174c170f51a79",
+    "src/rtl/basic/parity.sv": "cb503fb1f9d3ad04c9d1e307f675715e22a555c4ba108b3cad1a5ec1efb63ab6",
+    "src/rtl/basic/ecc.sv": "e370e1cff7d8360a2b8955621a49bcd32b93c7069de31443e03030eeb0406686",
+    "src/rtl/basic/context_memory.sv": "5b160dc782ea71a5e2c89d4ec7f9c03248f15d0d2f98860b5782279099927c5e",
+    "src/rtl/basic/context_sequencer.sv": "e75a5db85861a9c6b9461d3eaf80135166852615cded2b7943c652445ecd5523",
+    "src/rtl/basic/async_fifo.sv": "f1ff5695a5f69916c9ee0bd9d98f0aad2f0b3173390f848378b5cfc21b4fe29a",
+    "src/rtl/basic/performance_counters.sv": "4790d96341d466827b2f215f51c22557c753a0409a765ad614b3efff8ccac704",
+    "src/rtl/basic/register_file.sv": "8c47195e840f5e4f4dc00168d983c5649c8e84624aadc6e6778d6d6d777c7bcc",
+    "src/rtl/basic/packer.sv": "4be33b1a9e8f78e25aef0fc939ee207bb700a301e15e3237b013472169064f9a",
+    "src/rtl/basic/stream_join.sv": "5ca00b530e83229ff8c60fef170253f4424dd545828b782bef611e759fd79fe8",
+    "src/rtl/basic/round_robin_arbiter.sv": "82b9032c942a8221c373b36b4aca58ef03175f4923553a5532d25d1c157d5720",
+    "src/rtl/building_blocks/event_barrier_state.sv": "0b04b66385ce678b62d08ad6b4db0a4b27f21f41c7affdb315fc855a3ff85a51",
+    "src/rtl/building_blocks/event_barrier_queue.sv": "0c3c936f9aed20e76e8c84d983dff23fb4c64748c4aea7c09954eef0ad63aca9",
+    "src/rtl/building_blocks/event_barrier.sv": "923028f6088af6ec2b4cd0c7c184af5082e23f7aefff06aa14e9f0d6708bf77c",
+    "src/rtl/building_blocks/loop_controller.sv": "9e55ffc5497f7f60a67db9dd5b00314ab6df3c89eb1d3a25204130a97b72d365",
+    "src/rtl/building_blocks/tile_power_controller.sv": "bb017271a05fd1de8e194016f069cbf5814d54ce6ca231bf0c313c647f9d67b4",
+    "src/rtl/mosaic_blocks/tile_shell_codec.sv": "1b5168c1f58845865c7c2211e3f997ca6ffdd4584cf13c983a77ab63a3f02cf9",
+    "src/rtl/mosaic_blocks/tile_shell_state.sv": "b93b8685f3deb50d39f01f28828fee60fbab91503984d9befea9475dd2983f4e",
+    "src/rtl/mosaic_blocks/tile_shell_queue.sv": "6008d3817c7c5f117ab371b67d4b28401161d51d1ade28ee26032a49bb00ed49",
+    "src/rtl/mosaic_blocks/tile_shell.sv": "c7ec7e7bd6069578d0cee8d6ede47b73e5a98831795c7a7c03191c6f38076212",
+    "src/rtl/building_blocks/predicate_unit.sv": "bab0eb80cd2ce054859e84387cfb6512c4f75a06415101411c5a5e2799c0fe9d",
+    "src/rtl/building_blocks/scalar_alu.sv": "8b584da1594f739011a9b83775cb58985bd518b7a025860f36c3aa2180d3b7cd",
+    "src/rtl/mosaic_blocks/cpt_actions.sv": "2ccd343d105b41a12e8db771c80baabd29b28a2f53c374942ab6157e3b498d9d",
+    "src/rtl/mosaic_blocks/cpt_egress.sv": "406bf0d7d43eebe1614789e93eec4da8fe284af64c3a4641e9d2a1ac57d1917a",
+    "src/rtl/mosaic_blocks/cpt_body.sv": "086e320ba8ab0a4a75487732f54eac52fa94101fa9c72c2ed9de80d149e6339b",
+    "src/rtl/mosaic_blocks/cpt.sv": "9a2704d1a1c95463d9fcbccc98c7c25eadbc6dd7f2cf109beb318db6efc5eb89"
+  },
+  "contract_sha256": "9d35904be3d53617cc9ad1406507aa41091c0e0ffdb5b72982fce551755cb303"
+}

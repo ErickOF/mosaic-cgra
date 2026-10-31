@@ -22,6 +22,7 @@ from reciprocal_unit.characterize import characterize
 ROOT = Path(__file__).resolve().parents[4]
 TEST_DIR = Path(__file__).resolve().parent
 DEPENDENCIES = tuple(ROOT / f'src/rtl/{name}.sv' for name in (
+    'common/ecc_pkg',
     'building_blocks/reciprocal_unit_pkg', 'building_blocks/scalar_alu_pkg',
     'common/dff', 'common/reset_synchronizer', 'common/operand_isolation',
     'common/decoder', 'common/priority_encoder', 'common/mux', 'basic/fifo',

@@ -12,7 +12,7 @@ COCOTB_TOPLEVEL ?= counter
 COCOTB_TEST_MODULES ?= test_$(COCOTB_TOPLEVEL)
 # Discover validation modules by top name across RTL/validation categories.
 # Override the directory when a top has multiple suites or lives elsewhere.
-PYUVM_TEST_DIR ?= $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/$(COCOTB_TOPLEVEL)))
+PYUVM_TEST_DIR ?= $(if $(filter cluster_events,$(COCOTB_TOPLEVEL)),$(PROJECT_ROOT)/src/val/mosaic_blocks/cluster,$(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/$(COCOTB_TOPLEVEL))))
 ACCUMULATOR_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/accumulator))
 PREDICATE_UNIT_TEST_DIR := $(PROJECT_ROOT)/src/val/building_blocks/predicate_unit
 VECTOR_REDUCTION_TEST_DIR := $(PROJECT_ROOT)/src/val/building_blocks/vector_reduction
@@ -76,13 +76,13 @@ PARITY_TEST_DIR := $(firstword $(wildcard $(PROJECT_ROOT)/src/val/*/parity))
 # Include each basic module's common dependencies. Caller lists take precedence.
 _ACCUMULATOR_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/accumulator_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/lane_mask.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/building_blocks/accumulator.sv
 _RTL_SOURCES_accumulator := $(_ACCUMULATOR_SOURCES)
-_LUT_UNIT_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/lut_unit_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/ecc.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv $(PROJECT_ROOT)/src/rtl/building_blocks/lut_unit_bank.sv $(PROJECT_ROOT)/src/rtl/building_blocks/lut_unit.sv
+_LUT_UNIT_SOURCES := $(PROJECT_ROOT)/src/rtl/common/ecc_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/lut_unit_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/ecc.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv $(PROJECT_ROOT)/src/rtl/building_blocks/lut_unit_bank.sv $(PROJECT_ROOT)/src/rtl/building_blocks/lut_unit.sv
 _RTL_SOURCES_lut_unit := $(_LUT_UNIT_SOURCES)
-_RSQRT_UNIT_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/rsqrt_unit_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/reset_synchronizer.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv $(PROJECT_ROOT)/src/rtl/common/mux.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/ecc.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv $(PROJECT_ROOT)/src/rtl/building_blocks/multiplier.sv $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu.sv $(PROJECT_ROOT)/src/rtl/building_blocks/polynomial_unit_round.sv $(PROJECT_ROOT)/src/rtl/building_blocks/protected_seed_rom.sv $(PROJECT_ROOT)/src/rtl/building_blocks/reciprocal_unit_scale.sv $(PROJECT_ROOT)/src/rtl/building_blocks/rsqrt_unit_normalize.sv $(PROJECT_ROOT)/src/rtl/building_blocks/rsqrt_unit_seed.sv $(PROJECT_ROOT)/src/rtl/building_blocks/rsqrt_unit_newton.sv $(PROJECT_ROOT)/src/rtl/building_blocks/rsqrt_unit.sv
+_RSQRT_UNIT_SOURCES := $(PROJECT_ROOT)/src/rtl/common/ecc_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/rsqrt_unit_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/reset_synchronizer.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv $(PROJECT_ROOT)/src/rtl/common/mux.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/ecc.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv $(PROJECT_ROOT)/src/rtl/building_blocks/multiplier.sv $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu.sv $(PROJECT_ROOT)/src/rtl/building_blocks/polynomial_unit_round.sv $(PROJECT_ROOT)/src/rtl/building_blocks/protected_seed_rom.sv $(PROJECT_ROOT)/src/rtl/building_blocks/reciprocal_unit_scale.sv $(PROJECT_ROOT)/src/rtl/building_blocks/rsqrt_unit_normalize.sv $(PROJECT_ROOT)/src/rtl/building_blocks/rsqrt_unit_seed.sv $(PROJECT_ROOT)/src/rtl/building_blocks/rsqrt_unit_newton.sv $(PROJECT_ROOT)/src/rtl/building_blocks/rsqrt_unit.sv
 _RTL_SOURCES_rsqrt_unit := $(_RSQRT_UNIT_SOURCES)
-_RECIPROCAL_UNIT_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/reciprocal_unit_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/reset_synchronizer.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv $(PROJECT_ROOT)/src/rtl/common/mux.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/ecc.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv $(PROJECT_ROOT)/src/rtl/building_blocks/multiplier.sv $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu.sv $(PROJECT_ROOT)/src/rtl/building_blocks/polynomial_unit_round.sv $(PROJECT_ROOT)/src/rtl/building_blocks/reciprocal_unit_normalize.sv $(PROJECT_ROOT)/src/rtl/building_blocks/protected_seed_rom.sv $(PROJECT_ROOT)/src/rtl/building_blocks/reciprocal_unit_seed.sv $(PROJECT_ROOT)/src/rtl/building_blocks/reciprocal_unit_newton.sv $(PROJECT_ROOT)/src/rtl/building_blocks/reciprocal_unit_scale.sv $(PROJECT_ROOT)/src/rtl/building_blocks/reciprocal_unit.sv
+_RECIPROCAL_UNIT_SOURCES := $(PROJECT_ROOT)/src/rtl/common/ecc_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/reciprocal_unit_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/reset_synchronizer.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv $(PROJECT_ROOT)/src/rtl/common/mux.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/ecc.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv $(PROJECT_ROOT)/src/rtl/building_blocks/multiplier.sv $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu.sv $(PROJECT_ROOT)/src/rtl/building_blocks/polynomial_unit_round.sv $(PROJECT_ROOT)/src/rtl/building_blocks/reciprocal_unit_normalize.sv $(PROJECT_ROOT)/src/rtl/building_blocks/protected_seed_rom.sv $(PROJECT_ROOT)/src/rtl/building_blocks/reciprocal_unit_seed.sv $(PROJECT_ROOT)/src/rtl/building_blocks/reciprocal_unit_newton.sv $(PROJECT_ROOT)/src/rtl/building_blocks/reciprocal_unit_scale.sv $(PROJECT_ROOT)/src/rtl/building_blocks/reciprocal_unit.sv
 _RTL_SOURCES_reciprocal_unit := $(_RECIPROCAL_UNIT_SOURCES)
-_POLYNOMIAL_UNIT_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/polynomial_unit_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/mux.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/ecc.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv $(PROJECT_ROOT)/src/rtl/building_blocks/lut_unit_bank.sv $(PROJECT_ROOT)/src/rtl/building_blocks/multiplier.sv $(PROJECT_ROOT)/src/rtl/building_blocks/polynomial_unit_round.sv $(PROJECT_ROOT)/src/rtl/building_blocks/polynomial_unit_horner.sv $(PROJECT_ROOT)/src/rtl/building_blocks/polynomial_unit_scale.sv $(PROJECT_ROOT)/src/rtl/building_blocks/polynomial_unit.sv
+_POLYNOMIAL_UNIT_SOURCES := $(PROJECT_ROOT)/src/rtl/common/ecc_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/polynomial_unit_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/mux.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/ecc.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv $(PROJECT_ROOT)/src/rtl/building_blocks/lut_unit_bank.sv $(PROJECT_ROOT)/src/rtl/building_blocks/multiplier.sv $(PROJECT_ROOT)/src/rtl/building_blocks/polynomial_unit_round.sv $(PROJECT_ROOT)/src/rtl/building_blocks/polynomial_unit_horner.sv $(PROJECT_ROOT)/src/rtl/building_blocks/polynomial_unit_scale.sv $(PROJECT_ROOT)/src/rtl/building_blocks/polynomial_unit.sv
 _RTL_SOURCES_polynomial_unit := $(_POLYNOMIAL_UNIT_SOURCES)
 _LOOP_CONTROLLER_SOURCES := $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/building_blocks/loop_controller_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv $(PROJECT_ROOT)/src/rtl/common/write_gate.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/loop_controller.sv
 _RTL_SOURCES_loop_controller := $(_LOOP_CONTROLLER_SOURCES)
@@ -91,7 +91,7 @@ _TILE_POWER_CONTROLLER_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/tile_p
     $(PROJECT_ROOT)/src/rtl/common/reset_synchronizer.sv \
     $(PROJECT_ROOT)/src/rtl/building_blocks/tile_power_controller.sv
 _RTL_SOURCES_tile_power_controller := $(_TILE_POWER_CONTROLLER_SOURCES)
-_TILE_SHELL_SOURCES := $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_pkg.sv \
+_TILE_SHELL_SOURCES := $(PROJECT_ROOT)/src/rtl/common/ecc_pkg.sv $(PROJECT_ROOT)/src/rtl/common/crc_pkg.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_pkg.sv \
     $(PROJECT_ROOT)/src/rtl/basic/context_sequencer_pkg.sv \
     $(PROJECT_ROOT)/src/rtl/building_blocks/tile_power_controller_pkg.sv \
     $(PROJECT_ROOT)/src/rtl/common/dff.sv \
@@ -114,6 +114,218 @@ _TILE_SHELL_SOURCES := $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_pkg.sv \
     $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_queue.sv \
     $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell.sv
 _RTL_SOURCES_tile_shell := $(_TILE_SHELL_SOURCES)
+_RTL_SOURCES_configuration_network := $(PROJECT_ROOT)/src/rtl/common/ecc_pkg.sv $(PROJECT_ROOT)/src/rtl/common/crc_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv \
+    $(PROJECT_ROOT)/src/rtl/common/counter.sv \
+    $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv \
+    $(PROJECT_ROOT)/src/rtl/common/write_gate.sv \
+    $(PROJECT_ROOT)/src/rtl/common/decoder.sv \
+    $(PROJECT_ROOT)/src/rtl/common/mux.sv \
+    $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/fifo.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/skid_buffer.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/register_slice.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/stream_fork.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/round_robin_arbiter.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/parity.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/ecc.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_codec.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/banked_scratchpad_state.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/banked_scratchpad_counters.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/static_mesh_queue.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/static_mesh_link.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/configuration_network_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/configuration_network_crc.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/configuration_network_serializer.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/configuration_network_receiver.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/configuration_network_link.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/configuration_network_fork.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/configuration_network_tree.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/configuration_network_tile_adapter.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/configuration_network.sv
+_RTL_SOURCES_configuration_network_tile_adapter := $(filter-out %/configuration_network.sv,$(_RTL_SOURCES_configuration_network))
+
+_RTL_SOURCES_predicate_network := $(PROJECT_ROOT)/src/rtl/common/ecc_pkg.sv $(PROJECT_ROOT)/src/rtl/common/crc_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/local_switch_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/static_mesh_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/common/dff.sv \
+    $(PROJECT_ROOT)/src/rtl/common/mux.sv \
+    $(PROJECT_ROOT)/src/rtl/common/decoder.sv \
+    $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv \
+    $(PROJECT_ROOT)/src/rtl/common/write_gate.sv \
+    $(PROJECT_ROOT)/src/rtl/common/counter.sv \
+    $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv \
+    $(PROJECT_ROOT)/src/rtl/common/lane_mask.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/register_slice.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/skid_buffer.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/fifo.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/ecc.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/parity.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/banked_scratchpad_counters.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/local_switch.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_codec.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/banked_scratchpad_state.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/static_mesh_node.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/static_mesh_link.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/static_mesh_queue.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/predicate_network_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/predicate_network_schedule.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/predicate_network_control.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/predicate_network.sv
+
+_RTL_SOURCES_static_mesh := $(PROJECT_ROOT)/src/rtl/common/ecc_pkg.sv $(PROJECT_ROOT)/src/rtl/common/crc_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/local_switch_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/static_mesh_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/common/dff.sv \
+    $(PROJECT_ROOT)/src/rtl/common/mux.sv \
+    $(PROJECT_ROOT)/src/rtl/common/decoder.sv \
+    $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv \
+    $(PROJECT_ROOT)/src/rtl/common/write_gate.sv \
+    $(PROJECT_ROOT)/src/rtl/common/counter.sv \
+    $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv \
+    $(PROJECT_ROOT)/src/rtl/common/lane_mask.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/register_slice.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/skid_buffer.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/context_memory.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/fifo.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/ecc.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/parity.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/banked_scratchpad_counters.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/local_switch.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_codec.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/banked_scratchpad_state.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/static_mesh_node.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/static_mesh_link.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/static_mesh_queue.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/static_mesh_control.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/static_mesh.sv
+
+_RTL_SOURCES_mst := $(PROJECT_ROOT)/src/rtl/common/ecc_pkg.sv $(PROJECT_ROOT)/src/rtl/common/crc_pkg.sv $(PROJECT_ROOT)/src/rtl/basic/context_sequencer_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/agu_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/dma_engine_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/load_engine_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/store_engine_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/stream_formatter_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/tile_power_controller_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/mst_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/async_fifo.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/context_memory.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/context_sequencer.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/data_aligner.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/ecc.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/fifo.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/packer.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/parity.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/performance_counters.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/register_slice.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/round_robin_arbiter.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/width_converter.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/agu.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/dma_engine_bounds.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/dma_engine_command_queue.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/load_engine.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/store_engine.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/stream_formatter.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/tile_power_controller.sv \
+    $(PROJECT_ROOT)/src/rtl/common/counter.sv \
+    $(PROJECT_ROOT)/src/rtl/common/decoder.sv \
+    $(PROJECT_ROOT)/src/rtl/common/dff.sv \
+    $(PROJECT_ROOT)/src/rtl/common/lane_mask.sv \
+    $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv \
+    $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv \
+    $(PROJECT_ROOT)/src/rtl/common/reset_synchronizer.sv \
+    $(PROJECT_ROOT)/src/rtl/common/write_gate.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/banked_scratchpad_counters.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/banked_scratchpad_state.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/mst.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/mst_body.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/mst_channel.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/mst_command_queue.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/mst_element_converter.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/mst_fragment_adapter.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/mst_validate.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_codec.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_queue.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_state.sv
+_BCT_SOURCES := $(_TILE_SHELL_SOURCES) $(PROJECT_ROOT)/src/rtl/mosaic_blocks/bct_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/predicate_unit_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/accumulator_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/common/write_gate.sv \
+    $(PROJECT_ROOT)/src/rtl/common/lane_mask.sv \
+    $(PROJECT_ROOT)/src/rtl/common/mux.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/register_file.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/bypass_network.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/rdu.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/stream_join.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/multiplier.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/dot_product.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/mac.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/accumulator.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/predicate_unit.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/bct_body.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/bct.sv
+_RTL_SOURCES_bct := $(_BCT_SOURCES)
+_VCT_SOURCES := $(PROJECT_ROOT)/src/rtl/common/ecc_pkg.sv $(PROJECT_ROOT)/src/rtl/common/crc_pkg.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/context_sequencer_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/tile_power_controller_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/common/dff.sv \
+    $(PROJECT_ROOT)/src/rtl/common/counter.sv \
+    $(PROJECT_ROOT)/src/rtl/common/decoder.sv \
+    $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv \
+    $(PROJECT_ROOT)/src/rtl/common/reset_synchronizer.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/fifo.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/parity.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/ecc.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/context_memory.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/context_sequencer.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/async_fifo.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/performance_counters.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/tile_power_controller.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_codec.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_state.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_queue.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/predicate_unit_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/accumulator_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/common/write_gate.sv \
+    $(PROJECT_ROOT)/src/rtl/common/lane_mask.sv \
+    $(PROJECT_ROOT)/src/rtl/common/mux.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/register_file.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/bypass_network.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/rdu.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/stream_join.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/multiplier.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/dot_product.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/mac.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/accumulator.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/predicate_unit.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/vector_register_file.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/packer.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/vector_lane_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/vector_reduction_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/vector_lane_pipeline.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/vector_lane.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/vector_reduction_tree.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/vector_reduction.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/vct_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/vct_vrf.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/vct_accumulator.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/vct_body.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/vct.sv
+_RTL_SOURCES_vct := $(_VCT_SOURCES)
 _TILE_NETWORK_INTERFACE_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/tile_network_interface_pkg.sv \
     $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv \
     $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv \
@@ -136,7 +348,7 @@ _RTL_SOURCES_scratchpad_controller = $(PROJECT_ROOT)/src/rtl/building_blocks/scr
     $(PROJECT_ROOT)/src/rtl/building_blocks/scratchpad_controller_counters.sv \
     $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/basic/round_robin_arbiter.sv \
     $(PROJECT_ROOT)/src/rtl/building_blocks/scratchpad_controller.sv
-_RTL_SOURCES_scratchpad_bank = $(PROJECT_ROOT)/src/rtl/building_blocks/scratchpad_bank_pkg.sv \
+_RTL_SOURCES_scratchpad_bank = $(PROJECT_ROOT)/src/rtl/common/ecc_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/scratchpad_bank_pkg.sv \
     $(PROJECT_ROOT)/src/rtl/common/dff.sv \
     $(PROJECT_ROOT)/src/rtl/common/counter.sv \
     $(PROJECT_ROOT)/src/rtl/common/decoder.sv \
@@ -148,6 +360,14 @@ _RTL_SOURCES_scratchpad_bank = $(PROJECT_ROOT)/src/rtl/building_blocks/scratchpa
     $(PROJECT_ROOT)/src/rtl/basic/sram_wrapper.sv \
     $(PROJECT_ROOT)/src/rtl/building_blocks/scratchpad_bank_counters.sv \
     $(PROJECT_ROOT)/src/rtl/building_blocks/scratchpad_bank.sv
+_RTL_SOURCES_banked_scratchpad = $(PROJECT_ROOT)/src/rtl/mosaic_blocks/banked_scratchpad_pkg.sv \
+    $(_RTL_SOURCES_scratchpad_controller) \
+    $(filter-out $(_RTL_SOURCES_scratchpad_controller),$(_RTL_SOURCES_scratchpad_bank)) \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_codec.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/banked_scratchpad_state.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/banked_scratchpad_power.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/banked_scratchpad_counters.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/banked_scratchpad.sv
 _RTL_SOURCES_stream_formatter := $(PROJECT_ROOT)/src/rtl/building_blocks/stream_formatter_pkg.sv \
     $(PROJECT_ROOT)/src/rtl/common/dff.sv \
     $(PROJECT_ROOT)/src/rtl/common/counter.sv \
@@ -170,7 +390,7 @@ _RTL_SOURCES_store_engine := $(PROJECT_ROOT)/src/rtl/building_blocks/agu_pkg.sv 
     $(PROJECT_ROOT)/src/rtl/building_blocks/store_engine.sv
 _LOAD_ENGINE_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/agu_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/dma_engine_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/load_engine_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/building_blocks/dma_engine_bounds.sv $(PROJECT_ROOT)/src/rtl/common/write_gate.sv $(PROJECT_ROOT)/src/rtl/building_blocks/agu.sv $(PROJECT_ROOT)/src/rtl/building_blocks/load_engine_counters.sv $(PROJECT_ROOT)/src/rtl/building_blocks/load_engine.sv
 _RTL_SOURCES_load_engine := $(_LOAD_ENGINE_SOURCES)
-_EXP_UNIT_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/generated/exp_unit_tables_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/exp_unit_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/ecc.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv $(PROJECT_ROOT)/src/rtl/common/mux.sv $(PROJECT_ROOT)/src/rtl/building_blocks/multiplier.sv $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu.sv $(PROJECT_ROOT)/src/rtl/building_blocks/polynomial_unit_round.sv $(PROJECT_ROOT)/src/rtl/building_blocks/exp_unit_interpolate.sv $(PROJECT_ROOT)/src/rtl/building_blocks/exp_unit_rom.sv $(PROJECT_ROOT)/src/rtl/building_blocks/exp_unit_stage.sv $(PROJECT_ROOT)/src/rtl/building_blocks/exp_unit.sv
+_EXP_UNIT_SOURCES := $(PROJECT_ROOT)/src/rtl/common/ecc_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/generated/exp_unit_tables_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/exp_unit_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/ecc.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv $(PROJECT_ROOT)/src/rtl/common/mux.sv $(PROJECT_ROOT)/src/rtl/building_blocks/multiplier.sv $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu.sv $(PROJECT_ROOT)/src/rtl/building_blocks/polynomial_unit_round.sv $(PROJECT_ROOT)/src/rtl/building_blocks/exp_unit_interpolate.sv $(PROJECT_ROOT)/src/rtl/building_blocks/exp_unit_rom.sv $(PROJECT_ROOT)/src/rtl/building_blocks/exp_unit_stage.sv $(PROJECT_ROOT)/src/rtl/building_blocks/exp_unit.sv
 _RTL_SOURCES_exp_unit := $(_EXP_UNIT_SOURCES)
 _EVENT_BARRIER_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/round_robin_arbiter.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier.sv
 _RTL_SOURCES_event_barrier := $(_EVENT_BARRIER_SOURCES)
@@ -207,7 +427,7 @@ _RTL_SOURCES_vector_lane := $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu_p
     $(PROJECT_ROOT)/src/rtl/building_blocks/mac.sv \
     $(PROJECT_ROOT)/src/rtl/building_blocks/vector_lane_pipeline.sv \
     $(PROJECT_ROOT)/src/rtl/building_blocks/vector_lane.sv
-_NOC_ROUTER_SOURCES := $(PROJECT_ROOT)/src/rtl/building_blocks/noc_router_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/mux.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/ecc.sv $(PROJECT_ROOT)/src/rtl/basic/round_robin_arbiter.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv $(PROJECT_ROOT)/src/rtl/building_blocks/noc_router_codec.sv $(PROJECT_ROOT)/src/rtl/building_blocks/noc_router_buffer.sv $(PROJECT_ROOT)/src/rtl/building_blocks/noc_router.sv
+_NOC_ROUTER_SOURCES := $(PROJECT_ROOT)/src/rtl/common/ecc_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/noc_router_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/mux.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/ecc.sv $(PROJECT_ROOT)/src/rtl/basic/round_robin_arbiter.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv $(PROJECT_ROOT)/src/rtl/building_blocks/noc_router_codec.sv $(PROJECT_ROOT)/src/rtl/building_blocks/noc_router_buffer.sv $(PROJECT_ROOT)/src/rtl/building_blocks/noc_router.sv
 _RTL_SOURCES_noc_router := $(_NOC_ROUTER_SOURCES)
 _RTL_SOURCES_multiplier := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/building_blocks/multiplier.sv
 _RTL_SOURCES_mac := $(_DOT_PRODUCT_SOURCES) $(PROJECT_ROOT)/src/rtl/building_blocks/mac.sv
@@ -225,7 +445,7 @@ _RTL_SOURCES_context_memory := $(_CONTEXT_MEMORY_SOURCES)
 _RTL_SOURCES_context_sequencer := $(_CONTEXT_SEQUENCER_SOURCES)
 _DATA_ALIGNER_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/data_aligner.sv
 _RTL_SOURCES_data_aligner := $(_DATA_ALIGNER_SOURCES)
-_ECC_SOURCES := $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/ecc.sv
+_ECC_SOURCES := $(PROJECT_ROOT)/src/rtl/common/ecc_pkg.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/ecc.sv
 _RTL_SOURCES_ecc := $(_ECC_SOURCES)
 _FIFO_SOURCES := $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv
 _RTL_SOURCES_fifo := $(_FIFO_SOURCES)
@@ -256,6 +476,80 @@ _RTL_SOURCES_stream_join := $(_STREAM_JOIN_SOURCES)
 SRAM_BACKEND_SOURCE ?= $(PROJECT_ROOT)/src/rtl/basic/sram_wrapper_backend.sv
 _SRAM_WRAPPER_SOURCES = $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(SRAM_BACKEND_SOURCE) $(PROJECT_ROOT)/src/rtl/basic/sram_wrapper.sv
 _RTL_SOURCES_sram_wrapper = $(_SRAM_WRAPPER_SOURCES)
+_SFT_SOURCES := $(PROJECT_ROOT)/src/rtl/common/ecc_pkg.sv $(PROJECT_ROOT)/src/rtl/common/crc_pkg.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_pkg.sv $(PROJECT_ROOT)/src/rtl/basic/context_sequencer_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/tile_power_controller_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/lut_unit_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/polynomial_unit_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/reciprocal_unit_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/vector_lane_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/rsqrt_unit_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/generated/exp_unit_tables_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/exp_unit_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/vector_reduction_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/accumulator_pkg.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/sft_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/reset_synchronizer.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/ecc.sv $(PROJECT_ROOT)/src/rtl/basic/context_memory.sv $(PROJECT_ROOT)/src/rtl/basic/context_sequencer.sv $(PROJECT_ROOT)/src/rtl/basic/async_fifo.sv $(PROJECT_ROOT)/src/rtl/basic/performance_counters.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv $(PROJECT_ROOT)/src/rtl/building_blocks/tile_power_controller.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_codec.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_state.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_queue.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell.sv $(PROJECT_ROOT)/src/rtl/building_blocks/lut_unit_bank.sv $(PROJECT_ROOT)/src/rtl/building_blocks/lut_unit.sv $(PROJECT_ROOT)/src/rtl/common/mux.sv $(PROJECT_ROOT)/src/rtl/building_blocks/multiplier.sv $(PROJECT_ROOT)/src/rtl/building_blocks/polynomial_unit_round.sv $(PROJECT_ROOT)/src/rtl/building_blocks/polynomial_unit_horner.sv $(PROJECT_ROOT)/src/rtl/building_blocks/polynomial_unit_scale.sv $(PROJECT_ROOT)/src/rtl/building_blocks/polynomial_unit.sv $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu.sv $(PROJECT_ROOT)/src/rtl/building_blocks/reciprocal_unit_normalize.sv $(PROJECT_ROOT)/src/rtl/building_blocks/protected_seed_rom.sv $(PROJECT_ROOT)/src/rtl/building_blocks/reciprocal_unit_seed.sv $(PROJECT_ROOT)/src/rtl/building_blocks/reciprocal_unit_newton.sv $(PROJECT_ROOT)/src/rtl/building_blocks/reciprocal_unit_scale.sv $(PROJECT_ROOT)/src/rtl/building_blocks/reciprocal_unit.sv $(PROJECT_ROOT)/src/rtl/building_blocks/rsqrt_unit_normalize.sv $(PROJECT_ROOT)/src/rtl/building_blocks/rsqrt_unit_seed.sv $(PROJECT_ROOT)/src/rtl/building_blocks/rsqrt_unit_newton.sv $(PROJECT_ROOT)/src/rtl/building_blocks/rsqrt_unit.sv $(PROJECT_ROOT)/src/rtl/building_blocks/exp_unit_interpolate.sv $(PROJECT_ROOT)/src/rtl/building_blocks/exp_unit_rom.sv $(PROJECT_ROOT)/src/rtl/building_blocks/exp_unit_stage.sv $(PROJECT_ROOT)/src/rtl/building_blocks/exp_unit.sv $(PROJECT_ROOT)/src/rtl/common/lane_mask.sv $(PROJECT_ROOT)/src/rtl/basic/register_file.sv $(PROJECT_ROOT)/src/rtl/basic/bypass_network.sv $(PROJECT_ROOT)/src/rtl/basic/stream_join.sv $(PROJECT_ROOT)/src/rtl/basic/packer.sv $(PROJECT_ROOT)/src/rtl/building_blocks/accumulator.sv $(PROJECT_ROOT)/src/rtl/building_blocks/vector_reduction_tree.sv $(PROJECT_ROOT)/src/rtl/building_blocks/vector_reduction.sv $(PROJECT_ROOT)/src/rtl/common/write_gate.sv $(PROJECT_ROOT)/src/rtl/building_blocks/vector_lane_pipeline.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/sft_datapath.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/sft_body.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/sft.sv
+_RTL_SOURCES_sft := $(_SFT_SOURCES)
+_CPT_SOURCES := $(PROJECT_ROOT)/src/rtl/common/ecc_pkg.sv $(PROJECT_ROOT)/src/rtl/common/crc_pkg.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_pkg.sv $(PROJECT_ROOT)/src/rtl/basic/context_sequencer_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/tile_power_controller_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/predicate_unit_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/loop_controller_pkg.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/cpt_pkg.sv $(PROJECT_ROOT)/src/rtl/common/dff.sv $(PROJECT_ROOT)/src/rtl/common/counter.sv $(PROJECT_ROOT)/src/rtl/common/decoder.sv $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv $(PROJECT_ROOT)/src/rtl/common/reset_synchronizer.sv $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv $(PROJECT_ROOT)/src/rtl/common/write_gate.sv $(PROJECT_ROOT)/src/rtl/common/lane_mask.sv $(PROJECT_ROOT)/src/rtl/common/mux.sv $(PROJECT_ROOT)/src/rtl/basic/fifo.sv $(PROJECT_ROOT)/src/rtl/basic/parity.sv $(PROJECT_ROOT)/src/rtl/basic/ecc.sv $(PROJECT_ROOT)/src/rtl/basic/context_memory.sv $(PROJECT_ROOT)/src/rtl/basic/context_sequencer.sv $(PROJECT_ROOT)/src/rtl/basic/async_fifo.sv $(PROJECT_ROOT)/src/rtl/basic/performance_counters.sv $(PROJECT_ROOT)/src/rtl/basic/register_file.sv $(PROJECT_ROOT)/src/rtl/basic/packer.sv $(PROJECT_ROOT)/src/rtl/basic/stream_join.sv $(PROJECT_ROOT)/src/rtl/basic/round_robin_arbiter.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier.sv $(PROJECT_ROOT)/src/rtl/building_blocks/loop_controller.sv $(PROJECT_ROOT)/src/rtl/building_blocks/tile_power_controller.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_codec.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_state.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_queue.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell.sv $(PROJECT_ROOT)/src/rtl/building_blocks/predicate_unit.sv $(PROJECT_ROOT)/src/rtl/building_blocks/scalar_alu.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/cpt_actions.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/cpt_egress.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/cpt_body.sv $(PROJECT_ROOT)/src/rtl/mosaic_blocks/cpt.sv
+_RTL_SOURCES_cpt := $(_CPT_SOURCES)
+_RTL_SOURCES_system = $(addprefix $(PROJECT_ROOT)/,$(file <$(PROJECT_ROOT)/src/gen/system/generated/sources.f))
+_RTL_SOURCES_array = $(addprefix $(PROJECT_ROOT)/,$(file <$(PROJECT_ROOT)/src/gen/array/generated/sources.f))
+_RTL_SOURCES_cluster = $(addprefix $(PROJECT_ROOT)/,$(file <$(PROJECT_ROOT)/src/gen/cluster/generated/sources.f))
+_RTL_SOURCES_cluster_events = $(filter-out $(PROJECT_ROOT)/src/rtl/mosaic_blocks/cluster.sv,$(_RTL_SOURCES_cluster))
+_GLOBAL_NOC_SOURCES := $(PROJECT_ROOT)/src/rtl/common/ecc_pkg.sv $(PROJECT_ROOT)/src/rtl/common/crc_pkg.sv $(PROJECT_ROOT)/src/rtl/building_blocks/noc_router_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/tile_network_interface_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/global_noc_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/common/dff.sv \
+    $(PROJECT_ROOT)/src/rtl/common/counter.sv \
+    $(PROJECT_ROOT)/src/rtl/common/decoder.sv \
+    $(PROJECT_ROOT)/src/rtl/common/mux.sv \
+    $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv \
+    $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/fifo.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/parity.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/ecc.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/round_robin_arbiter.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/skid_buffer.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/noc_router_codec.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/noc_router_buffer.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/noc_router.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/tile_network_interface.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/global_noc_link.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/global_noc.sv
+_RTL_SOURCES_global_noc := $(_GLOBAL_NOC_SOURCES)
+_RUNTIME_CONTROLLER_SOURCES := $(PROJECT_ROOT)/src/rtl/common/ecc_pkg.sv     $(PROJECT_ROOT)/src/rtl/mosaic_blocks/runtime_controller_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/common/dff.sv \
+    $(PROJECT_ROOT)/src/rtl/common/counter.sv \
+    $(PROJECT_ROOT)/src/rtl/common/priority_encoder.sv \
+    $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv \
+    $(PROJECT_ROOT)/src/rtl/common/decoder.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/fifo.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/parity.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/ecc.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/round_robin_arbiter.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/performance_counters.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_codec.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_state.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/runtime_controller.sv
+_RTL_SOURCES_runtime_controller := $(_RUNTIME_CONTROLLER_SOURCES)
+
+_CLUSTER_POWER_MANAGER_SOURCES := $(PROJECT_ROOT)/src/rtl/common/ecc_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/tile_power_controller_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/cluster_power_manager_pkg.sv \
+    $(PROJECT_ROOT)/src/rtl/common/dff.sv \
+    $(PROJECT_ROOT)/src/rtl/common/counter.sv \
+    $(PROJECT_ROOT)/src/rtl/common/clock_gate.sv \
+    $(PROJECT_ROOT)/src/rtl/common/reset_synchronizer.sv \
+    $(PROJECT_ROOT)/src/rtl/common/isolation_cell.sv \
+    $(PROJECT_ROOT)/src/rtl/common/decoder.sv \
+    $(PROJECT_ROOT)/src/rtl/common/operand_isolation.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/fifo.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/parity.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/ecc.sv \
+    $(PROJECT_ROOT)/src/rtl/basic/performance_counters.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_state.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/event_barrier_queue.sv \
+    $(PROJECT_ROOT)/src/rtl/building_blocks/tile_power_controller.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_codec.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/tile_shell_state.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/cluster_power_manager_sync.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/cluster_power_manager_tiles.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/cluster_power_manager_events.sv \
+    $(PROJECT_ROOT)/src/rtl/mosaic_blocks/cluster_power_manager.sv
+_RTL_SOURCES_cluster_power_manager := $(_CLUSTER_POWER_MANAGER_SOURCES)
+
 VERILOG_SOURCES ?= $(or $(_RTL_SOURCES_$(COCOTB_TOPLEVEL)),$(firstword $(wildcard $(PROJECT_ROOT)/src/rtl/*/$(COCOTB_TOPLEVEL).sv)),$(PROJECT_ROOT)/src/rtl/common/$(COCOTB_TOPLEVEL).sv)
 SIM_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/$(COCOTB_TOPLEVEL)
 COCOTB_RESULTS_FILE ?= $(SIM_BUILD)/results.xml
@@ -827,6 +1121,19 @@ ifneq ($(strip $(SDF_FILE)),)
 # VCS unified SDF annotation is a compilation option, not a simv option.
 COMPILE_ARGS += -sdf $(SDF_CORNER):$(SDF_SCOPE):$(abspath $(SDF_FILE))
 CUSTOM_COMPILE_DEPS += $(abspath $(SDF_FILE))
+endif
+endif
+# Short simulation timeout overrides keep negative PyUVM tests bounded. RTL
+# defaults retain the specification values; the campaign supplies its own flags.
+ifeq ($(COCOTB_TOPLEVEL),cluster_power_manager)
+ifneq ($(_GATE_RUN),1)
+export CLUSTER_POWER_MANAGER_DRAIN_TIMEOUT_CYCLES ?= 256
+export CLUSTER_POWER_MANAGER_TILE_ACK_TIMEOUT_CYCLES ?= 128
+export CLUSTER_POWER_MANAGER_POWER_TIMEOUT_CYCLES ?= 128
+export CLUSTER_POWER_MANAGER_CLOCK_TIMEOUT_CYCLES ?= 128
+export CLUSTER_POWER_MANAGER_RELOAD_TIMEOUT_CYCLES ?= 128
+_CPM_TEST_TIMERS := DRAIN_TIMEOUT_CYCLES TILE_ACK_TIMEOUT_CYCLES POWER_TIMEOUT_CYCLES CLOCK_TIMEOUT_CYCLES RELOAD_TIMEOUT_CYCLES
+COMPILE_ARGS += $(foreach name,$(_CPM_TEST_TIMERS),$(if $(filter vcs,$(SIM)),-pvalue+,-P)cluster_power_manager.$(name)=$(CLUSTER_POWER_MANAGER_$(name)))
 endif
 endif
 include $(shell "$(PYTHON_BIN)" -m cocotb_tools.config --makefiles)/Makefile.sim
@@ -1768,6 +2075,13 @@ help:
 		'make stream-formatter-regression  Check canonical frames, lanes and elastic output' \
 		'make store-engine-regression  Check atomic writes, framing and ordered completions' \
 		'make load-engine-regression  Check tagged reads, ordered retirement and fatal drain' \
+		'make configuration-network-regression Check configuration delivery and commit with PyUVM' \
+		'make predicate-network-regression Check predicate routing and alignment with PyUVM' \
+		'make static-mesh-regression Check static mesh RTL with PyUVM' \
+		'make mst-regression        Check memory/stream tile RTL with PyUVM' \
+		'make banked-scratchpad-regression Check region-managed scratchpad with real banks' \
+		'make vct-regression     Check vector tile execution and shell integration' \
+		'make bct-regression     Check scalar tile execution and shell integration' \
 		'make tile-shell-regression Check context, ownership, transfer and power integration' \
 		'make exp-unit-regression  Check fixed-point exponentials and elastic responses' \
 		'make exp-unit-images      Verify generated endpoint and log2(e) artifacts' \
@@ -1871,3 +2185,205 @@ tile-shell-regression:
 		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" \
 		--make "$(_TILE_SHELL_MAKE)" \
 		$(if $(strip $(_TILE_SHELL_SIM_BIN_DIR)),--sim-bin-dir "$(_TILE_SHELL_SIM_BIN_DIR)")
+
+BCT_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/bct/regression
+BCT_RANDOM_CYCLES ?= 2000
+BCT_SEED ?= 20261025
+_BCT_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+.PHONY: bct-regression
+bct-regression:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/val/mosaic_blocks/bct/run_bct_regression.py" \
+		--sim "$(SIM)" --build-dir "$(BCT_REGRESSION_BUILD)" \
+		--seed "$(BCT_SEED)" --random-cycles "$(BCT_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(MAKE)" \
+		$(if $(strip $(_BCT_SIM_BIN_DIR)),--sim-bin-dir "$(_BCT_SIM_BIN_DIR)")
+
+VCT_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/vct/regression
+VCT_RANDOM_CYCLES ?= 2000
+VCT_SEED ?= 20261026
+_VCT_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+.PHONY: vct-regression
+vct-regression:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/val/mosaic_blocks/vct/run_vct_regression.py" \
+		--sim "$(SIM)" --build-dir "$(VCT_REGRESSION_BUILD)" \
+		--seed "$(VCT_SEED)" --random-cycles "$(VCT_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(MAKE)" \
+		$(if $(strip $(_VCT_SIM_BIN_DIR)),--sim-bin-dir "$(_VCT_SIM_BIN_DIR)")
+
+BANKED_SCRATCHPAD_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/banked_scratchpad/regression
+BANKED_SCRATCHPAD_RANDOM_CYCLES ?= 2000
+BANKED_SCRATCHPAD_SEED ?= 20261026
+_BANKED_SCRATCHPAD_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+.PHONY: banked-scratchpad-regression
+banked-scratchpad-regression:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/val/mosaic_blocks/banked_scratchpad/run_banked_scratchpad_regression.py" \
+		--sim "$(SIM)" --build-dir "$(BANKED_SCRATCHPAD_REGRESSION_BUILD)" \
+		--seed "$(BANKED_SCRATCHPAD_SEED)" --random-cycles "$(BANKED_SCRATCHPAD_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(MAKE)" \
+		$(if $(strip $(_BANKED_SCRATCHPAD_SIM_BIN_DIR)),--sim-bin-dir "$(_BANKED_SCRATCHPAD_SIM_BIN_DIR)")
+
+MST_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/mst/regression
+MST_RANDOM_CYCLES ?= 30
+MST_SEED ?= 20261025
+_MST_SIM_BIN_DIR = $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+.PHONY: mst-regression
+mst-regression:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/val/mosaic_blocks/mst/run_mst_regression.py" \
+		--sim "$(SIM)" --build-dir "$(MST_REGRESSION_BUILD)" \
+		--seed "$(MST_SEED)" --random-cycles "$(MST_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(MAKE)" \
+		$(if $(strip $(_MST_SIM_BIN_DIR)),--sim-bin-dir "$(_MST_SIM_BIN_DIR)")
+
+STATIC_MESH_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/static_mesh/regression
+STATIC_MESH_SEED ?= 20261025
+STATIC_MESH_RANDOM_CYCLES ?= 1000
+_STATIC_MESH_SIM_BIN_DIR := $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+.PHONY: static-mesh-regression
+static-mesh-regression:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/val/mosaic_blocks/static_mesh/run_static_mesh_regression.py" \
+		--sim "$(SIM)" --build-dir "$(STATIC_MESH_REGRESSION_BUILD)" \
+		--seed "$(STATIC_MESH_SEED)" --random-cycles "$(STATIC_MESH_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(MAKE)" \
+		$(if $(strip $(_STATIC_MESH_SIM_BIN_DIR)),--sim-bin-dir "$(_STATIC_MESH_SIM_BIN_DIR)")
+
+PREDICATE_NETWORK_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/predicate_network/regression
+PREDICATE_NETWORK_SEED ?= 20261025
+PREDICATE_NETWORK_RANDOM_CYCLES ?= 1000
+_PREDICATE_NETWORK_SIM_BIN_DIR := $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+.PHONY: predicate-network-regression
+predicate-network-regression:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/val/mosaic_blocks/predicate_network/run_predicate_network_regression.py" \
+		--sim "$(SIM)" --build-dir "$(PREDICATE_NETWORK_REGRESSION_BUILD)" \
+		--seed "$(PREDICATE_NETWORK_SEED)" --random-cycles "$(PREDICATE_NETWORK_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(MAKE)" \
+		$(if $(strip $(_PREDICATE_NETWORK_SIM_BIN_DIR)),--sim-bin-dir "$(_PREDICATE_NETWORK_SIM_BIN_DIR)")
+
+CONFIGURATION_NETWORK_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/configuration_network/regression
+CONFIGURATION_NETWORK_SEED ?= 20261026
+CONFIGURATION_NETWORK_RANDOM_CYCLES ?= 1000
+_CONFIGURATION_NETWORK_SIM_BIN_DIR := $(if $(filter vcs,$(SIM)),$(VCS_BIN_DIR),$(ICARUS_BIN_DIR))
+.PHONY: configuration-network-regression
+configuration-network-regression:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/val/mosaic_blocks/configuration_network/run_configuration_network_regression.py" \
+		--sim "$(SIM)" --build-dir "$(CONFIGURATION_NETWORK_REGRESSION_BUILD)" \
+		--seed "$(CONFIGURATION_NETWORK_SEED)" --random-cycles "$(CONFIGURATION_NETWORK_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(MAKE)" \
+		$(if $(strip $(_CONFIGURATION_NETWORK_SIM_BIN_DIR)),--sim-bin-dir "$(_CONFIGURATION_NETWORK_SIM_BIN_DIR)")
+
+# The generated file list is an architectural release artifact. The generator's
+# Python source owns the dependency closure; no JSON dependency loader is used.
+CLUSTER_DESCRIPTOR ?= $(PROJECT_ROOT)/src/gen/cluster/mvp.toml
+CLUSTER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/cluster/regression
+CLUSTER_SEED ?= 20261026
+CLUSTER_RANDOM_CYCLES ?= 1000
+CLUSTER_REGRESSION_ARGS ?=
+.PHONY: cluster-generate cluster-regression
+cluster-generate:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/gen/cluster/generate.py" --descriptor "$(CLUSTER_DESCRIPTOR)"
+
+cluster-regression:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/val/mosaic_blocks/cluster/run_cluster_regression.py" \
+		--sim "$(SIM)" --build-dir "$(CLUSTER_REGRESSION_BUILD)" \
+		--seed "$(CLUSTER_SEED)" --random-cycles "$(CLUSTER_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(MAKE)" \
+		$(if $(filter vcs,$(SIM)),$(if $(VCS_BIN_DIR),--sim-bin-dir "$(VCS_BIN_DIR)"),$(if $(ICARUS_BIN_DIR),--sim-bin-dir "$(ICARUS_BIN_DIR)")) \
+		$(CLUSTER_REGRESSION_ARGS)
+
+SFT_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/sft/regression
+SFT_SEED ?= 20261027
+SFT_RANDOM_CYCLES ?= 1000
+.PHONY: sft-regression
+sft-regression:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/val/mosaic_blocks/sft/run_sft_regression.py" \
+		--sim "$(SIM)" --build-dir "$(SFT_REGRESSION_BUILD)" \
+		--seed "$(SFT_SEED)" --random-cycles "$(SFT_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(MAKE)"
+
+.PHONY: sft-generate
+sft-generate:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/gen/sft/generate.py"
+
+CPT_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/cpt/regression
+CPT_SEED ?= 20261027
+CPT_RANDOM_CYCLES ?= 1000
+.PHONY: cpt-regression cpt-generate
+cpt-regression:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/val/mosaic_blocks/cpt/run_cpt_regression.py" \
+		--sim "$(SIM)" --build-dir "$(CPT_REGRESSION_BUILD)" \
+		--seed "$(CPT_SEED)" --random-cycles "$(CPT_RANDOM_CYCLES)" \
+		--compile-args="$(COMPILE_ARGS)" --sim-args="$(SIM_ARGS)" --make "$(MAKE)"
+
+cpt-generate:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/gen/cpt/generate.py"
+
+GLOBAL_NOC_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/global_noc/regression
+GLOBAL_NOC_SEED ?= 20261027
+GLOBAL_NOC_RANDOM_CYCLES ?= 2000
+GLOBAL_NOC_REGRESSION_ARGS ?=
+.PHONY: global-noc-generate global-noc-regression
+global-noc-generate:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/gen/global_noc/generate.py"
+global-noc-regression:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/val/mosaic_blocks/global_noc/run_global_noc_regression.py" \
+		--sim "$(SIM)" --build-dir "$(GLOBAL_NOC_REGRESSION_BUILD)" \
+		--seed "$(GLOBAL_NOC_SEED)" --random-cycles "$(GLOBAL_NOC_RANDOM_CYCLES)" \
+		$(GLOBAL_NOC_REGRESSION_ARGS)
+
+# Normalized runtime policy uses external Python peers; no synthesis or HDL assertions.
+RUNTIME_CONTROLLER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/runtime_controller/regression
+RUNTIME_CONTROLLER_SEED ?= 20261027
+RUNTIME_CONTROLLER_RANDOM_CYCLES ?= 2000
+RUNTIME_CONTROLLER_REGRESSION_ARGS ?=
+.PHONY: runtime-controller-generate runtime-controller-regression
+runtime-controller-generate:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/gen/runtime_controller/generate.py"
+runtime-controller-regression:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/val/mosaic_blocks/runtime_controller/run_runtime_controller_regression.py" \
+		--sim "$(SIM)" --build-dir "$(RUNTIME_CONTROLLER_REGRESSION_BUILD)" \
+		--seed "$(RUNTIME_CONTROLLER_SEED)" --random-cycles "$(RUNTIME_CONTROLLER_RANDOM_CYCLES)" \
+		--make "$(MAKE)" $(if $(filter vcs,$(SIM)),$(if $(VCS_BIN_DIR),--sim-bin-dir "$(VCS_BIN_DIR)"),$(if $(ICARUS_BIN_DIR),--sim-bin-dir "$(ICARUS_BIN_DIR)")) \
+		$(RUNTIME_CONTROLLER_REGRESSION_ARGS)
+
+# AON sequencing, released tile controllers and physical Python peers only.
+CLUSTER_POWER_MANAGER_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/cluster_power_manager/regression
+CLUSTER_POWER_MANAGER_SEED ?= 20261028
+CLUSTER_POWER_MANAGER_RANDOM_CYCLES ?= 1000
+CLUSTER_POWER_MANAGER_REGRESSION_ARGS ?=
+.PHONY: cluster-power-manager-generate cluster-power-manager-regression
+cluster-power-manager-generate:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/gen/cluster_power_manager/generate.py"
+cluster-power-manager-regression:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/val/mosaic_blocks/cluster_power_manager/run_cluster_power_manager_regression.py" \
+		--sim "$(SIM)" --build-dir "$(CLUSTER_POWER_MANAGER_REGRESSION_BUILD)" \
+		--seed "$(CLUSTER_POWER_MANAGER_SEED)" --random-cycles "$(CLUSTER_POWER_MANAGER_RANDOM_CYCLES)" \
+		--make "$(MAKE)" $(if $(filter vcs,$(SIM)),$(if $(VCS_BIN_DIR),--sim-bin-dir "$(VCS_BIN_DIR)"),$(if $(ICARUS_BIN_DIR),--sim-bin-dir "$(ICARUS_BIN_DIR)")) \
+		$(CLUSTER_POWER_MANAGER_REGRESSION_ARGS)
+
+ARRAY_DESCRIPTOR ?= $(PROJECT_ROOT)/src/gen/array/mvp.toml
+ARRAY_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/array/regression
+ARRAY_SEED ?= 20261028
+ARRAY_RANDOM_CYCLES ?= 1000
+ARRAY_REGRESSION_ARGS ?=
+.PHONY: array-generate array-regression
+array-generate:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/gen/array/generate.py" --descriptor "$(ARRAY_DESCRIPTOR)"
+array-regression:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/val/mosaic_blocks/array/run_array_regression.py" \
+		--sim "$(SIM)" --build-dir "$(ARRAY_REGRESSION_BUILD)" \
+		--seed "$(ARRAY_SEED)" --random-cycles "$(ARRAY_RANDOM_CYCLES)" \
+		$(ARRAY_REGRESSION_ARGS)
+
+SYSTEM_DESCRIPTOR ?= $(PROJECT_ROOT)/src/gen/system/rtl.toml
+SYSTEM_REGRESSION_BUILD ?= $(PROJECT_ROOT)/build/$(SIM)/system/regression
+SYSTEM_SEED ?= 20261029
+SYSTEM_RANDOM_CYCLES ?= 1000
+SYSTEM_REGRESSION_ARGS ?=
+.PHONY: system-generate system-regression
+system-generate:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/gen/system/generate.py" --descriptor "$(SYSTEM_DESCRIPTOR)"
+system-regression:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/val/mosaic_blocks/system/run_system_regression.py" \
+		--sim "$(SIM)" --build-dir "$(SYSTEM_REGRESSION_BUILD)" \
+		--seed "$(SYSTEM_SEED)" --random-cycles "$(SYSTEM_RANDOM_CYCLES)" \
+		--make "$(MAKE)" $(if $(filter vcs,$(SIM)),$(if $(VCS_BIN_DIR),--sim-bin-dir "$(VCS_BIN_DIR)"),$(if $(ICARUS_BIN_DIR),--sim-bin-dir "$(ICARUS_BIN_DIR)")) \
+		$(SYSTEM_REGRESSION_ARGS)

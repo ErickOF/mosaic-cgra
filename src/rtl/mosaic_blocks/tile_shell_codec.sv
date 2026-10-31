@@ -7,8 +7,7 @@ module tile_shell_codec #(
     parameter int PROTECTION = 0,
     localparam int STRIPES = (WIDTH + 255) / 256,
     localparam int LAST = WIDTH - (STRIPES - 1) * 256,
-    localparam int CODE = PROTECTION == 2 ?
-        (STRIPES - 1) * 266 + LAST + hamming_bits(LAST) + 1 : WIDTH + PROTECTION
+    localparam int CODE = ecc_pkg::code_width(WIDTH, PROTECTION)
 ) (
     input logic [WIDTH-1:0] i_data,
     output wire [CODE-1:0] o_code,
@@ -17,18 +16,14 @@ module tile_shell_codec #(
     output wire o_corrected,
     output wire o_bad
 );
-    function automatic int hamming_bits(input int width);
-        int bits;
-        bits = 1;
-        while ((64'd1 << bits) < 64'(width) + 64'(bits) + 1) bits++;
-        return bits;
-    endfunction
     if (PROTECTION == 2) begin : g_secded
         wire [STRIPES-1:0] corrected;
         wire [STRIPES-1:0] bad;
+
         for (genvar s = 0; s < STRIPES; s++) begin : g_stripe
             localparam int BITS = s == STRIPES - 1 ? LAST : 256;
-            localparam int STORED = BITS + hamming_bits(BITS) + 1;
+            localparam int STORED = BITS + ecc_pkg::hamming_bits(BITS) + 1;
+
             ecc #(.DATA_WIDTH(BITS)) u_ecc (
                 .i_encode_data(i_data[s*256+:BITS]),
                 .o_encoded_codeword(o_code[s*266+:STORED]),
@@ -45,11 +40,13 @@ module tile_shell_codec #(
                 .o_overall_parity_error()
             );
         end
+
         assign o_bad = ((|bad) !== 1'b0) || $countones(corrected) > 1 || (^ o_data === 1'bx);
         assign o_corrected = !o_bad && (|corrected);
     end else if (PROTECTION == 1) begin : g_parity
         wire generated;
         wire error_bit;
+
         parity #(.DATA_WIDTH(WIDTH), .PARITY_GRANULE_WIDTH(WIDTH)) u_parity (
             .i_generate_data(i_data),
             .o_generated_parity(generated),
@@ -61,6 +58,7 @@ module tile_shell_codec #(
             .o_no_error(),
             .o_any_error()
         );
+
         assign o_code = {generated, i_data};
         assign o_data = i_code[WIDTH-1:0];
         assign o_corrected = 1'b0;

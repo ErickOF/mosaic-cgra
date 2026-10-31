@@ -1,0 +1,998 @@
+{
+  "i_clk": [
+    "input",
+    1
+  ],
+  "i_rstb": [
+    "input",
+    1
+  ],
+  "i_test_mode": [
+    "input",
+    1
+  ],
+  "i_scan_enable": [
+    "input",
+    1
+  ],
+  "i_cfg_request_valid": [
+    "input",
+    1
+  ],
+  "o_cfg_request_ready": [
+    "output",
+    1
+  ],
+  "i_cfg_commit_valid": [
+    "input",
+    1
+  ],
+  "o_cfg_commit_ready": [
+    "output",
+    1
+  ],
+  "i_cfg_request_command": [
+    "input",
+    5
+  ],
+  "i_cfg_request_destination_mask": [
+    "input",
+    6
+  ],
+  "i_cfg_request_owner_id": [
+    "input",
+    16
+  ],
+  "i_cfg_request_kernel_id": [
+    "input",
+    16
+  ],
+  "i_cfg_request_package_id": [
+    "input",
+    32
+  ],
+  "i_cfg_request_context_id": [
+    "input",
+    8
+  ],
+  "i_cfg_request_expected_version": [
+    "input",
+    16
+  ],
+  "i_cfg_request_word_index": [
+    "input",
+    16
+  ],
+  "i_cfg_request_write_data": [
+    "input",
+    64
+  ],
+  "i_cfg_request_write_strobe": [
+    "input",
+    8
+  ],
+  "i_cfg_request_expected_crc": [
+    "input",
+    32
+  ],
+  "i_cfg_request_tag": [
+    "input",
+    16
+  ],
+  "i_cfg_request_epoch": [
+    "input",
+    4
+  ],
+  "i_cfg_request_flags": [
+    "input",
+    8
+  ],
+  "i_cfg_request_protocol": [
+    "input",
+    8
+  ],
+  "o_cfg_response_valid": [
+    "output",
+    1
+  ],
+  "i_cfg_response_ready": [
+    "input",
+    1
+  ],
+  "o_cfg_response_command": [
+    "output",
+    5
+  ],
+  "o_cfg_response_transaction_id": [
+    "output",
+    8
+  ],
+  "o_cfg_response_endpoint_id": [
+    "output",
+    8
+  ],
+  "o_cfg_response_endpoint_type": [
+    "output",
+    4
+  ],
+  "o_cfg_response_status": [
+    "output",
+    4
+  ],
+  "o_cfg_response_error_code": [
+    "output",
+    8
+  ],
+  "o_cfg_response_read_data": [
+    "output",
+    64
+  ],
+  "o_cfg_response_context_id": [
+    "output",
+    8
+  ],
+  "o_cfg_response_context_version": [
+    "output",
+    16
+  ],
+  "o_cfg_response_crc": [
+    "output",
+    32
+  ],
+  "o_cfg_response_tag": [
+    "output",
+    16
+  ],
+  "o_cfg_response_epoch": [
+    "output",
+    4
+  ],
+  "o_cfg_response_first": [
+    "output",
+    1
+  ],
+  "o_cfg_response_last": [
+    "output",
+    1
+  ],
+  "o_cfg_response_prepared": [
+    "output",
+    1
+  ],
+  "o_cfg_response_committed": [
+    "output",
+    1
+  ],
+  "o_cfg_response_failure_mask": [
+    "output",
+    6
+  ],
+  "o_cfg_response_success_mask": [
+    "output",
+    6
+  ],
+  "o_cfg_response_timeout_mask": [
+    "output",
+    6
+  ],
+  "o_cfg_response_not_present_mask": [
+    "output",
+    6
+  ],
+  "i_cfg_commit_destination_mask": [
+    "input",
+    6
+  ],
+  "i_cfg_commit_package_id": [
+    "input",
+    32
+  ],
+  "i_cfg_commit_kernel_id": [
+    "input",
+    16
+  ],
+  "i_cfg_commit_owner_id": [
+    "input",
+    16
+  ],
+  "i_cfg_commit_epoch": [
+    "input",
+    4
+  ],
+  "i_cfg_commit_context_ids": [
+    "input",
+    48
+  ],
+  "i_cfg_commit_context_versions": [
+    "input",
+    96
+  ],
+  "o_cfg_response_sequence_id": [
+    "output",
+    32
+  ],
+  "o_cfg_response_protocol": [
+    "output",
+    8
+  ],
+  "o_cfg_response_packet_crc": [
+    "output",
+    32
+  ],
+  "o_cfg_response_transaction_success": [
+    "output",
+    1
+  ],
+  "o_cfg_execution_hold": [
+    "output",
+    1
+  ],
+  "o_cfg_commit_complete": [
+    "output",
+    1
+  ],
+  "o_cfg_commit_error": [
+    "output",
+    1
+  ],
+  "o_cfg_commit_ack_mask": [
+    "output",
+    6
+  ],
+  "o_cfg_commit_failure_mask": [
+    "output",
+    6
+  ],
+  "o_cfg_configuration_epoch": [
+    "output",
+    4
+  ],
+  "i_boundary_valid": [
+    "input",
+    8
+  ],
+  "o_boundary_ready": [
+    "output",
+    8
+  ],
+  "i_boundary_data": [
+    "input",
+    256
+  ],
+  "i_boundary_metadata": [
+    "input",
+    4096
+  ],
+  "o_boundary_valid": [
+    "output",
+    8
+  ],
+  "i_boundary_ready": [
+    "input",
+    8
+  ],
+  "o_boundary_data": [
+    "output",
+    256
+  ],
+  "o_boundary_metadata": [
+    "output",
+    4096
+  ],
+  "o_boundary_error": [
+    "output",
+    8
+  ],
+  "i_mst_region_valid": [
+    "input",
+    1
+  ],
+  "i_mst_buffer_valid": [
+    "input",
+    1
+  ],
+  "i_mst_descriptor_valid": [
+    "input",
+    1
+  ],
+  "o_mst_descriptor_ready": [
+    "output",
+    1
+  ],
+  "o_mst_descriptor_accepted": [
+    "output",
+    1
+  ],
+  "o_mst_descriptor_rejected": [
+    "output",
+    1
+  ],
+  "o_mst_completion_overflow": [
+    "output",
+    1
+  ],
+  "o_mst_completion_saturated": [
+    "output",
+    1
+  ],
+  "i_mst_rejection_ready": [
+    "input",
+    1
+  ],
+  "i_mst_region_response_ready": [
+    "input",
+    1
+  ],
+  "i_mst_buffer_response_ready": [
+    "input",
+    1
+  ],
+  "i_mst_cancel_valid": [
+    "input",
+    1
+  ],
+  "i_mst_completion_ready": [
+    "input",
+    1
+  ],
+  "i_mst_session_end": [
+    "input",
+    1
+  ],
+  "o_mst_rejection_valid": [
+    "output",
+    1
+  ],
+  "o_mst_region_ready": [
+    "output",
+    1
+  ],
+  "o_mst_region_response_valid": [
+    "output",
+    1
+  ],
+  "o_mst_region_response_error": [
+    "output",
+    1
+  ],
+  "o_mst_buffer_ready": [
+    "output",
+    1
+  ],
+  "o_mst_buffer_response_valid": [
+    "output",
+    1
+  ],
+  "o_mst_buffer_response_error": [
+    "output",
+    1
+  ],
+  "o_mst_cancel_ready": [
+    "output",
+    1
+  ],
+  "o_mst_cancel_accepted": [
+    "output",
+    1
+  ],
+  "o_mst_cancel_not_found": [
+    "output",
+    1
+  ],
+  "o_mst_completion_valid": [
+    "output",
+    1
+  ],
+  "o_mst_idle": [
+    "output",
+    1
+  ],
+  "o_mst_quiescent": [
+    "output",
+    1
+  ],
+  "o_mst_drain_done": [
+    "output",
+    1
+  ],
+  "o_mst_flush_completed": [
+    "output",
+    1
+  ],
+  "o_mst_error": [
+    "output",
+    1
+  ],
+  "o_mst_fatal_error": [
+    "output",
+    1
+  ],
+  "o_mst_event_rejected": [
+    "output",
+    1
+  ],
+  "i_mst_descriptor_identity": [
+    "input",
+    134
+  ],
+  "i_mst_descriptor_mode": [
+    "input",
+    8
+  ],
+  "i_mst_descriptor_source": [
+    "input",
+    146
+  ],
+  "i_mst_descriptor_destination": [
+    "input",
+    146
+  ],
+  "i_mst_descriptor_format": [
+    "input",
+    16
+  ],
+  "i_mst_descriptor_events": [
+    "input",
+    88
+  ],
+  "i_mst_descriptor_control": [
+    "input",
+    52
+  ],
+  "o_mst_rejection_code": [
+    "output",
+    8
+  ],
+  "o_mst_region_response_code": [
+    "output",
+    8
+  ],
+  "o_mst_buffer_response_code": [
+    "output",
+    8
+  ],
+  "o_mst_error_code": [
+    "output",
+    8
+  ],
+  "o_mst_rejection_identity": [
+    "output",
+    134
+  ],
+  "o_mst_completion_identity": [
+    "output",
+    134
+  ],
+  "i_mst_cancel_identity": [
+    "input",
+    134
+  ],
+  "i_mst_region_index": [
+    "input",
+    4
+  ],
+  "i_mst_region_record": [
+    "input",
+    142
+  ],
+  "i_mst_buffer_index": [
+    "input",
+    8
+  ],
+  "i_mst_buffer_record": [
+    "input",
+    175
+  ],
+  "o_mst_execution_epoch": [
+    "output",
+    4
+  ],
+  "o_mst_completion_channel": [
+    "output",
+    1
+  ],
+  "o_mst_completion_status": [
+    "output",
+    2
+  ],
+  "o_mst_completion_error_code": [
+    "output",
+    8
+  ],
+  "o_mst_completion_bytes_read": [
+    "output",
+    37
+  ],
+  "o_mst_completion_bytes_written": [
+    "output",
+    37
+  ],
+  "o_mst_completion_elements": [
+    "output",
+    32
+  ],
+  "o_mst_completion_partial": [
+    "output",
+    1
+  ],
+  "o_mst_completion_effects_unknown": [
+    "output",
+    1
+  ],
+  "o_mst_command_occupancy": [
+    "output",
+    6
+  ],
+  "i_mst_dma_in_valid": [
+    "input",
+    1
+  ],
+  "o_mst_dma_in_ready": [
+    "output",
+    1
+  ],
+  "i_mst_dma_in_data": [
+    "input",
+    32
+  ],
+  "i_mst_dma_in_metadata": [
+    "input",
+    256
+  ],
+  "o_mst_dma_out_valid": [
+    "output",
+    1
+  ],
+  "i_mst_dma_out_ready": [
+    "input",
+    1
+  ],
+  "o_mst_dma_out_data": [
+    "output",
+    32
+  ],
+  "o_mst_dma_out_metadata": [
+    "output",
+    256
+  ],
+  "i_package_valid": [
+    "input",
+    1
+  ],
+  "o_package_ready": [
+    "output",
+    1
+  ],
+  "i_package_owner_id": [
+    "input",
+    16
+  ],
+  "i_package_kernel_id": [
+    "input",
+    16
+  ],
+  "i_package_id": [
+    "input",
+    32
+  ],
+  "i_package_context_id": [
+    "input",
+    8
+  ],
+  "i_package_allocation_generation": [
+    "input",
+    16
+  ],
+  "i_package_architecture_hash": [
+    "input",
+    256
+  ],
+  "i_package_topology_id": [
+    "input",
+    32
+  ],
+  "i_package_contract_version": [
+    "input",
+    16
+  ],
+  "i_package_requirements": [
+    "input",
+    16
+  ],
+  "i_package_resource_mask": [
+    "input",
+    4
+  ],
+  "i_package_endpoint_mask": [
+    "input",
+    6
+  ],
+  "i_package_context_versions": [
+    "input",
+    96
+  ],
+  "i_package_image_crcs": [
+    "input",
+    192
+  ],
+  "i_package_epoch": [
+    "input",
+    4
+  ],
+  "i_package_suspend_safe": [
+    "input",
+    1
+  ],
+  "i_package_tag": [
+    "input",
+    16
+  ],
+  "o_package_response_valid": [
+    "output",
+    1
+  ],
+  "i_package_response_ready": [
+    "input",
+    1
+  ],
+  "o_package_response_error_code": [
+    "output",
+    8
+  ],
+  "o_package_response_tag": [
+    "output",
+    16
+  ],
+  "i_runtime_valid": [
+    "input",
+    1
+  ],
+  "o_runtime_ready": [
+    "output",
+    1
+  ],
+  "i_runtime_command": [
+    "input",
+    4
+  ],
+  "i_runtime_owner_id": [
+    "input",
+    16
+  ],
+  "i_runtime_kernel_id": [
+    "input",
+    16
+  ],
+  "i_runtime_package_id": [
+    "input",
+    32
+  ],
+  "i_runtime_context_id": [
+    "input",
+    8
+  ],
+  "i_runtime_resource_mask": [
+    "input",
+    4
+  ],
+  "i_runtime_flags": [
+    "input",
+    8
+  ],
+  "i_runtime_tag": [
+    "input",
+    16
+  ],
+  "o_runtime_response_valid": [
+    "output",
+    1
+  ],
+  "i_runtime_response_ready": [
+    "input",
+    1
+  ],
+  "o_runtime_response_command": [
+    "output",
+    4
+  ],
+  "o_runtime_response_status": [
+    "output",
+    4
+  ],
+  "o_runtime_response_error_code": [
+    "output",
+    8
+  ],
+  "o_runtime_response_tag": [
+    "output",
+    16
+  ],
+  "o_runtime_response_state": [
+    "output",
+    4
+  ],
+  "o_cluster_clock_enable": [
+    "output",
+    1
+  ],
+  "o_boundary_isolation_enable": [
+    "output",
+    1
+  ],
+  "i_memory_req_valid": [
+    "input",
+    3
+  ],
+  "i_memory_rsp_ready": [
+    "input",
+    3
+  ],
+  "o_memory_req_ready": [
+    "output",
+    3
+  ],
+  "o_memory_rsp_valid": [
+    "output",
+    3
+  ],
+  "o_memory_rsp_error": [
+    "output",
+    3
+  ],
+  "o_memory_rsp_corrected": [
+    "output",
+    3
+  ],
+  "o_memory_rsp_uncorrectable": [
+    "output",
+    3
+  ],
+  "i_memory_req_opcode": [
+    "input",
+    6
+  ],
+  "i_memory_req_addr": [
+    "input",
+    48
+  ],
+  "i_memory_req_size": [
+    "input",
+    12
+  ],
+  "i_memory_req_wdata": [
+    "input",
+    192
+  ],
+  "i_memory_req_wstrb": [
+    "input",
+    24
+  ],
+  "i_memory_req_owner_id": [
+    "input",
+    48
+  ],
+  "i_memory_req_kernel_id": [
+    "input",
+    48
+  ],
+  "i_memory_req_region_id": [
+    "input",
+    9
+  ],
+  "i_memory_req_generation": [
+    "input",
+    48
+  ],
+  "i_memory_req_tag": [
+    "input",
+    228
+  ],
+  "o_memory_rsp_opcode": [
+    "output",
+    6
+  ],
+  "o_memory_rsp_rdata": [
+    "output",
+    192
+  ],
+  "o_memory_rsp_region_id": [
+    "output",
+    9
+  ],
+  "o_memory_rsp_generation": [
+    "output",
+    48
+  ],
+  "o_memory_rsp_tag": [
+    "output",
+    228
+  ],
+  "o_memory_rsp_error_code": [
+    "output",
+    24
+  ],
+  "o_event_valid": [
+    "output",
+    1
+  ],
+  "i_event_ready": [
+    "input",
+    1
+  ],
+  "o_event_type": [
+    "output",
+    3
+  ],
+  "o_event_source_id": [
+    "output",
+    8
+  ],
+  "o_event_owner_id": [
+    "output",
+    16
+  ],
+  "o_event_kernel_id": [
+    "output",
+    16
+  ],
+  "o_event_context_id": [
+    "output",
+    8
+  ],
+  "o_event_package_id": [
+    "output",
+    32
+  ],
+  "o_event_epoch": [
+    "output",
+    4
+  ],
+  "o_event_payload": [
+    "output",
+    256
+  ],
+  "o_event_severity": [
+    "output",
+    2
+  ],
+  "o_event_sequence": [
+    "output",
+    32
+  ],
+  "o_interrupt": [
+    "output",
+    1
+  ],
+  "o_status_topology_id": [
+    "output",
+    32
+  ],
+  "o_status_package_manifest_valid": [
+    "output",
+    1
+  ],
+  "o_status_cluster_id": [
+    "output",
+    8
+  ],
+  "o_status_arch_version": [
+    "output",
+    16
+  ],
+  "o_status_cluster_state": [
+    "output",
+    4
+  ],
+  "o_status_owner_id": [
+    "output",
+    16
+  ],
+  "o_status_kernel_id": [
+    "output",
+    16
+  ],
+  "o_status_package_id": [
+    "output",
+    32
+  ],
+  "o_status_execution_epoch": [
+    "output",
+    4
+  ],
+  "o_status_allocation_generation": [
+    "output",
+    16
+  ],
+  "o_status_tile_active_mask": [
+    "output",
+    4
+  ],
+  "o_status_tile_idle_mask": [
+    "output",
+    4
+  ],
+  "o_status_tile_error_mask": [
+    "output",
+    4
+  ],
+  "o_status_scratchpad_busy": [
+    "output",
+    1
+  ],
+  "o_status_network_busy": [
+    "output",
+    1
+  ],
+  "o_status_dma_busy": [
+    "output",
+    1
+  ],
+  "o_status_configuration_busy": [
+    "output",
+    1
+  ],
+  "o_status_quiescent": [
+    "output",
+    1
+  ],
+  "o_status_error": [
+    "output",
+    1
+  ],
+  "o_status_fatal_error": [
+    "output",
+    1
+  ],
+  "o_status_first_error_code": [
+    "output",
+    8
+  ],
+  "o_status_first_error_source": [
+    "output",
+    8
+  ],
+  "o_status_completion_mask": [
+    "output",
+    4
+  ],
+  "o_status_tile_versions": [
+    "output",
+    64
+  ],
+  "o_status_scratchpad_generation": [
+    "output",
+    16
+  ],
+  "o_status_stall_reasons": [
+    "output",
+    8
+  ],
+  "o_status_manifest_hash": [
+    "output",
+    256
+  ],
+  "i_counter_read": [
+    "input",
+    1
+  ],
+  "i_counter_owner_id": [
+    "input",
+    16
+  ],
+  "i_counter_index": [
+    "input",
+    3
+  ],
+  "o_counter_valid": [
+    "output",
+    1
+  ],
+  "o_counter_value": [
+    "output",
+    48
+  ],
+  "o_counter_snapshot_valid": [
+    "output",
+    1
+  ]
+}

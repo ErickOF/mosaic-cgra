@@ -40,7 +40,14 @@ module tile_shell #(
     parameter CONTEXT_PROTECTION = 0,
     parameter CONTROL_PROTECTION = 0,
     parameter ASYNC_RESET = 0,
+    // Optional synchronous body request, accepted only at an empty safe boundary.
+    parameter BODY_CONTEXT_ADVANCE = 0,
+    // Memory tiles can finish accepted effects after runtime termination. Keep
+    // their owned terminal events deliverable while returning to READY.
+    parameter BODY_DRAIN_EVENTS = 0,
     localparam bit GEOMETRY_VALID =
+        ((BODY_CONTEXT_ADVANCE === 0) || (BODY_CONTEXT_ADVANCE === 1)) &&
+        ((BODY_DRAIN_EVENTS === 0) || (BODY_DRAIN_EVENTS === 1)) &&
         ((TILE_ID_WIDTH >= 1) === 1'b1) && (^ TILE_ID_WIDTH !== 1'bx) &&
         ((ARCH_VERSION_WIDTH >= 1) === 1'b1) && (^ ARCH_VERSION_WIDTH !== 1'bx) &&
         ((CAPABILITY_ID_WIDTH >= 1) === 1'b1) && (^ CAPABILITY_ID_WIDTH !== 1'bx) &&
@@ -166,6 +173,9 @@ module tile_shell #(
     input logic i_cfg_rstb,
     input logic i_test_enable,
     input logic i_scan_enable,
+    input logic i_body_context_advance,
+    input logic [CI-1:0] i_body_next_context,
+    output wire o_body_context_advance_ready,
     output wire o_body_clock_enable,
     output wire o_monitor_clock_enable,
     input logic [NI-1:0] i_data_in_valid,
@@ -330,6 +340,7 @@ module tile_shell #(
     output wire [TR-1:0] o_trace_data
 );
     import tile_shell_pkg::*;
+
     if (!PARAMETERS_VALID) begin : g_invalid_parameters
         tile_shell_parameters_must_be_valid invalid_parameters ();
     end else begin : g_shell
@@ -345,6 +356,7 @@ module tile_shell #(
         wire interface_up = reset_b && reset_known;
         wire reset_b;
         wire cfg_reset_b;
+
         if (ASYNC_RESET == 1 || CONFIG_ASYNC == 1) begin : g_reset
             reset_synchronizer u_core_release (
                 .i_clk(i_clk),
@@ -354,6 +366,7 @@ module tile_shell #(
         end else begin : g_sync_reset
             assign reset_b = reset_input;
         end
+
         if (CONFIG_ASYNC == 1) begin : g_cfg_reset
             reset_synchronizer u_cfg_release (
                 .i_clk(i_cfg_clk),
@@ -363,6 +376,7 @@ module tile_shell #(
         end else begin : g_cfg_sync_reset
             assign cfg_reset_b = reset_b;
         end
+
         typedef struct packed {
             logic [2:0] command;
             logic [TI-1:0] tile_id;
@@ -374,6 +388,7 @@ module tile_shell #(
             logic [31:0] crc;
             logic [T-1:0] tag;
         } cfg_request_t;
+
         typedef struct packed {
             logic [2:0] command;
             logic [CI-1:0] context_id;
@@ -384,6 +399,7 @@ module tile_shell #(
             logic [ER-1:0] code;
             logic [T-1:0] tag;
         } cfg_response_t;
+
         typedef struct packed {
             logic allocated;
             logic [O-1:0] owner;
@@ -395,11 +411,13 @@ module tile_shell #(
             logic body_completed;
             logic monitor;
         } control_t;
+
         typedef struct packed {
             logic [V-1:0] version;
             logic [N-1:0] written;
             logic validated;
         } context_t;
+
         typedef struct packed {
             logic valid;
             logic sent;
@@ -411,6 +429,7 @@ module tile_shell #(
             logic [31:0] crc;
             logic [T-1:0] tag;
         } validation_t;
+
         typedef struct packed {
             logic valid;
             logic fatal;
@@ -422,6 +441,7 @@ module tile_shell #(
             logic [3:0] state;
             logic [T-1:0] tag;
         } error_t;
+
         typedef struct packed {
             logic [2:0] command;
             logic [3:0] state;
@@ -429,6 +449,7 @@ module tile_shell #(
             logic [ER-1:0] code;
             logic [T-1:0] tag;
         } runtime_response_t;
+
         control_t control;
         control_t control_next;
         wire [V-1:0] versions[C];
@@ -514,6 +535,19 @@ module tile_shell #(
             control.state != tile_shell_pkg::TILE_ACTIVE && control.state !=
                 tile_shell_pkg::TILE_SUSPENDING &&
             control.state != tile_shell_pkg::TILE_DRAINING &&!power_transition;
+        wire body_advance_index_ok = (^i_body_next_context !== 1'bx) &&
+            {1'b0, i_body_next_context} < (CI + 1)'(C);
+        wire body_advance_requested = BODY_CONTEXT_ADVANCE == 1 &&
+            i_body_context_advance === 1'b1;
+        wire body_advance_fault = body_advance_requested && (!body_advance_index_ok ||
+            validated[i_body_next_context] !== 1'b1);
+        assign o_body_context_advance_ready = BODY_CONTEXT_ADVANCE == 1 && healthy &&
+            safe_boundary &&!validation.valid &&!runtime_pending &&!runtime_valid &&
+            !cfg_valid &&!response_valid &&!power_transition &&
+            control.state == tile_shell_pkg::TILE_ACTIVE &&!body_advance_fault;
+        wire body_advance_fire = body_advance_requested && o_body_context_advance_ready;
+        wire [CI-1:0] sequencer_target = body_advance_fire ?
+            i_body_next_context : cfg.context_id;
         wire completion_fault = i_body_completed === 1'b1 &&!control.body_completed &&
             (control.completion || control.completion_event ||
             control.state == tile_shell_pkg::TILE_COMPLETED);
@@ -521,7 +555,8 @@ module tile_shell #(
             {1'b0, selected_context} < (CI + 1)'(C);
         wire active_context_fault = control.active && (!selected_address_valid ||
             validated[selected_context] !== 1'b1 || committed[selected_context] !== 1'b1);
-        wire fatal_live = active_context_fault || completion_fault || control_bad ||
+        wire fatal_live = body_advance_fault || active_context_fault || completion_fault ||
+            control_bad ||
             validation_bad || error_bad ||
             (|context_bad) ||
             (|image_bad) || queue_fault || response_bad || runtime_response_bad || seq_error ||
@@ -560,6 +595,9 @@ module tile_shell #(
         wire wake_pending;
         wire body_usable = healthy &&!power_reset && o_body_clock_enable &&
             i_body_power_good === 1'b1 && i_body_isolation_ack === 1'b0;
+        wire terminal_event_retiring = retiring || (BODY_DRAIN_EVENTS == 1 && healthy &&
+            !flush && control.active && control.state == tile_shell_pkg::TILE_READY &&
+            i_body_busy === 1'b1);
         wire power_needs_wake = physical_power != tile_power_controller_pkg::PWR_ACTIVE &&
             physical_power != tile_power_controller_pkg::PWR_STALLED;
         wire [BY-1:0] cfg_strobe = cfg.strobe;
@@ -592,17 +630,20 @@ module tile_shell #(
             cfg_error == 0;
         assign seq_activate = cfg_activate_ok;
         assign seq_stop = release_contexts &&!seq_idle;
+
         // Configuration owns a request/response bridge pair. Logical capacity
         // can be non-power-of-two; physical Gray FIFOs round storage upward.
         if (CONFIG_ASYNC == 1) begin : g_bridge
             localparam int DEPTH = 1 << $clog2(Q);
             logic source_unknown;
             (* ASYNC_REG = "TRUE" *) wire [1:0] unknown_sync;
+
             always_ff @(posedge i_cfg_clk or negedge cfg_reset_b) begin
                 if (!cfg_reset_b) source_unknown <= 1'b0;
                 else source_unknown <= i_cfg_request_valid !== 1'b0 &&
                     (i_cfg_request_valid !== 1'b1 ||!external_cfg_known);
             end
+
             dff #(.WIDTH(2), .ASYNC_RESET(1)) u_unknown_sync (
                 .i_clk(i_clk),
                 .i_rstb(reset_b),
@@ -610,6 +651,7 @@ module tile_shell #(
                 .i_d({unknown_sync[0], source_unknown}),
                 .o_q(unknown_sync)
             );
+
             assign cfg_unknown = unknown_sync[1];
             wire [$clog2(DEPTH+1)-1:0] request_level;
             wire [$clog2(DEPTH+1)-1:0] response_level;
@@ -617,6 +659,7 @@ module tile_shell #(
             wire response_ready;
             wire response_out;
             wire [$bits(cfg_response_t)-1:0] response_data;
+
             async_fifo #(.DATA_WIDTH($bits(cfg_request_t)), .DEPTH(DEPTH)) u_requests (
                 .i_w_clk(i_cfg_clk),
                 .i_w_rstb(cfg_reset_b),
@@ -640,8 +683,10 @@ module tile_shell #(
                 .o_r_level(),
                 .o_r_init_done()
             );
+
             assign o_cfg_request_ready = reset_known && request_ready && external_cfg_known &&
                 request_level < Q;
+
             async_fifo #(.DATA_WIDTH($bits(cfg_response_t)), .DEPTH(DEPTH)) u_responses (
                 .i_w_clk(i_clk),
                 .i_w_rstb(reset_b),
@@ -662,6 +707,7 @@ module tile_shell #(
                 .o_r_level(),
                 .o_r_init_done()
             );
+
             assign cfg_response_ready = interface_up && response_ready && response_level < Q;
             assign o_cfg_response_valid = reset_known && cfg_reset_b && response_out;
             assign {o_cfg_response_command, o_cfg_response_context_id, o_cfg_response_read_data,
@@ -683,6 +729,7 @@ module tile_shell #(
                 o_cfg_response_error_code, o_cfg_response_tag} = o_cfg_response_valid ?
                     cfg_response : '0;
         end
+
         // Validation results get response priority. Writes may proceed while a
         // candidate is outstanding, making stale-response handling observable.
         assign cfg_ready = interface_up && cfg_capacity && config_known &&
@@ -692,30 +739,31 @@ module tile_shell #(
         assign o_runtime_request_ready = interface_up && runtime_capacity &&!runtime_pending &&
             runtime_known &&!cfg_valid &&
             (!execution_wake || architectural_power == tile_shell_pkg::POWER_ACTIVE);
+
         function automatic logic [31:0] crc32c(input logic [IM-1:0] image);
             logic [31:0] crc;
             crc = '1;
+
             for (int b = 0; b < IM / 8; b++) begin
-                crc = crc ^ {24'b0, image[b*8+:8]};
-                for (int bit_index = 0; bit_index < 8; bit_index++)
-                    crc = crc[0] ? (crc >> 1) ^ 32'h82f63b78 : crc >> 1;
+                crc = crc_pkg::crc32c_byte(crc, image[b*8+:8]);
             end
+
             return ~crc;
         endfunction
+
         // Context-memory holds protected raw words; validation is separately
         // committed. Byte merges use corrected read data and initialize unwritten
         // bytes to zero. No executable word or immutable snapshot is overwritten.
-        localparam int STRIPES = (W + 255) / 256;
-        localparam int LAST = W - (STRIPES - 1) * 256;
-        localparam int CODE = CONTEXT_PROTECTION == 2 ?
-            (STRIPES - 1) * 266 + LAST + hamming_bits(LAST) + 1 : W + CONTEXT_PROTECTION;
+        localparam int CODE = ecc_pkg::code_width(W, CONTEXT_PROTECTION);
         wire [C*N*CODE-1:0] raw_images;
         wire [N*CODE-1:0] write_image;
         wire [C*CI-1:0] read_addresses;
         wire [N-1:0] write_mask = N'(1) << word_index;
+
         for (genvar c = 0; c < C; c++) begin : g_context
             assign read_addresses[c*CI+:CI] = CI'(c);
             assign version_exhausted[c] = &versions[c];
+
             tile_shell_state #(.WIDTH($bits(context_t)), .PROTECTION(CONTROL_PROTECTION)) u_state (
                 .i_clk(i_clk),
                 .i_rstb(reset_b),
@@ -726,10 +774,13 @@ module tile_shell #(
                 .o_bad(context_bad[c]),
                 .o_corrected(context_corrected[c])
             );
+
             wire [N-1:0] bad;
             wire [N-1:0] corrected;
+
             for (genvar w = 0; w < N; w++) begin : g_word
                 wire [W-1:0] decoded;
+
                 tile_shell_codec #(.WIDTH(W), .PROTECTION(CONTEXT_PROTECTION)) u_codec (
                     .i_data(merged_image[w*W+:W]),
                     .o_code(),
@@ -738,11 +789,14 @@ module tile_shell #(
                     .o_bad(bad[w]),
                     .o_corrected(corrected[w])
                 );
+
                 assign images[(c*N+w)*W+:W] = written[c][w] ? decoded : '0;
             end
+
             assign image_bad[c] = |(bad & written[c]);
             assign image_corrected[c] = |(corrected & written[c]);
         end
+
         for (genvar w = 0; w < N; w++) begin : g_write_codec
             tile_shell_codec #(.WIDTH(W), .PROTECTION(CONTEXT_PROTECTION)) u_codec (
                 .i_data(merged_image[w*W+:W]),
@@ -753,6 +807,7 @@ module tile_shell #(
                 .o_corrected()
             );
         end
+
         context_memory #(
             .CONTEXT_WIDTH(N * CODE),
             .CONTEXT_DEPTH(C),
@@ -775,16 +830,17 @@ module tile_shell #(
             .i_invalidate_enable(invalidate_context),
             .i_invalidate_address(cfg.context_id)
         );
+
         context_sequencer #(.CONTEXT_DEPTH(C), .HAS_LOOP(0)) u_sequencer (
             .i_clk(i_clk),
             .i_rstb(reset_b),
             .i_start_enable(seq_activate && seq_idle),
-            .i_start_context(cfg.context_id),
+            .i_start_context(sequencer_target),
             .i_stop_request(seq_stop),
             .i_suspend_request(1'b0),
             .i_resume_request(1'b0),
-            .i_switch_request(seq_activate &&!seq_idle),
-            .i_switch_context(cfg.context_id),
+            .i_switch_request((seq_activate &&!seq_idle) || body_advance_fire),
+            .i_switch_context(sequencer_target),
             .i_error_clear(1'b0),
             .i_step_accepted(1'b0),
             .i_safe_point(safe_boundary),
@@ -792,7 +848,8 @@ module tile_shell #(
             .i_transition_target({CI{1'b0}}),
             .i_loop_count(16'b0),
             .i_active_context_valid(!control.active || validated[selected_context]),
-            .i_candidate_context_valid(context_index_ok && validated[cfg_index]),
+            .i_candidate_context_valid(body_advance_fire ? validated[i_body_next_context] :
+                context_index_ok && validated[cfg_index]),
             .o_active_context(selected_context),
             .o_idle(seq_idle),
             .o_error(seq_error),
@@ -816,12 +873,7 @@ module tile_shell #(
             .o_loop_owner(),
             .o_loop_remaining()
         );
-        function automatic int hamming_bits(input int width);
-            int bits;
-            bits = 1;
-            while ((64'd1 << bits) < 64'(width) + 64'(bits) + 1) bits++;
-            return bits;
-        endfunction
+
         // Port zero occupies the least-significant packed slice. Each record
         // stores payload and metadata atomically; invalid outputs are isolated.
         wire [NI-1:0] data_in_bad;
@@ -831,6 +883,7 @@ module tile_shell #(
         wire [31:0] data_in_count[NI];
         wire [NI-1:0] data_in_source_fire;
         wire [NI-1:0] data_in_sink_fire;
+
         for (genvar port_index = 0; port_index < NI; port_index++) begin : g_data_in
             wire [M-1:0] metadata = i_data_in_metadata[port_index*M+:M];
             wire metadata_matches = (^ metadata !== 1'bx) && control.active &&
@@ -844,6 +897,7 @@ module tile_shell #(
                 &&
                 ((source_valid &&!o_data_in_ready[port_index]) ||
                 (i_body_data_in_ready[port_index] === 1'b1 &&!source_valid));
+
             tile_shell_queue #(
                 .WIDTH(D + M),
                 .DEPTH(BI),
@@ -866,10 +920,12 @@ module tile_shell #(
                 .o_bad(data_in_bad[port_index]),
                 .o_corrected(data_in_corrected[port_index])
             );
+
             assign data_in_source_fire[port_index] = source_valid && o_data_in_ready[port_index];
             assign data_in_sink_fire[port_index] = o_body_data_in_valid[port_index] &&
                 i_body_data_in_ready[port_index] === 1'b1;
         end
+
         wire [NO-1:0] data_out_bad;
         wire [NO-1:0] data_out_corrected;
         wire [NO-1:0] data_out_metadata_bad;
@@ -877,6 +933,7 @@ module tile_shell #(
         wire [31:0] data_out_count[NO];
         wire [NO-1:0] data_out_source_fire;
         wire [NO-1:0] data_out_sink_fire;
+
         for (genvar port_index = 0; port_index < NO; port_index++) begin : g_data_out
             wire [M-1:0] metadata = i_body_data_out_metadata[port_index*M+:M];
             wire metadata_matches = (^ metadata !== 1'bx) && control.active &&
@@ -889,6 +946,7 @@ module tile_shell #(
             assign data_out_schedule_bad[port_index] = running &&
                 (!OUTPUT_ELASTIC_MASK[port_index]) &&
                 source_valid &&!o_body_data_out_ready[port_index];
+
             tile_shell_queue #(
                 .WIDTH(D + M),
                 .DEPTH(BO),
@@ -911,11 +969,13 @@ module tile_shell #(
                 .o_bad(data_out_bad[port_index]),
                 .o_corrected(data_out_corrected[port_index])
             );
+
             assign data_out_source_fire[port_index] = source_valid &&
                 o_body_data_out_ready[port_index];
             assign data_out_sink_fire[port_index] = o_data_out_valid[port_index] &&
                 i_data_out_ready[port_index] === 1'b1;
         end
+
         wire [PI-1:0] predicate_in_bad;
         wire [PI-1:0] predicate_in_corrected;
         wire [PI-1:0] predicate_in_metadata_bad;
@@ -923,6 +983,7 @@ module tile_shell #(
         wire [31:0] predicate_in_count[PI];
         wire [PI-1:0] predicate_in_source_fire;
         wire [PI-1:0] predicate_in_sink_fire;
+
         for (genvar port_index = 0; port_index < PI; port_index++) begin : g_predicate_in
             wire [PM-1:0] metadata = i_predicate_in_metadata[port_index*PM+:PM];
             wire metadata_matches = (^ metadata !== 1'bx) && control.active &&
@@ -932,6 +993,7 @@ module tile_shell #(
             assign predicate_in_metadata_bad[port_index] = reset_b && admission &&
                 source_valid &&!metadata_matches;
             assign predicate_in_schedule_bad[port_index] = 1'b0;
+
             tile_shell_queue #(
                 .WIDTH(P + PM),
                 .DEPTH(BI),
@@ -954,11 +1016,13 @@ module tile_shell #(
                 .o_bad(predicate_in_bad[port_index]),
                 .o_corrected(predicate_in_corrected[port_index])
             );
+
             assign predicate_in_source_fire[port_index] = source_valid &&
                 o_predicate_in_ready[port_index];
             assign predicate_in_sink_fire[port_index] = o_body_predicate_in_valid[port_index] &&
                 i_body_predicate_in_ready[port_index] === 1'b1;
         end
+
         wire [PO-1:0] predicate_out_bad;
         wire [PO-1:0] predicate_out_corrected;
         wire [PO-1:0] predicate_out_metadata_bad;
@@ -966,6 +1030,7 @@ module tile_shell #(
         wire [31:0] predicate_out_count[PO];
         wire [PO-1:0] predicate_out_source_fire;
         wire [PO-1:0] predicate_out_sink_fire;
+
         for (genvar port_index = 0; port_index < PO; port_index++) begin : g_predicate_out
             wire [PM-1:0] metadata = i_body_predicate_out_metadata[port_index*PM+:PM];
             wire metadata_matches = (^ metadata !== 1'bx) && control.active &&
@@ -975,6 +1040,7 @@ module tile_shell #(
             assign predicate_out_metadata_bad[port_index] = reset_b && admission &&
                 source_valid &&!metadata_matches;
             assign predicate_out_schedule_bad[port_index] = 1'b0;
+
             tile_shell_queue #(
                 .WIDTH(P + PM),
                 .DEPTH(BO),
@@ -997,11 +1063,13 @@ module tile_shell #(
                 .o_bad(predicate_out_bad[port_index]),
                 .o_corrected(predicate_out_corrected[port_index])
             );
+
             assign predicate_out_source_fire[port_index] = source_valid &&
                 o_body_predicate_out_ready[port_index];
             assign predicate_out_sink_fire[port_index] = o_predicate_out_valid[port_index] &&
                 i_predicate_out_ready[port_index] === 1'b1;
         end
+
         wire [EI-1:0] event_in_bad;
         wire [EI-1:0] event_in_corrected;
         wire [EI-1:0] event_in_metadata_bad;
@@ -1009,6 +1077,7 @@ module tile_shell #(
         wire [31:0] event_in_count[EI];
         wire [EI-1:0] event_in_source_fire;
         wire [EI-1:0] event_in_sink_fire;
+
         for (genvar port_index = 0; port_index < EI; port_index++) begin : g_event_in
             wire [E-1:0] payload = i_event_in_payload[port_index*E+:E];
             wire metadata_matches = (^ payload !== 1'bx) && control.active &&
@@ -1021,6 +1090,7 @@ module tile_shell #(
             assign event_in_metadata_bad[port_index] = reset_b && admission &&
                 source_valid &&!metadata_matches;
             assign event_in_schedule_bad[port_index] = 1'b0;
+
             tile_shell_queue #(
                 .WIDTH(E),
                 .DEPTH(BI > 0 ? BI : 1),
@@ -1042,10 +1112,12 @@ module tile_shell #(
                 .o_bad(event_in_bad[port_index]),
                 .o_corrected(event_in_corrected[port_index])
             );
+
             assign event_in_source_fire[port_index] = source_valid && o_event_in_ready[port_index];
             assign event_in_sink_fire[port_index] = o_body_event_in_valid[port_index] &&
                 i_body_event_in_ready[port_index] === 1'b1;
         end
+
         wire [EO-1:0] event_out_bad;
         wire [EO-1:0] event_out_corrected;
         wire [EO-1:0] event_out_metadata_bad;
@@ -1055,22 +1127,26 @@ module tile_shell #(
         wire [EO-1:0] event_out_sink_fire;
         wire [EO-1:0] event_out_valid;
         wire [EO*E-1:0] event_out_payload;
+
         for (genvar event_port = 0; event_port < EO; event_port++) begin : g_event_out
             wire [E-1:0] payload = i_body_event_out_payload[event_port*E+:E];
             wire metadata_matches = (^ payload !== 1'bx) && control.active &&
                 payload[3+:CI] == selected_context && payload[3+CI+:K] == control.kernel;
             wire source_valid = i_body_event_out_valid[event_port] === 1'b1;
-            wire admission = retiring && body_usable;
+            wire admission = terminal_event_retiring && body_usable;
             wire deliver;
+
             if (event_port == 0) begin : g_completion_priority
                 assign deliver = healthy && control.state != tile_shell_pkg::TILE_SUSPENDED &&
                     !control.completion_event &&!error_event_valid;
             end else begin : g_body_event
                 assign deliver = healthy && control.state != tile_shell_pkg::TILE_SUSPENDED;
             end
+
             assign event_out_metadata_bad[event_port] = reset_b && admission &&
                 source_valid &&!metadata_matches;
             assign event_out_schedule_bad[event_port] = 1'b0;
+
             tile_shell_queue #(
                 .WIDTH(E),
                 .DEPTH(BO > 0 ? BO : 1),
@@ -1078,7 +1154,7 @@ module tile_shell #(
             ) u_channel (
                 .i_clk(i_clk),
                 .i_rstb(reset_b),
-                .i_flush(flush),
+                .i_flush(flush && BODY_DRAIN_EVENTS == 0),
                 .i_admit(admission && metadata_matches),
                 .i_deliver(deliver),
                 .i_valid(source_valid),
@@ -1091,16 +1167,20 @@ module tile_shell #(
                 .o_bad(event_out_bad[event_port]),
                 .o_corrected(event_out_corrected[event_port])
             );
+
             assign event_out_source_fire[event_port] = source_valid &&
                 o_body_event_out_ready[event_port];
             assign event_out_sink_fire[event_port] = event_out_valid[event_port] &&
                 i_event_out_ready[event_port] === 1'b1;
         end
+
         logic [31:0] input_count;
         logic [31:0] output_count;
+
         always @* begin
             input_count = '0;
             output_count = '0;
+
             for (int p = 0; p < NI; p++)
                 input_count = input_count + data_in_count[p];
             for (int p = 0; p < NO; p++)
@@ -1114,6 +1194,7 @@ module tile_shell #(
             for (int p = 0; p < EO; p++)
                 output_count = output_count + event_out_count[p];
         end
+
         assign queues_empty = input_count == 0 && output_count == 0;
         assign outputs_empty = output_count == 0 && i_body_data_out_valid === '0 &&
             i_body_predicate_out_valid === '0 && i_body_event_out_valid === '0;
@@ -1152,12 +1233,15 @@ module tile_shell #(
             i_body_stall_reasons, i_body_error, i_body_fatal_error, i_body_wakeup_required,
             i_body_power_good, i_body_isolation_ack, i_body_save_done, i_body_restore_done} ===
                 1'bx));
+
         logic event_buffer_pending;
         always @* begin
             event_buffer_pending = 1'b0;
+
             for (int e = 0; e < EI; e++)
                 event_buffer_pending = event_buffer_pending || event_in_count[e] != 0;
         end
+
         assign wake_pending = event_buffer_pending || |i_event_in_valid ||
             i_body_wakeup_required === 1'b1;
         wire [E-1:0] completion_payload = (E'(control.kernel) << (CI + 3)) |
@@ -1166,11 +1250,13 @@ module tile_shell #(
             event_out_valid | {{(EO - 1){1'b0}}, 1'b1} :
             control.completion_event && healthy ?
             event_out_valid | {{(EO - 1){1'b0}}, 1'b1} : event_out_valid;
+
         for (genvar e = 0; e < EO; e++) begin : g_event_mux
             assign o_event_out_payload[e*E+:E] = e == 0 && error_event_valid && interface_up ?
                 error_event_payload : e == 0 && control.completion_event && healthy ?
                 completion_payload : event_out_payload[e*E+:E];
         end
+
         wire validation_result_known = ^{i_body_validate_context_id,
             i_body_validate_context_version, i_body_validate_legal,
             i_body_validate_error_code} !== 1'bx;
@@ -1206,6 +1292,7 @@ module tile_shell #(
             o_runtime_response_tag} = o_runtime_response_valid ? runtime_response : '0;
         always @* begin
             cfg_error = tile_shell_pkg::SHELL_OK;
+
             if (cfg.tile_id != TI'(TILE_ID)) cfg_error = tile_shell_pkg::SHELL_ERR_TILE;
             else if (control.allocated && cfg.owner != control.owner) cfg_error =
                 tile_shell_pkg::SHELL_ERR_OWNER;
@@ -1239,8 +1326,10 @@ module tile_shell #(
                 default: begin end
             endcase
         end
+
         always @* begin
             runtime_error = tile_shell_pkg::SHELL_OK;
+
             if (i_runtime_request_command == tile_shell_pkg::RUNTIME_ALLOCATE) begin
                 if (control.allocated ||!safe_mutation || response_valid)
                     runtime_error = tile_shell_pkg::SHELL_ERR_STATE;
@@ -1291,6 +1380,7 @@ module tile_shell #(
                 default: runtime_error = tile_shell_pkg::SHELL_ERR_COMMAND;
             endcase
         end
+
         always @* begin
             control_next = control;
             validation_next = validation;
@@ -1316,17 +1406,22 @@ module tile_shell #(
             events[4] = |event_in_source_fire;
             events[5] = |(o_event_out_valid & i_event_out_ready);
             events[6] = running && (|o_status_stall_reasons);
+
             for (int c = 0; c < C; c++) begin
                 next_versions[c] = versions[c];
                 next_written[c] = written[c];
                 next_validated[c] = validated[c];
             end
+
             control_next.body_completed = i_body_completed === 1'b1;
+
             if (debug_fire && debug_write_ok && i_debug_request_write &&
                 i_debug_request_address == 8'h21)
                 control_next.monitor = i_debug_request_write_data[0];
+
             if (o_body_validate_valid && i_body_validate_ready === 1'b1)
                 validation_next.sent = 1'b1;
+
             if (validation_result_fire) begin
                 response_next = 1'b1;
                 cfg_response_next = '0;
@@ -1336,6 +1431,7 @@ module tile_shell #(
                 cfg_response_next.crc = validation.crc;
                 cfg_response_next.tag = validation.tag;
                 validation_next.valid = 1'b0;
+
                 if (!healthy || i_body_validate_context_id != validation.context_id ||
                     i_body_validate_context_version != validation.version ||
                     versions[validation.context_id] != validation.version) begin
@@ -1351,7 +1447,9 @@ module tile_shell #(
                 end
                 events[8] = !cfg_response_next.error;
             end
+
             if (validation.valid && flush) validation_next.cancelled = 1'b1;
+
             if (validation.valid && (validation.cancelled || flush) && cfg_capacity) begin
                 validation_next.valid = 1'b0;
                 cfg_response_next = '0;
@@ -1367,6 +1465,7 @@ module tile_shell #(
                 commit_context = 1'b0;
                 next_validated[validation.context_id] = validated[validation.context_id];
             end
+
             if (cfg_fire) begin
                 cfg_response_next = '0;
                 cfg_response_next.command = cfg.command;
@@ -1376,11 +1475,13 @@ module tile_shell #(
                 cfg_response_next.error = cfg_error != 0;
                 cfg_response_next.code = cfg_error;
                 response_next = 1'b1;
+
                 if (cfg_error == 0) case (cfg.command)
                     tile_shell_pkg::CFG_WRITE: begin
                         for (int b = 0; b < BY; b++)
                             if (cfg_strobe[b])
                                 merged_image[word_index*W+b*8+:8] = cfg_write_data[b*8+:8];
+
                         write_context = 1'b1;
                         next_written[cfg_index][word_index] = 1'b1;
                         next_versions[cfg_index] = versions[cfg_index] + 1'b1;
@@ -1419,6 +1520,9 @@ module tile_shell #(
                     default: begin end
                 endcase
             end
+
+            if (body_advance_fire) events[9] = 1'b1;
+
             if (runtime_fire) begin
                 runtime_response_next = '0;
                 runtime_response_next.command = i_runtime_request_command;
@@ -1426,8 +1530,10 @@ module tile_shell #(
                 runtime_response_next.error = runtime_error != 0;
                 runtime_response_next.code = runtime_error;
                 runtime_valid_next = 1'b1;
+
                 if (runtime_error == 0) begin
                     events[10] = 1'b1;
+
                     case (i_runtime_request_command)
                         tile_shell_pkg::RUNTIME_ALLOCATE: begin
                             control_next.allocated = 1'b1;
@@ -1476,19 +1582,23 @@ module tile_shell #(
                 end
                 runtime_response_next.state = control_next.state;
             end
+
             if (retiring && i_body_completed === 1'b1 &&!control.body_completed)
                 control_next.completion = 1'b1;
+
             if (control.completion &&!control.completion_event && healthy &&
                 safe_boundary && (control.state != tile_shell_pkg::TILE_DRAINING ||
                 i_body_drain_done === 1'b1) && outputs_empty &&!validation.valid &&!response_valid
                     &&!error_event_valid) begin
                 control_next.completion_event = 1'b1;
             end
+
             if (control.completion_event &&!error_event_valid && healthy && i_event_out_ready[0]
                 === 1'b1) begin
                 control_next.completion_event = 1'b0;
                 control_next.completion = 1'b0;
                 control_next.state = tile_shell_pkg::TILE_COMPLETED;
+
                 if (runtime_pending && pending_command == tile_shell_pkg::RUNTIME_DRAIN &&
                     runtime_capacity) begin
                     runtime_valid_next = 1'b1;
@@ -1500,6 +1610,7 @@ module tile_shell #(
                 end
                 events[11] = 1'b1;
             end
+
             if (interface_up && runtime_pending && runtime_capacity) begin
                 if ((pending_command == tile_shell_pkg::RUNTIME_SUSPEND && i_body_safe_point ===
                     1'b1) ||
@@ -1516,12 +1627,14 @@ module tile_shell #(
                     runtime_response_next.state = control_next.state;
                 end
             end
+
             if (fatal_live || first_error.fatal || i_body_error === 1'b1) begin
                 control_next.state = tile_shell_pkg::TILE_ERROR;
                 control_next.completion_event = 1'b0;
                 control_next.completion = 1'b0;
             end
         end
+
         tile_shell_state #(.WIDTH($bits(control_t)), .PROTECTION(CONTROL_PROTECTION)) u_control (
             .i_clk(i_clk),
             .i_rstb(reset_b),
@@ -1531,8 +1644,11 @@ module tile_shell #(
             .o_bad(control_bad),
             .o_corrected(control_corrected)
         );
-        tile_shell_state #(.WIDTH($bits(validation_t)), .PROTECTION(CONTROL_PROTECTION))
-            u_validation (
+
+        tile_shell_state #(
+            .WIDTH($bits(validation_t)),
+            .PROTECTION(CONTROL_PROTECTION)
+        ) u_validation (
             .i_clk(i_clk),
             .i_rstb(reset_b),
             .i_enable(reset_known && validation_next != validation),
@@ -1541,8 +1657,11 @@ module tile_shell #(
             .o_bad(validation_bad),
             .o_corrected(validation_corrected)
         );
-        tile_shell_state #(.WIDTH($bits(cfg_response_t) + 1),
-            .PROTECTION(CONTROL_PROTECTION)) u_cfg_response (
+
+        tile_shell_state #(
+            .WIDTH($bits(cfg_response_t) + 1),
+            .PROTECTION(CONTROL_PROTECTION)
+        ) u_cfg_response (
             .i_clk(i_clk),
             .i_rstb(reset_b),
             .i_enable(reset_known),
@@ -1551,8 +1670,11 @@ module tile_shell #(
             .o_bad(response_bad),
             .o_corrected(response_corrected)
         );
-        tile_shell_state #(.WIDTH($bits(runtime_response_t) + T + 5),
-            .PROTECTION(CONTROL_PROTECTION)) u_runtime_response (
+
+        tile_shell_state #(
+            .WIDTH($bits(runtime_response_t) + T + 5),
+            .PROTECTION(CONTROL_PROTECTION)
+        ) u_runtime_response (
             .i_clk(i_clk),
             .i_rstb(reset_b),
             .i_enable(reset_known),
@@ -1563,6 +1685,7 @@ module tile_shell #(
             .o_bad(runtime_response_bad),
             .o_corrected(runtime_response_corrected)
         );
+
         dff #(.WIDTH(2)) u_body_pulses (
             .i_clk(i_clk),
             .i_rstb(reset_b),
@@ -1573,6 +1696,7 @@ module tile_shell #(
                     tile_shell_pkg::RUNTIME_RESUME}),
             .o_q({body_start, body_resume})
         );
+
         // The physical controller retains its existing command/state encodings;
         // this adapter publishes the architectural shell power states.
         wire [2:0] power_command = i_power_request_state == tile_shell_pkg::POWER_IDLE ?
@@ -1602,6 +1726,7 @@ module tile_shell #(
         assign o_power_request_ready = interface_up &&!power_pending && power_known &&
             (!power_response_valid || i_power_response_ready === 1'b1) && power_command_ready &&
             !runtime_fire &&!cfg_valid;
+
         tile_power_controller #(
             .NUM_CLOCK_GROUPS(1),
             .NUM_WAKE_SOURCES(1),
@@ -1691,6 +1816,7 @@ module tile_shell #(
             .o_event_off_entry(),
             .o_event_timeout()
         );
+
         assign architectural_power = first_error.fatal ? tile_shell_pkg::POWER_SAFE :
             physical_power == tile_power_controller_pkg::PWR_ACTIVE ? tile_shell_pkg::POWER_ACTIVE :
             physical_power == tile_power_controller_pkg::PWR_STALLED ?
@@ -1701,6 +1827,7 @@ module tile_shell #(
             physical_power == tile_power_controller_pkg::PWR_OFF ? tile_shell_pkg::POWER_OFF :
             physical_power == tile_power_controller_pkg::PWR_ERROR ? tile_shell_pkg::POWER_SAFE :
                 tile_shell_pkg::POWER_WAKEUP;
+
         // The existing controller uses an isolation setup interval. The shell
         // additionally requires the physical acknowledgement before supply loss.
         assign o_body_power_enable = power_switch || (power_isolate &&
@@ -1715,12 +1842,15 @@ module tile_shell #(
             ((control.state == tile_shell_pkg::TILE_ACTIVE && activity_needed) ||
             control.state == tile_shell_pkg::TILE_SUSPENDING ||
             control.state == tile_shell_pkg::TILE_DRAINING || wake_pending || validation.valid ||
-            o_body_start || o_body_resume || o_body_save || o_body_restore)));
+            o_body_start || o_body_resume || o_body_save || o_body_restore ||
+            (BODY_DRAIN_EVENTS == 1 && control.state == tile_shell_pkg::TILE_READY &&
+                i_body_busy === 1'b1))));
         assign o_monitor_clock_enable = reset_b && control.monitor;
         assign o_power_response_valid = interface_up && power_response_valid;
         assign o_power_response_state = o_power_response_valid ? power_response_state : '0;
         assign o_power_response_error = o_power_response_valid && power_response_error;
         assign o_power_response_error_code = o_power_response_valid ? power_response_code : '0;
+
         always_ff @(posedge i_clk) begin
             if (!reset_b) begin
                 power_pending <= 1'b0;
@@ -1731,6 +1861,7 @@ module tile_shell #(
             end else if (reset_known) begin
                 if (power_response_valid && i_power_response_ready === 1'b1)
                     power_response_valid <= 1'b0;
+
                 if (power_fire) begin
                     if (!power_legal) begin
                         power_response_valid <= 1'b1;
@@ -1739,6 +1870,7 @@ module tile_shell #(
                         power_response_state <= architectural_power;
                     end else power_pending <= 1'b1;
                 end
+
                 if (power_pending && (power_command_done || power_command_rejected ||
                     power_fatal)) begin
                     power_pending <= 1'b0;
@@ -1750,6 +1882,7 @@ module tile_shell #(
                 end
             end
         end
+
         // Debug is a separate single-response channel. Status reads remain
         // available during containment. Writes cannot bypass context validation.
         logic debug_valid;
@@ -1778,9 +1911,11 @@ module tile_shell #(
             (16'(wake_pending) << 13) | (16'(power_transition) << 14) |
             (16'(trace_drop) << 15);
         wire [63:0] event_select;
+
         for (genvar e = 0; e < 16; e++) begin : g_event_select
             assign event_select[e*4+:4] = 4'(e);
         end
+
         // Weighted events preserve simultaneous per-port transfer counts.
         localparam int DATA_PORTS = NI > NO ? NI : NO;
         localparam int PREDICATE_PORTS = PI > PO ? PI : PO;
@@ -1789,8 +1924,10 @@ module tile_shell #(
         localparam int MAX_PORTS = STREAM_PORTS > EVENT_PORTS ? STREAM_PORTS : EVENT_PORTS;
         localparam int INCREMENT = $clog2(MAX_PORTS + 1);
         logic [16*INCREMENT-1:0] increments;
+
         always @* begin
             increments = '0;
+
             for (int e = 6; e < 16; e++) increments[e*INCREMENT+:INCREMENT] = INCREMENT'(1);
             for (int p = 0; p < NI; p++)
                 increments[0*INCREMENT+:INCREMENT] = increments[0*INCREMENT+:INCREMENT] +
@@ -1811,6 +1948,7 @@ module tile_shell #(
                 increments[5*INCREMENT+:INCREMENT] = increments[5*INCREMENT+:INCREMENT] +
                     INCREMENT'(o_event_out_valid[p] && i_event_out_ready[p]);
         end
+
         performance_counters #(
             .COUNTER_WIDTH(W),
             .NUM_COUNTERS(16),
@@ -1842,8 +1980,10 @@ module tile_shell #(
             .o_config_error(),
             .o_snapshot_valid()
         );
+
         always @* begin
             debug_read = '0;
+
             case (i_debug_request_address)
                 8'h00: debug_read = W'(o_status_execution_state);
                 8'h01: debug_read = W'(control.owner);
@@ -1862,11 +2002,13 @@ module tile_shell #(
                     i_debug_request_address < 8'h50) debug_read = counter_read;
             endcase
         end
+
         assign o_debug_request_ready = interface_up && debug_known &&
             (!debug_valid || i_debug_response_ready === 1'b1);
         assign o_debug_response_valid = interface_up && debug_valid;
         assign o_debug_response_read_data = o_debug_response_valid ? debug_data : '0;
         assign o_debug_response_error = o_debug_response_valid && debug_error;
+
         always_ff @(posedge i_clk) begin
             if (!reset_b) begin
                 debug_valid <= 1'b0;
@@ -1881,11 +2023,13 @@ module tile_shell #(
                 end
             end
         end
+
         logic error_event_valid;
         wire [E-1:0] error_event_payload = (E'(first_error.code) << (CI + K + 3)) |
             (E'(first_error.kernel) << (CI + 3)) |
             (E'(first_error.context_id) << 3) |
             (first_error.fatal ? E'(tile_shell_pkg::EVENT_FATAL) : E'(tile_shell_pkg::EVENT_ERROR));
+
         always_ff @(posedge i_clk) begin
             if (!reset_b) error_event_valid <= 1'b0;
             else begin
@@ -1894,10 +2038,13 @@ module tile_shell #(
                 if (!first_error.valid && error_next.valid) error_event_valid <= 1'b1;
             end
         end
+
         wire trace_drop;
+
         if (SUPPORT_TRACE == 1) begin : g_trace
             localparam int SEQUENCE = TR - TI - O - K - CI - 4;
             wire [SEQUENCE-1:0] sequence_number;
+
             counter #(.WIDTH(SEQUENCE)) u_sequence (
                 .i_clk(i_clk),
                 .i_rstb(reset_b),
@@ -1911,6 +2058,7 @@ module tile_shell #(
                 .o_underflow(),
                 .o_terminal()
             );
+
             wire queue_ready;
             wire queue_valid;
             wire [TR-1:0] trace_data;
@@ -1920,6 +2068,7 @@ module tile_shell #(
             wire [TR-1:0] trace_record = TR'({sequence_number, TILE_ID_WIDTH'(TILE_ID),
                 control.owner,
                 control.kernel, selected_context, event_class});
+
             tile_shell_queue #(.WIDTH(TR), .DEPTH(1), .PROTECTION(CONTROL_PROTECTION)) u_trace (
                 .i_clk(i_clk),
                 .i_rstb(reset_b),
@@ -1936,6 +2085,7 @@ module tile_shell #(
                 .o_bad(),
                 .o_corrected()
             );
+
             assign o_trace_valid = interface_up && queue_valid;
             assign o_trace_data = o_trace_valid ? trace_data : '0;
             assign trace_drop = trace_event && control.monitor &&!queue_ready;
@@ -1944,74 +2094,100 @@ module tile_shell #(
             assign o_trace_data = '0;
             assign trace_drop = 1'b0;
         end
+
         always @* begin
             detected_error = '0;
             detected_fatal = 1'b0;
             detected_source = tile_shell_pkg::ERROR_SOURCE_CONFIGURATION;
             error_tag = '0;
+
             if (cfg_fire && cfg_error != 0) begin
                 detected_error = cfg_error;
                 error_tag = cfg.tag;
                 detected_fatal = cfg_error == tile_shell_pkg::SHELL_ERR_VERSION;
             end
+
             if (validation_result_fire && cfg_response_next.error) begin
                 detected_error = cfg_response_next.code;
                 error_tag = validation.tag;
             end
+
             if (runtime_fire && runtime_error != 0) begin
                 detected_error = runtime_error;
                 detected_fatal = runtime_error == tile_shell_pkg::SHELL_ERR_VERSION;
                 detected_source = tile_shell_pkg::ERROR_SOURCE_RUNTIME;
                 error_tag = i_runtime_request_tag;
             end
+
             if (metadata_fault) detected_error = ER'(tile_shell_pkg::SHELL_ERR_METADATA);
+
             if (schedule_fault) detected_error = ER'(tile_shell_pkg::SHELL_ERR_SCHEDULE);
+
             if (response_corrected || runtime_response_corrected ||
                 queue_corrected || control_corrected || validation_corrected ||
                 error_corrected || (|context_corrected) || (|image_corrected))
                 detected_error = ER'(tile_shell_pkg::SHELL_ERR_CORRECTED);
+
             if (debug_bad) detected_source = tile_shell_pkg::ERROR_SOURCE_DEBUG;
+
             if (debug_bad) detected_error = ER'(tile_shell_pkg::SHELL_ERR_DEBUG);
+
             if ((i_power_request_valid === 1'b1 &&!power_known) ||
                 protocol_fault || cfg_unknown || (cfg_valid &&!config_known) ||
                 (i_runtime_request_valid === 1'b1 &&!runtime_known) ||
                 (i_body_validate_result_valid === 1'b1 &&!validation_result_known))
                 detected_error = ER'(tile_shell_pkg::SHELL_ERR_UNKNOWN);
+
             if (i_body_error === 1'b1) detected_source = tile_shell_pkg::ERROR_SOURCE_BODY;
+
             if (i_body_error === 1'b1) detected_error = i_body_error_code != 0 ?
                 i_body_error_code : ER'(tile_shell_pkg::SHELL_ERR_BODY);
+
             if (i_body_completed === 1'b1 &&!control.body_completed &&
                 (control.completion || control.completion_event || control.state ==
                     tile_shell_pkg::TILE_COMPLETED)) begin
                 detected_error = ER'(tile_shell_pkg::SHELL_ERR_COMPLETION);
                 detected_fatal = 1'b1;
             end
+
             if (fatal_live) begin
                 detected_source = tile_shell_pkg::ERROR_SOURCE_INTEGRITY;
                 detected_error = ER'(tile_shell_pkg::SHELL_ERR_INTEGRITY);
                 detected_fatal = 1'b1;
+
                 if (completion_fault) detected_error = ER'(tile_shell_pkg::SHELL_ERR_COMPLETION);
+
                 if (power_fatal) detected_error = ER'(tile_shell_pkg::SHELL_ERR_POWER);
+
                 if (i_body_fatal_error === 1'b1) detected_error = i_body_error_code != 0 ?
                     i_body_error_code : ER'(tile_shell_pkg::SHELL_ERR_BODY);
+
                 if (i_body_power_good === 1'b0 && i_body_isolation_ack !== 1'b1)
                     detected_error = ER'(tile_shell_pkg::SHELL_ERR_POWER_LOSS);
             end
+
             // Source attribution follows the same priority as the diagnostic.
             if (validation_result_fire && cfg_response_next.error)
                 detected_source = tile_shell_pkg::ERROR_SOURCE_BODY;
+
             if (metadata_fault || schedule_fault || protocol_fault || cfg_unknown)
                 detected_source = tile_shell_pkg::ERROR_SOURCE_PROTOCOL;
+
             if (debug_bad) detected_source = tile_shell_pkg::ERROR_SOURCE_DEBUG;
+
             if (i_body_error === 1'b1 || i_body_fatal_error === 1'b1)
                 detected_source = tile_shell_pkg::ERROR_SOURCE_BODY;
+
             if (power_fatal || (i_body_power_good === 1'b0 &&
                 i_body_isolation_ack !== 1'b1))
                 detected_source = tile_shell_pkg::ERROR_SOURCE_POWER;
+
             error_next = first_error;
+
             if ((clear_error || debug_clear) &&!first_error.fatal) error_next = '0;
             else if (detected_error != 0) begin
                 error_next.fatal = first_error.fatal || detected_fatal;
+
                 if (!first_error.valid) begin
                     error_next.valid = 1'b1;
                     error_next.code = detected_error;
@@ -2024,6 +2200,7 @@ module tile_shell #(
                 end
             end
         end
+
         tile_shell_state #(.WIDTH($bits(error_t)), .PROTECTION(CONTROL_PROTECTION)) u_error (
             .i_clk(i_clk),
             .i_rstb(reset_b),
@@ -2033,9 +2210,11 @@ module tile_shell #(
             .o_bad(error_bad),
             .o_corrected(error_corrected)
         );
+
         assign o_status_tile_id = TI'(TILE_ID);
         assign o_status_tile_class = 3'(TILE_CLASS);
         assign o_status_arch_version = AV'(1);
+
         function automatic logic [31:0] capability_fingerprint;
             localparam int INPUT_BITS = 32 * ((NI + 31) / 32);
             localparam int OUTPUT_BITS = 32 * ((NO + 31) / 32);
@@ -2081,12 +2260,16 @@ module tile_shell #(
                 32'(TILE_CLASS),
                 32'(TILE_ID_WIDTH)};
             digest = 32'd2166136261;
+
             for (int b = 0; b < BITS / 8; b++)
                 digest = (digest ^ {24'b0, descriptor[b*8+:8]}) * 32'd16777619;
+
             return digest;
         endfunction
+
         localparam logic [31:0] CAPABILITY = capability_fingerprint();
         assign o_status_capability_id = CP'(CAPABILITY);
+
         // Elastic ready indicates capacity, not a demand for an operand. Only
         // scheduled ready is a reservation; elastic input stalls come from the
         // body's explicit requirement bitmap. Stall decoding never depends on
@@ -2119,9 +2302,11 @@ module tile_shell #(
             '0;
         assign o_status_owner_id = reset_b && control.allocated ? control.owner : '0;
         assign o_status_kernel_id = reset_b && control.allocated ? control.kernel : '0;
+
         for (genvar c = 0; c < C; c++) begin : g_valid_status
             assign o_status_context_valid[c] = reset_b && validated[c] && committed[c];
         end
+
         assign o_status_error = reset_b && (first_error.valid || fatal_live);
         assign o_status_fatal_error = reset_b && (first_error.fatal || fatal_live);
         assign o_status_error_code = !reset_b ? '0 : first_error.valid ? first_error.code :

@@ -1,5 +1,8 @@
 # Mosaic CGRA
 
+See the [RTL reuse review](doc/rtl-reuse.md) for shared ECC/CRC helpers,
+remaining duplication and the focused Python checks.
+
 Run PyUVM tests through cocotb with Synopsys VCS:
 
 ```sh
@@ -1394,3 +1397,203 @@ reset epochs and power handshakes across 27 parameter profiles. See the
 [tile-shell validation details](src/val/mosaic_blocks/tile_shell/README.md) for the
 repository-local boundary, body contract, debug map, protection and evidence.
 Synthesis is deferred to Design Compiler.
+
+Run the scalar BCT integration regression:
+
+```sh
+make bct-regression
+make bct-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=bct
+```
+
+The BCT composes the common tile shell with released scalar arithmetic, register
+storage, predication, bypass, RDU/elastic synchronization and protected result
+queues. Its Python-only campaign checks BCT-A/M/MAC mappings, atomic destinations,
+local-state lifetime, temporal contexts, protection, runtime and power behavior.
+See the [BCT validation and context ABI](src/val/mosaic_blocks/bct/README.md) for
+configuration, timing, debug counters and evidence. Design Compiler synthesis is
+deferred.
+
+Run the vector VCT integration regression:
+
+```sh
+make vct-regression
+make vct-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=vct
+```
+
+The VCT composes the common tile shell with vector lanes, slice-banked VRF,
+predicates and masks, vector/scalar accumulators, reduction, optional dot product,
+bypass, RDU or elastic synchronization, explicit packing and protected result
+storage. The Python-only campaign checks numerical results, lane masks, partial
+writes, state lifetime, atomic output, runtime, protection and power behavior.
+See the [VCT validation and context ABI](src/val/mosaic_blocks/vct/README.md) for
+configuration, conservative timing, debug counters and reproducible evidence.
+Design Compiler synthesis is deferred.
+
+Run the configuration-network specification regression:
+
+```sh
+make configuration-network-regression SIM=icarus PYTHON_BIN=.venv/bin/python
+```
+
+The fabric reuses multicast forks, packet-locking arbiters, FIFOs, skid buffers
+and protected storage. Its PyUVM campaign checks packet delivery, ordered endpoint
+results, image preparation, coordinated commit, execution hold, cancellation and
+fault recovery. A separate conformance test checks the tile-shell configuration
+adapter. See the [configuration-network validation guide](src/val/mosaic_blocks/configuration_network/README.md)
+for packet and endpoint contracts, supported synchronous profiles and reproducible
+evidence. Validation is Python-only; Design Compiler synthesis is deferred.
+
+Run the region-managed banked-scratchpad specification regression:
+
+```sh
+make banked-scratchpad-regression
+make banked-scratchpad-regression SIM=icarus
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=banked_scratchpad
+```
+
+The DUT reuses the released scratchpad controller, real SRAM-backed banks and
+protection codecs. PyUVM checks region ownership, generation fencing, atomic buffer
+swaps, ordered completions, masked accesses, faults, drain/flush and power hooks.
+See the [banked-scratchpad ABI and validation details](src/val/mosaic_blocks/banked_scratchpad/README.md)
+for parameter profiles, descriptor packing, counters and evidence. Validation is
+Python-only; Design Compiler synthesis remains deferred.
+
+
+The [MST PyUVM suite](src/val/mosaic_blocks/mst/README.md) validates the memory
+and stream tile using the existing shell, load/store engines, AGU, conversion,
+and protected buffering blocks. Run `make mst-regression SIM=icarus` locally or
+select `SIM=vcs` on the licensed server. This is a Python-only campaign;
+Design Compiler synthesis is deferred.
+
+Run the generated Cluster-MVP specification campaign:
+
+```sh
+make cluster-generate
+make cluster-regression SIM=icarus
+make cluster-regression
+```
+
+The selected 2×2 cluster composes three real BCTs, one MST, the static mesh,
+configuration network and banked scratchpad. It adds exclusive allocation,
+manifest-checked coordinated commit, lifecycle fanout, explicit metadata/memory
+bridges, reliable events and coherent counters. Event aggregation reuses the
+released round-robin arbiter, saturating counter and protected queue; its Python
+campaign also checks focused event-path profiles and integrated integrity-fault
+containment. See the
+[cluster validation details](src/val/mosaic_blocks/cluster/README.md) for the generated
+architecture, public ABI, supported profiles and Python-only evidence. Synthesis
+remains deferred to Design Compiler.
+
+Run the Specialized Function Tile specification campaign:
+
+```sh
+make sft-generate
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=sft
+make sft-regression SIM=icarus
+```
+
+The SFT composes the actual tile shell and reusable LUT, polynomial, reciprocal,
+rsqrt, exponential, exact reduction, scalar arithmetic, storage and formatting
+blocks. It provides four guarded fixed-point profiles with ordered retirement,
+immutable context/function-bank programming and explicit mapper-owned replay.
+See the [SFT validation details](src/val/mosaic_blocks/sft/README.md) for the local
+ABI, supported configurations and Python-only evidence. Design Compiler synthesis
+is deferred.
+
+Run the Control and Predicate Tile specification campaign:
+
+```sh
+make cpt-generate
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=cpt
+make cpt-regression SIM=icarus
+```
+
+The CPT composes the released shell, predicate, comparison, nested-loop,
+event/barrier, typed control-register, queue, arbitration and counter modules.
+Local and Cluster profiles support reliable event records and explicit tagged
+coordination. See the [CPT validation contract](src/val/mosaic_blocks/cpt/README.md)
+for the public ABI, supported limits and Python-only evidence. Synthesis remains
+deferred to Design Compiler.
+
+Run the global NoC specification campaign:
+
+```sh
+make global-noc-generate
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=global_noc
+make global-noc-regression SIM=icarus
+```
+
+The global NoC composes real routers and tile network interfaces into a rectangular
+mesh, with flow bindings, dedicated configuration, packet credit reservations,
+epochs, coordinated drain/flush and public accounting. See the
+[global NoC validation contract](src/val/mosaic_blocks/global_noc/README.md) for the
+ABI, supported profiles, endpoint integration obligations and Python-only test
+coverage. Synthesis remains deferred to Design Compiler.
+
+Run the runtime-controller specification campaign:
+
+```sh
+make runtime-controller-generate
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=runtime_controller
+make runtime-controller-regression SIM=icarus
+```
+
+The runtime controller reuses the existing queues, arbitration, counters and
+protected-state blocks for Static and Partitioned admission, complete-cluster
+reservations, authoritative lifecycle handshakes, rollback, safe suspend/resume
+and monitoring. See the
+[runtime-controller validation contract](src/val/mosaic_blocks/runtime_controller/README.md)
+for the normalized peer ABI, resource ownership and recovery requirements,
+supported limits and Python-only evidence. Synthesis remains deferred to
+Design Compiler.
+
+Run the cluster power manager specification campaign:
+
+```sh
+make cluster-power-manager-generate
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=cluster_power_manager
+make cluster-power-manager-regression SIM=icarus
+```
+
+The manager composes released tile power controllers, actual root/group clock
+gates, reset synchronizers, isolation cells, counters, queues and protected
+storage for Clocked and Protected Clocked operation. See the
+[cluster power manager validation contract](src/val/mosaic_blocks/cluster_power_manager/README.md)
+for the AON ABI, authorization and recovery requirements, Python peer integration
+boundary and guarded advanced physical profiles. Synthesis remains deferred to
+Design Compiler.
+
+Run the generated array specification campaign:
+
+```sh
+make array-generate
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=array
+make array-regression SIM=icarus
+```
+
+The array composes actual MVP clusters, SRAM banks, configuration roots, global-NoC
+routers/TNIs and protected event infrastructure. It supports one-cluster bring-up
+and a two-cluster synchronous MVP, whole-cluster ownership, coordinated package
+commit, authenticated inter-cluster streams and independent concurrent kernels.
+See the [array validation contract](src/val/mosaic_blocks/array/README.md) for
+profiles, runtime/package setup, source provenance and deferred features. Validation
+uses Python/PyUVM only; synthesis remains deferred to Design Compiler.
+
+Run the generated system specification campaign:
+
+```sh
+make system-generate
+make pyuvm SIM=icarus COCOTB_TOPLEVEL=system
+make system-regression SIM=icarus
+```
+
+The synchronous canonical System-RTL profile connects one real generated array to
+32-bit MMIO control, memory-resident configuration programs, fenced buffers,
+input/output DMA, protected events and a level interrupt. It supports one active
+whole-array kernel, one- or two-cluster MVP arrays and 64/128-bit physical-memory
+interfaces. See the [system validation contract](src/val/mosaic_blocks/system/README.md)
+for register/descriptor schemas, ownership and cache-maintenance obligations,
+verified profiles and unsupported platform features. Validation uses Python/PyUVM
+only; synthesis remains deferred to Design Compiler.

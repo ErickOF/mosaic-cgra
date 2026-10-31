@@ -242,3 +242,15 @@ changes during a campaign invalidate its result. The campaign runs no HDL checke
 lint, formal, synthesis, physical implementation or power analysis. Full release
 qualification and integrated BCT/MST body validation are separate from this Python
 functional campaign.
+
+## Optional body-driven context advance
+
+`BODY_CONTEXT_ADVANCE=1` enables a synchronous internal request on
+`i_body_context_advance` with `i_body_next_context`. The request is accepted on
+`o_body_context_advance_ready` only while the shell is ACTIVE, the body and shell
+queues are empty, no runtime/configuration response or power transition conflicts,
+and the next context is validated. It changes the sequencer selection without
+changing owner/kernel or leaving ACTIVE. The requesting body must stop issue until
+the new image is observed. Invalid requested targets cause containment. The BCT
+integration campaign exercises count, predicate and event-driven transitions.
+The default zero disables the interface; standalone shell tests remain applicable.
