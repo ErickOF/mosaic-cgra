@@ -1,4 +1,9 @@
 """Repository-local CPT v1 public dimensions and field encodings."""
+from pathlib import Path
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from tile_units import UNIT_DEFAULTS, resolve_units, unit_defaults
+
 DEFAULTS = {'TILE_ID': 0,
  'TILE_ID_WIDTH': 16,
  'ARCH_VERSION_WIDTH': 16,
@@ -191,9 +196,11 @@ PORTS = {'i_clk': ('Input', '1'),
  'o_trace_data': ('Output', 'TR')}
 
 
+DEFAULTS.update(unit_defaults("CPT"))
+
 def profile(**overrides):
     """Derive dependent widths from one source of public parameter truth."""
-    p=DEFAULTS | overrides
+    p=resolve_units("CPT", DEFAULTS | overrides, overrides)
     p['PREDICATE_WIDTH']=overrides.get('PREDICATE_WIDTH',p['PREDICATE_LANES'])
     p['EVENT_WIDTH']=overrides.get('EVENT_WIDTH',p['EVENT_RECORD_WIDTH'])
     p['CONFIG_WORD_COUNT']=overrides.get('CONFIG_WORD_COUNT',(512+p['MAX_LOOP_DEPTH']*
@@ -204,6 +211,9 @@ def profile(**overrides):
 
 
 def validate(p):
+    for name in UNIT_DEFAULTS["CPT"]:
+        if p[name] not in (0, 1):
+            raise ValueError(f"{name} must be Boolean")
     """Reject capabilities without an implemented, verified native composition."""
     fixed=dict(SHELL_DATA_WIDTH=64,CONTROL_WIDTH=32,DATA_METADATA_WIDTH=128,
         CONFIG_DATA_WIDTH=64,EVENT_RECORD_WIDTH=256,EVENT_WIDTH=256,
@@ -219,7 +229,9 @@ def validate(p):
         SUPPORT_CONTEXT_CHECKSUM=1)
     for key,value in fixed.items():
         if p[key]!=value:raise ValueError(f'{key} requires {value}')
-    ranges=dict(TILE_ID=(0,p['MAX_EVENT_SOURCES']-1),CONFIG_QUEUE_DEPTH=(2,16),PREDICATE_LANES=(1,16),PREDICATE_DEPTH=(2,16),
+    # The local input-source directory size does not constrain this tile's ID.
+    # Native event records carry an eight-bit producer ID.
+    ranges=dict(TILE_ID=(0,255),CONFIG_QUEUE_DEPTH=(2,16),PREDICATE_LANES=(1,16),PREDICATE_DEPTH=(2,16),
         PREDICATE_INPUT_PORTS=(1,2),PREDICATE_OUTPUT_PORTS=(1,4),CONTEXT_DEPTH=(1,16),
         CONTROL_REGISTER_DEPTH=(4,16),FU_PROFILE=(0,1),MAX_LOOP_DEPTH=(1,4),
         INDEX_WIDTH=(4,32),TRIP_COUNT_WIDTH=(2,32),NUM_EVENTS=(1,16),
@@ -239,9 +251,6 @@ def validate(p):
                 'SUPPORT_TIMEOUT','SUPPORT_PREDICATED_TOKEN','REQUIRE_CANONICAL_FORMAT',
                 'CONFIG_ASYNC','SUPPORT_TRACE'):
         if p[key] not in (0,1):raise ValueError(f'{key} must be Boolean')
-    if not p['FU_PROFILE'] and any(p[k] for k in ('SUPPORT_CONTEXT_COORDINATION',
-            'SUPPORT_CLUSTER_LIFECYCLE','SUPPORT_TIMEOUT')):
-        raise ValueError('CPT-Local excludes cluster coordination and timeouts')
     expected=(512+p['MAX_LOOP_DEPTH']*(3*p['INDEX_WIDTH']+p['TRIP_COUNT_WIDTH']+5)+63)//64
     if p['CONFIG_WORD_COUNT']!=expected:raise ValueError('Incomplete context geometry')
     if p['PREDICATE_WIDTH']!=p['PREDICATE_LANES']:raise ValueError('Predicate lane mismatch')

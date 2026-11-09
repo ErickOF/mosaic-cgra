@@ -8,6 +8,9 @@ module sft_datapath #(
     parameter EW = 16,
     parameter NL = 4,
     parameter RA = 48,
+    parameter ENABLE_ALU = 1,
+    parameter ENABLE_REDUCTION = 1,
+    parameter ENABLE_FORMATTER = 1,
     parameter GENERAL_MULTIPLY = 1,
     parameter SUPPORT_SATURATION = 1
 ) (
@@ -35,27 +38,35 @@ module sft_datapath #(
     wire alu_illegal;
     wire abs_negative = i_opcode == 20 && i_signed && i_a[D-1];
 
-    scalar_alu #(
-        .DATA_WIDTH(D),
-        .SUPPORT_SATURATION(SUPPORT_SATURATION)
-    ) u_alu (
-        .i_enable(i_enable && i_operation == SFT_ALU),
-        .i_opcode(i_opcode == 20 ? (abs_negative ? 5'd1 : 5'd16) : i_opcode),
-        .i_operand_a(abs_negative ? {D{1'b0}} : i_a),
-        .i_operand_b(abs_negative ? i_a : i_b),
-        .i_predicate(i_select),
-        .i_signed(i_signed),
-        .i_saturate(i_saturate && (i_opcode != 20 || abs_negative)),
-        .o_result(alu_data),
-        .o_predicate(alu_predicate),
-        .o_overflow(alu_overflow),
-        .o_saturated(alu_saturated),
-        .o_illegal_operation(alu_illegal),
-        .o_zero(),
-        .o_negative(),
-        .o_carry(),
-        .o_borrow()
-    );
+    if (ENABLE_ALU) begin : g_alu
+        scalar_alu #(
+            .DATA_WIDTH(D),
+            .SUPPORT_SATURATION(SUPPORT_SATURATION)
+        ) u_alu (
+            .i_enable(i_enable && i_operation == SFT_ALU),
+            .i_opcode(i_opcode == 20 ? (abs_negative ? 5'd1 : 5'd16) : i_opcode),
+            .i_operand_a(abs_negative ? {D{1'b0}} : i_a),
+            .i_operand_b(abs_negative ? i_a : i_b),
+            .i_predicate(i_select),
+            .i_signed(i_signed),
+            .i_saturate(i_saturate && (i_opcode != 20 || abs_negative)),
+            .o_result(alu_data),
+            .o_predicate(alu_predicate),
+            .o_overflow(alu_overflow),
+            .o_saturated(alu_saturated),
+            .o_illegal_operation(alu_illegal),
+            .o_zero(),
+            .o_negative(),
+            .o_carry(),
+            .o_borrow()
+        );
+    end else begin : g_no_alu
+        assign alu_data = '0;
+        assign alu_predicate = '0;
+        assign alu_overflow = '0;
+        assign alu_saturated = '0;
+        assign alu_illegal = '0;
+    end
 
     wire [2*I-1:0] product;
 
@@ -84,129 +95,148 @@ module sft_datapath #(
 
     wire [NL*2*EW-1:0] squares;
 
-    for (genvar lane = 0; lane < NL; lane++) begin : g_sumsq
-        multiplier #(
-            .OPERAND_WIDTH(EW),
-            .LATENCY(0)
-        ) u_square (
-            .i_clk(1'b0),
-            .i_rstb(1'b1),
-            .i_clock_enable(1'b1),
-            .i_valid(i_enable && i_operation == SFT_REDUCE && i_reduction == REDUCE_SUMSQ &&
-                i_mask[lane]),
-            .i_operand_a(i_a[lane*EW+:EW]),
-            .i_operand_b(i_a[lane*EW+:EW]),
-            .i_signed_a(i_signed),
-            .i_signed_b(i_signed),
-            .o_product(squares[lane*2*EW+:2*EW]),
-            .o_valid(),
-            .o_product_signed(),
-            .o_zero(),
-            .o_negative()
-        );
-    end
-
     wire [RA-1:0] reduced;
     wire [RA-1:0] squared_sum;
     wire [$clog2(NL+1)-1:0] count;
 
-    vector_reduction #(
-        .ELEMENT_WIDTH(EW),
-        .NUM_ELEMENTS(NL),
-        .ACC_WIDTH(RA),
-        .LATENCY(0)
-    ) u_reduction (
-        .i_clk(1'b0),
-        .i_rstb(1'b1),
-        .i_clock_enable(1'b1),
-        .i_valid(i_enable && i_operation == SFT_REDUCE),
-        .i_opcode(i_reduction == REDUCE_MIN ? 3'd1 : i_reduction == REDUCE_MAX ? 3'd2 : 3'd0),
-        .i_element_mask(i_mask),
-        .i_data(i_a[NL*EW-1:0]),
-        .i_signed(i_signed),
-        .o_result(reduced),
-        .o_active_count(count),
-        .o_valid(),
-        .o_result_format(),
-        .o_result_signed(),
-        .o_zero(),
-        .o_negative(),
-        .o_illegal_operation()
-    );
+    if (ENABLE_REDUCTION) begin : g_reduction
+        for (genvar lane = 0; lane < NL; lane++) begin : g_sumsq
+            multiplier #(
+                .OPERAND_WIDTH(EW),
+                .LATENCY(0)
+            ) u_square (
+                .i_clk(1'b0),
+                .i_rstb(1'b1),
+                .i_clock_enable(1'b1),
+                .i_valid(i_enable && i_operation == SFT_REDUCE && i_reduction == REDUCE_SUMSQ &&
+                    i_mask[lane]),
+                .i_operand_a(i_a[lane*EW+:EW]),
+                .i_operand_b(i_a[lane*EW+:EW]),
+                .i_signed_a(i_signed),
+                .i_signed_b(i_signed),
+                .o_product(squares[lane*2*EW+:2*EW]),
+                .o_valid(),
+                .o_product_signed(),
+                .o_zero(),
+                .o_negative()
+            );
+        end
 
-    vector_reduction #(
-        .ELEMENT_WIDTH(2 * EW),
-        .NUM_ELEMENTS(NL),
-        .ACC_WIDTH(RA),
-        .LATENCY(0)
-    ) u_square_sum (
-        .i_clk(1'b0),
-        .i_rstb(1'b1),
-        .i_clock_enable(1'b1),
-        .i_valid(i_enable && i_operation == SFT_REDUCE && i_reduction == REDUCE_SUMSQ),
-        .i_opcode(3'd0),
-        .i_element_mask(i_mask),
-        .i_data(squares),
-        .i_signed(1'b0),
-        .o_result(squared_sum),
-        .o_active_count(),
-        .o_valid(),
-        .o_result_format(),
-        .o_result_signed(),
-        .o_zero(),
-        .o_negative(),
-        .o_illegal_operation()
-    );
+
+        vector_reduction #(
+            .ELEMENT_WIDTH(EW),
+            .NUM_ELEMENTS(NL),
+            .ACC_WIDTH(RA),
+            .LATENCY(0)
+        ) u_reduction (
+            .i_clk(1'b0),
+            .i_rstb(1'b1),
+            .i_clock_enable(1'b1),
+            .i_valid(i_enable && i_operation == SFT_REDUCE),
+            .i_opcode(i_reduction == REDUCE_MIN ? 3'd1 : i_reduction == REDUCE_MAX ? 3'd2 : 3'd0),
+            .i_element_mask(i_mask),
+            .i_data(i_a[NL*EW-1:0]),
+            .i_signed(i_signed),
+            .o_result(reduced),
+            .o_active_count(count),
+            .o_valid(),
+            .o_result_format(),
+            .o_result_signed(),
+            .o_zero(),
+            .o_negative(),
+            .o_illegal_operation()
+        );
+
+        vector_reduction #(
+            .ELEMENT_WIDTH(2 * EW),
+            .NUM_ELEMENTS(NL),
+            .ACC_WIDTH(RA),
+            .LATENCY(0)
+        ) u_square_sum (
+            .i_clk(1'b0),
+            .i_rstb(1'b1),
+            .i_clock_enable(1'b1),
+            .i_valid(i_enable && i_operation == SFT_REDUCE && i_reduction == REDUCE_SUMSQ),
+            .i_opcode(3'd0),
+            .i_element_mask(i_mask),
+            .i_data(squares),
+            .i_signed(1'b0),
+            .o_result(squared_sum),
+            .o_active_count(),
+            .o_valid(),
+            .o_result_format(),
+            .o_result_signed(),
+            .o_zero(),
+            .o_negative(),
+            .o_illegal_operation()
+        );
+    end else begin : g_no_reduction
+        assign squares = '0;
+        assign reduced = '0;
+        assign squared_sum = '0;
+        assign count = '0;
+    end
 
     wire signed [D:0] rounded;
     wire inexact;
 
-    polynomial_unit_round #(
-        .WIDTH(D + 1),
-        .SHIFT_WIDTH(8)
-    ) u_round (
-        .i_value({i_signed && i_a[D-1], i_a}),
-        .i_shift(i_shift),
-        .i_nearest(i_round),
-        .o_value(rounded),
-        .o_inexact(inexact)
-    );
+    if (ENABLE_FORMATTER) begin : g_round
+        polynomial_unit_round #(
+            .WIDTH(D + 1),
+            .SHIFT_WIDTH(8)
+        ) u_round (
+            .i_value({i_signed && i_a[D-1], i_a}),
+            .i_shift(i_shift),
+            .i_nearest(i_round),
+            .o_value(rounded),
+            .o_inexact(inexact)
+        );
+    end else begin : g_no_round
+        assign rounded = '0;
+        assign inexact = '0;
+    end
 
     wire [OW-1:0] formatted;
     wire overflow;
     wire saturated;
 
-    packer #(
-        .NUM_ELEMENTS(1),
-        .SRC_ELEMENT_WIDTH(D + 1),
-        .DST_ELEMENT_WIDTH(OW),
-        .SUPPORT_SATURATION(SUPPORT_SATURATION)
-    ) u_format (
-        .i_clk(1'b0),
-        .i_rstb(1'b1),
-        .i_flush(1'b0),
-        .i_valid(i_enable && i_operation == SFT_FORMAT),
-        .o_ready(),
-        .i_data(rounded),
-        .i_lane_valid(1'b1),
-        .i_signed(i_signed),
-        .i_saturate(i_saturate),
-        .i_reverse(1'b0),
-        .i_last(1'b1),
-        .i_user(1'b0),
-        .o_valid(),
-        .i_ready(1'b1),
-        .o_data(formatted),
-        .o_lane_valid(),
-        .o_overflow(),
-        .o_saturated(),
-        .o_any_overflow(overflow),
-        .o_any_saturated(saturated),
-        .o_last(),
-        .o_user(),
-        .o_config_error(),
-        .o_busy()
-    );
+    if (ENABLE_FORMATTER) begin : g_format
+        packer #(
+            .NUM_ELEMENTS(1),
+            .SRC_ELEMENT_WIDTH(D + 1),
+            .DST_ELEMENT_WIDTH(OW),
+            .SUPPORT_SATURATION(SUPPORT_SATURATION)
+        ) u_format (
+            .i_clk(1'b0),
+            .i_rstb(1'b1),
+            .i_flush(1'b0),
+            .i_valid(i_enable && i_operation == SFT_FORMAT),
+            .o_ready(),
+            .i_data(rounded),
+            .i_lane_valid(1'b1),
+            .i_signed(i_signed),
+            .i_saturate(i_saturate),
+            .i_reverse(1'b0),
+            .i_last(1'b1),
+            .i_user(1'b0),
+            .o_valid(),
+            .i_ready(1'b1),
+            .o_data(formatted),
+            .o_lane_valid(),
+            .o_overflow(),
+            .o_saturated(),
+            .o_any_overflow(overflow),
+            .o_any_saturated(saturated),
+            .o_last(),
+            .o_user(),
+            .o_config_error(),
+            .o_busy()
+        );
+    end else begin : g_no_format
+        assign formatted = '0;
+        assign overflow = '0;
+        assign saturated = '0;
+    end
 
     assign o_count = 16'(count);
 

@@ -1,0 +1,78 @@
+"schema" = "mosaic-flavor-v1"
+"name" = "independent_fus"
+
+["cluster"]
+"schema" = "mosaic-cluster-v1"
+"profile" = "Configurable"
+"cluster_id" = 0
+"rows" = 1
+"cols" = 5
+"context_depth" = 4
+"scratchpad_banks" = 8
+"scratchpad_bank_words" = 32
+"clock_gating" = true
+"lifecycle_timeout" = 65535
+
+[["cluster"."tiles"]]
+"id" = 0
+"row" = 0
+"col" = 0
+"class" = "BCT"
+
+["cluster"."tiles"."parameters"]
+"ENABLE_ALU" = 0
+"ENABLE_MULTIPLIER" = 0
+"ENABLE_MAC" = 1
+
+[["cluster"."tiles"]]
+"id" = 1
+"row" = 0
+"col" = 1
+"class" = "MST"
+
+["cluster"."tiles"."parameters"]
+"ENABLE_LOAD" = 1
+"ENABLE_STORE" = 0
+
+[["cluster"."tiles"]]
+"id" = 2
+"row" = 0
+"col" = 2
+"class" = "VCT"
+
+["cluster"."tiles"."parameters"]
+"ENABLE_LANE_ALU" = 0
+"ENABLE_REDUCTION" = 0
+"ENABLE_DOT_PRODUCT" = 1
+"SUPPORT_MUL" = 0
+"SUPPORT_MAC" = 0
+
+[["cluster"."tiles"]]
+"id" = 3
+"row" = 0
+"col" = 3
+"class" = "SFT"
+
+["cluster"."tiles"."parameters"]
+"ENABLE_ALU" = 0
+"ENABLE_MULTIPLIER" = 0
+"ENABLE_LUT" = 0
+"ENABLE_POLYNOMIAL" = 0
+"ENABLE_RECIPROCAL" = 1
+"ENABLE_RSQRT" = 0
+"ENABLE_EXPONENTIAL" = 0
+"ENABLE_REDUCTION" = 0
+"ENABLE_FORMATTER" = 0
+"ENABLE_ACCUMULATOR" = 0
+
+[["cluster"."tiles"]]
+"id" = 4
+"row" = 0
+"col" = 4
+"class" = "CPT"
+
+["cluster"."tiles"."parameters"]
+"ENABLE_PREDICATE" = 0
+"ENABLE_LOOP_CONTROLLER" = 1
+"ENABLE_EVENT_BARRIER" = 0
+"ENABLE_ACTIONS" = 0

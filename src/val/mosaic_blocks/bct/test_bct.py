@@ -26,7 +26,8 @@ class BctTest(uvm_test):
         cocotb.top.i_cfg_clk.value = 0
         for name in INPUTS:
             getattr(cocotb.top, name).value = 0
-        sequence = BctSequence(self.c)
+        from mosaic_uvm.tile_selection import selected_sequence
+        sequence = selected_sequence("BCT", BctSequence)(self.c)
         sequence.coverage = self.env.coverage
         sequence.active = ConfigDB().get(self, 'env.agent', 'active')
         await sequence.start(self.env.sequencer)

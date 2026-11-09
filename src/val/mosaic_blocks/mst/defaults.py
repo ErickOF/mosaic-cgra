@@ -307,3 +307,5 @@ PORTS = {'i_clk': ('Input', '1'),
  'o_completion_overflow': ('Output', '1'),
  'o_completion_saturated': ('Output', '1'),
  'i_scratchpad_conflict': ('Input', 'NM')}
+
+DEFAULTS.update({'ENABLE_LOAD': 1, 'ENABLE_STORE': 1})

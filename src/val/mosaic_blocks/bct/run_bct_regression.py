@@ -24,6 +24,9 @@ DEPENDENCIES = tuple(ROOT / f'src/rtl/{name}.sv' for name in NAMES)
 
 def profile(label, **overrides):
     p = DEFAULTS | overrides
+    from mosaic_uvm.tile_selection import DEFAULT_ENABLES
+    for name, minimum in DEFAULT_ENABLES["BCT"].items():
+        p[name] = overrides.get(name, int(p["FU_PROFILE"] >= minimum))
     p.setdefault('INPUT_ELASTIC_MASK', (1 << p['DATA_INPUT_PORTS']) - 1)
     p.setdefault('OUTPUT_ELASTIC_MASK', (1 << p['DATA_OUTPUT_PORTS']) - 1)
     return label, p

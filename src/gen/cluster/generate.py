@@ -15,6 +15,7 @@ import re
 import tomllib
 
 from sources import SOURCES
+from tile_parameters import tile_parameters
 
 ROOT = Path(__file__).resolve().parents[3]
 RTL = ROOT / "src/rtl"
@@ -115,6 +116,9 @@ def validate(d):
         raise ValueError(f"Unknown/missing descriptor fields: {set(d) ^ allowed}")
     if d["schema"] != "mosaic-cluster-v1" or d["profile"] != "Cluster-MVP":
         raise ValueError("Only the released synchronous Cluster-MVP profile is supported")
+    for name in ("cluster_id", "rows", "cols", "context_depth", "lifecycle_timeout"):
+        if type(d[name]) is not int:
+            raise ValueError(f"{name} must be an integer")
     if d["rows"] not in (2, 4) or d["cols"] != d["rows"]:
         raise ValueError("MVP requires a 2 by 2 or 4 by 4 square")
     if type(d["clock_gating"]) is not bool or not 16 <= d["lifecycle_timeout"] <= 16777215:
@@ -129,12 +133,20 @@ def validate(d):
             "scratchpad_bank_words"] * 8 <= 1048576:
         raise ValueError("Scratchpad geometry exceeds the MVP address codec")
     tiles = d["tiles"]
+    if not isinstance(tiles, list):
+        raise ValueError("tiles must be an explicit list")
     if len(tiles) != d["rows"] * d["cols"]:
         raise ValueError("Each grid position must have one explicit released tile")
     ids, coordinates = set(), set()
     for tile in tiles:
-        if set(tile) != {"id", "class", "row", "col"}:
-            raise ValueError("Tile entries require id, class, row and col")
+        required = {"id", "class", "row", "col"}
+        if not isinstance(tile, dict) or not required <= set(tile) or set(tile) - required - {
+                "parameters"}:
+            raise ValueError("Tile entries require id, class, row and col; parameters are optional")
+        if any(type(tile[key]) is not int for key in ("id", "row", "col")):
+            raise ValueError("Tile identity and coordinates must be integers")
+        if not isinstance(tile["class"], str):
+            raise ValueError("Tile class must be a string")
         if tile["class"] not in ("BCT", "MST"):
             raise ValueError(f"Unsupported Cluster-MVP tile class or adapter: {tile['class']}")
         coordinate = tile["row"], tile["col"]
@@ -144,12 +156,15 @@ def validate(d):
             raise ValueError("Duplicate or out-of-range tile identity/coordinate")
         ids.add(tile["id"])
         coordinates.add(coordinate)
+        tile_parameters(tile)
     if sum(t["class"] == "MST" for t in tiles) != 1:
         raise ValueError("MVP v1 qualifies exactly one MST and its dedicated scratchpad client")
     return geometry(d)
 
 
 class Wrapper:
+    port_catalog = staticmethod(ports)
+
     def __init__(self):
         self.public = {}
         self.wires = {}
@@ -175,7 +190,7 @@ class Wrapper:
     def instance(self, module, prefix, aliases, parameters=None, bindings=None, expose=None):
         bindings = bindings or {}
         expose = expose or {}
-        catalog = ports(module, aliases)
+        catalog = self.port_catalog(module, aliases)
         unknown = set(bindings) - set(catalog)
         if unknown:
             raise ValueError(f"Unknown {module} binding: {unknown}")
@@ -193,7 +208,8 @@ class Wrapper:
                     ties[name] = "0 (feature absent from this descriptor)"
         params = ",\n".join(f"        .{key}({value})" for key, value in (parameters or {}).items())
         connections = ",\n".join(f"        .{name}({value})" for name, value in mapping.items())
-        self.instances.append(f"    {module} #(\n{params}\n    ) u_{prefix} (\n{connections}\n    );")
+        module_name = module.rsplit("/", 1)[-1]
+        self.instances.append(f"    {module_name} #(\n{params}\n    ) u_{prefix} (\n{connections}\n    );")
         self.ties[prefix] = ties
         return mapping
 
@@ -390,6 +406,7 @@ def build(d, g):
                       EVENT_WIDTH=256, DATA_METADATA_WIDTH=256, CONTROL_PROTECTION=1)
         if module == "bct": params.update(DATA_INPUT_PORTS=2, DATA_OUTPUT_PORTS=2, EVENT_WIDTH=32)
         else: params.update(SHELL_DATA_WIDTH=32, EXECUTION_EPOCH_WIDTH=4, MAX_ELEMENT_BYTES=8)
+        params.update(tile_parameters(tile))
         bind = dict(i_clk="gclk", i_rstb="i_rstb", i_cfg_clk="gclk", i_cfg_rstb="i_rstb",
             i_test_enable="i_test_mode", i_scan_enable="i_scan_enable",
             i_runtime_request_valid=f"tile_runtime_valid[{index}]",
@@ -919,6 +936,28 @@ def finish(w, d, g, root, mesh, sp, tiles, proxies, mst, mst_index):
     );""")
 
 
+def format_rtl(text):
+    """Keep generated declarations and expressions within the 100-column RTL style."""
+    lines = []
+    for line in text.splitlines():
+        while len(line) > 100:
+            choices = [line.rfind(token, 0, 96) for token in (" && ", " || ", ", ", " ? ", " : ", " | ", " = ")]
+            cut = max(choices)
+            if cut < 20:
+                # A long port name plus a long signal can exceed one line even
+                # without arithmetic. Break inside the named connection.
+                cut = line.find("(")+1 if line.lstrip().startswith(".") else -1
+                if cut < 20: break
+                lines.append(line[:cut].rstrip())
+                line = "            " + line[cut:].lstrip()
+                continue
+            cut += 3 if line[cut:cut+3] in (" &&", " ||") else (2 if line[cut] == " " else 1)
+            lines.append(line[:cut].rstrip())
+            line = "        " + line[cut:].lstrip()
+        lines.append(line)
+    return "\n".join(lines) + "\n"
+
+
 def generate(descriptor: Path, output: Path, artifacts: Path):
     raw = descriptor.read_bytes()
     d = tomllib.loads(raw.decode("utf-8"))
@@ -930,6 +969,7 @@ def generate(descriptor: Path, output: Path, artifacts: Path):
     hashes = {f"src/rtl/{name}.sv": hashlib.sha256((RTL / f"{name}.sv").read_bytes()).hexdigest()
               for name in SOURCES}
     contract = dict(schema="mosaic-cluster-contract-v1", descriptor=d, geometry=g,
+        tile_parameter_table=[dict(id=t["id"], parameters=tile_parameters(t)) for t in tiles],
         tile_present_mask=(1 << g["n"]) - 1,
         tile_class_table=[0 if t["class"] == "BCT" else 3 for t in tiles],
         tile_id_table=[t["id"] for t in tiles], tile_coordinate_table=[
@@ -964,26 +1004,8 @@ def generate(descriptor: Path, output: Path, artifacts: Path):
     for name in getattr(wrapper, "registers", ()):
         text = re.sub(r"    wire (\[[^\]]+\] )?"+name+r";",
                       lambda m: "    logic "+(m[1] or "")+name+";", text)
-    # Keep generated RTL readable and conform to the repository's 100-column rule.
-    lines = []
-    for line in text.splitlines():
-        while len(line) > 100:
-            choices = [line.rfind(token, 0, 96) for token in (" && ", " || ", ", ", " ? ", " : ", " | ", " = ")]
-            cut = max(choices)
-            if cut < 20:
-                # A long port name plus a long signal can exceed one line even
-                # without arithmetic. Break inside the named connection.
-                cut = line.find("(")+1 if line.lstrip().startswith(".") else -1
-                if cut < 20: break
-                lines.append(line[:cut].rstrip())
-                line = "            " + line[cut:].lstrip()
-                continue
-            cut += 3 if line[cut:cut+3] in (" &&", " ||") else (2 if line[cut] == " " else 1)
-            lines.append(line[:cut].rstrip())
-            line = "        " + line[cut:].lstrip()
-        lines.append(line)
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text("\n".join(lines)+"\n")
+    output.write_text(format_rtl(text))
     artifacts.mkdir(parents=True, exist_ok=True)
     contract["generated_rtl_sha256"] = hashlib.sha256(output.read_bytes()).hexdigest()
     (artifacts/"manifest.json").write_text(json.dumps(contract, indent=2)+"\n")

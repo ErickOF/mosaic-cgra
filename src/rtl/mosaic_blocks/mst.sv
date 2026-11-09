@@ -2,6 +2,9 @@
 `default_nettype none
 
 module mst #(
+    // Explicit enables override the legacy profile without coupling peer FUs.
+    parameter ENABLE_LOAD = 1,
+    parameter ENABLE_STORE = 1,
     parameter TILE_ID = 0,
     parameter ADDR_WIDTH = 32,
     parameter SHELL_DATA_WIDTH = 128,
@@ -92,6 +95,9 @@ module mst #(
     parameter EVENT_WIDTH = 256,
     parameter DATA_METADATA_WIDTH = 256,
     localparam bit PARAMETERS_VALID =
+        ((ENABLE_LOAD === 0) || (ENABLE_LOAD === 1)) &&
+        ((ENABLE_STORE === 0) || (ENABLE_STORE === 1)) &&
+
         ((ADDR_WIDTH > 0) === 1'b1) && (^ADDR_WIDTH !== 1'bx) &&
         ((SHELL_DATA_WIDTH > 0) === 1'b1) && (^SHELL_DATA_WIDTH !== 1'bx) &&
         ((MEMORY_DATA_WIDTH > 0) === 1'b1) && (^MEMORY_DATA_WIDTH !== 1'bx) &&
@@ -662,6 +668,10 @@ module mst #(
         value = (value ^ 32'(SUPPORT_COMMAND_CHAINING)) * 32'd16777619;
         value = (value ^ 32'(SUPPORT_DOUBLE_BUFFER)) * 32'd16777619;
         value = (value ^ 32'(SUPPORT_MULTICAST)) * 32'd16777619;
+        if (ENABLE_LOAD != (1))
+            value = (value ^ (32'(ENABLE_LOAD) + 32'd1)) * 32'd16777619;
+        if (ENABLE_STORE != (1))
+            value = (value ^ (32'(ENABLE_STORE) + 32'd2)) * 32'd16777619;
         value = (value ^ 32'(SUPPORT_DIRECT_MEMORY_PROXY)) * 32'd16777619;
         value = (value ^ 32'(SUPPORT_CANCELLATION)) * 32'd16777619;
         value = (value ^ 32'(COMMAND_PROTECTION)) * 32'd16777619;
@@ -810,6 +820,8 @@ module mst #(
         .NUM_STREAM_INPUTS(NUM_STREAM_INPUTS),
         .NUM_STREAM_OUTPUTS(NUM_STREAM_OUTPUTS),
         .NUM_LOAD_CHANNELS(NUM_LOAD_CHANNELS),
+        .ENABLE_LOAD(ENABLE_LOAD),
+        .ENABLE_STORE(ENABLE_STORE),
         .NUM_STORE_CHANNELS(NUM_STORE_CHANNELS),
         .NUM_SCRATCHPAD_CLIENTS(NUM_SCRATCHPAD_CLIENTS),
         .NUM_DMA_INGRESS_CHANNELS(NUM_DMA_INGRESS_CHANNELS),

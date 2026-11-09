@@ -13,6 +13,9 @@ class MstCoverage(CoverageCollector):
         self.bins[name] += count
 
     def report(self):
+        from mosaic_uvm.tile_selection import selection_report
+        if (selected := selection_report(self)) is not None:
+            return selected
         required = ['reset', 'context', 'region', 'load', 'store', 'forward',
                     'copy', 'dma', 'bounds', 'duplicate', 'cancel', 'backpressure',
                     'event', 'completion', 'unaligned', 'conversion', 'two_dimensional', 'reliable_event', 'chain', 'buffer_roles',

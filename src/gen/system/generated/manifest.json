@@ -22,7 +22,7 @@
     "system_clock_gating": false,
     "max_active_kernels": 1
   },
-  "array_manifest_sha256": "e648cea4e9cebb22bdf72529203e53057a2fc28217b8e68bd5da5723952a9003",
+  "array_manifest_sha256": "fc1336bc88cded333ca85a37bada11a6aee418feb58b95aa26f8b0254f94e22f",
   "register_map": {
     "IDENTITY": {
       "offset": 0,
@@ -1642,7 +1642,7 @@
         "scratchpad_bank_words": 32,
         "noc_ingress": 2,
         "noc_egress": 1,
-        "manifest_sha256": "c187e87a3f408097b044b86ff514c8031ed2f3d142b81d5e52b512cb0d74b774",
+        "manifest_sha256": "3daf2615120907044ff910017eaaef061edc49f2643dcf1dba859f7d8823ee13",
         "tile_count": 4,
         "capacity": 512,
         "profile": "Cluster-MVP",
@@ -1661,7 +1661,7 @@
         "scratchpad_bank_words": 32,
         "noc_ingress": 2,
         "noc_egress": 1,
-        "manifest_sha256": "524f5574dfdc34f334596ccb5a2e02c50e998e4c173b0212ba205570cf869cef",
+        "manifest_sha256": "3f429e90d50668f0d731dd7b79fc265505e3bb1b67fed8110f792c177964645c",
         "tile_count": 4,
         "capacity": 512,
         "profile": "Cluster-MVP",
@@ -1759,8 +1759,8 @@
       "src/rtl/building_blocks/mac.sv": "c66aab429e7e003b077ec030b5bcba8b0cd8cf72e229dba8d7a138da052c7d68",
       "src/rtl/building_blocks/accumulator.sv": "8fef1ad83bcf950de5e0542446fc5b7ae240af4e4eaa689bcb9f4a504628bb0c",
       "src/rtl/building_blocks/predicate_unit.sv": "bab0eb80cd2ce054859e84387cfb6512c4f75a06415101411c5a5e2799c0fe9d",
-      "src/rtl/mosaic_blocks/bct_body.sv": "67f48ac27306ae5e491aa02898ac64e781eda5d6791b84a76a1ce70d6f41df3b",
-      "src/rtl/mosaic_blocks/bct.sv": "0c6f16bc0c788e8e038a8b14ca933756d117baf3ebc74bf67bc4762e00ab0606",
+      "src/rtl/mosaic_blocks/bct_body.sv": "1ec95d1b3a94ee78d192c162127f67c3c12abca1265e4fc047e82a41fea5bbcf",
+      "src/rtl/mosaic_blocks/bct.sv": "4b673bfe8c8344a365d46412a1e421980751ee40981dda444e20267f5285aa23",
       "src/rtl/basic/data_aligner.sv": "a49bb28f1ee3873e6edd3b34b64ba9823e5fd4b29c4c08749b7c210a1d134384",
       "src/rtl/basic/packer.sv": "4be33b1a9e8f78e25aef0fc939ee207bb700a301e15e3237b013472169064f9a",
       "src/rtl/basic/register_slice.sv": "81bbd5a9bf527e6d5f2fb41f3e81de29e7321eb4a87fd2b988c49338e9f07523",
@@ -1775,13 +1775,13 @@
       "src/rtl/common/priority_encoder.sv": "78ae31ee0db47b901b7b3df785574cfe50436afdf7029b4aa4d3e1346ac58f4c",
       "src/rtl/mosaic_blocks/banked_scratchpad_counters.sv": "33a938045eb833774cfd42bbc8a8bfacdd76942dcf6d592f2eed3549adbbc98c",
       "src/rtl/mosaic_blocks/banked_scratchpad_state.sv": "f68d5d72219b43e6c13caa3756730c83cf0d4b1423eed6abd11c681faf8007d6",
-      "src/rtl/mosaic_blocks/mst_body.sv": "314309030778c6b012901c6d7204b8b290c228e123b9382e65e301700c047887",
+      "src/rtl/mosaic_blocks/mst_body.sv": "66a8027fa4a58475595bbc9ab987727e4aea80263414b2993304283aafbcb090",
       "src/rtl/mosaic_blocks/mst_channel.sv": "ee995ed6cf1fa1d843ebbdbaa96a152bf68069499ea86ad4f8531ce400d6b861",
       "src/rtl/mosaic_blocks/mst_command_queue.sv": "416f536d049abdd71b284f7176a9741bd5822597571bfd1089ff27378ce46509",
       "src/rtl/mosaic_blocks/mst_element_converter.sv": "1ced1a3fd799cbf3d37e44b052d78a4fefba145ec06384ff6dc432b53626b5ab",
       "src/rtl/mosaic_blocks/mst_fragment_adapter.sv": "17525bfbd1bf4c77c5a35d2dc385de22b0883548c6fd46674157987137505e71",
-      "src/rtl/mosaic_blocks/mst_validate.sv": "02850a7c6ece833857907fdf178dc3e9a29617f39d44e01ef9c721d6df250b7b",
-      "src/rtl/mosaic_blocks/mst.sv": "d38b273a20e1f3532bc05567f80ec837523874d8cbe83c93afea5cd4a9edb31d",
+      "src/rtl/mosaic_blocks/mst_validate.sv": "2b7d17367742336e3e4c3409f4068fa3da49182122c476aa199c75ca79856576",
+      "src/rtl/mosaic_blocks/mst.sv": "977a5d9de7809db11b40e2ce40b9db630116e64f35c330a06c07505b41674b63",
       "src/rtl/basic/skid_buffer.sv": "9a7aa4b79f426f3d22058ed0f8fade17be96d67cdffa4cb0c8d711318c0a68c6",
       "src/rtl/building_blocks/local_switch.sv": "b8ff5a5a77b3533b9605bc17d383018e6ae545c66f528c8e060ace550c6cf5f3",
       "src/rtl/mosaic_blocks/static_mesh_node.sv": "3347b8b44e5912e178581fb90f951a11048e92e5e6ca136cfa0075be87cea785",
@@ -1829,7 +1829,8 @@
     },
     "generator_sha256": {
       "src/gen/array/generate.py": "18980e44d20182910ffa6d06bd458072c629dc52837b96946f7e3f5062806f6e",
-      "src/gen/cluster/generate.py": "57d450235b31f70a652803045bea279bff0ca6c092af5d718a5c4a2b20450ef5",
+      "src/gen/cluster/generate.py": "5958f34c4eb5e51ee8c470295b01dac6c5f92e3819f7d85c2c4867b4d935fdc2",
+      "src/gen/cluster/tile_parameters.py": "68e7b3f7f209a61f263461f321e8badb27cd01f2de168c9c0043be6ad1da7716",
       "src/gen/cluster/sources.py": "46d5c7a3d6bbc177f8b759b9aa2a0df88373add07843dd02b76e675b18c6dd77",
       "src/gen/global_noc/generate.py": "b31ba94676d6ad41e734ffa4e0b821a53565b21b5f4e20632fb68fd010aaa78a",
       "src/gen/global_noc/global_noc_contract.py": "ad61de2a838c826c26fbe37940b4cee3046f25bd5d5ac7c2873f1e2765df7997",
@@ -1862,8 +1863,8 @@
         "Cluster-MVP"
       ],
       "CLUSTER_MANIFEST_HASH_TABLE": [
-        "c187e87a3f408097b044b86ff514c8031ed2f3d142b81d5e52b512cb0d74b774",
-        "524f5574dfdc34f334596ccb5a2e02c50e998e4c173b0212ba205570cf869cef"
+        "3daf2615120907044ff910017eaaef061edc49f2643dcf1dba859f7d8823ee13",
+        "3f429e90d50668f0d731dd7b79fc265505e3bb1b67fed8110f792c177964645c"
       ],
       "CLUSTER_COORDINATE_TABLE": [
         [
@@ -2042,8 +2043,8 @@
         "always powered; native gate-safe clock enable only"
       ]
     },
-    "manifest_sha256": "e648cea4e9cebb22bdf72529203e53057a2fc28217b8e68bd5da5723952a9003",
-    "generated_rtl_sha256": "9a736d0a083978dd46b31bd606079ba263aaf711e446e03935c8df47750ca4b6"
+    "manifest_sha256": "fc1336bc88cded333ca85a37bada11a6aee418feb58b95aa26f8b0254f94e22f",
+    "generated_rtl_sha256": "2fbe4173835c1431700ab7f72c7b8b834e086aaab45b64199965b58b51806d66"
   },
   "dependency_sha256": {
     "src/rtl/common/crc_pkg.sv": "d876f4f2ab9c63e935eae6e9ca81222d4e0fe4648a974f62fd2263a0b5fb9b22",
@@ -2091,11 +2092,11 @@
     "formal": "NOT_RUN",
     "physical": "NOT_CHARACTERIZED"
   },
-  "manifest_sha256": "3f8b0046ee828bf81d3f74632abff8cd210444475d680fd4564400001980432e",
-  "generated_rtl_sha256": "ce4f27a0b02819c06db5eef37211f5fa74f93439aadc10ad039f56591d049f8e",
+  "manifest_sha256": "dea5df1ea270f4bfdac67fa549167cbd85a9b710364e4c01c2a9ca22be5838ef",
+  "generated_rtl_sha256": "bcb5922f1e812156aa5ef5e2862cead6030bbf1f7b228e974bc85ca0c4639659",
   "artifact_sha256": {
     "system_registers_pkg.sv": "050cb3f6951979f4276236a01220f61a033ff7b8329055f962a34e12aa266686",
-    "system.h": "5cc8cfd936f1efd9bb6b4f338051ddb563f081eb9006400031488185eacf9983",
+    "system.h": "d5b60423851c8289d8527f57387365e7de062cfc92f5f9724d19ba6aed4d843f",
     "registers.json": "9b80e10bfab8333984eb3bed19d38fa7115b94c2d83a845c05a835dae248345a",
     "descriptors.json": "c4701b4831f428fab9693f25890b45e73ef94721e4a970945e534f53e644df3e",
     "ports.json": "e037f98be248ddeb7e6ed3d4bda0a5607706c7fc086846eb20bfdc3e3b48a3ee"

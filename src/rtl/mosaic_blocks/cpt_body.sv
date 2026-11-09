@@ -25,6 +25,11 @@ module cpt_body #(
     parameter CONTROL_WIDTH = 32,
     parameter CONTROL_REGISTER_DEPTH = 8,
     parameter FU_PROFILE = 1,
+    // Explicit enables override the legacy profile without coupling peer FUs.
+    parameter ENABLE_PREDICATE = 1,
+    parameter ENABLE_LOOP_CONTROLLER = 1,
+    parameter ENABLE_EVENT_BARRIER = 1,
+    parameter ENABLE_ACTIONS = FU_PROFILE >= 1,
     parameter MAX_LOOP_DEPTH = 4,
     parameter INDEX_WIDTH = 32,
     parameter TRIP_COUNT_WIDTH = 32,
@@ -290,7 +295,15 @@ module cpt_body #(
             (value[79:64] >> NUM_EVENTS) == 0 &&
             (value[199:192] >> LD) == 0 && $countones(value[199:192]) <= LOOP_EXPORT_LEVELS;
 
-        if (FU_PROFILE == 0)
+        case (value[19:16])
+            CPT_CMD_PREDICATE, CPT_CMD_COMPARE: legal &= ENABLE_PREDICATE;
+            CPT_CMD_LOOP_CONFIG, CPT_CMD_LOOP_CONTROL: legal &= ENABLE_LOOP_CONTROLLER;
+            CPT_CMD_EVENT, CPT_CMD_BARRIER: legal &= ENABLE_EVENT_BARRIER;
+            CPT_CMD_ACTION: legal &= ENABLE_ACTIONS;
+            default: begin end
+        endcase
+
+        if (!ENABLE_ACTIONS)
             legal = legal &&!value[262] && value[127:96] == 0;
 
         if (!SUPPORT_TIMEOUT) legal = legal && value[127:96] == 0;
@@ -451,36 +464,48 @@ module cpt_body #(
     wire [31:0] compare_a = command_meta[56] ? rf_data[31:0] : operand_a;
     wire [31:0] compare_b = opcode == 6 || opcode == 7 ? 32'd0 :
         command_meta[57] ? rf_data[63:32] : operand_b;
-    scalar_alu #(.DATA_WIDTH(32), .SUPPORT_SATURATION(0), .SUPPORT_MINMAX(0)) u_compare (
-        .i_enable(effects && command_class == CPT_CMD_COMPARE && rf_sources_ok),
-        .i_opcode(alu_opcode),
-        .i_operand_a(compare_a),
-        .i_operand_b(compare_b),
-        .i_predicate(1'b1),
-        .i_signed(signed_compare),
-        .i_saturate(1'b0),
-        .o_result(alu_result),
-        .o_predicate(comparison)
-    );
+    if (ENABLE_PREDICATE) begin : g_compare
+        scalar_alu #(.DATA_WIDTH(32), .SUPPORT_SATURATION(0), .SUPPORT_MINMAX(0)) u_compare (
+            .i_enable(effects && command_class == CPT_CMD_COMPARE && rf_sources_ok),
+            .i_opcode(alu_opcode),
+            .i_operand_a(compare_a),
+            .i_operand_b(compare_b),
+            .i_predicate(1'b1),
+            .i_signed(signed_compare),
+            .i_saturate(1'b0),
+            .o_result(alu_result),
+            .o_predicate(comparison)
+        );
+    end else begin : g_no_compare
+        assign alu_result = '0;
+        assign comparison = '0;
+    end
 
-    predicate_unit #(.PRED_DEPTH(PREDICATE_DEPTH), .NUM_LANES(P)) u_predicate (
-        .i_clk(i_clk),
-        .i_rstb(storage_rstb),
-        .i_clock_enable(enable),
-        .i_valid(pred_issue && (command_class != CPT_CMD_COMPARE || rf_sources_ok)),
-        .i_opcode(command_class == CPT_CMD_COMPARE ? 4'd2 : opcode),
-        .i_lane_mask(active_lanes),
-        .i_source_a_addr(PR_BITS'(source_a)),
-        .i_source_b_addr(PR_BITS'(source_b)),
-        .i_destination_addr(PR_BITS'(destination)),
-        .i_predicate_input(command_class == CPT_CMD_COMPARE ? {P{comparison}} :
-            command_meta[58] ? command_predicate : P'(operand_a)),
-        .i_write_enable(write_enable),
-        .o_valid(pred_response),
-        .o_result(pred_result),
-        .o_result_valid(pred_lanes),
-        .o_illegal_operation(pred_illegal)
-    );
+    if (ENABLE_PREDICATE) begin : g_predicate
+        predicate_unit #(.PRED_DEPTH(PREDICATE_DEPTH), .NUM_LANES(P)) u_predicate (
+            .i_clk(i_clk),
+            .i_rstb(storage_rstb),
+            .i_clock_enable(enable),
+            .i_valid(pred_issue && (command_class != CPT_CMD_COMPARE || rf_sources_ok)),
+            .i_opcode(command_class == CPT_CMD_COMPARE ? 4'd2 : opcode),
+            .i_lane_mask(active_lanes),
+            .i_source_a_addr(PR_BITS'(source_a)),
+            .i_source_b_addr(PR_BITS'(source_b)),
+            .i_destination_addr(PR_BITS'(destination)),
+            .i_predicate_input(command_class == CPT_CMD_COMPARE ? {P{comparison}} :
+                command_meta[58] ? command_predicate : P'(operand_a)),
+            .i_write_enable(write_enable),
+            .o_valid(pred_response),
+            .o_result(pred_result),
+            .o_result_valid(pred_lanes),
+            .o_illegal_operation(pred_illegal)
+        );
+    end else begin : g_no_predicate
+        assign pred_response = '0;
+        assign pred_result = '0;
+        assign pred_lanes = '0;
+        assign pred_illegal = '0;
+    end
 
     // Compact registers have a published type, context and version for every
     // legal read. Data itself needs no bulk reset once validity is cleared.
@@ -625,99 +650,140 @@ module cpt_body #(
     wire ingress_fire = ingress_ready && event_input_valid === 1'b1;
     wire post_external = external_post &&!command_post;
 
-    event_barrier #(
-        .NUM_EVENTS(NUM_EVENTS),
-        .EVENT_COUNT_WIDTH(EVENT_COUNT_WIDTH),
-        .NUM_WAIT_SLOTS(NUM_WAIT_SLOTS),
-        .WAIT_RESULT_QUEUE_DEPTH(WAIT_RESULT_QUEUE_DEPTH),
-        .NUM_BARRIERS(NUM_BARRIERS),
-        .MAX_PARTICIPANTS(MAX_PARTICIPANTS),
-        .BARRIER_RELEASE_QUEUE_DEPTH(BARRIER_RELEASE_QUEUE_DEPTH),
-        .GENERATION_WIDTH(4),
-        .CONTEXT_ID_WIDTH(CI),
-        .WAITER_TAG_WIDTH(8),
-        .BARRIER_TAG_WIDTH(8),
-        .PROTECT_STATE(EVENT_PROTECTION)
-    ) u_events (
-        .i_clk(i_clk),
-        .i_rstb(unit_rstb),
-        .i_flush(flush),
-        .i_error_clear(enable),
-        .i_config_valid(live && initialized &&!event_init_sent),
-        .i_post_valid(enable && (command_post || post_external)),
-        .i_ack_valid(command_ack),
-        .i_wait_valid(command_wait),
-        .i_wait_cancel_valid(command_cancel),
-        .i_wait_result_ready(egress_ready[2] && enable),
-        .i_barrier_config_valid(command_barrier),
-        .i_barrier_config_enable(1'b1),
-        .i_barrier_release_event_enable(command_meta[59]),
-        .i_barrier_arrival_valid(command_arrive),
-        .i_barrier_release_ready(egress_ready[1] && enable),
-        .i_wait_consume(command_meta[59]),
-        .i_config_context_id({CI{1'b0}}),
-        .i_post_context_id({CI{1'b0}}),
-        .i_ack_context_id({CI{1'b0}}),
-        .i_wait_context_id({CI{1'b0}}),
-        .i_wait_cancel_context_id({CI{1'b0}}),
-        .i_barrier_context_id({CI{1'b0}}),
-        .i_barrier_arrival_context_id({CI{1'b0}}),
-        .i_config_event_enable(event_enable),
-        .i_wait_event_mask(NUM_EVENTS'(mask)),
-        .i_post_event_id(post_external ? EI_BITS'(ingress.event_id) : EI_BITS'(object_id)),
-        .i_ack_event_id(EI_BITS'(object_id)),
-        .i_barrier_release_event_id(EI_BITS'(sub_id)),
-        .i_ack_mode(opcode == 2 ? 2'd1 : 2'd0),
-        .i_wait_mode(opcode == 4 ? 2'd1 : 2'd0),
-        .i_wait_slot(WI_BITS'(object_id)),
-        .i_wait_cancel_slot(WI_BITS'(object_id)),
-        .i_wait_tag(tag),
-        .i_wait_cancel_tag(tag),
-        .i_barrier_config_id(BI_BITS'(object_id)),
-        .i_barrier_arrival_id(BI_BITS'(object_id)),
-        .i_barrier_expected_mask(MAX_PARTICIPANTS'(operand_a)),
-        .i_barrier_tag(tag),
-        .i_barrier_participant_id(PA_BITS'(participant)),
-        .i_barrier_arrival_generation(generation),
-        .o_config_ready(eb_init_ready),
-        .o_config_accepted(eb_configured),
-        .o_post_ready(eb_post_ready),
-        .o_post_accepted(eb_post_accepted),
-        .o_post_rejected(eb_post_rejected),
-        .o_ack_ready(eb_ack_ready),
-        .o_ack_accepted(eb_ack_accepted),
-        .o_ack_rejected(eb_ack_rejected),
-        .o_wait_ready(eb_wait_ready),
-        .o_wait_armed(eb_wait_armed),
-        .o_wait_rejected(eb_wait_rejected),
-        .o_wait_cancel_ready(eb_cancel_ready),
-        .o_wait_canceled(eb_cancel_done),
-        .o_wait_cancel_not_found(eb_cancel_missing),
-        .o_wait_result_valid(eb_wait_valid),
-        .o_wait_result_status(eb_wait_status),
-        .o_barrier_config_ready(eb_barrier_ready),
-        .o_barrier_configured(eb_barrier_configured),
-        .o_barrier_config_rejected(eb_barrier_rejected),
-        .o_barrier_arrival_ready(eb_arrival_ready),
-        .o_barrier_arrival_accepted(eb_arrival_accepted),
-        .o_barrier_arrival_rejected(eb_arrival_rejected),
-        .o_barrier_release_valid(eb_release_valid),
-        .o_idle(eb_idle),
-        .o_fatal_error(eb_fatal),
-        .o_wait_result_matched_mask(eb_wait_mask),
-        .o_wait_result_consumed_mask(eb_wait_consumed),
-        .o_event_count(eb_counts),
-        .o_wait_slot_active(eb_wait_active),
-        .o_barrier_enable(eb_barrier_enabled),
-        .o_barrier_arrived(eb_arrivals),
-        .o_barrier_generation(eb_generations),
-        .o_wait_result_slot(eb_wait_slot),
-        .o_wait_result_tag(eb_wait_tag),
-        .o_barrier_release_id(eb_release_id),
-        .o_barrier_release_generation(eb_release_generation),
-        .o_barrier_release_tag(eb_release_tag),
-        .o_barrier_release_participants(eb_release_mask)
-    );
+    if (ENABLE_EVENT_BARRIER) begin : g_events
+        event_barrier #(
+            .NUM_EVENTS(NUM_EVENTS),
+            .EVENT_COUNT_WIDTH(EVENT_COUNT_WIDTH),
+            .NUM_WAIT_SLOTS(NUM_WAIT_SLOTS),
+            .WAIT_RESULT_QUEUE_DEPTH(WAIT_RESULT_QUEUE_DEPTH),
+            .NUM_BARRIERS(NUM_BARRIERS),
+            .MAX_PARTICIPANTS(MAX_PARTICIPANTS),
+            .BARRIER_RELEASE_QUEUE_DEPTH(BARRIER_RELEASE_QUEUE_DEPTH),
+            .GENERATION_WIDTH(4),
+            .CONTEXT_ID_WIDTH(CI),
+            .WAITER_TAG_WIDTH(8),
+            .BARRIER_TAG_WIDTH(8),
+            .PROTECT_STATE(EVENT_PROTECTION)
+        ) u_events (
+            .i_clk(i_clk),
+            .i_rstb(unit_rstb),
+            .i_flush(flush),
+            .i_error_clear(enable),
+            .i_config_valid(live && initialized &&!event_init_sent),
+            .i_post_valid(enable && (command_post || post_external)),
+            .i_ack_valid(command_ack),
+            .i_wait_valid(command_wait),
+            .i_wait_cancel_valid(command_cancel),
+            .i_wait_result_ready(egress_ready[2] && enable),
+            .i_barrier_config_valid(command_barrier),
+            .i_barrier_config_enable(1'b1),
+            .i_barrier_release_event_enable(command_meta[59]),
+            .i_barrier_arrival_valid(command_arrive),
+            .i_barrier_release_ready(egress_ready[1] && enable),
+            .i_wait_consume(command_meta[59]),
+            .i_config_context_id({CI{1'b0}}),
+            .i_post_context_id({CI{1'b0}}),
+            .i_ack_context_id({CI{1'b0}}),
+            .i_wait_context_id({CI{1'b0}}),
+            .i_wait_cancel_context_id({CI{1'b0}}),
+            .i_barrier_context_id({CI{1'b0}}),
+            .i_barrier_arrival_context_id({CI{1'b0}}),
+            .i_config_event_enable(event_enable),
+            .i_wait_event_mask(NUM_EVENTS'(mask)),
+            .i_post_event_id(post_external ? EI_BITS'(ingress.event_id) : EI_BITS'(object_id)),
+            .i_ack_event_id(EI_BITS'(object_id)),
+            .i_barrier_release_event_id(EI_BITS'(sub_id)),
+            .i_ack_mode(opcode == 2 ? 2'd1 : 2'd0),
+            .i_wait_mode(opcode == 4 ? 2'd1 : 2'd0),
+            .i_wait_slot(WI_BITS'(object_id)),
+            .i_wait_cancel_slot(WI_BITS'(object_id)),
+            .i_wait_tag(tag),
+            .i_wait_cancel_tag(tag),
+            .i_barrier_config_id(BI_BITS'(object_id)),
+            .i_barrier_arrival_id(BI_BITS'(object_id)),
+            .i_barrier_expected_mask(MAX_PARTICIPANTS'(operand_a)),
+            .i_barrier_tag(tag),
+            .i_barrier_participant_id(PA_BITS'(participant)),
+            .i_barrier_arrival_generation(generation),
+            .o_config_ready(eb_init_ready),
+            .o_config_accepted(eb_configured),
+            .o_post_ready(eb_post_ready),
+            .o_post_accepted(eb_post_accepted),
+            .o_post_rejected(eb_post_rejected),
+            .o_ack_ready(eb_ack_ready),
+            .o_ack_accepted(eb_ack_accepted),
+            .o_ack_rejected(eb_ack_rejected),
+            .o_wait_ready(eb_wait_ready),
+            .o_wait_armed(eb_wait_armed),
+            .o_wait_rejected(eb_wait_rejected),
+            .o_wait_cancel_ready(eb_cancel_ready),
+            .o_wait_canceled(eb_cancel_done),
+            .o_wait_cancel_not_found(eb_cancel_missing),
+            .o_wait_result_valid(eb_wait_valid),
+            .o_wait_result_status(eb_wait_status),
+            .o_barrier_config_ready(eb_barrier_ready),
+            .o_barrier_configured(eb_barrier_configured),
+            .o_barrier_config_rejected(eb_barrier_rejected),
+            .o_barrier_arrival_ready(eb_arrival_ready),
+            .o_barrier_arrival_accepted(eb_arrival_accepted),
+            .o_barrier_arrival_rejected(eb_arrival_rejected),
+            .o_barrier_release_valid(eb_release_valid),
+            .o_idle(eb_idle),
+            .o_fatal_error(eb_fatal),
+            .o_wait_result_matched_mask(eb_wait_mask),
+            .o_wait_result_consumed_mask(eb_wait_consumed),
+            .o_event_count(eb_counts),
+            .o_wait_slot_active(eb_wait_active),
+            .o_barrier_enable(eb_barrier_enabled),
+            .o_barrier_arrived(eb_arrivals),
+            .o_barrier_generation(eb_generations),
+            .o_wait_result_slot(eb_wait_slot),
+            .o_wait_result_tag(eb_wait_tag),
+            .o_barrier_release_id(eb_release_id),
+            .o_barrier_release_generation(eb_release_generation),
+            .o_barrier_release_tag(eb_release_tag),
+            .o_barrier_release_participants(eb_release_mask)
+        );
+    end else begin : g_no_events
+        assign eb_init_ready = '0;
+        assign eb_configured = '0;
+        assign eb_post_ready = '0;
+        assign eb_post_accepted = '0;
+        assign eb_post_rejected = '0;
+        assign eb_ack_ready = '0;
+        assign eb_ack_accepted = '0;
+        assign eb_ack_rejected = '0;
+        assign eb_wait_ready = '0;
+        assign eb_wait_armed = '0;
+        assign eb_wait_rejected = '0;
+        assign eb_cancel_ready = '0;
+        assign eb_cancel_done = '0;
+        assign eb_cancel_missing = '0;
+        assign eb_wait_valid = '0;
+        assign eb_wait_status = '0;
+        assign eb_barrier_ready = '0;
+        assign eb_barrier_configured = '0;
+        assign eb_barrier_rejected = '0;
+        assign eb_arrival_ready = '0;
+        assign eb_arrival_accepted = '0;
+        assign eb_arrival_rejected = '0;
+        assign eb_release_valid = '0;
+        assign eb_idle = 1'b1;
+        assign eb_fatal = '0;
+        assign eb_wait_mask = '0;
+        assign eb_wait_consumed = '0;
+        assign eb_counts = '0;
+        assign eb_wait_active = '0;
+        assign eb_barrier_enabled = '0;
+        assign eb_arrivals = '0;
+        assign eb_generations = '0;
+        assign eb_wait_slot = '0;
+        assign eb_wait_tag = '0;
+        assign eb_release_id = '0;
+        assign eb_release_generation = '0;
+        assign eb_release_tag = '0;
+        assign eb_release_mask = '0;
+    end
 
     wire [LD*2-1:0] loop_modes;
     wire [LD*IW-1:0] loop_initial;
@@ -769,72 +835,101 @@ module cpt_body #(
     wire loop_control_valid = explicit_loop_control || implicit_pause || implicit_resume;
     wire [1:0] loop_control_command = opcode == 1 ? 2'd0 : opcode == 2 ? 2'd1 : 2'd2;
 
-    loop_controller #(
-        .MAX_LOOP_DEPTH(LD),
-        .INDEX_WIDTH(IW),
-        .TRIP_COUNT_WIDTH(TW),
-        .LINEAR_COUNT_WIDTH(64),
-        .II_WIDTH(8),
-        .CONTEXT_ID_WIDTH(CI),
-        .RUN_ID_WIDTH(8),
-        .CONFIG_EPOCH_WIDTH(16),
-        .NUM_EVENTS(NUM_EVENTS),
-        .PROTECT_STATE(CONTROL_PROTECTION != 0)
-    ) u_loop (
-        .i_clk(i_clk),
-        .i_rstb(unit_rstb),
-        .i_flush(flush),
-        .i_error_clear(enable),
-        .i_config_valid(live && initialized &&!loop_init_sent),
-        .o_config_ready(loop_config_ready),
-        .i_config_depth(DEPTH_BITS'(loop_depth)),
-        .i_config_level_mode(loop_modes),
-        .i_config_initial(loop_initial),
-        .i_config_bound(loop_bound),
-        .i_config_step(loop_step),
-        .i_config_trip_count(loop_trips),
-        .i_config_compare(loop_compares),
-        .i_config_initiation_interval(loop_ii),
-        .i_config_context_id(active_context),
-        .i_config_completion_event_enable(1'b1),
-        .i_config_completion_event_id(loop_event),
-        .o_config_accepted(loop_config_accepted),
-        .o_config_rejected(loop_config_rejected),
-        .i_start_valid(effects && command_class == CPT_CMD_LOOP_CONTROL && opcode == 0),
-        .o_start_ready(loop_start_ready),
-        .i_start_context_id(active_context),
-        .i_start_run_id(tag),
-        .o_start_accepted(loop_start_accepted),
-        .o_start_rejected(loop_start_rejected),
-        .i_control_valid(loop_control_valid),
-        .o_control_ready(loop_control_ready),
-        .i_control_command(explicit_loop_control ? loop_control_command :
-            implicit_resume ? 2'd1 : 2'd0),
-        .i_control_context_id(active_context),
-        .i_control_run_id(explicit_loop_control ? tag : current_loop_run),
-        .o_control_accepted(loop_control_accepted),
-        .o_control_rejected(loop_control_rejected),
-        .i_execution_quiescent(!loop_frame_active),
-        .o_iteration_valid(loop_token_valid),
-        .i_iteration_ready(loop_token_ready),
-        .o_iteration_index(loop_indices),
-        .o_iteration_ordinal(loop_ordinals),
-        .o_iteration_first_mask(loop_first),
-        .o_iteration_last_mask(loop_last),
-        .o_iteration_linear(loop_linear),
-        .o_iteration_run_id(loop_run),
-        .o_iteration_epoch(loop_epoch),
-        .o_completion_valid(loop_complete),
-        .i_completion_ready(!eb_wait_valid && egress_ready[2] && enable),
-        .o_completion_run_id(completed_loop_run),
-        .o_completion_status(loop_completion_status),
-        .o_completion_iterations(loop_iterations),
-        .o_current_run_id(current_loop_run),
-        .o_active(loop_active),
-        .o_suspended(loop_suspended),
-        .o_idle(loop_idle),
-        .o_fatal_error(loop_fatal)
-    );
+    if (ENABLE_LOOP_CONTROLLER) begin : g_loop
+        loop_controller #(
+            .MAX_LOOP_DEPTH(LD),
+            .INDEX_WIDTH(IW),
+            .TRIP_COUNT_WIDTH(TW),
+            .LINEAR_COUNT_WIDTH(64),
+            .II_WIDTH(8),
+            .CONTEXT_ID_WIDTH(CI),
+            .RUN_ID_WIDTH(8),
+            .CONFIG_EPOCH_WIDTH(16),
+            .NUM_EVENTS(NUM_EVENTS),
+            .PROTECT_STATE(CONTROL_PROTECTION != 0)
+        ) u_loop (
+            .i_clk(i_clk),
+            .i_rstb(unit_rstb),
+            .i_flush(flush),
+            .i_error_clear(enable),
+            .i_config_valid(live && initialized &&!loop_init_sent),
+            .o_config_ready(loop_config_ready),
+            .i_config_depth(DEPTH_BITS'(loop_depth)),
+            .i_config_level_mode(loop_modes),
+            .i_config_initial(loop_initial),
+            .i_config_bound(loop_bound),
+            .i_config_step(loop_step),
+            .i_config_trip_count(loop_trips),
+            .i_config_compare(loop_compares),
+            .i_config_initiation_interval(loop_ii),
+            .i_config_context_id(active_context),
+            .i_config_completion_event_enable(1'b1),
+            .i_config_completion_event_id(loop_event),
+            .o_config_accepted(loop_config_accepted),
+            .o_config_rejected(loop_config_rejected),
+            .i_start_valid(effects && command_class == CPT_CMD_LOOP_CONTROL && opcode == 0),
+            .o_start_ready(loop_start_ready),
+            .i_start_context_id(active_context),
+            .i_start_run_id(tag),
+            .o_start_accepted(loop_start_accepted),
+            .o_start_rejected(loop_start_rejected),
+            .i_control_valid(loop_control_valid),
+            .o_control_ready(loop_control_ready),
+            .i_control_command(explicit_loop_control ? loop_control_command :
+                implicit_resume ? 2'd1 : 2'd0),
+            .i_control_context_id(active_context),
+            .i_control_run_id(explicit_loop_control ? tag : current_loop_run),
+            .o_control_accepted(loop_control_accepted),
+            .o_control_rejected(loop_control_rejected),
+            .i_execution_quiescent(!loop_frame_active),
+            .o_iteration_valid(loop_token_valid),
+            .i_iteration_ready(loop_token_ready),
+            .o_iteration_index(loop_indices),
+            .o_iteration_ordinal(loop_ordinals),
+            .o_iteration_first_mask(loop_first),
+            .o_iteration_last_mask(loop_last),
+            .o_iteration_linear(loop_linear),
+            .o_iteration_run_id(loop_run),
+            .o_iteration_epoch(loop_epoch),
+            .o_completion_valid(loop_complete),
+            .i_completion_ready(!eb_wait_valid && egress_ready[2] && enable),
+            .o_completion_run_id(completed_loop_run),
+            .o_completion_status(loop_completion_status),
+            .o_completion_iterations(loop_iterations),
+            .o_current_run_id(current_loop_run),
+            .o_active(loop_active),
+            .o_suspended(loop_suspended),
+            .o_idle(loop_idle),
+            .o_fatal_error(loop_fatal)
+        );
+    end else begin : g_no_loop
+        assign loop_config_ready = '0;
+        assign loop_config_accepted = '0;
+        assign loop_config_rejected = '0;
+        assign loop_start_ready = '0;
+        assign loop_start_accepted = '0;
+        assign loop_start_rejected = '0;
+        assign loop_control_ready = '0;
+        assign loop_control_accepted = '0;
+        assign loop_control_rejected = '0;
+        assign loop_token_valid = '0;
+        assign loop_indices = '0;
+        assign loop_ordinals = '0;
+        assign loop_first = '0;
+        assign loop_last = '0;
+        assign loop_linear = '0;
+        assign loop_run = '0;
+        assign loop_epoch = '0;
+        assign loop_complete = '0;
+        assign completed_loop_run = '0;
+        assign loop_completion_status = '0;
+        assign loop_iterations = '0;
+        assign current_loop_run = '0;
+        assign loop_active = '0;
+        assign loop_suspended = '0;
+        assign loop_idle = 1'b1;
+        assign loop_fatal = '0;
+    end
 
     function automatic cpt_record_t new_record(input logic [3:0] kind);
         cpt_record_t record;
@@ -866,7 +961,7 @@ module cpt_body #(
     wire actions_busy;
     wire action_uncertain;
     wire timeout_event;
-    wire legal_action = FU_PROFILE >= 1 && opcode <= CPT_ACTION_RECOVER &&
+    wire legal_action = ENABLE_ACTIONS && opcode <= CPT_ACTION_RECOVER &&
         opcode != CPT_ACTION_CHECKPOINT && targets != 0 &&
         (targets >> MAX_PARTICIPANTS) == 0 &&
         (opcode != CPT_ACTION_ACTIVATE_CONTEXT || SUPPORT_CONTEXT_COORDINATION &&
@@ -903,7 +998,7 @@ module cpt_body #(
         end
     end
 
-    if (FU_PROFILE >= 1) begin : g_actions
+    if (ENABLE_ACTIONS) begin : g_actions
         cpt_actions #(
             .SLOTS(MAX_OUTSTANDING_ACTIONS), .SUPPORT_TIMEOUT(SUPPORT_TIMEOUT)
         ) u_actions (
@@ -930,7 +1025,7 @@ module cpt_body #(
             .o_uncertain(action_uncertain),
             .o_timeout_event(timeout_event)
         );
-    end else begin : g_local
+    end else begin : g_no_actions
         assign action_ready = 1'b0;
         assign action_issue_error = 1'b1;
         assign action_response_ready = 1'b1;
@@ -1209,6 +1304,13 @@ module cpt_body #(
                     end
                     default: begin end
                 endcase
+        case (command_class)
+            CPT_CMD_PREDICATE, CPT_CMD_COMPARE: command_legal &= ENABLE_PREDICATE;
+            CPT_CMD_LOOP_CONFIG, CPT_CMD_LOOP_CONTROL: command_legal &= ENABLE_LOOP_CONTROLLER;
+            CPT_CMD_EVENT, CPT_CMD_BARRIER: command_legal &= ENABLE_EVENT_BARRIER;
+            CPT_CMD_ACTION: command_legal &= ENABLE_ACTIONS;
+            default: begin end
+        endcase
             end
             CPT_CMD_BARRIER: begin
                 command_legal = command_legal && opcode <= 2 && object_id < NUM_BARRIERS;
@@ -1313,9 +1415,9 @@ module cpt_body #(
             if (live && initialized &&!loop_init_sent && loop_config_ready)
                 loop_init_sent <= 1'b1;
 
-            if (eb_configured) event_initialized <= 1'b1;
+            if (!ENABLE_EVENT_BARRIER || eb_configured) event_initialized <= 1'b1;
 
-            if (loop_config_accepted) loop_initialized <= 1'b1;
+            if (!ENABLE_LOOP_CONTROLLER || loop_config_accepted) loop_initialized <= 1'b1;
 
             if (loop_config_rejected) fatal <= 1'b1;
 

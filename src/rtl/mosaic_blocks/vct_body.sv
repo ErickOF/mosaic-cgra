@@ -7,6 +7,10 @@ module vct_body #(
     parameter ELEMENT_WIDTH = 8,
     parameter ACC_WIDTH = 32,
     parameter FU_PROFILE = 1,
+    // Explicit enables override the legacy profile without coupling peer FUs.
+    parameter ENABLE_LANE_ALU = 1,
+    parameter ENABLE_REDUCTION = FU_PROFILE >= 1,
+    parameter ENABLE_DOT_PRODUCT = FU_PROFILE == 2,
     parameter LANE_LATENCY = 1,
     parameter MUL_LATENCY = 1,
     parameter MAC_LATENCY = 1,
@@ -292,7 +296,7 @@ module vct_body #(
     function automatic bit edge_legal(input int source, input int operand);
         if (source < 0 || source >= NS) return 1'b0;
 
-        if (source == SACC && FU_PROFILE == 0) return 1'b0;
+        if (source == SACC && !(ENABLE_REDUCTION || ENABLE_DOT_PRODUCT)) return 1'b0;
 
         if (BYPASS_PROFILE == 0 && (source == RF0 || source == RF1 ||
             source == SACC && operand != 2))
@@ -316,7 +320,7 @@ module vct_body #(
         for (int d = 0; d < 3; d++) begin
             for (int s = 0; s < NS; s++) begin
                 value[d*NS+s] = 1'b1;
-                if (s == SACC && FU_PROFILE == 0) value[d*NS+s] = 1'b0;
+                if (s == SACC && !(ENABLE_REDUCTION || ENABLE_DOT_PRODUCT)) value[d*NS+s] = 1'b0;
 
                 if (BYPASS_PROFILE == 0 && (s == RF0 || s == RF1 || s == SACC && d != 2))
                     value[d*NS+s] = 1'b0;
@@ -387,7 +391,8 @@ module vct_body #(
             SUPPORT_SPATIAL_TEMPORAL == 0) return 1'b0;
 
         if (c.fu == VCT_LANE) begin
-            if (c.opcode > 21 || c.opcode == 20 && SUPPORT_MUL == 0 ||
+            if (c.opcode < 20 &&!ENABLE_LANE_ALU || c.opcode > 21 ||
+                c.opcode == 20 && SUPPORT_MUL == 0 ||
                 c.opcode == 21 && SUPPORT_MAC == 0 ||
                 (c.opcode == 18 || c.opcode == 19) && SUPPORT_MINMAX == 0)
                 return 1'b0;
@@ -401,7 +406,7 @@ module vct_body #(
         end
 
         if (c.fu == VCT_REDUCTION) begin
-            if (FU_PROFILE == 0 || c.opcode > 4 || c.format_a != VCT_ELEMENT_VECTOR ||
+            if (!ENABLE_REDUCTION || c.opcode > 4 || c.format_a != VCT_ELEMENT_VECTOR ||
                 (c.opcode == 1 || c.opcode == 2) &&
                 (SUPPORT_MINMAX == 0 || c.lane_mask == 0)) return 1'b0;
 
@@ -409,7 +414,7 @@ module vct_body #(
         end
 
         if (c.fu == VCT_DOT) begin
-            if (FU_PROFILE != 2 || c.format_a != VCT_ELEMENT_VECTOR ||
+            if (!ENABLE_DOT_PRODUCT || c.format_a != VCT_ELEMENT_VECTOR ||
                 c.format_b != VCT_ELEMENT_VECTOR) return 1'b0;
 
             expected = VCT_SCALAR_ACC;
@@ -448,7 +453,8 @@ module vct_body #(
             c.result_format != VCT_SCALAR_ACC || c.format_c != VCT_SCALAR_ACC)) return 1'b0;
 
         if (c.write_vacc && c.result_format != VCT_ACC_VECTOR ||
-            c.write_sacc && (FU_PROFILE == 0 || c.result_format != VCT_SCALAR_ACC)) return 1'b0;
+            c.write_sacc && (!(ENABLE_REDUCTION || ENABLE_DOT_PRODUCT) ||
+                c.result_format != VCT_SCALAR_ACC)) return 1'b0;
 
         if (c.write_rf && (c.result_format > VCT_ACC_VECTOR ||
             int'(c.write_slice) + slices > SP)) return 1'b0;
@@ -905,7 +911,7 @@ module vct_body #(
         );
     end
 
-    if (FU_PROFILE != 0) begin : g_sacc
+    if (ENABLE_REDUCTION || ENABLE_DOT_PRODUCT) begin : g_sacc
         for (genvar a = 0; a < SCALAR_ACC_DEPTH; a++) begin : g_entry
             vct_accumulator #(
                 .LANES(1),
@@ -1194,6 +1200,7 @@ module vct_body #(
         vector_lane #(
             .ELEMENT_WIDTH(EL),
             .ACC_WIDTH(A),
+            .ENABLE_ALU(ENABLE_LANE_ALU),
             .SUPPORT_MUL(SUPPORT_MUL),
             .SUPPORT_MAC(SUPPORT_MAC),
             .SUPPORT_SATURATION(SUPPORT_SATURATION),
@@ -1285,7 +1292,7 @@ module vct_body #(
     wire reduction_overflow;
     wire reduction_saturated;
 
-    if (FU_PROFILE != 0) begin : g_reduction
+    if (ENABLE_REDUCTION) begin : g_reduction
         wire [A-1:0] raw;
         vector_reduction #(
             .ELEMENT_WIDTH(EL),
@@ -1345,7 +1352,7 @@ module vct_body #(
     wire dot_overflow;
     wire dot_saturated;
 
-    if (FU_PROFILE == 2) begin : g_dot
+    if (ENABLE_DOT_PRODUCT) begin : g_dot
         dot_product #(
             .ELEMENT_WIDTH(EL),
             .NUM_TERMS(LN),

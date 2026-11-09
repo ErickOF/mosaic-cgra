@@ -26,7 +26,8 @@ class MstTest(uvm_test):
         cocotb.top.i_cfg_clk.value = 0
         for name in INPUTS:
             getattr(cocotb.top, name).value = 0
-        sequence = MstSequence(self.c)
+        from mosaic_uvm.tile_selection import selected_sequence
+        sequence = selected_sequence("MST", MstSequence)(self.c)
         sequence.coverage = self.env.coverage
         sequence.active = ConfigDB().get(self, 'env.agent', 'active')
 

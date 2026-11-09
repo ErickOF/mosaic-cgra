@@ -1,0 +1,1 @@
+"""Local visual architecture editor."""

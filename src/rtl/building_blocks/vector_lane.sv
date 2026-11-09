@@ -6,6 +6,7 @@
 module vector_lane #(
     parameter ELEMENT_WIDTH = 8,
     parameter ACC_WIDTH = 32,
+    parameter ENABLE_ALU = 1,
     parameter SUPPORT_MUL = 1,
     parameter SUPPORT_MAC = 1,
     parameter SUPPORT_SATURATION = 1,
@@ -27,6 +28,7 @@ module vector_lane #(
         ((MAX_LANE_LATENCY <= 32'd2147483646) === 1'b1) &&
         ((LANE_LATENCY >= 0 && LANE_LATENCY <= MAX_LANE_LATENCY) === 1'b1) &&
         ( ^ LANE_LATENCY !== 1'bx) &&
+        ((ENABLE_ALU === 0) || (ENABLE_ALU === 1)) &&
         ((SUPPORT_MUL === 0) || (SUPPORT_MUL === 1)) &&
         ((SUPPORT_MAC === 0) || (SUPPORT_MAC === 1)) &&
         ((SUPPORT_SATURATION === 0) || (SUPPORT_SATURATION === 1)) &&
@@ -147,6 +149,7 @@ module vector_lane #(
                     illegal = ( ^ {i_opcode, i_signed, i_saturate} === 1'bx) ||
                         i_opcode > VLANE_MAC ||
                         ((i_opcode == VLANE_MIN || i_opcode == VLANE_MAX) && SUPPORT_MINMAX == 0) ||
+                        (i_opcode < VLANE_MUL &&!ENABLE_ALU) ||
                         (i_opcode == VLANE_MUL && SUPPORT_MUL == 0) ||
                         (i_opcode == VLANE_MAC && SUPPORT_MAC == 0) ||
                         (i_opcode == VLANE_SELECT &&
@@ -182,26 +185,38 @@ module vector_lane #(
         wire unused_element_negative;
         wire unused_element_illegal;
 
-        scalar_alu #(.DATA_WIDTH(E), .SUPPORT_SATURATION(SUPPORT_SATURATION),
-            .SUPPORT_MINMAX(SUPPORT_MINMAX)) u_alu (
-            .i_enable(alu_request),
-            .i_opcode(alu_request ? i_opcode : 5'b0),
-            .i_operand_a(alu_a),
-            .i_operand_b(alu_b),
-            .i_predicate(alu_request && i_opcode == vector_lane_pkg::VLANE_SELECT &&
-                i_select_predicate),
-            .i_signed(alu_request && i_signed),
-            .i_saturate(alu_request && i_saturate),
-            .o_result(element_result),
-            .o_predicate(element_predicate),
-            .o_zero(unused_element_zero),
-            .o_negative(unused_element_negative),
-            .o_carry(element_carry),
-            .o_borrow(element_borrow),
-            .o_overflow(element_overflow),
-            .o_saturated(element_saturated),
-            .o_illegal_operation(unused_element_illegal)
-        );
+        if (ENABLE_ALU) begin : g_alu
+            scalar_alu #(.DATA_WIDTH(E), .SUPPORT_SATURATION(SUPPORT_SATURATION),
+                .SUPPORT_MINMAX(SUPPORT_MINMAX)) u_alu (
+                .i_enable(alu_request),
+                .i_opcode(alu_request ? i_opcode : 5'b0),
+                .i_operand_a(alu_a),
+                .i_operand_b(alu_b),
+                .i_predicate(alu_request && i_opcode == vector_lane_pkg::VLANE_SELECT &&
+                    i_select_predicate),
+                .i_signed(alu_request && i_signed),
+                .i_saturate(alu_request && i_saturate),
+                .o_result(element_result),
+                .o_predicate(element_predicate),
+                .o_zero(unused_element_zero),
+                .o_negative(unused_element_negative),
+                .o_carry(element_carry),
+                .o_borrow(element_borrow),
+                .o_overflow(element_overflow),
+                .o_saturated(element_saturated),
+                .o_illegal_operation(unused_element_illegal)
+            );
+        end else begin : g_no_alu
+            assign element_result = '0;
+            assign element_predicate = '0;
+            assign unused_element_zero = '0;
+            assign unused_element_negative = '0;
+            assign element_carry = '0;
+            assign element_borrow = '0;
+            assign element_overflow = '0;
+            assign element_saturated = '0;
+            assign unused_element_illegal = '0;
+        end
 
         result_t alu_payload;
         always_comb begin

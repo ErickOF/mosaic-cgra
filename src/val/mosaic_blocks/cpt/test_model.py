@@ -17,7 +17,7 @@ class ModelTests(unittest.TestCase):
             with self.assertRaises(ValueError):profile(**changes)
 
     def test_local_profile(self):
-        with self.assertRaises(ValueError):profile(FU_PROFILE=0)
+        self.assertEqual(profile(FU_PROFILE=0)["ENABLE_ACTIONS"], 0)
         self.assertEqual(profile(FU_PROFILE=0,SUPPORT_CONTEXT_COORDINATION=0,
             SUPPORT_CLUSTER_LIFECYCLE=0,SUPPORT_TIMEOUT=0)['FU_PROFILE'],0)
 

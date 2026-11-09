@@ -15,6 +15,9 @@ class SftCoverage(CoverageCollector):
     def hit(self,name):self.hits.add(name)
 
     def report(self):
+        from mosaic_uvm.tile_selection import selection_report
+        if (selected := selection_report(self)) is not None:
+            return selected
         c=self.config
         goals=['validation_cancel','busy_drain','completion_event','activation','backpressure','false_suppress','validation_rejection',
                'ownership_rejection','ordered_completion','atomic_destinations',

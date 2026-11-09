@@ -77,21 +77,25 @@
     "PREDICATE_PROTECTION": 0,
     "EVENT_PROTECTION": 0,
     "CONFIG_WORD_COUNT": 17,
+    "ENABLE_PREDICATE": 1,
+    "ENABLE_LOOP_CONTROLLER": 1,
+    "ENABLE_EVENT_BARRIER": 1,
+    "ENABLE_ACTIONS": 1,
     "INPUT_ELASTIC_MASK": 3,
     "OUTPUT_ELASTIC_MASK": 1
   },
   "inventory": [
     "tile_shell",
-    "predicate_unit",
-    "scalar_alu",
-    "loop_controller",
-    "event_barrier",
     "register_file",
     "round_robin_arbiter",
     "tile_shell_queue",
     "performance_counters",
     "packer",
     "stream_join",
+    "predicate_unit",
+    "scalar_alu",
+    "loop_controller",
+    "event_barrier",
     "tagged_actions",
     "timeout_counters"
   ],
@@ -439,8 +443,8 @@
     "src/rtl/building_blocks/scalar_alu.sv": "8b584da1594f739011a9b83775cb58985bd518b7a025860f36c3aa2180d3b7cd",
     "src/rtl/mosaic_blocks/cpt_actions.sv": "2ccd343d105b41a12e8db771c80baabd29b28a2f53c374942ab6157e3b498d9d",
     "src/rtl/mosaic_blocks/cpt_egress.sv": "406bf0d7d43eebe1614789e93eec4da8fe284af64c3a4641e9d2a1ac57d1917a",
-    "src/rtl/mosaic_blocks/cpt_body.sv": "086e320ba8ab0a4a75487732f54eac52fa94101fa9c72c2ed9de80d149e6339b",
-    "src/rtl/mosaic_blocks/cpt.sv": "9a2704d1a1c95463d9fcbccc98c7c25eadbc6dd7f2cf109beb318db6efc5eb89"
+    "src/rtl/mosaic_blocks/cpt_body.sv": "53e871eef28cf5ad0b5f0450bd0879e30bcd9704d46094d0e0e85abdff71eae9",
+    "src/rtl/mosaic_blocks/cpt.sv": "e223a7c330448a838430e552c0e7b818f587ad56cd24ec2e5f87aec76d15c57b"
   },
-  "contract_sha256": "9d35904be3d53617cc9ad1406507aa41091c0e0ffdb5b72982fce551755cb303"
+  "contract_sha256": "16b6dc6c341b6eda2ed2399c54ddd1ab15504b378ea3960ac9ed3d5aaeb41c39"
 }

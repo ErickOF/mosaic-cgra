@@ -12,9 +12,12 @@ ROOT=Path(__file__).resolve().parents[3]
 def generate(parameters,output):
     p=validate(parameters)
     result=dict(schema='mosaic-cpt-local-v1',parameters=p,
-        inventory=['tile_shell','predicate_unit','scalar_alu','loop_controller',
-            'event_barrier','register_file','round_robin_arbiter','tile_shell_queue',
-            'performance_counters','packer','stream_join']+(['tagged_actions','timeout_counters'] if p['FU_PROFILE'] else []),
+        inventory=['tile_shell', 'register_file', 'round_robin_arbiter', 'tile_shell_queue',
+            'performance_counters', 'packer', 'stream_join'] +
+            (['predicate_unit', 'scalar_alu'] if p['ENABLE_PREDICATE'] else []) +
+            (['loop_controller'] if p['ENABLE_LOOP_CONTROLLER'] else []) +
+            (['event_barrier'] if p['ENABLE_EVENT_BARRIER'] else []) +
+            (['tagged_actions', 'timeout_counters'] if p['ENABLE_ACTIONS'] else []),
         issue=dict(slots_per_cycle=1,execution='one reserved command; concurrent native event/loop/action engines',
             ordering='command acceptance order; independent egress class arbitration'),
         context_fields=FIELDS,command_metadata=META,event_fields=RECORD,
@@ -25,7 +28,7 @@ def generate(parameters,output):
             ['loop_controller','packer','tile_shell.data'],
             ['native_sources','class_queues','bounded_arbiter','event_fifo','tile_shell.events'],
             ['tile_shell.public_final_delivery','loop_controller.iteration_ready']],
-        actual_action_reservations=p['MAX_OUTSTANDING_ACTIONS'] if p['FU_PROFILE'] else 0,
+        actual_action_reservations=p['MAX_OUTSTANDING_ACTIONS'] if p['ENABLE_ACTIONS'] else 0,
         event_record_bits=256,event_policy='shell envelope; exact per-source sequence; no sequence wrap within an epoch',
         action_policy='safe-point collection plus authoritative commit; timeout queries without replay',
         loop_policy='header and selected index/ordinal beats; advance after final public delivery',

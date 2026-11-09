@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#162b35">
+  <title>MOSAIC · Flavor Studio</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="MOSAIC Flavor Studio">
+      <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      <span>MOSAIC <span class="brand-divider">/</span> <span class="brand-product">Flavor Studio</span></span>
+    </a>
+    <span class="local-badge"><span></span> LOCAL WORKSPACE</span>
+    <div class="header-actions">
+      <button id="open-button" class="button subtle" type="button">Open TOML</button>
+      <button id="save-button" class="button secondary" type="button">Save TOML</button>
+      <button id="generate-button" class="button primary" type="button" disabled>Generate RTL <span aria-hidden="true">↗</span></button>
+    </div>
+    <input id="file-input" type="file" accept=".toml,text/plain" hidden>
+  </header>
+
+  <main class="workspace">
+    <aside class="architecture-panel" aria-label="Architecture settings">
+      <div class="panel-heading"><span class="eyebrow">YOUR ARCHITECTURE</span><span class="version-pill">v1</span></div>
+      <label class="field-label" for="flavor-name">Flavor name</label>
+      <input id="flavor-name" type="text" maxlength="40" autocomplete="off" spellcheck="false" value="my_cgra">
+      <p class="field-help">A name for this hardware configuration.</p>
+      <div id="name-guidance"></div>
+
+      <div class="section-title grid-section"><span>Grid &amp; memory</span></div>
+      <div class="grid-dimensions">
+        <div><label class="field-label" for="grid-rows">Rows</label>
+          <input id="grid-rows" type="number" min="1" step="1" value="2"></div>
+        <div><label class="field-label" for="grid-cols">Columns</label>
+          <input id="grid-cols" type="number" min="1" step="1" value="2"></div>
+      </div>
+      <div id="grid-guidance"></div>
+      <div class="field-pair">
+        <div><label class="field-label" for="memory-banks">SRAM banks</label><select id="memory-banks"></select></div>
+        <div><label class="field-label" for="memory-words">Words / bank</label><select id="memory-words"></select></div>
+      </div>
+      <div class="capacity-card"><span class="capacity-icon" aria-hidden="true">▤</span><div><strong id="memory-capacity">64 KiB</strong><span>shared scratchpad</span></div></div>
+
+      <div id="memory-guidance"></div>
+
+      <div class="section-title palette-section"><span>Tile palette</span><span class="small-caption">Drag to place</span></div>
+      <div id="tile-palette" class="tile-palette" aria-label="Tile classes"></div>
+      <p class="palette-help">Click a class, then a tile to replace it. Press <kbd>Esc</kbd> to return to selection.</p>
+
+      <details class="advanced-settings">
+        <summary>Cluster settings</summary>
+        <label class="field-label" for="cluster-id">Logical cluster ID</label>
+        <input id="cluster-id" type="number" min="0" max="65535" value="0">
+        <input id="lifecycle-timeout" type="hidden" value="65535">
+        <label class="checkbox-field"><input id="clock-gating" type="checkbox" checked> Enable clock gating</label>
+        <div id="cluster-guidance"></div>
+      </details>
+      <div class="profile-note"><span class="eyebrow">CONFIGURABLE FABRIC</span><p>Rectangular grids, all five tile classes, private FU settings, and one clock domain.</p></div>
+    </aside>
+
+    <section class="design-panel" aria-label="Architecture editor">
+      <div class="design-heading">
+        <div><div class="breadcrumb">CGRA FLAVORS <span>/</span> <span id="breadcrumb-name">my_cgra</span></div><h1>Make room for your workload.</h1><p>Choose your tiles. Tune each one. Build your RTL.</p></div>
+        <div id="validation-status" class="validation-status checking" role="status">Checking layout…</div>
+      </div>
+      <p id="guidance-scope" class="guidance-scope"></p>
+      <div class="summary-strip" aria-label="Architecture overview">
+        <div><strong id="summary-tiles">4</strong><span>tiles</span></div>
+        <div><strong id="summary-compute">3</strong><span>compute</span></div>
+        <div><strong id="summary-memory">1</strong><span>memory</span></div>
+        <div><strong><span id="summary-data-width">—</span><span class="unit">bit</span></strong><span>data mesh</span></div>
+        <div><strong id="summary-capacity">64<span class="unit">KiB</span></strong><span>scratchpad</span></div>
+      </div>
+
+      <div class="editor-card">
+        <div class="canvas-toolbar">
+          <div class="segmented-control" role="tablist" aria-label="Editor view">
+            <button id="layout-tab" role="tab" aria-selected="true" aria-controls="layout-view" class="active" type="button">Layout</button>
+            <button id="toml-tab" role="tab" aria-selected="false" aria-controls="toml-view" type="button">TOML</button>
+          </div>
+          <div class="canvas-actions">
+            <button id="select-button" class="icon-button active" type="button" aria-label="Select tiles" title="Select tiles (Esc)"></button>
+            <span class="toolbar-divider"></span>
+            <button id="undo-button" class="icon-button" type="button" aria-label="Undo" title="Undo (Ctrl+Z)" disabled></button>
+            <button id="redo-button" class="icon-button" type="button" aria-label="Redo" title="Redo (Ctrl+Shift+Z)" disabled></button>
+          </div>
+        </div>
+
+        <div id="layout-view" role="tabpanel" aria-labelledby="layout-tab">
+          <div class="canvas-info"><span id="grid-label">2 × 2 TILE GRID</span><span id="placement-hint">Select a tile to configure it</span></div>
+          <div class="grid-canvas"><div id="column-labels" class="column-labels" aria-hidden="true"></div><div class="grid-row"><div id="row-labels" class="row-labels" aria-hidden="true"></div><div class="mesh-board"><svg id="mesh-wires" class="mesh-wires" viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true"></svg><div id="tile-grid" class="tile-grid" aria-label="Tile placement grid"></div></div></div></div>
+          <div class="canvas-footer"><div class="tile-legend"><span><i class="bct-dot"></i> Compute tile</span><span><i class="mst-dot"></i> Memory tile</span></div><span>Drag tiles to swap positions</span></div>
+        </div>
+
+        <div id="toml-view" role="tabpanel" aria-labelledby="toml-tab" hidden>
+          <div class="toml-toolbar"><span id="toml-status">Architecture source · TOML</span><div><button id="discard-toml" class="button subtle small" type="button" hidden>Discard edits</button><button id="apply-toml" class="button secondary small" type="button" disabled>Apply changes</button></div></div>
+          <label class="sr-only" for="toml-source">Architecture TOML</label><textarea id="toml-source" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
+        </div>
+      </div>
+
+      <section id="issues-panel" class="issues-panel" aria-label="Validation issues" hidden><div class="issues-heading"><strong>Let’s fix the layout</strong><span>Generation is paused until these issues are resolved.</span></div><ul id="issues-list"></ul></section>
+
+      <section class="build-section" aria-label="Build activity">
+        <div class="build-heading"><div><h2>Build activity</h2><p id="test-scope">Generate an RTL bundle or check your design with PyUVM.</p></div><div><select id="simulator" aria-label="Simulation tool"></select><button id="test-button" class="button secondary small" type="button" disabled>Run PyUVM</button></div></div>
+        <div id="jobs-list" class="jobs-list"><div class="empty-builds"><span class="empty-build-icon" aria-hidden="true">↗</span><div><strong>Your next architecture starts here.</strong><p>Generated RTL, manifests, and source files will be available as a local download.</p></div></div></div>
+      </section>
+      <footer class="workspace-footer"><span><span class="local-dot"></span> Everything runs on your machine.</span><span id="draft-status">TOML-backed architecture</span></footer>
+    </section>
+
+    <aside id="inspector" class="inspector-panel" aria-label="Selected tile parameters"><div class="inspector-empty">Select a tile to configure its hardware.</div></aside>
+  </main>
+  <div id="toast-region" class="toast-region" aria-live="polite"></div>
+  <div id="startup-error" class="startup-error" hidden><h1>Could not open the workspace</h1><p id="startup-error-message"></p><button id="retry-button" type="button" class="button primary">Try again</button></div>
+</body>
+</html>

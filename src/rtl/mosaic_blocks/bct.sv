@@ -41,6 +41,10 @@ module bct #(
     parameter CONTROL_PROTECTION = 0,
     parameter ASYNC_RESET = 0,
     parameter FU_PROFILE = 1,
+    // Explicit enables override the legacy profile without coupling peer FUs.
+    parameter ENABLE_ALU = 1,
+    parameter ENABLE_MULTIPLIER = FU_PROFILE >= 1,
+    parameter ENABLE_MAC = FU_PROFILE == 2,
     parameter MULTIPLY_OPERAND_WIDTH = 16,
     parameter ALU_LATENCY = 1,
     parameter MULTIPLY_LATENCY = 1,
@@ -64,6 +68,10 @@ module bct #(
     parameter REQUIRE_CANONICAL_NARROW = 1,
     parameter RF_PROTECTION = 0,
     localparam bit BCT_GEOMETRY_VALID =
+        ((ENABLE_ALU === 0) || (ENABLE_ALU === 1)) &&
+        ((ENABLE_MULTIPLIER === 0) || (ENABLE_MULTIPLIER === 1)) &&
+        ((ENABLE_MAC === 0) || (ENABLE_MAC === 1)) &&
+
         ((DATA_WIDTH >= 1 && DATA_WIDTH <= 65536) === 1'b1) && (^DATA_WIDTH !== 1'bx) &&
         ((DATA_INPUT_PORTS >= 1 && DATA_INPUT_PORTS <= 65536) === 1'b1) && (^DATA_INPUT_PORTS
             !== 1'bx) &&
@@ -105,7 +113,7 @@ module bct #(
         ((MAC_LATENCY >= 0 && MAC_LATENCY <= 4) === 1'b1) &&
         ((RF_READ_PORTS >= 2 && RF_WRITE_PORTS >= 1) === 1'b1) &&
         ((ACCUMULATOR_COUNT >= 0 && ACCUMULATOR_COUNT <= 32) === 1'b1) &&
-        ((FU_PROFILE != 2 || ACCUMULATOR_COUNT >= 1) === 1'b1) &&
+        ((ENABLE_MAC != 1 || ACCUMULATOR_COUNT >= 1) === 1'b1) &&
         ((RDU_TOTAL_DELAY_ENTRIES >= 0 && RDU_TOTAL_DELAY_ENTRIES <= 1024) === 1'b1) &&
         ((SYNC_PROFILE != 1 || RDU_TOTAL_DELAY_ENTRIES >= 1) === 1'b1) &&
         ((INPUT_FIFO_DEPTH >= 0 && INPUT_FIFO_DEPTH <= 65536) === 1'b1) &&
@@ -421,6 +429,9 @@ module bct #(
 
     bct_body #(
         .FU_PROFILE(FU_PROFILE),
+        .ENABLE_ALU(ENABLE_ALU),
+        .ENABLE_MULTIPLIER(ENABLE_MULTIPLIER),
+        .ENABLE_MAC(ENABLE_MAC),
         .MULTIPLY_OPERAND_WIDTH(MULTIPLY_OPERAND_WIDTH),
         .ALU_LATENCY(ALU_LATENCY),
         .MULTIPLY_LATENCY(MULTIPLY_LATENCY),
@@ -533,6 +544,12 @@ module bct #(
         h = 32'd2166136261;
 
         for (int b = 0; b < 4; b++) h = (h ^ ((32'(FU_PROFILE) >> (8 * b)) & 255)) * 32'd16777619;
+        if (ENABLE_ALU != (1))
+            h = (h ^ (32'(ENABLE_ALU) + 32'd1)) * 32'd16777619;
+        if (ENABLE_MULTIPLIER != (FU_PROFILE >= 1))
+            h = (h ^ (32'(ENABLE_MULTIPLIER) + 32'd2)) * 32'd16777619;
+        if (ENABLE_MAC != (FU_PROFILE == 2))
+            h = (h ^ (32'(ENABLE_MAC) + 32'd3)) * 32'd16777619;
 
         for (int b = 0; b < 4; b++) h = (h ^ ((32'(MULTIPLY_OPERAND_WIDTH) >> (8 * b)) & 255)) *
             32'd16777619;

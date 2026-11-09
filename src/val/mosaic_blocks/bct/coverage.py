@@ -14,6 +14,9 @@ class BctCoverage(CoverageCollector):
         self.hits.add(name)
 
     def report(self):
+        from mosaic_uvm.tile_selection import selection_report
+        if (selected := selection_report(self)) is not None:
+            return selected
         c = self.config
         goals = ['activation', 'backpressure', 'false_suppress', 'write_rf',
                  'write_predicate', 'predicate_0', 'predicate_1', 'predicate_2', 'predicate_3',

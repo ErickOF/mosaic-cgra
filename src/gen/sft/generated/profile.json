@@ -87,17 +87,27 @@
     "TABLE_PROTECTION": 0,
     "COEFFICIENT_PROTECTION": 0,
     "CONFIG_WORD_COUNT": 74,
+    "ENABLE_ALU": 1,
+    "ENABLE_MULTIPLIER": 1,
+    "ENABLE_LUT": 1,
+    "ENABLE_POLYNOMIAL": 1,
+    "ENABLE_RECIPROCAL": 0,
+    "ENABLE_RSQRT": 0,
+    "ENABLE_EXPONENTIAL": 0,
+    "ENABLE_REDUCTION": 1,
+    "ENABLE_FORMATTER": 1,
+    "ENABLE_ACCUMULATOR": 1,
     "INPUT_ELASTIC_MASK": 3,
     "OUTPUT_ELASTIC_MASK": 3
   },
   "fu_inventory": [
+    "alu",
+    "multiplier",
     "lut",
-    "scalar_alu",
-    "exact_reduction",
-    "sumsq_multiplier",
-    "accumulator",
     "polynomial",
-    "scalar_multiplier"
+    "reduction",
+    "formatter",
+    "accumulator"
   ],
   "context_fields": {
     "schema": {
@@ -329,10 +339,20 @@
       "0x53460100",
       "0x53460200"
     ],
+    "1": [
+      "0x53460001",
+      "0x53460101",
+      "0x53460201"
+    ],
     "2": [
       "0x53460002",
       "0x53460102",
       "0x53460202"
+    ],
+    "3": [
+      "0x53460003",
+      "0x53460103",
+      "0x53460203"
     ],
     "7": [
       "0x53460007",
@@ -348,16 +368,6 @@
       "0x53460009",
       "0x53460109",
       "0x53460209"
-    ],
-    "1": [
-      "0x53460001",
-      "0x53460101",
-      "0x53460201"
-    ],
-    "3": [
-      "0x53460003",
-      "0x53460103",
-      "0x53460203"
     ]
   },
   "numerical_policy": "native fixed-point primitives; explicit format conversion only",
@@ -439,9 +449,9 @@
     "src/rtl/building_blocks/vector_reduction.sv": "3ef11e7ac2a285860561c64a7cd3a08e1cacc6583475b704eb5370a80a03c1ee",
     "src/rtl/common/write_gate.sv": "cd14228f0e72f10e674cf0ed274b01d0bd1b7f7417868ae9d9009420889299b7",
     "src/rtl/building_blocks/vector_lane_pipeline.sv": "edfbb1ed0eea838862a43a33adea6d8beba2378857eb3c599879d6bf22ae2df0",
-    "src/rtl/mosaic_blocks/sft_datapath.sv": "08dda71a095935f9391b0c883ba29ce257595d0d2c61583dc9c2a7b7e0ba0535",
-    "src/rtl/mosaic_blocks/sft_body.sv": "68f797af668aaf507ead515b9cc4237a05d5806547c2f3d737e42f80e75ac069",
-    "src/rtl/mosaic_blocks/sft.sv": "259dedb61568abdd47ef8336557cb0369e9eb397c22a1ce2baf68e000100f825"
+    "src/rtl/mosaic_blocks/sft_datapath.sv": "92b5a3645e4b8322ea66d6d8b5f795d759eef9df006d57d2334a3c15ab4d3b48",
+    "src/rtl/mosaic_blocks/sft_body.sv": "26e84954a0c0b8a3954c63a88f4b04ecd05216754b74738190b2b1aa713ba0f9",
+    "src/rtl/mosaic_blocks/sft.sv": "42e183cb1b787e3cf63d89d550e7e63e0441b99a61e417613dea2690274274b0"
   },
-  "contract_sha256": "6011931a7d0c87f6f7d340c085b8a7ee2715b262675ad042f558d1dfbfacd855"
+  "contract_sha256": "2431def97dd70f686ba4f5dd0211502f3ebeb4c871a832822e826bd1c21bfbc3"
 }

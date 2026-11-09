@@ -68,6 +68,17 @@ module sft #(
     parameter REDUCTION_ACC_WIDTH = 48,
     parameter MAX_REDUCTION_ELEMENTS = 1024,
     parameter FU_PROFILE = 1,
+    // Explicit enables override the legacy profile without coupling peer FUs.
+    parameter ENABLE_ALU = 1,
+    parameter ENABLE_MULTIPLIER = FU_PROFILE >= 1,
+    parameter ENABLE_LUT = 1,
+    parameter ENABLE_POLYNOMIAL = FU_PROFILE >= 1,
+    parameter ENABLE_RECIPROCAL = FU_PROFILE >= 2,
+    parameter ENABLE_RSQRT = FU_PROFILE >= 2,
+    parameter ENABLE_EXPONENTIAL = FU_PROFILE == 3,
+    parameter ENABLE_REDUCTION = 1,
+    parameter ENABLE_FORMATTER = 1,
+    parameter ENABLE_ACCUMULATOR = 1,
     parameter LOCAL_RF_DEPTH = 8,
     parameter LOCAL_RF_READ_PORTS = 2,
     parameter LOCAL_RF_WRITE_PORTS = 1,
@@ -89,9 +100,20 @@ module sft #(
     parameter COEFFICIENT_PROTECTION = 0,
     // Complete inactive packages contain a header and selected function-bank images.
     parameter CONFIG_WORD_COUNT = (512 + (1 << LUT_ADDRESS_WIDTH) *
-        OUTPUT_WIDTH + (FU_PROFILE >= 1 ? (POLY_MAX_DEGREE + 1) *
+        OUTPUT_WIDTH + (ENABLE_POLYNOMIAL ? (POLY_MAX_DEGREE + 1) *
         POLY_COEFFICIENT_WIDTH : 0) + CONFIG_DATA_WIDTH - 1) / CONFIG_DATA_WIDTH,
     localparam bit SFT_GEOMETRY_VALID =
+        ((ENABLE_ALU === 0) || (ENABLE_ALU === 1)) &&
+        ((ENABLE_MULTIPLIER === 0) || (ENABLE_MULTIPLIER === 1)) &&
+        ((ENABLE_LUT === 0) || (ENABLE_LUT === 1)) &&
+        ((ENABLE_POLYNOMIAL === 0) || (ENABLE_POLYNOMIAL === 1)) &&
+        ((ENABLE_RECIPROCAL === 0) || (ENABLE_RECIPROCAL === 1)) &&
+        ((ENABLE_RSQRT === 0) || (ENABLE_RSQRT === 1)) &&
+        ((ENABLE_EXPONENTIAL === 0) || (ENABLE_EXPONENTIAL === 1)) &&
+        ((ENABLE_REDUCTION === 0) || (ENABLE_REDUCTION === 1)) &&
+        ((ENABLE_FORMATTER === 0) || (ENABLE_FORMATTER === 1)) &&
+        ((ENABLE_ACCUMULATOR === 0) || (ENABLE_ACCUMULATOR === 1)) &&
+
         ((DATA_METADATA_WIDTH >= 160 && DATA_METADATA_WIDTH <= 512) === 1'b1) &&
         ((OWNER_ID_WIDTH >= 1 && OWNER_ID_WIDTH <= 32) === 1'b1) &&
         ((KERNEL_ID_WIDTH >= 1 && KERNEL_ID_WIDTH <= 32) === 1'b1) &&
@@ -161,7 +183,7 @@ module sft #(
         ((SYNC_PROFILE === 0) || (SYNC_PROFILE === 2)) &&
         (SUPPORT_FP16 === 0) && (SUPPORT_BF16 === 0) &&
         ((CONFIG_WORD_COUNT * CONFIG_DATA_WIDTH >= 512 +
-            (1 << LUT_ADDRESS_WIDTH) * OUTPUT_WIDTH + (FU_PROFILE >= 1 ?
+            (1 << LUT_ADDRESS_WIDTH) * OUTPUT_WIDTH + (ENABLE_POLYNOMIAL ?
             (POLY_MAX_DEGREE + 1) * POLY_COEFFICIENT_WIDTH : 0)) === 1'b1) &&
         (CONFIG_DATA_WIDTH === 64) && (DATA_INPUT_PORTS === 2) &&
         ((DATA_OUTPUT_PORTS >= 1 && DATA_OUTPUT_PORTS <= 4) === 1'b1),
@@ -507,6 +529,16 @@ module sft #(
             .REDUCTION_ACC_WIDTH(REDUCTION_ACC_WIDTH),
             .MAX_REDUCTION_ELEMENTS(MAX_REDUCTION_ELEMENTS),
             .FU_PROFILE(FU_PROFILE),
+            .ENABLE_ALU(ENABLE_ALU),
+            .ENABLE_MULTIPLIER(ENABLE_MULTIPLIER),
+            .ENABLE_LUT(ENABLE_LUT),
+            .ENABLE_POLYNOMIAL(ENABLE_POLYNOMIAL),
+            .ENABLE_RECIPROCAL(ENABLE_RECIPROCAL),
+            .ENABLE_RSQRT(ENABLE_RSQRT),
+            .ENABLE_EXPONENTIAL(ENABLE_EXPONENTIAL),
+            .ENABLE_REDUCTION(ENABLE_REDUCTION),
+            .ENABLE_FORMATTER(ENABLE_FORMATTER),
+            .ENABLE_ACCUMULATOR(ENABLE_ACCUMULATOR),
             .LOCAL_RF_DEPTH(LOCAL_RF_DEPTH),
             .LOCAL_RF_READ_PORTS(LOCAL_RF_READ_PORTS),
             .LOCAL_RF_WRITE_PORTS(LOCAL_RF_WRITE_PORTS),
@@ -705,6 +737,26 @@ module sft #(
 
             for (int b = 0; b < 4; b++)
                 h = (h ^ ((32'(FU_PROFILE) >> (8 * b)) & 255)) * 32'd16777619;
+            if (ENABLE_ALU != (1))
+                h = (h ^ (32'(ENABLE_ALU) + 32'd1)) * 32'd16777619;
+            if (ENABLE_MULTIPLIER != (FU_PROFILE >= 1))
+                h = (h ^ (32'(ENABLE_MULTIPLIER) + 32'd2)) * 32'd16777619;
+            if (ENABLE_LUT != (1))
+                h = (h ^ (32'(ENABLE_LUT) + 32'd3)) * 32'd16777619;
+            if (ENABLE_POLYNOMIAL != (FU_PROFILE >= 1))
+                h = (h ^ (32'(ENABLE_POLYNOMIAL) + 32'd4)) * 32'd16777619;
+            if (ENABLE_RECIPROCAL != (FU_PROFILE >= 2))
+                h = (h ^ (32'(ENABLE_RECIPROCAL) + 32'd5)) * 32'd16777619;
+            if (ENABLE_RSQRT != (FU_PROFILE >= 2))
+                h = (h ^ (32'(ENABLE_RSQRT) + 32'd6)) * 32'd16777619;
+            if (ENABLE_EXPONENTIAL != (FU_PROFILE == 3))
+                h = (h ^ (32'(ENABLE_EXPONENTIAL) + 32'd7)) * 32'd16777619;
+            if (ENABLE_REDUCTION != (1))
+                h = (h ^ (32'(ENABLE_REDUCTION) + 32'd8)) * 32'd16777619;
+            if (ENABLE_FORMATTER != (1))
+                h = (h ^ (32'(ENABLE_FORMATTER) + 32'd9)) * 32'd16777619;
+            if (ENABLE_ACCUMULATOR != (1))
+                h = (h ^ (32'(ENABLE_ACCUMULATOR) + 32'd10)) * 32'd16777619;
 
             for (int b = 0; b < 4; b++)
                 h = (h ^ ((32'(LOCAL_RF_DEPTH) >> (8 * b)) & 255)) * 32'd16777619;

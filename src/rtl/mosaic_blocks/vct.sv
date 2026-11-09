@@ -42,6 +42,10 @@ module vct #(
     parameter ELEMENT_WIDTH = 8,
     parameter ACC_WIDTH = 32,
     parameter FU_PROFILE = 1,
+    // Explicit enables override the legacy profile without coupling peer FUs.
+    parameter ENABLE_LANE_ALU = 1,
+    parameter ENABLE_REDUCTION = FU_PROFILE >= 1,
+    parameter ENABLE_DOT_PRODUCT = FU_PROFILE == 2,
     parameter LANE_LATENCY = 1,
     parameter MUL_LATENCY = 1,
     parameter MAC_LATENCY = 1,
@@ -75,6 +79,10 @@ module vct #(
     localparam int PREDICATE_WIDTH = (NUM_LANES >= 1 && NUM_LANES <= 8) ===
         1'b1 ? NUM_LANES : 1,
     localparam bit VCT_GEOMETRY_VALID =
+        ((ENABLE_LANE_ALU === 0) || (ENABLE_LANE_ALU === 1)) &&
+        ((ENABLE_REDUCTION === 0) || (ENABLE_REDUCTION === 1)) &&
+        ((ENABLE_DOT_PRODUCT === 0) || (ENABLE_DOT_PRODUCT === 1)) &&
+
         ((CONFIG_WORD_COUNT >= 1 && CONFIG_WORD_COUNT <= 256) === 1'b1) &&
         ((CONFIG_DATA_WIDTH >= 8 && CONFIG_DATA_WIDTH <= 256) === 1'b1) &&
         ((DATA_METADATA_WIDTH >= 1 && DATA_METADATA_WIDTH <= 256) === 1'b1) &&
@@ -93,7 +101,7 @@ module vct #(
         ((WRITE_SLICE_WIDTH >= 1 && WRITE_SLICE_WIDTH <= ELEMENT_WIDTH) === 1'b1) &&
         ((ELEMENT_WIDTH % WRITE_SLICE_WIDTH == 0) === 1'b1) &&
         ((ACC_WIDTH % WRITE_SLICE_WIDTH == 0) === 1'b1) &&
-        ((FU_PROFILE != 2 || ACC_WIDTH >= 2 * ELEMENT_WIDTH + $clog2(NUM_LANES)) === 1'b1) &&
+        ((!ENABLE_DOT_PRODUCT || ACC_WIDTH >= 2 * ELEMENT_WIDTH + $clog2(NUM_LANES)) === 1'b1) &&
         ((VRF_DEPTH >= 1 && VRF_DEPTH <= 64) === 1'b1) &&
         ((PREDICATE_DEPTH >= 1 && PREDICATE_DEPTH <= 64) === 1'b1) &&
         ((VECTOR_ACC_DEPTH >= 1 && VECTOR_ACC_DEPTH <= 64) === 1'b1) &&
@@ -446,6 +454,9 @@ module vct #(
         .ELEMENT_WIDTH(ELEMENT_WIDTH),
         .ACC_WIDTH(ACC_WIDTH),
         .FU_PROFILE(FU_PROFILE),
+        .ENABLE_LANE_ALU(ENABLE_LANE_ALU),
+        .ENABLE_REDUCTION(ENABLE_REDUCTION),
+        .ENABLE_DOT_PRODUCT(ENABLE_DOT_PRODUCT),
         .LANE_LATENCY(LANE_LATENCY),
         .MUL_LATENCY(MUL_LATENCY),
         .MAC_LATENCY(MAC_LATENCY),
@@ -575,6 +586,12 @@ module vct #(
 
         for (int b = 0; b < 4; b++)
             h = (h ^ ((32'(FU_PROFILE) >> (8 * b)) & 255)) * 32'd16777619;
+        if (ENABLE_LANE_ALU != (1))
+            h = (h ^ (32'(ENABLE_LANE_ALU) + 32'd1)) * 32'd16777619;
+        if (ENABLE_REDUCTION != (FU_PROFILE >= 1))
+            h = (h ^ (32'(ENABLE_REDUCTION) + 32'd2)) * 32'd16777619;
+        if (ENABLE_DOT_PRODUCT != (FU_PROFILE == 2))
+            h = (h ^ (32'(ENABLE_DOT_PRODUCT) + 32'd3)) * 32'd16777619;
 
         for (int b = 0; b < 4; b++)
             h = (h ^ ((32'(LANE_LATENCY) >> (8 * b)) & 255)) * 32'd16777619;

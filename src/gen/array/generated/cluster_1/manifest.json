@@ -234,6 +234,73 @@
       "OC": 3
     }
   },
+  "tile_parameter_table": [
+    {
+      "id": 0,
+      "parameters": {
+        "FU_PROFILE": 1,
+        "RF_DEPTH": 8,
+        "MULTIPLY_OPERAND_WIDTH": 16,
+        "ALU_LATENCY": 1,
+        "MULTIPLY_LATENCY": 1,
+        "MAC_LATENCY": 1,
+        "BYPASS_PROFILE": 1,
+        "REGISTER_BYPASS": 0,
+        "INPUT_FIFO_DEPTH": 2,
+        "RESULT_QUEUE_DEPTH": 2,
+        "RF_PROTECTION": 0,
+        "CONTROL_PROTECTION": 1,
+        "CONTEXT_PROTECTION": 0
+      }
+    },
+    {
+      "id": 1,
+      "parameters": {
+        "FU_PROFILE": 1,
+        "RF_DEPTH": 8,
+        "MULTIPLY_OPERAND_WIDTH": 16,
+        "ALU_LATENCY": 1,
+        "MULTIPLY_LATENCY": 1,
+        "MAC_LATENCY": 1,
+        "BYPASS_PROFILE": 1,
+        "REGISTER_BYPASS": 0,
+        "INPUT_FIFO_DEPTH": 2,
+        "RESULT_QUEUE_DEPTH": 2,
+        "RF_PROTECTION": 0,
+        "CONTROL_PROTECTION": 1,
+        "CONTEXT_PROTECTION": 0
+      }
+    },
+    {
+      "id": 2,
+      "parameters": {
+        "FU_PROFILE": 1,
+        "RF_DEPTH": 8,
+        "MULTIPLY_OPERAND_WIDTH": 16,
+        "ALU_LATENCY": 1,
+        "MULTIPLY_LATENCY": 1,
+        "MAC_LATENCY": 1,
+        "BYPASS_PROFILE": 1,
+        "REGISTER_BYPASS": 0,
+        "INPUT_FIFO_DEPTH": 2,
+        "RESULT_QUEUE_DEPTH": 2,
+        "RF_PROTECTION": 0,
+        "CONTROL_PROTECTION": 1,
+        "CONTEXT_PROTECTION": 0
+      }
+    },
+    {
+      "id": 3,
+      "parameters": {
+        "READ_DATA_FIFO_DEPTH": 8,
+        "WRITE_DATA_FIFO_DEPTH": 8,
+        "COMMAND_PROTECTION": 0,
+        "FIFO_PROTECTION": 0,
+        "CONTROL_PROTECTION": 1,
+        "CONTEXT_PROTECTION": 0
+      }
+    }
+  ],
   "tile_present_mask": 15,
   "tile_class_table": [
     0,
@@ -411,8 +478,8 @@
     "src/rtl/building_blocks/mac.sv": "c66aab429e7e003b077ec030b5bcba8b0cd8cf72e229dba8d7a138da052c7d68",
     "src/rtl/building_blocks/accumulator.sv": "8fef1ad83bcf950de5e0542446fc5b7ae240af4e4eaa689bcb9f4a504628bb0c",
     "src/rtl/building_blocks/predicate_unit.sv": "bab0eb80cd2ce054859e84387cfb6512c4f75a06415101411c5a5e2799c0fe9d",
-    "src/rtl/mosaic_blocks/bct_body.sv": "67f48ac27306ae5e491aa02898ac64e781eda5d6791b84a76a1ce70d6f41df3b",
-    "src/rtl/mosaic_blocks/bct.sv": "0c6f16bc0c788e8e038a8b14ca933756d117baf3ebc74bf67bc4762e00ab0606",
+    "src/rtl/mosaic_blocks/bct_body.sv": "1ec95d1b3a94ee78d192c162127f67c3c12abca1265e4fc047e82a41fea5bbcf",
+    "src/rtl/mosaic_blocks/bct.sv": "4b673bfe8c8344a365d46412a1e421980751ee40981dda444e20267f5285aa23",
     "src/rtl/basic/data_aligner.sv": "a49bb28f1ee3873e6edd3b34b64ba9823e5fd4b29c4c08749b7c210a1d134384",
     "src/rtl/basic/packer.sv": "4be33b1a9e8f78e25aef0fc939ee207bb700a301e15e3237b013472169064f9a",
     "src/rtl/basic/register_slice.sv": "81bbd5a9bf527e6d5f2fb41f3e81de29e7321eb4a87fd2b988c49338e9f07523",
@@ -427,13 +494,13 @@
     "src/rtl/common/priority_encoder.sv": "78ae31ee0db47b901b7b3df785574cfe50436afdf7029b4aa4d3e1346ac58f4c",
     "src/rtl/mosaic_blocks/banked_scratchpad_counters.sv": "33a938045eb833774cfd42bbc8a8bfacdd76942dcf6d592f2eed3549adbbc98c",
     "src/rtl/mosaic_blocks/banked_scratchpad_state.sv": "f68d5d72219b43e6c13caa3756730c83cf0d4b1423eed6abd11c681faf8007d6",
-    "src/rtl/mosaic_blocks/mst_body.sv": "314309030778c6b012901c6d7204b8b290c228e123b9382e65e301700c047887",
+    "src/rtl/mosaic_blocks/mst_body.sv": "66a8027fa4a58475595bbc9ab987727e4aea80263414b2993304283aafbcb090",
     "src/rtl/mosaic_blocks/mst_channel.sv": "ee995ed6cf1fa1d843ebbdbaa96a152bf68069499ea86ad4f8531ce400d6b861",
     "src/rtl/mosaic_blocks/mst_command_queue.sv": "416f536d049abdd71b284f7176a9741bd5822597571bfd1089ff27378ce46509",
     "src/rtl/mosaic_blocks/mst_element_converter.sv": "1ced1a3fd799cbf3d37e44b052d78a4fefba145ec06384ff6dc432b53626b5ab",
     "src/rtl/mosaic_blocks/mst_fragment_adapter.sv": "17525bfbd1bf4c77c5a35d2dc385de22b0883548c6fd46674157987137505e71",
-    "src/rtl/mosaic_blocks/mst_validate.sv": "02850a7c6ece833857907fdf178dc3e9a29617f39d44e01ef9c721d6df250b7b",
-    "src/rtl/mosaic_blocks/mst.sv": "d38b273a20e1f3532bc05567f80ec837523874d8cbe83c93afea5cd4a9edb31d",
+    "src/rtl/mosaic_blocks/mst_validate.sv": "2b7d17367742336e3e4c3409f4068fa3da49182122c476aa199c75ca79856576",
+    "src/rtl/mosaic_blocks/mst.sv": "977a5d9de7809db11b40e2ce40b9db630116e64f35c330a06c07505b41674b63",
     "src/rtl/basic/skid_buffer.sv": "9a7aa4b79f426f3d22058ed0f8fade17be96d67cdffa4cb0c8d711318c0a68c6",
     "src/rtl/building_blocks/local_switch.sv": "b8ff5a5a77b3533b9605bc17d383018e6ae545c66f528c8e060ace550c6cf5f3",
     "src/rtl/mosaic_blocks/static_mesh_node.sv": "3347b8b44e5912e178581fb90f951a11048e92e5e6ca136cfa0075be87cea785",
@@ -467,7 +534,8 @@
     "src/rtl/mosaic_blocks/cluster_stream_adapter.sv": "f3bb8822d470346820cf3345c81da78d3665d1104d531d2226ad6d553758eb39"
   },
   "generator_sha256": {
-    "generate.py": "57d450235b31f70a652803045bea279bff0ca6c092af5d718a5c4a2b20450ef5",
+    "generate.py": "5958f34c4eb5e51ee8c470295b01dac6c5f92e3819f7d85c2c4867b4d935fdc2",
+    "tile_parameters.py": "68e7b3f7f209a61f263461f321e8badb27cd01f2de168c9c0043be6ad1da7716",
     "sources.py": "46d5c7a3d6bbc177f8b759b9aa2a0df88373add07843dd02b76e675b18c6dd77"
   },
   "signoff": {
@@ -610,6 +678,6 @@
     "memory_bridge": {},
     "events": {}
   },
-  "manifest_sha256": "524f5574dfdc34f334596ccb5a2e02c50e998e4c173b0212ba205570cf869cef",
-  "generated_rtl_sha256": "d8d26f9ab4cd14fd5d1e38c82c6302af35ee254d0385c017beb4f784814701d2"
+  "manifest_sha256": "3f429e90d50668f0d731dd7b79fc265505e3bb1b67fed8110f792c177964645c",
+  "generated_rtl_sha256": "42af3e12257202bd9d5ec693859c512d2a48edf7ba3136a8bb929059d3e7f0d6"
 }

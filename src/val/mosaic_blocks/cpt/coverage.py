@@ -13,6 +13,9 @@ class CptCoverage(CoverageCollector):
     def hit(self,name):self.hits.add(name)
 
     def report(self):
+        from mosaic_uvm.tile_selection import selection_report
+        if (selected := selection_report(self)) is not None:
+            return selected
         goals=['activation','validation_rejection','predicate','comparison','registers',
             'events','wait_any','wait_all','barrier','loop','backpressure','random',
             'false_suppress','ownership','duplicate','saturation','suspend_resume',

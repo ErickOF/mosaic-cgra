@@ -2010,6 +2010,11 @@ clean-power:
 
 help:
 	@printf '%s\n' \
+		'make app             Open the local CGRA flavor editor at 127.0.0.1:8765' \
+		'make app-test        Check flavor documents, exports, HTTP and queued jobs' \
+		'make app-browser-check  Check the editor in Chromium (optional Playwright)' \
+		'make app-flavor-regression SIM=icarus  Run exported RTL through Python/PyUVM' \
+		'make flavor-generate FLAVOR=path.toml  Generate an isolated RTL bundle' \
 		'make setup           Install pinned PyUVM and cocotb into .venv' \
 		'make [pyuvm|sim]     Run PyUVM with VCS (default: counter)' \
 		'make counter-regression  Run the counter specification matrix with PyUVM' \
@@ -2387,3 +2392,31 @@ system-regression:
 		--seed "$(SYSTEM_SEED)" --random-cycles "$(SYSTEM_RANDOM_CYCLES)" \
 		--make "$(MAKE)" $(if $(filter vcs,$(SIM)),$(if $(VCS_BIN_DIR),--sim-bin-dir "$(VCS_BIN_DIR)"),$(if $(ICARUS_BIN_DIR),--sim-bin-dir "$(ICARUS_BIN_DIR)")) \
 		$(SYSTEM_REGRESSION_ARGS)
+
+# Local visual editor; generation uses isolated bundles instead of default RTL outputs.
+APP_PORT ?= 8765
+APP_OUTPUT_ROOT ?= $(PROJECT_ROOT)/build/flavors
+APP_CHECK_BUILD ?= $(PROJECT_ROOT)/build/app-checks
+FLAVOR ?= $(PROJECT_ROOT)/app/examples/balanced_compute.toml
+.PHONY: app app-test app-browser-check app-flavor-regression flavor-validate flavor-generate
+app:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/app/server.py" --port "$(APP_PORT)" \
+		--output-root "$(APP_OUTPUT_ROOT)"
+
+app-test:
+	@"$(PYTHON_BIN)" -m unittest discover -s "$(PROJECT_ROOT)/app/checks" -p 'test_*.py' -v
+
+app-browser-check:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/app/checks/browser.py" --output "$(APP_CHECK_BUILD)/browser"
+
+app-flavor-regression:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/app/checks/regression.py" --sim "$(SIM)" \
+		--output "$(APP_CHECK_BUILD)/regression"
+
+flavor-validate:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/gen/flavor/generate.py" \
+		--flavor "$(FLAVOR)" --validate-only
+
+flavor-generate:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/gen/flavor/generate.py" \
+		--flavor "$(FLAVOR)" --output-root "$(APP_OUTPUT_ROOT)"

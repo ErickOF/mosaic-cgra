@@ -16,7 +16,7 @@ def characterize(parameters, output):
     with localcontext() as decimal_context:
         decimal_context.prec=80
         for operation in (4,5,6):
-            if p['FU_PROFILE'] < (3 if operation==6 else 2):continue
+            if not p[{4: 'ENABLE_RECIPROCAL', 5: 'ENABLE_RSQRT', 6: 'ENABLE_EXPONENTIAL'}[operation]]:continue
             for quality in range(3 if operation!=6 else 1):
                 c=context(p,operation=operation,quality=quality,iterations=quality,
                           rounding=1,interpolate=int(bool(p['SUPPORT_INTERPOLATION'])))

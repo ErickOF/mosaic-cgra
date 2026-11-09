@@ -3,6 +3,10 @@
 
 module bct_body #(
     parameter FU_PROFILE = 1,
+    // Explicit enables override the legacy profile without coupling peer FUs.
+    parameter ENABLE_ALU = 1,
+    parameter ENABLE_MULTIPLIER = FU_PROFILE >= 1,
+    parameter ENABLE_MAC = FU_PROFILE == 2,
     parameter MULTIPLY_OPERAND_WIDTH = 16,
     parameter ALU_LATENCY = 1,
     parameter MULTIPLY_LATENCY = 1,
@@ -212,11 +216,11 @@ module bct_body #(
 
     function automatic bit edge_legal(input int source, input int operand);
         if (source >= NS) return 1'b0;
-        if (operand == 2 && FU_PROFILE != 2) return source == ZERO;
-        if (source >= ACC0 && source < BYPASS) return FU_PROFILE == 2;
+        if (operand == 2 && ENABLE_MAC == 0) return source == ZERO;
+        if (source >= ACC0 && source < BYPASS) return ENABLE_MAC == 1;
         if (source == PREDICATE) return BYPASS_PROFILE == 2;
         if (source == BYPASS || source == PREVIOUS)
-            return BYPASS_PROFILE != 0 || FU_PROFILE == 2;
+            return BYPASS_PROFILE != 0 || ENABLE_MAC == 1;
         return 1'b1;
     endfunction
 
@@ -227,11 +231,11 @@ module bct_body #(
             for (int s = 0; s < NS; s++) begin
                 value[d*NS+s] = 1'b1;
 
-                if (s >= ACC0 && s < BYPASS) value[d*NS+s] = FU_PROFILE == 2;
+                if (s >= ACC0 && s < BYPASS) value[d*NS+s] = ENABLE_MAC == 1;
                 if (s == PREDICATE) value[d*NS+s] = BYPASS_PROFILE == 2;
                 if (s == BYPASS || s == PREVIOUS)
-                    value[d*NS+s] = BYPASS_PROFILE != 0 || FU_PROFILE == 2;
-                if (d == 2 && FU_PROFILE != 2) value[d*NS+s] = s == ZERO;
+                    value[d*NS+s] = BYPASS_PROFILE != 0 || ENABLE_MAC == 1;
+                if (d == 2 && ENABLE_MAC == 0) value[d*NS+s] = s == ZERO;
             end
         end
         return value;
@@ -270,9 +274,10 @@ module bct_body #(
             live_accumulator = live_accumulator | (AC'(1) << (c.source_c - ACC0));
 
         legal_context = (^image !== 1'bx) && (image >> CW) == 0 && c.schema == 1 &&
-            c.fu <= FU_PROFILE && c.fu <= 2 && c.opcode <= 19 && c.flag_select <= 6 &&
+            c.fu <= 2 && (c.fu != 0 || ENABLE_ALU) &&
+            (c.fu != 1 || ENABLE_MULTIPLIER) && c.opcode <= 19 && c.flag_select <= 6 &&
             (c.fu == 0 || c.opcode == 0) &&
-            (c.fu != 2 || FU_PROFILE == 2) &&
+            (c.fu != 2 || ENABLE_MAC == 1) &&
             (!c.saturate || (SUPPORT_SATURATION == 1 &&
                 (c.fu == 2 || (c.fu == 0 && c.opcode < 2)))) &&
             (c.fu != 0 || c.opcode < 18 || SUPPORT_MINMAX == 1) &&
@@ -282,15 +287,15 @@ module bct_body #(
             (!c.write_rf || c.rf_write < RF_DEPTH) &&
             c.predicate_read < PREDICATE_DEPTH &&
             (!c.write_predicate || c.predicate_write < PREDICATE_DEPTH) &&
-            (!c.write_accumulator || (FU_PROFILE == 2 && c.accumulator_write < AC)) &&
+            (!c.write_accumulator || (ENABLE_MAC == 1 && c.accumulator_write < AC)) &&
             (!c.false_token || (SUPPORT_PREDICATED_TOKEN == 1 && (|c.output_mask))) &&
             ((c.required_rf & c.invalidate_rf) == 0) &&
             ((c.required_predicate & c.invalidate_predicate) == 0) &&
             ((c.required_accumulator & c.invalidate_accumulator) == 0) &&
             ((c.clear_accumulator & c.invalidate_accumulator) == 0) &&
-            (FU_PROFILE == 2 || c.clear_accumulator == 0) &&
-            (FU_PROFILE == 2 || c.required_accumulator == 0) &&
-            (!c.write_bypass || BYPASS_PROFILE != 0 || FU_PROFILE == 2) &&
+            (ENABLE_MAC == 1 || c.clear_accumulator == 0) &&
+            (ENABLE_MAC == 1 || c.required_accumulator == 0) &&
+            (!c.write_bypass || BYPASS_PROFILE != 0 || ENABLE_MAC == 1) &&
             (!c.terminal || c.advance_mode == 0) &&
             (c.advance_mode == 0 || (SUPPORT_SPATIAL_TEMPORAL == 1 &&
                 c.next_context < C && (c.iterations != 0 || c.advance_mode != 1))) &&
@@ -501,7 +506,7 @@ module bct_body #(
     wire commit_accumulator_enable;
     wire [AA-1:0] commit_accumulator;
 
-    if (FU_PROFILE == 2) begin : g_accumulators
+    if (ENABLE_MAC == 1) begin : g_accumulators
         for (genvar a = 0; a < AC; a++) begin : g_entry
             wire clear_entry = clear_private || (context_change && invalid_accumulator[a]);
             wire initialize_entry = context_change && clear_accumulator[a];
@@ -818,28 +823,40 @@ module bct_body #(
     wire alu_negative;
     wire alu_illegal;
 
-    scalar_alu #(
-        .DATA_WIDTH(D),
-        .SUPPORT_SATURATION(SUPPORT_SATURATION),
-        .SUPPORT_MINMAX(SUPPORT_MINMAX)
-    ) u_alu (
-        .i_enable(fu_enable && ctx.fu == 0),
-        .i_opcode(ctx.opcode),
-        .i_operand_a(a),
-        .i_operand_b(b),
-        .i_predicate(ctx.select_condition),
-        .i_signed(ctx.signed_a),
-        .i_saturate(ctx.saturate),
-        .o_result(alu_result),
-        .o_predicate(alu_predicate),
-        .o_carry(alu_carry),
-        .o_borrow(alu_borrow),
-        .o_overflow(alu_overflow),
-        .o_saturated(alu_saturated),
-        .o_zero(alu_zero),
-        .o_negative(alu_negative),
-        .o_illegal_operation(alu_illegal)
-    );
+    if (ENABLE_ALU) begin : g_alu
+        scalar_alu #(
+            .DATA_WIDTH(D),
+            .SUPPORT_SATURATION(SUPPORT_SATURATION),
+            .SUPPORT_MINMAX(SUPPORT_MINMAX)
+        ) u_alu (
+            .i_enable(fu_enable && ctx.fu == 0),
+            .i_opcode(ctx.opcode),
+            .i_operand_a(a),
+            .i_operand_b(b),
+            .i_predicate(ctx.select_condition),
+            .i_signed(ctx.signed_a),
+            .i_saturate(ctx.saturate),
+            .o_result(alu_result),
+            .o_predicate(alu_predicate),
+            .o_carry(alu_carry),
+            .o_borrow(alu_borrow),
+            .o_overflow(alu_overflow),
+            .o_saturated(alu_saturated),
+            .o_zero(alu_zero),
+            .o_negative(alu_negative),
+            .o_illegal_operation(alu_illegal)
+        );
+    end else begin : g_no_alu
+        assign alu_result = '0;
+        assign alu_predicate = '0;
+        assign alu_carry = '0;
+        assign alu_borrow = '0;
+        assign alu_overflow = '0;
+        assign alu_saturated = '0;
+        assign alu_zero = '0;
+        assign alu_negative = '0;
+        assign alu_illegal = '0;
+    end
 
     wire [D-1:0] multiply_result;
     wire [D-1:0] mac_result;
@@ -850,7 +867,7 @@ module bct_body #(
     wire mac_negative;
     wire mac_illegal;
 
-    if (FU_PROFILE != 0) begin : g_multiply
+    if (ENABLE_MULTIPLIER || ENABLE_MAC) begin : g_multiply
         wire [2*MULTIPLY_OPERAND_WIDTH-1:0] product;
         wire product_signed;
 
@@ -872,7 +889,7 @@ module bct_body #(
 
         assign multiply_result = product_signed ? D'($signed(product)) : D'(product);
 
-        if (FU_PROFILE == 2) begin : g_mac
+        if (ENABLE_MAC == 1) begin : g_mac
             wire [D-1:0] same_result;
             wire same_overflow;
             wire same_carry;

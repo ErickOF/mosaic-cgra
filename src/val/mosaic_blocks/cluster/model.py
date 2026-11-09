@@ -76,11 +76,12 @@ def images(descriptor, *, owner, kernel, package, allocation, context, count,
     result = []
     for slot, tile in enumerate(tiles):
         if tile['class'] == 'BCT':
-            s = sources(BCT_PARAMETERS)
+            parameters = BCT_PARAMETERS | tile.get('parameters', {})
+            s = sources(parameters)
             context_image = dict(schema=1, source_a=0, source_b=s['immediate'],
                 source_c=s['zero'], opcode=0, output_mask=1, iterations=count,
                 terminal=1, monitor=1, immediates=increment[slot])
-            result.append(bct_pack(BCT_PARAMETERS, context_image))
+            result.append(bct_pack(parameters, context_image))
         else:
             result.append(mst_pack(MST_PARAMETERS, 'context', dict(schema=1,
                 package_id=package, allocation=allocation, automatic_command=0,

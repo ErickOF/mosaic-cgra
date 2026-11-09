@@ -1,4 +1,9 @@
 """Repository-local SFT v1 parameter, context and connectivity contract."""
+from pathlib import Path
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from tile_units import UNIT_DEFAULTS, resolve_units, unit_defaults
+
 DEFAULTS = {'TILE_ID': 0,
  'TILE_ID_WIDTH': 16,
  'ARCH_VERSION_WIDTH': 16,
@@ -249,11 +254,13 @@ FIELDS = {'schema': (0, 8),
 
 def package_words(p):
     return (512 + (1 << p['LUT_ADDRESS_WIDTH']) * p['OUTPUT_WIDTH'] +
-            ((p['POLY_MAX_DEGREE'] + 1) * p['POLY_COEFFICIENT_WIDTH'] if p['FU_PROFILE'] else 0) + 63) // 64
+            ((p['POLY_MAX_DEGREE'] + 1) * p['POLY_COEFFICIENT_WIDTH'] if p['ENABLE_POLYNOMIAL'] else 0) + 63) // 64
 
+
+DEFAULTS.update(unit_defaults("SFT"))
 
 def profile(**changes):
-    p = DEFAULTS | changes
+    p = resolve_units("SFT", DEFAULTS | changes, changes)
     if 'CONFIG_WORD_COUNT' not in changes:
         p['CONFIG_WORD_COUNT'] = package_words(p)
     p.setdefault('INPUT_ELASTIC_MASK', (1 << p['DATA_INPUT_PORTS']) - 1)
@@ -262,6 +269,9 @@ def profile(**changes):
 
 
 def validate(p):
+    for name in UNIT_DEFAULTS["SFT"]:
+        if p[name] not in (0, 1):
+            raise ValueError(f"{name} must be Boolean")
     if any(not isinstance(value, int) for value in p.values()):
         raise ValueError('Parameters must be known integers')
     ranges = {'FU_PROFILE': (0, 3), 'LUT_ADDRESS_WIDTH': (1, 8), 'LUT_BANKS': (1, 4),

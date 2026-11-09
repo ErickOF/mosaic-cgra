@@ -1,0 +1,2 @@
+# Optional browser checks only; the app itself uses Python's standard library.
+playwright==1.64.1

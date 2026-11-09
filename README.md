@@ -1,5 +1,20 @@
 # Mosaic CGRA
 
+Configure a CGRA visually with the [local Flavor Studio app](app/README.md):
+
+```sh
+make app
+# Open http://127.0.0.1:8765
+```
+
+The app requires Python 3.12 and supports rectangular grids with BCT, MST, VCT,
+SFT and CPT tiles, independent FU enables and settings, TOML import/export, portable RTL downloads
+and Python/PyUVM validation.
+
+See the [annotated architecture diagrams](doc/architecture/README.md) for the MOSAIC
+single-grid CGRA, shared memory, tile shell and functional units. Editable
+SVGs, high-resolution PNGs and a two-page PDF are included.
+
 See the [RTL reuse review](doc/rtl-reuse.md) for shared ECC/CRC helpers,
 remaining duplication and the focused Python checks.
 

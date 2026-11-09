@@ -1,0 +1,149 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1500" viewBox="0 0 1800 1500" role="img" aria-labelledby="title desc">
+<title id="title">MOSAIC configurable fabric and native tiles</title>
+<desc id="desc">A configurable rectangular fabric contains BCT, MST, VCT, SFT and CPT tiles, one local switch per tile and shared banked SRAM. Every native tile composes a common shell with a specialized body. Independent FU enables and widths are design-time hardware choices; runtime contexts program the hardware that exists. Every tile belongs to one continuous mesh.</desc>
+<defs>
+<marker id="arrow-235cb2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#235cb2"/></marker>
+<marker id="arrow-087f82" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#087f82"/></marker>
+<marker id="arrow-7340b4" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#7340b4"/></marker>
+<marker id="arrow-a15a0a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#a15a0a"/></marker>
+<marker id="arrow-a33168" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#a33168"/></marker>
+<marker id="arrow-52657c" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#52657c"/></marker>
+</defs>
+<g font-family="Arial, Helvetica, sans-serif">
+<rect width="1800" height="1500" fill="#ffffff"/>
+<text x="48" y="43" font-size="15" fill="#087f82" font-weight="700" text-anchor="start">MOSAIC / HARDWARE ATLAS</text>
+<text x="1752" y="43" font-size="15" fill="#52657c" font-weight="400" text-anchor="end">02 / TILES + FUs</text>
+<text x="48" y="102" font-size="43" fill="#14263e" font-weight="700" text-anchor="start">Build the CGRA around your workload</text>
+<text x="48" y="139" font-size="21" fill="#52657c" font-weight="400" text-anchor="start">Local Configurable backend · independent rows and columns · any tile class at any position</text>
+<rect x="48" y="177" width="550" height="114" rx="16" fill="#eef4ff" stroke="#eef4ff" stroke-width="1.5"/>
+<text x="68" y="216" font-size="21" fill="#235cb2" font-weight="700" text-anchor="start">Grid + placement</text>
+<text x="68" y="247" font-size="18" fill="#52657c" font-weight="400" text-anchor="start">Choose rows × columns and every tile class / ID.</text>
+<text x="68" y="272" font-size="18" fill="#52657c" font-weight="400" text-anchor="start">Coordinates determine neighbors and hop distance.</text>
+<rect x="625" y="177" width="550" height="114" rx="16" fill="#eef4ff" stroke="#eef4ff" stroke-width="1.5"/>
+<text x="645" y="216" font-size="21" fill="#235cb2" font-weight="700" text-anchor="start">Private hardware per tile</text>
+<text x="645" y="247" font-size="18" fill="#52657c" font-weight="400" text-anchor="start">Choose FUs, widths, lanes, storage and protection.</text>
+<text x="645" y="272" font-size="18" fill="#52657c" font-weight="400" text-anchor="start">Settings belong to that individual tile instance.</text>
+<rect x="1202" y="177" width="550" height="114" rx="16" fill="#eef4ff" stroke="#eef4ff" stroke-width="1.5"/>
+<text x="1222" y="216" font-size="21" fill="#235cb2" font-weight="700" text-anchor="start">Shared memory + clocks</text>
+<text x="1222" y="247" font-size="18" fill="#52657c" font-weight="400" text-anchor="start">Choose SRAM banking / depth and clock gating.</text>
+<text x="1222" y="272" font-size="18" fill="#52657c" font-weight="400" text-anchor="start">One synchronous domain; four contexts per tile.</text>
+<rect x="48" y="327" width="948" height="585" rx="16" fill="#f8fafc" stroke="#ccd7e4" stroke-width="1.5"/>
+<text x="76" y="367" font-size="26" fill="#14263e" font-weight="700" text-anchor="start">Example fabric · one 2 × 3 tile grid</text>
+<text x="76" y="396" font-size="18" fill="#52657c" font-weight="400" text-anchor="start">2 × 3 example from app/examples/heterogeneous.toml; dimensions are not presets.</text>
+<rect x="88" y="445" width="248" height="104" rx="16" fill="#eef4ff" stroke="#235cb2" stroke-width="1.5"/>
+<text x="106" y="477" font-size="24" fill="#235cb2" font-weight="700" text-anchor="start">BCT · tile 0</text>
+<text x="106" y="506" font-size="18" fill="#14263e" font-weight="400" text-anchor="start">Scalar compute</text>
+<text x="106" y="531" font-size="16" fill="#52657c" font-weight="400" text-anchor="start">Native tile + local switch</text>
+<rect x="388" y="445" width="248" height="104" rx="16" fill="#fff5e8" stroke="#a15a0a" stroke-width="1.5"/>
+<text x="406" y="477" font-size="24" fill="#a15a0a" font-weight="700" text-anchor="start">MST · tile 1</text>
+<text x="406" y="506" font-size="18" fill="#14263e" font-weight="400" text-anchor="start">Memory / streams</text>
+<text x="406" y="531" font-size="16" fill="#52657c" font-weight="400" text-anchor="start">Native tile + local switch</text>
+<rect x="688" y="445" width="248" height="104" rx="16" fill="#eaf8f5" stroke="#087f82" stroke-width="1.5"/>
+<text x="706" y="477" font-size="24" fill="#087f82" font-weight="700" text-anchor="start">VCT · tile 2</text>
+<text x="706" y="506" font-size="18" fill="#14263e" font-weight="400" text-anchor="start">Vector compute</text>
+<text x="706" y="531" font-size="16" fill="#52657c" font-weight="400" text-anchor="start">Native tile + local switch</text>
+<rect x="88" y="631" width="248" height="104" rx="16" fill="#f5effc" stroke="#7340b4" stroke-width="1.5"/>
+<text x="106" y="663" font-size="24" fill="#7340b4" font-weight="700" text-anchor="start">SFT · tile 3</text>
+<text x="106" y="692" font-size="18" fill="#14263e" font-weight="400" text-anchor="start">Special functions</text>
+<text x="106" y="717" font-size="16" fill="#52657c" font-weight="400" text-anchor="start">Native tile + local switch</text>
+<rect x="388" y="631" width="248" height="104" rx="16" fill="#fceff5" stroke="#a33168" stroke-width="1.5"/>
+<text x="406" y="663" font-size="24" fill="#a33168" font-weight="700" text-anchor="start">CPT · tile 4</text>
+<text x="406" y="692" font-size="18" fill="#14263e" font-weight="400" text-anchor="start">Control / coordination</text>
+<text x="406" y="717" font-size="16" fill="#52657c" font-weight="400" text-anchor="start">Native tile + local switch</text>
+<rect x="688" y="631" width="248" height="104" rx="16" fill="#eef4ff" stroke="#235cb2" stroke-width="1.5"/>
+<text x="706" y="663" font-size="24" fill="#235cb2" font-weight="700" text-anchor="start">BCT · tile 5</text>
+<text x="706" y="692" font-size="18" fill="#14263e" font-weight="400" text-anchor="start">Scalar compute</text>
+<text x="706" y="717" font-size="16" fill="#52657c" font-weight="400" text-anchor="start">Native tile + local switch</text>
+<path d="M 338 497 L 386 497" stroke="#087f82" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-087f82)" marker-start="url(#arrow-087f82)"/>
+<path d="M 638 497 L 686 497" stroke="#087f82" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-087f82)" marker-start="url(#arrow-087f82)"/>
+<path d="M 338 683 L 386 683" stroke="#087f82" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-087f82)" marker-start="url(#arrow-087f82)"/>
+<path d="M 638 683 L 686 683" stroke="#087f82" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-087f82)" marker-start="url(#arrow-087f82)"/>
+<path d="M 212 551 L 212 629" stroke="#087f82" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-087f82)" marker-start="url(#arrow-087f82)"/>
+<path d="M 512 551 L 512 629" stroke="#087f82" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-087f82)" marker-start="url(#arrow-087f82)"/>
+<path d="M 812 551 L 812 629" stroke="#087f82" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-087f82)" marker-start="url(#arrow-087f82)"/>
+<path d="M 512 443 L 512 421 L 972 421 L 972 842 L 950 842" stroke="#087f82" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="7 6" marker-end="url(#arrow-087f82)" marker-start="url(#arrow-087f82)"/>
+<text x="738" y="439" font-size="15" fill="#087f82" font-weight="400" text-anchor="start">MST memory bridge</text>
+<text x="88" y="775" font-size="18" fill="#52657c" font-weight="400" text-anchor="start">Edge streams and each tile&#x27;s native control ports remain exposed.</text>
+<rect x="88" y="803" width="860" height="78" rx="16" fill="#eaf8f5" stroke="#eaf8f5" stroke-width="1.5"/>
+<text x="108" y="842" font-size="21" fill="#087f82" font-weight="700" text-anchor="start">Shared banked scratchpad</text>
+<text x="108" y="873" font-size="18" fill="#52657c" font-weight="400" text-anchor="start">8 banks × 32 words × 8 B = 2,048 B · one host client + one client per MST</text>
+<rect x="1024" y="327" width="728" height="585" rx="16" fill="#f8fafc" stroke="#ccd7e4" stroke-width="1.5"/>
+<text x="1052" y="367" font-size="26" fill="#14263e" font-weight="700" text-anchor="start">Inside every native tile</text>
+<rect x="1052" y="399" width="672" height="66" rx="16" fill="#eef4ff" stroke="#eef4ff" stroke-width="1.5"/>
+<text x="1072" y="438" font-size="21" fill="#235cb2" font-weight="700" text-anchor="start">Native configuration / runtime / predicate / event ports</text>
+<path d="M 1388 467 L 1388 491" stroke="#235cb2" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-235cb2)" marker-start="url(#arrow-235cb2)"/>
+<rect x="1052" y="493" width="672" height="170" rx="16" fill="#eef4ff" stroke="#eef4ff" stroke-width="1.5"/>
+<rect x="1072" y="510" width="34" height="30" rx="8" fill="#235cb2" stroke="#235cb2" stroke-width="1.5"/>
+<text x="1089" y="531" font-size="16" fill="white" font-weight="700" text-anchor="middle">07</text>
+<text x="1118" y="532" font-size="21" fill="#235cb2" font-weight="700" text-anchor="start">Tile shell · shared contract</text>
+<text x="1072" y="563" font-size="18" fill="#52657c" font-weight="400" text-anchor="start">Context memory + safe-point context selection</text>
+<text x="1072" y="588" font-size="18" fill="#52657c" font-weight="400" text-anchor="start">Owned queues + lifecycle and identity checks</text>
+<text x="1072" y="613" font-size="18" fill="#52657c" font-weight="400" text-anchor="start">Monitoring + power-control handshakes</text>
+<text x="1072" y="638" font-size="18" fill="#52657c" font-weight="400" text-anchor="start">Protection according to the selected native parameters</text>
+<path d="M 1388 665 L 1388 693" stroke="#235cb2" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-235cb2)" marker-start="url(#arrow-235cb2)"/>
+<rect x="1052" y="695" width="672" height="123" rx="16" fill="#f5effc" stroke="#f5effc" stroke-width="1.5"/>
+<rect x="1072" y="712" width="34" height="30" rx="8" fill="#7340b4" stroke="#7340b4" stroke-width="1.5"/>
+<text x="1089" y="733" font-size="16" fill="white" font-weight="700" text-anchor="middle">08</text>
+<text x="1118" y="734" font-size="21" fill="#7340b4" font-weight="700" text-anchor="start">Tile-specific body</text>
+<text x="1072" y="765" font-size="18" fill="#52657c" font-weight="400" text-anchor="start">Selected FUs + registers, accumulators and local state</text>
+<text x="1072" y="790" font-size="18" fill="#52657c" font-weight="400" text-anchor="start">Unavailable operation classes are rejected</text>
+<text x="1052" y="855" font-size="18" fill="#52657c" font-weight="400" text-anchor="start">Data streams connect through the separate local switch.</text>
+<text x="1052" y="883" font-size="17" fill="#52657c" font-weight="400" text-anchor="start">A shell power protocol does not imply enabled physical power gating.</text>
+<text x="48" y="956" font-size="16" fill="#087f82" font-weight="700" text-anchor="start">09 / CHOOSE EACH FUNCTIONAL UNIT INDEPENDENTLY</text>
+<rect x="48" y="982" width="320" height="272" rx="16" fill="#eef4ff" stroke="#eef4ff" stroke-width="1.5"/>
+<text x="68" y="1026" font-size="30" fill="#235cb2" font-weight="700" text-anchor="start">BCT</text>
+<text x="68" y="1055" font-size="19" fill="#14263e" font-weight="700" text-anchor="start">Basic compute tile</text>
+<text x="68" y="1092" font-size="17" fill="#52657c" font-weight="400" text-anchor="start">Scalar ALU</text>
+<text x="68" y="1119" font-size="17" fill="#52657c" font-weight="400" text-anchor="start">Multiplier</text>
+<text x="68" y="1146" font-size="17" fill="#52657c" font-weight="400" text-anchor="start">MAC</text>
+<text x="68" y="1231" font-size="16" fill="#235cb2" font-weight="700" text-anchor="start">Scalar integer dataflow</text>
+<rect x="394" y="982" width="320" height="272" rx="16" fill="#eaf8f5" stroke="#eaf8f5" stroke-width="1.5"/>
+<text x="414" y="1026" font-size="30" fill="#087f82" font-weight="700" text-anchor="start">VCT</text>
+<text x="414" y="1055" font-size="19" fill="#14263e" font-weight="700" text-anchor="start">Vector compute tile</text>
+<text x="414" y="1092" font-size="17" fill="#52657c" font-weight="400" text-anchor="start">Lane ALU</text>
+<text x="414" y="1119" font-size="17" fill="#52657c" font-weight="400" text-anchor="start">Lane multiply · lane MAC</text>
+<text x="414" y="1146" font-size="17" fill="#52657c" font-weight="400" text-anchor="start">Vector reduction</text>
+<text x="414" y="1173" font-size="17" fill="#52657c" font-weight="400" text-anchor="start">Dot product</text>
+<text x="414" y="1231" font-size="16" fill="#087f82" font-weight="700" text-anchor="start">Masked SIMD + scalar results</text>
+<rect x="740" y="982" width="320" height="272" rx="16" fill="#f5effc" stroke="#f5effc" stroke-width="1.5"/>
+<text x="760" y="1026" font-size="30" fill="#7340b4" font-weight="700" text-anchor="start">SFT</text>
+<text x="760" y="1055" font-size="19" fill="#14263e" font-weight="700" text-anchor="start">Specialized function tile</text>
+<text x="760" y="1092" font-size="17" fill="#52657c" font-weight="400" text-anchor="start">ALU · multiplier</text>
+<text x="760" y="1119" font-size="17" fill="#52657c" font-weight="400" text-anchor="start">LUT · polynomial</text>
+<text x="760" y="1146" font-size="17" fill="#52657c" font-weight="400" text-anchor="start">Reciprocal · RSQRT · exponential</text>
+<text x="760" y="1173" font-size="17" fill="#52657c" font-weight="400" text-anchor="start">Reduction · formatter</text>
+<text x="760" y="1200" font-size="17" fill="#52657c" font-weight="400" text-anchor="start">Accumulator</text>
+<text x="760" y="1231" font-size="16" fill="#7340b4" font-weight="700" text-anchor="start">Fixed-point nonlinear functions</text>
+<rect x="1086" y="982" width="320" height="272" rx="16" fill="#fff5e8" stroke="#fff5e8" stroke-width="1.5"/>
+<text x="1106" y="1026" font-size="30" fill="#a15a0a" font-weight="700" text-anchor="start">MST</text>
+<text x="1106" y="1055" font-size="19" fill="#14263e" font-weight="700" text-anchor="start">Memory + stream tile</text>
+<text x="1106" y="1092" font-size="17" fill="#52657c" font-weight="400" text-anchor="start">Load engine</text>
+<text x="1106" y="1119" font-size="17" fill="#52657c" font-weight="400" text-anchor="start">Store engine</text>
+<text x="1106" y="1146" font-size="17" fill="#52657c" font-weight="400" text-anchor="start">AGUs + formatters live</text>
+<text x="1106" y="1173" font-size="17" fill="#52657c" font-weight="400" text-anchor="start">inside the selected engines</text>
+<text x="1106" y="1231" font-size="16" fill="#a15a0a" font-weight="700" text-anchor="start">SRAM / stream movement</text>
+<rect x="1432" y="982" width="320" height="272" rx="16" fill="#fceff5" stroke="#fceff5" stroke-width="1.5"/>
+<text x="1452" y="1026" font-size="30" fill="#a33168" font-weight="700" text-anchor="start">CPT</text>
+<text x="1452" y="1055" font-size="19" fill="#14263e" font-weight="700" text-anchor="start">Control + predicate tile</text>
+<text x="1452" y="1092" font-size="17" fill="#52657c" font-weight="400" text-anchor="start">Predicate operations</text>
+<text x="1452" y="1119" font-size="17" fill="#52657c" font-weight="400" text-anchor="start">Loop controller</text>
+<text x="1452" y="1146" font-size="17" fill="#52657c" font-weight="400" text-anchor="start">Events / barriers</text>
+<text x="1452" y="1173" font-size="17" fill="#52657c" font-weight="400" text-anchor="start">Tagged actions</text>
+<text x="1452" y="1231" font-size="16" fill="#a33168" font-weight="700" text-anchor="start">Control + synchronization</text>
+<text x="48" y="1292" font-size="16" fill="#087f82" font-weight="700" text-anchor="start">WHAT A CONFIGURATION CHANGES</text>
+<rect x="48" y="1314" width="550" height="113" rx="16" fill="#f4f7fa" stroke="#f4f7fa" stroke-width="1.5"/>
+<text x="68" y="1353" font-size="21" fill="#52657c" font-weight="700" text-anchor="start">Widths + lane count</text>
+<text x="68" y="1384" font-size="18" fill="#52657c" font-weight="400" text-anchor="start">Change number range, payload size and replicated logic.</text>
+<text x="68" y="1409" font-size="18" fill="#52657c" font-weight="400" text-anchor="start">The widest tile sets the common grid payload width.</text>
+<rect x="625" y="1314" width="550" height="113" rx="16" fill="#f4f7fa" stroke="#f4f7fa" stroke-width="1.5"/>
+<text x="645" y="1353" font-size="21" fill="#52657c" font-weight="700" text-anchor="start">Tables, queues + latency</text>
+<text x="645" y="1384" font-size="18" fill="#52657c" font-weight="400" text-anchor="start">Change capacity, storage and backpressure behavior.</text>
+<text x="645" y="1409" font-size="18" fill="#52657c" font-weight="400" text-anchor="start">A response delay does not necessarily retime arithmetic.</text>
+<rect x="1202" y="1314" width="550" height="113" rx="16" fill="#f4f7fa" stroke="#f4f7fa" stroke-width="1.5"/>
+<text x="1222" y="1353" font-size="21" fill="#52657c" font-weight="700" text-anchor="start">Hardware versus runtime contexts</text>
+<text x="1222" y="1384" font-size="18" fill="#52657c" font-weight="400" text-anchor="start">Generation determines which hardware exists.</text>
+<text x="1222" y="1409" font-size="18" fill="#52657c" font-weight="400" text-anchor="start">Contexts program operations within that hardware.</text>
+<text x="48" y="1460" font-size="18" fill="#52657c" font-weight="400" text-anchor="start">Native per-tile controls connect to a host adapter; mesh edge streams connect external producers and consumers.</text>
+<text x="48" y="1487" font-size="18" fill="#52657c" font-weight="400" text-anchor="start">Layout is logical connectivity, not a floorplan. Area, timing, power and energy require later technology-specific implementation.</text>
+</g>
+</svg>

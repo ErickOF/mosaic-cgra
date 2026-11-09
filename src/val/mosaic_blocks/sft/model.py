@@ -44,7 +44,7 @@ def pack(p, c):
         for data in bank:
             value |= (data & ((1 << p['OUTPUT_WIDTH']) - 1)) << offset
             offset += p['OUTPUT_WIDTH']
-    if p['FU_PROFILE']:
+    if p.get('ENABLE_POLYNOMIAL', p['FU_PROFILE'] >= 1):
         for bank in [coefficients[c['bank'] % len(coefficients)]]:
             assert len(bank) == p['POLY_MAX_DEGREE'] + 1
             for data in bank:

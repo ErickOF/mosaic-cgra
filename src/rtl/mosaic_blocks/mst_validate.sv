@@ -2,6 +2,8 @@
 `default_nettype none
 
 module mst_validate #(
+    parameter ENABLE_LOAD = 1,
+    parameter ENABLE_STORE = 1,
     parameter TILE_ID = 0,
     parameter ADDR_WIDTH = 32,
     parameter SHELL_DATA_WIDTH = 128,
@@ -657,7 +659,9 @@ module mst_validate #(
             else if (!matrix_ok || d.mode.address_mode > MST_ADDR_STRIDED_2D ||
                 (d.mode.address_mode == MST_ADDR_STRIDED_2D && SUPPORT_2D == 0))
                 o_code = MST_ERR_MODE;
-            else if (!channel_ok ||
+            else if (!channel_ok || (load_class(d.mode.transfer) &&!ENABLE_LOAD) ||
+                ((!load_class(d.mode.transfer) || d.mode.transfer == MST_LOCAL_COPY) &&
+                    !ENABLE_STORE) ||
                 (load_class(d.mode.transfer) &&
                     ((i_load_mask >> d.mode.load_channel) & 1'b1) == 0) ||
                 ((!load_class(d.mode.transfer) || d.mode.transfer == MST_LOCAL_COPY) &&

@@ -33,6 +33,17 @@ module sft_body #(
     parameter REDUCTION_ACC_WIDTH = 48,
     parameter MAX_REDUCTION_ELEMENTS = 1024,
     parameter FU_PROFILE = 1,
+    // Explicit enables override the legacy profile without coupling peer FUs.
+    parameter ENABLE_ALU = 1,
+    parameter ENABLE_MULTIPLIER = FU_PROFILE >= 1,
+    parameter ENABLE_LUT = 1,
+    parameter ENABLE_POLYNOMIAL = FU_PROFILE >= 1,
+    parameter ENABLE_RECIPROCAL = FU_PROFILE >= 2,
+    parameter ENABLE_RSQRT = FU_PROFILE >= 2,
+    parameter ENABLE_EXPONENTIAL = FU_PROFILE == 3,
+    parameter ENABLE_REDUCTION = 1,
+    parameter ENABLE_FORMATTER = 1,
+    parameter ENABLE_ACCUMULATOR = 1,
     parameter LOCAL_RF_DEPTH = 8,
     parameter LOCAL_RF_READ_PORTS = 2,
     parameter LOCAL_RF_WRITE_PORTS = 1,
@@ -165,7 +176,7 @@ module sft_body #(
     localparam int LD = 1 << LA;
     localparam int TABLE_BITS = LD * OUTPUT_WIDTH;
     localparam int COEFFICIENT_BASE = 512 + TABLE_BITS;
-    localparam int IMAGE_BITS = COEFFICIENT_BASE + (FU_PROFILE >= 1 ?
+    localparam int IMAGE_BITS = COEFFICIENT_BASE + (ENABLE_POLYNOMIAL ?
         (POLY_MAX_DEGREE + 1) * POLY_COEFFICIENT_WIDTH : 0);
     localparam int LBI = C * LB > 1 ? $clog2(C * LB) : 1;
     localparam int PBI = C * PB > 1 ? $clog2(C * PB) : 1;
@@ -307,19 +318,21 @@ module sft_body #(
             (c.output_mask >> NO) == 0 && c.shift < D &&
             c.source_format <= 3 && c.result_format <= 3 &&
             c.model == (32'h53460000 | (32'(c.quality) << 8) | 32'(c.operation)) &&
-            (c.operation != SFT_MULTIPLY || FU_PROFILE >= 1) &&
-            (c.operation != SFT_LUT || c.bank < LB) &&
-            (c.operation != SFT_POLYNOMIAL || (FU_PROFILE >= 1 && c.bank < PB &&
+            (c.operation != SFT_MULTIPLY || ENABLE_MULTIPLIER) &&
+            (c.operation != SFT_LUT || (ENABLE_LUT && c.bank < LB)) &&
+            (c.operation != SFT_POLYNOMIAL || (ENABLE_POLYNOMIAL && c.bank < PB &&
                 c.degree <= POLY_MAX_DEGREE && c.signed_data &&
                 c.shift < INTERNAL_WIDTH && c.shift < 32)) &&
-            (c.operation != SFT_RECIPROCAL || (FU_PROFILE >= 2 &&
+            (c.operation != SFT_RECIPROCAL || (ENABLE_RECIPROCAL &&
                 c.iterations <= RECIP_MAX_ITERATIONS && c.iterations == c.quality)) &&
-            (c.operation != SFT_RSQRT || (FU_PROFILE >= 2 &&
+            (c.operation != SFT_RSQRT || (ENABLE_RSQRT &&
                 c.iterations <= RSQRT_MAX_ITERATIONS && c.iterations == c.quality)) &&
-            (c.operation != SFT_EXP || FU_PROFILE == 3) &&
-            (c.operation != SFT_ALU || (c.opcode <= 20 &&
+            (c.operation != SFT_EXP || ENABLE_EXPONENTIAL) &&
+            (c.operation != SFT_ALU || (ENABLE_ALU && c.opcode <= 20 &&
                 (!c.saturate || c.opcode == 0 || c.opcode == 1 || c.opcode == 20))) &&
-            (c.operation != SFT_ACCUMULATOR || c.opcode <= 3);
+            (c.operation != SFT_ACCUMULATOR || (ENABLE_ACCUMULATOR && c.opcode <= 3)) &&
+            (c.operation != SFT_REDUCE || ENABLE_REDUCTION) &&
+            (c.operation != SFT_FORMAT || ENABLE_FORMATTER);
     endfunction
 
     context_t ctx;
@@ -920,7 +933,10 @@ module sft_body #(
         .EW(EW),
         .NL(NL),
         .RA(RA),
-        .GENERAL_MULTIPLY(FU_PROFILE >= 1),
+        .GENERAL_MULTIPLY(ENABLE_MULTIPLIER),
+        .ENABLE_ALU(ENABLE_ALU || ENABLE_ACCUMULATOR),
+        .ENABLE_REDUCTION(ENABLE_REDUCTION),
+        .ENABLE_FORMATTER(ENABLE_FORMATTER),
         .SUPPORT_SATURATION(SUPPORT_SATURATION)
     ) u_math (
         .i_enable(dispatch && q.predicate),
@@ -1077,63 +1093,81 @@ module sft_body #(
     wire lut_error;
     wire [3:0] lut_error_code;
 
-    lut_unit #(
-        .ADDRESS_WIDTH(LA),
-        .OUTPUT_WIDTH(OUTPUT_WIDTH),
-        .INDEX_FRACTION_WIDTH(LF),
-        .NUM_BANKS(C * LB),
-        .SUPPORT_INTERPOLATION(SUPPORT_INTERPOLATION),
-        .LOOKUP_PIPELINE_DEPTH(LUT_PIPELINE_DEPTH),
-        .TABLE_VERSION_WIDTH(V),
-        .CONTEXT_ID_WIDTH(8),
-        .LOOKUP_TAG_WIDTH(16),
-        .BUFFER_PROTECTION(TABLE_PROTECTION)
-    ) u_lut (
-        .i_clk(i_clk),
-        .i_rstb(i_rstb !== 1'b0),
-        .i_drain('0),
-        .i_flush(clear_private),
-        .i_error_clear('0),
-        .i_lookup_valid(native_request && ctx.operation == SFT_LUT),
-        .i_lookup_coordinate(a[0+:(1+LA+LF)]),
-        .i_lookup_bank(LBI'(q.context_id * LB + ctx.bank)),
-        .i_lookup_index_signed(ctx.signed_data),
-        .i_lookup_output_signed(ctx.signed_data),
-        .i_lookup_interpolate(ctx.interpolate),
-        .i_lookup_round_mode(ctx.rounding),
-        .i_lookup_predicate(1'b1),
-        .i_lookup_context_id(8'(q.context_id)),
-        .i_lookup_tag(q.tag),
-        .i_result_ready(native_consume),
-        .i_program_valid(program_valid &&!program_poly),
-        .i_program_command(program_command),
-        .i_program_bank(LBI'(program_context * LB + program_bank)),
-        .i_program_address(program_index[0+:LA]),
-        .i_program_write_data(program_image[512 + program_index * OUTPUT_WIDTH+:OUTPUT_WIDTH]),
-        .i_program_table_id(programming_context.table_id),
-        .i_program_quality_id(4'(programming_context.quality)),
-        .i_program_response_ready(reset_known && program_phase == PROGRAM_RESPONSE),
-        .o_result_valid(fu_valid[2]),
-        .o_result_data(fu_data[2*OUTPUT_WIDTH+:OUTPUT_WIDTH]),
-        .o_result_context_id(fu_context[2*8+:8]),
-        .o_result_tag(fu_tag[2*16+:16]),
-        .o_fatal_error(fu_fatal[2]),
-        .o_lookup_ready(fu_ready[2]),
-        .o_result_clipped_low(lut_low),
-        .o_result_clipped_high(lut_high),
-        .o_result_interpolated(lut_interpolated),
-        .o_result_error(lut_error),
-        .o_result_error_code(lut_error_code),
-        .o_program_ready(lut_program_ready),
-        .o_program_response_valid(lut_program_response),
-        .o_bank_valid(lut_bank_valid),
-        .o_program_response_error(lut_program_error)
-    );
+    if (ENABLE_LUT) begin : g_lut
+        lut_unit #(
+            .ADDRESS_WIDTH(LA),
+            .OUTPUT_WIDTH(OUTPUT_WIDTH),
+            .INDEX_FRACTION_WIDTH(LF),
+            .NUM_BANKS(C * LB),
+            .SUPPORT_INTERPOLATION(SUPPORT_INTERPOLATION),
+            .LOOKUP_PIPELINE_DEPTH(LUT_PIPELINE_DEPTH),
+            .TABLE_VERSION_WIDTH(V),
+            .CONTEXT_ID_WIDTH(8),
+            .LOOKUP_TAG_WIDTH(16),
+            .BUFFER_PROTECTION(TABLE_PROTECTION)
+        ) u_lut (
+            .i_clk(i_clk),
+            .i_rstb(i_rstb !== 1'b0),
+            .i_drain('0),
+            .i_flush(clear_private),
+            .i_error_clear('0),
+            .i_lookup_valid(native_request && ctx.operation == SFT_LUT),
+            .i_lookup_coordinate(a[0+:(1+LA+LF)]),
+            .i_lookup_bank(LBI'(q.context_id * LB + ctx.bank)),
+            .i_lookup_index_signed(ctx.signed_data),
+            .i_lookup_output_signed(ctx.signed_data),
+            .i_lookup_interpolate(ctx.interpolate),
+            .i_lookup_round_mode(ctx.rounding),
+            .i_lookup_predicate(1'b1),
+            .i_lookup_context_id(8'(q.context_id)),
+            .i_lookup_tag(q.tag),
+            .i_result_ready(native_consume),
+            .i_program_valid(program_valid &&!program_poly),
+            .i_program_command(program_command),
+            .i_program_bank(LBI'(program_context * LB + program_bank)),
+            .i_program_address(program_index[0+:LA]),
+            .i_program_write_data(program_image[512 + program_index * OUTPUT_WIDTH+:OUTPUT_WIDTH]),
+            .i_program_table_id(programming_context.table_id),
+            .i_program_quality_id(4'(programming_context.quality)),
+            .i_program_response_ready(reset_known && program_phase == PROGRAM_RESPONSE),
+            .o_result_valid(fu_valid[2]),
+            .o_result_data(fu_data[2*OUTPUT_WIDTH+:OUTPUT_WIDTH]),
+            .o_result_context_id(fu_context[2*8+:8]),
+            .o_result_tag(fu_tag[2*16+:16]),
+            .o_fatal_error(fu_fatal[2]),
+            .o_lookup_ready(fu_ready[2]),
+            .o_result_clipped_low(lut_low),
+            .o_result_clipped_high(lut_high),
+            .o_result_interpolated(lut_interpolated),
+            .o_result_error(lut_error),
+            .o_result_error_code(lut_error_code),
+            .o_program_ready(lut_program_ready),
+            .o_program_response_valid(lut_program_response),
+            .o_bank_valid(lut_bank_valid),
+            .o_program_response_error(lut_program_error)
+        );
+    end else begin : g_no_lut
+        assign fu_valid[2] = '0;
+        assign fu_data[2*OUTPUT_WIDTH+:OUTPUT_WIDTH] = '0;
+        assign fu_context[2*8+:8] = '0;
+        assign fu_tag[2*16+:16] = '0;
+        assign fu_fatal[2] = '0;
+        assign fu_ready[2] = '0;
+        assign lut_low = '0;
+        assign lut_high = '0;
+        assign lut_interpolated = '0;
+        assign lut_error = '0;
+        assign lut_error_code = '0;
+        assign lut_program_ready = '0;
+        assign lut_program_response = '0;
+        assign lut_bank_valid = '0;
+        assign lut_program_error = '0;
+    end
 
     assign fu_flags[2*16+:16] = {8'd0, lut_high, lut_low, lut_interpolated,
         4'd0, lut_error};
 
-    if (FU_PROFILE >= 1) begin : g_polynomial
+    if (ENABLE_POLYNOMIAL) begin : g_polynomial
         wire clip_low;
         wire clip_high;
         wire internal_saturated;
@@ -1214,7 +1248,7 @@ module sft_body #(
         assign poly_program_error = 1'b0;
     end
 
-    if (FU_PROFILE >= 2) begin : g_normalization
+    if (ENABLE_RECIPROCAL) begin : g_reciprocal
         wire recip_overflow;
         wire recip_underflow;
         wire recip_saturated;
@@ -1267,6 +1301,17 @@ module sft_body #(
 
         assign fu_flags[4*16+:16] = {9'd0, recip_zero, recip_approximate,
             recip_rounded, recip_saturated, recip_underflow, recip_overflow, recip_error};
+    end else begin : g_no_reciprocal
+        assign fu_ready[4] = '0;
+        assign fu_valid[4] = '0;
+        assign fu_fatal[4] = '0;
+        assign fu_data[4*OUTPUT_WIDTH+:OUTPUT_WIDTH] = '0;
+        assign fu_flags[4*16+:16] = '0;
+        assign fu_context[4*8+:8] = '0;
+        assign fu_tag[4*16+:16] = '0;
+    end
+
+    if (ENABLE_RSQRT) begin : g_rsqrt
         wire rsqrt_overflow;
         wire rsqrt_underflow;
         wire rsqrt_saturated;
@@ -1322,17 +1367,17 @@ module sft_body #(
 
         assign fu_flags[5*16+:16] = {9'd0, rsqrt_zero, rsqrt_approximate,
             rsqrt_rounded, rsqrt_saturated, rsqrt_underflow, rsqrt_overflow, rsqrt_error};
-    end else begin : g_no_normalization
-        assign fu_ready[5:4] = '0;
-        assign fu_valid[5:4] = '0;
-        assign fu_fatal[5:4] = '0;
-        assign fu_data[4*OUTPUT_WIDTH+:2*OUTPUT_WIDTH] = '0;
-        assign fu_flags[4*16+:32] = '0;
-        assign fu_context[4*8+:16] = '0;
-        assign fu_tag[4*16+:32] = '0;
+    end else begin : g_no_rsqrt
+        assign fu_ready[5] = '0;
+        assign fu_valid[5] = '0;
+        assign fu_fatal[5] = '0;
+        assign fu_data[5*OUTPUT_WIDTH+:OUTPUT_WIDTH] = '0;
+        assign fu_flags[5*16+:16] = '0;
+        assign fu_context[5*8+:8] = '0;
+        assign fu_tag[5*16+:16] = '0;
     end
 
-    if (FU_PROFILE == 3) begin : g_exponential
+    if (ENABLE_EXPONENTIAL) begin : g_exponential
         wire overflow;
         wire underflow;
         wire saturated;

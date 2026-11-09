@@ -23,7 +23,9 @@ def context(p, **overrides):
         event_enable=(1 << p['NUM_EVENTS'])-1,epoch=1,timeout=0,targets=(1<<min(2,p["MAX_PARTICIPANTS"]))-1,
         package_version=1,route_version=1,loop_depth=1,loop_ii=1,loop_export=1,
         loop_event=0,command_limit=0,sequence_enable=0,terminal_context=1,
-        next_context=0,allowed_classes=0xff if p['FU_PROFILE'] else 0xbf,register_type=0)
+        next_context=0,allowed_classes=(0x80 | (3 if p['ENABLE_PREDICATE'] else 0) |
+            (12 if p['ENABLE_LOOP_CONTROLLER'] else 0) | (48 if p['ENABLE_EVENT_BARRIER'] else 0) |
+            (64 if p['ENABLE_ACTIONS'] else 0)),register_type=0)
     c.update(overrides)
     c['levels']=levels
     return c
@@ -90,6 +92,11 @@ class Architecture:
         if not condition:return dict(data=0,error=False,
             predicate=(0,mask) if m['false_token'] and cls in (0,1) else None,
             suppress=not m['false_token'])
+        enable = {0: 'ENABLE_PREDICATE', 1: 'ENABLE_PREDICATE',
+                  2: 'ENABLE_LOOP_CONTROLLER', 3: 'ENABLE_LOOP_CONTROLLER',
+                  4: 'ENABLE_EVENT_BARRIER', 5: 'ENABLE_EVENT_BARRIER', 6: 'ENABLE_ACTIONS'}
+        if cls in enable and not self.p.get(enable[cls], 1):
+            return dict(data=0, error=True, predicate=None, suppress=False)
         if cls==0 and op==2 and m['predicate_load']:a=external
         if cls in (0,1):
             x,xv=self.predicates.get(m['source_a'],(0,0))

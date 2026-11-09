@@ -1,0 +1,58 @@
+"schema" = "mosaic-flavor-v1"
+"name" = "heterogeneous"
+
+["cluster"]
+"schema" = "mosaic-cluster-v1"
+"profile" = "Configurable"
+"cluster_id" = 0
+"rows" = 2
+"cols" = 3
+"context_depth" = 4
+"scratchpad_banks" = 8
+"scratchpad_bank_words" = 32
+"clock_gating" = true
+"lifecycle_timeout" = 65535
+
+[["cluster"."tiles"]]
+"id" = 0
+"row" = 0
+"col" = 0
+"class" = "BCT"
+
+[["cluster"."tiles"]]
+"id" = 1
+"row" = 0
+"col" = 1
+"class" = "MST"
+
+[["cluster"."tiles"]]
+"id" = 2
+"row" = 0
+"col" = 2
+"class" = "VCT"
+
+[["cluster"."tiles"]]
+"id" = 3
+"row" = 1
+"col" = 0
+"class" = "SFT"
+
+["cluster"."tiles"."parameters"]
+"FU_PROFILE" = 3
+"EXP_PIPELINE_DEPTH" = 7
+"RECIP_INTERNAL_WIDTH" = 32
+
+[["cluster"."tiles"]]
+"id" = 4
+"row" = 1
+"col" = 1
+"class" = "CPT"
+
+[["cluster"."tiles"]]
+"id" = 5
+"row" = 1
+"col" = 2
+"class" = "BCT"
+
+["cluster"."tiles"."parameters"]
+"RF_DEPTH" = 16

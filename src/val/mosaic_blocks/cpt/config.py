@@ -14,6 +14,8 @@ class CptConfig:
     @classmethod
     def from_environment(cls):
         p = {n: int(os.getenv('CPT_' + n, str(v)), 0) for n, v in DEFAULTS.items()}
+        from mosaic_uvm.tile_selection import environment_enables
+        p.update(environment_enables("CPT", p))
         for name, ports in (('INPUT_ELASTIC_MASK', 'DATA_INPUT_PORTS'),
                             ('OUTPUT_ELASTIC_MASK', 'DATA_OUTPUT_PORTS')):
             p[name] = int(os.getenv('CPT_' + name, str((1 << p[ports]) - 1)), 0)

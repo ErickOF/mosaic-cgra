@@ -1,0 +1,51 @@
+"schema" = "mosaic-flavor-v1"
+"name" = "balanced_compute"
+
+["cluster"]
+"schema" = "mosaic-cluster-v1"
+"profile" = "Configurable"
+"cluster_id" = 0
+"rows" = 2
+"cols" = 2
+"context_depth" = 4
+"scratchpad_banks" = 8
+"scratchpad_bank_words" = 1024
+"clock_gating" = true
+"lifecycle_timeout" = 65535
+
+[["cluster"."tiles"]]
+"id" = 0
+"class" = "BCT"
+"row" = 0
+"col" = 0
+
+["cluster"."tiles"."parameters"]
+"FU_PROFILE" = 2
+"RF_DEPTH" = 16
+"MULTIPLY_LATENCY" = 2
+
+[["cluster"."tiles"]]
+"id" = 1
+"class" = "BCT"
+"row" = 0
+"col" = 1
+
+["cluster"."tiles"."parameters"]
+"RF_DEPTH" = 4
+"ALU_LATENCY" = 0
+
+[["cluster"."tiles"]]
+"id" = 2
+"class" = "BCT"
+"row" = 1
+"col" = 0
+
+[["cluster"."tiles"]]
+"id" = 3
+"class" = "MST"
+"row" = 1
+"col" = 1
+
+["cluster"."tiles"."parameters"]
+"READ_DATA_FIFO_DEPTH" = 16
+"FIFO_PROTECTION" = 2

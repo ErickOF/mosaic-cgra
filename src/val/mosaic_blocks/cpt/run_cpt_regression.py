@@ -58,7 +58,7 @@ INVALID=(
     ('namespaces',dict(NUM_EVENT_NAMESPACES=2)),('event_record',dict(EVENT_RECORD_WIDTH=64)),
     ('predicate_protection',dict(PREDICATE_PROTECTION=1)),
     ('control_protection',dict(CONTROL_PROTECTION=1)),
-    ('async_reset',dict(ASYNC_RESET=1)),('local_capability',dict(FU_PROFILE=0)),
+    ('async_reset',dict(ASYNC_RESET=1)),('invalid_action_enable',dict(ENABLE_ACTIONS=2)),
     ('action_capacity',dict(ACTION_QUEUE_DEPTH=1)),
     ('loop_export',dict(LOOP_EXPORT_LEVELS=5)),('config_words',dict(CONFIG_WORD_COUNT=8)),
     ('unknown_profile',dict(FU_PROFILE="32'bx")),

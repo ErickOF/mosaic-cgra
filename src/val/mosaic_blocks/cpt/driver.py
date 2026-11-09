@@ -28,7 +28,7 @@ class CptDriver(uvm_driver):
                 else:
                     kind, index, mask = item.fault
                     b = d.g_cpt.u_body
-                    self.forced = (b.u_events.g_unit.u_policy.u_data.o_q
+                    self.forced = (b.g_events.u_events.g_unit.u_policy.u_data.o_q
                         if kind == 'event' else d.o_body_context_image)
                     self.forced.value = Force(int(self.forced.value) ^ mask)
             await Timer(2, unit='ns')

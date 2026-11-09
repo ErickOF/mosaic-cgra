@@ -13,6 +13,9 @@ class VctCoverage(CoverageCollector):
         self.hits.add(name)
 
     def report(self):
+        from mosaic_uvm.tile_selection import selection_report
+        if (selected := selection_report(self)) is not None:
+            return selected
         c = self.config
         goals = ['activation', 'backpressure', 'false_suppress', 'write_rf', 'write_predicate',
                  'write_bypass', 'validation_rejection', 'ownership_rejection', 'ordered_completion',

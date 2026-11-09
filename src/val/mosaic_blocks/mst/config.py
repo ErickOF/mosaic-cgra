@@ -56,6 +56,8 @@ class MstConfig:
     @classmethod
     def from_environment(cls):
         p = {n: int(os.getenv('MST_' + n, str(v)), 0) for n, v in DEFAULTS.items()}
+        from mosaic_uvm.tile_selection import environment_enables
+        p.update(environment_enables("MST", p))
         for n, k in (('INPUT_ELASTIC_MASK', 'NUM_STREAM_INPUTS'),
                      ('OUTPUT_ELASTIC_MASK', 'NUM_STREAM_OUTPUTS')):
             p[n] = int(os.getenv('MST_' + n, str((1 << p[k]) - 1)), 0)

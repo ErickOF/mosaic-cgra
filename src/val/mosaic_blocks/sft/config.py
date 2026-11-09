@@ -14,6 +14,8 @@ class SftConfig:
     @classmethod
     def from_environment(cls):
         p = {n: int(os.getenv('SFT_' + n, str(v)), 0) for n, v in DEFAULTS.items()}
+        from mosaic_uvm.tile_selection import environment_enables
+        p.update(environment_enables("SFT", p))
         for name, ports in (('INPUT_ELASTIC_MASK', 'DATA_INPUT_PORTS'),
                             ('OUTPUT_ELASTIC_MASK', 'DATA_OUTPUT_PORTS')):
             p[name] = int(os.getenv('SFT_' + name, str((1 << p[ports]) - 1)), 0)

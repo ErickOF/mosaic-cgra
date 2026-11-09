@@ -11,10 +11,11 @@ ROOT = Path(__file__).resolve().parents[3]
 
 def generate(parameters, output):
     p=validate(parameters)
-    inventory=['lut','scalar_alu','exact_reduction','sumsq_multiplier','accumulator']
-    if p['FU_PROFILE']>=1:inventory+=['polynomial','scalar_multiplier']
-    if p['FU_PROFILE']>=2:inventory+=['reciprocal','rsqrt']
-    if p['FU_PROFILE']==3:inventory+=['exp_e','exp2']
+    operations = {0: 'ENABLE_ALU', 1: 'ENABLE_MULTIPLIER', 2: 'ENABLE_LUT',
+        3: 'ENABLE_POLYNOMIAL', 4: 'ENABLE_RECIPROCAL', 5: 'ENABLE_RSQRT',
+        6: 'ENABLE_EXPONENTIAL', 7: 'ENABLE_REDUCTION', 8: 'ENABLE_FORMATTER',
+        9: 'ENABLE_ACCUMULATOR'}
+    inventory = [flag.removeprefix('ENABLE_').lower() for flag in operations.values() if p[flag]]
     result=dict(schema='mosaic-sft-local-v1',parameters=p,fu_inventory=inventory,
         context_fields={k:dict(offset=o,width=w) for k,(o,w) in FIELDS.items()},
         connectivity=connectivity(p),formats={0:'opaque native bits, without conversion',1:'input fixed-point',
@@ -24,8 +25,7 @@ def generate(parameters, output):
             execution='one shared engine; no out-of-order FU overlap',retirement='acceptance order',
             timing='3 engine edges for exact ops; native tagged handshake latency for approximations; queue and backpressure add wait'),
         numerical_models={str(op):[hex(0x53460000 | quality<<8 | op) for quality in range(3)]
-            for op in [0,2,7,8,9]+([1,3] if p['FU_PROFILE'] else [])+
-                ([4,5] if p['FU_PROFILE']>=2 else [])+([6] if p['FU_PROFILE']==3 else [])},
+            for op, flag in operations.items() if p[flag]},
         numerical_policy='native fixed-point primitives; explicit format conversion only',
         signoff=dict(python_simulation='see regression summary',synthesis='Design Compiler (deferred)',
             lint='NOT_RUN',formal='NOT_RUN',physical='NOT_RUN',power='NOT_RUN'))

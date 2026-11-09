@@ -44,6 +44,11 @@ module cpt #(
     parameter CONTROL_WIDTH = 32,
     parameter CONTROL_REGISTER_DEPTH = 8,
     parameter FU_PROFILE = 1,
+    // Explicit enables override the legacy profile without coupling peer FUs.
+    parameter ENABLE_PREDICATE = 1,
+    parameter ENABLE_LOOP_CONTROLLER = 1,
+    parameter ENABLE_EVENT_BARRIER = 1,
+    parameter ENABLE_ACTIONS = FU_PROFILE >= 1,
     parameter MAX_LOOP_DEPTH = 4,
     parameter INDEX_WIDTH = 32,
     parameter TRIP_COUNT_WIDTH = 32,
@@ -80,6 +85,11 @@ module cpt #(
     parameter CONFIG_WORD_COUNT = (512 + MAX_LOOP_DEPTH *
         (3 * INDEX_WIDTH + TRIP_COUNT_WIDTH + 5) + 63) / 64,
     localparam bit CPT_GEOMETRY_VALID =
+        ((ENABLE_PREDICATE === 0) || (ENABLE_PREDICATE === 1)) &&
+        ((ENABLE_LOOP_CONTROLLER === 0) || (ENABLE_LOOP_CONTROLLER === 1)) &&
+        ((ENABLE_EVENT_BARRIER === 0) || (ENABLE_EVENT_BARRIER === 1)) &&
+        ((ENABLE_ACTIONS === 0) || (ENABLE_ACTIONS === 1)) &&
+
         (TILE_ID_WIDTH === 16) && (ARCH_VERSION_WIDTH === 16) &&
         (CAPABILITY_ID_WIDTH === 32) && (RUNTIME_TAG_WIDTH === 8) &&
         (TRACE_WIDTH === 64) && (CONTEXT_CHECKSUM_WIDTH === 32) &&
@@ -140,8 +150,6 @@ module cpt #(
         ((SUPPORT_TIMEOUT === 0) || (SUPPORT_TIMEOUT === 1)) &&
         ((SUPPORT_PREDICATED_TOKEN === 0) || (SUPPORT_PREDICATED_TOKEN === 1)) &&
         ((REQUIRE_CANONICAL_FORMAT === 0) || (REQUIRE_CANONICAL_FORMAT === 1)) &&
-        (FU_PROFILE != 0 || (SUPPORT_CONTEXT_COORDINATION === 0 &&
-            SUPPORT_CLUSTER_LIFECYCLE === 0 && SUPPORT_TIMEOUT === 0)) &&
         (CONFIG_WORD_COUNT === (512 + MAX_LOOP_DEPTH *
             (3 * INDEX_WIDTH + TRIP_COUNT_WIDTH + 5) + 63) / 64) &&
         ((INPUT_BUFFER_DEPTH >= 1 && INPUT_BUFFER_DEPTH <= 4) === 1'b1) &&
@@ -484,6 +492,10 @@ module cpt #(
             .CONTROL_WIDTH(CONTROL_WIDTH),
             .CONTROL_REGISTER_DEPTH(CONTROL_REGISTER_DEPTH),
             .FU_PROFILE(FU_PROFILE),
+            .ENABLE_PREDICATE(ENABLE_PREDICATE),
+            .ENABLE_LOOP_CONTROLLER(ENABLE_LOOP_CONTROLLER),
+            .ENABLE_EVENT_BARRIER(ENABLE_EVENT_BARRIER),
+            .ENABLE_ACTIONS(ENABLE_ACTIONS),
             .MAX_LOOP_DEPTH(MAX_LOOP_DEPTH),
             .INDEX_WIDTH(INDEX_WIDTH),
             .TRIP_COUNT_WIDTH(TRIP_COUNT_WIDTH),
@@ -640,6 +652,14 @@ module cpt #(
             h = (h ^ 32'(CONTROL_WIDTH)) * 32'd16777619;
             h = (h ^ 32'(CONTROL_REGISTER_DEPTH)) * 32'd16777619;
             h = (h ^ 32'(FU_PROFILE)) * 32'd16777619;
+            if (ENABLE_PREDICATE != (1))
+                h = (h ^ (32'(ENABLE_PREDICATE) + 32'd1)) * 32'd16777619;
+            if (ENABLE_LOOP_CONTROLLER != (1))
+                h = (h ^ (32'(ENABLE_LOOP_CONTROLLER) + 32'd2)) * 32'd16777619;
+            if (ENABLE_EVENT_BARRIER != (1))
+                h = (h ^ (32'(ENABLE_EVENT_BARRIER) + 32'd3)) * 32'd16777619;
+            if (ENABLE_ACTIONS != (FU_PROFILE >= 1))
+                h = (h ^ (32'(ENABLE_ACTIONS) + 32'd4)) * 32'd16777619;
             h = (h ^ 32'(MAX_LOOP_DEPTH)) * 32'd16777619;
             h = (h ^ 32'(INDEX_WIDTH)) * 32'd16777619;
             h = (h ^ 32'(TRIP_COUNT_WIDTH)) * 32'd16777619;
