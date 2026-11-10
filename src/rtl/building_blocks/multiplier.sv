@@ -9,10 +9,9 @@ module multiplier #(
     parameter MAX_LATENCY = 4,
     parameter ASYNC_RESET = 0,
     localparam bit PARAMETERS_VALID =
-        ((OPERAND_WIDTH >= 1) === 1'b1) && ( ^ OPERAND_WIDTH !== 1'bx) &&
-        ((MAX_LATENCY >= 1) === 1'b1) && ( ^ MAX_LATENCY !== 1'bx) &&
+        ((OPERAND_WIDTH >= 1) === 1'b1) &&
+        ((MAX_LATENCY >= 1) === 1'b1) &&
         ((LATENCY >= 0) === 1'b1) && ((LATENCY <= MAX_LATENCY) === 1'b1) &&
-        ( ^ LATENCY !== 1'bx) &&
         ((ASYNC_RESET === 0) || (ASYNC_RESET === 1)) &&
         (((2 * 64'(OPERAND_WIDTH) + 3) * (64'(LATENCY) + 1) < 64'd2147483647) === 1'b1),
     localparam int W = PARAMETERS_VALID ? OPERAND_WIDTH : 1,

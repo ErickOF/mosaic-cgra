@@ -10,9 +10,7 @@ module predicate_unit #(
     parameter OPCODE_WIDTH = 4,
     localparam bit PARAMETERS_VALID =
         ((PRED_DEPTH >= 1 && PRED_DEPTH <= 1073741823) === 1'b1) &&
-        (^PRED_DEPTH !== 1'bx) &&
         ((NUM_LANES >= 1 && NUM_LANES <= 715827880) === 1'b1) &&
-        (^NUM_LANES !== 1'bx) &&
         ((ASYNC_RESET === 0) || (ASYNC_RESET === 1)) && (OPCODE_WIDTH === 4) &&
         ((128'(PRED_DEPTH) * 128'(NUM_LANES) * 2 < 128'd2147483647) === 1'b1),
     localparam int D = PARAMETERS_VALID ? PRED_DEPTH : 1,

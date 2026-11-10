@@ -10,7 +10,6 @@ module fifo #(
     // These are implementation results, not independently configurable knobs.
     localparam bit PARAMETERS_VALID =
         ((DATA_WIDTH >= 1) === 1'b1) && ((DEPTH >= 1) === 1'b1) &&
-        ((^DATA_WIDTH) !== 1'bx) && ((^DEPTH) !== 1'bx) &&
         ((ASYNC_RESET === 0) || (ASYNC_RESET === 1)) &&
         ((ALMOST_FULL_LEVEL >= 1 && ALMOST_FULL_LEVEL <= DEPTH) === 1'b1) &&
         ((ALMOST_EMPTY_LEVEL >= 0 && ALMOST_EMPTY_LEVEL < DEPTH) === 1'b1),
