@@ -51,6 +51,13 @@ class CampaignPlanTest(unittest.TestCase):
                 self.assertEqual(len(resolved["cluster"]["tiles"]), size * size)
                 self.assertGreater(geometry["capacity"], 0)
 
+    def test_synthesis_tracks_the_parameterized_design_name(self):
+        script = (campaign.ROOT / "flows/synth/run.tcl").read_text()
+        self.assertIn(
+            "set ELABORATED_DESIGN [get_object_name [current_design]]", script)
+        self.assertIn("current_design $ELABORATED_DESIGN", script)
+        self.assertNotIn("current_design $TOP_MODULE", script)
+
 
 class CampaignReportTest(unittest.TestCase):
     def write_reports(self, run_dir, top="bct"):

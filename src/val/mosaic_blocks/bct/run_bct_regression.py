@@ -34,6 +34,7 @@ def profile(label, **overrides):
 
 PROFILES = (
     profile('default'),
+    profile('synth_width2', DATA_WIDTH=2, MULTIPLY_OPERAND_WIDTH=1),
     *(profile(f'fu{fu}_w{width}_mw{narrow}_sync{sync}', FU_PROFILE=fu, DATA_WIDTH=width,
         MULTIPLY_OPERAND_WIDTH=narrow, SYNC_PROFILE=sync, ASYNC_RESET=sync % 2,
         RF_DEPTH=(4, 8, 16)[sync], BYPASS_PROFILE=sync,

@@ -98,14 +98,21 @@ if {$::env(MOSAIC_SYNTH_PARAMETERS) ne ""} {
     elaborate $TOP_MODULE
 }
 
+# Parameter overrides cause DC to create a specialized design name, for
+# example bct_DATA_WIDTH2. Track the design selected by elaborate instead of
+# assuming that the original module name remains in WORK.
+set ELABORATED_DESIGN [get_object_name [current_design]]
+
 # Verify that the top exists.
-if {[sizeof_collection [get_designs $TOP_MODULE]] == 0} {
-    puts "ERROR: TOP_MODULE '$TOP_MODULE' was not elaborated correctly."
+if {$ELABORATED_DESIGN eq "" ||
+        [sizeof_collection [get_designs $ELABORATED_DESIGN]] == 0} {
+    puts "ERROR: TOP_MODULE '$TOP_MODULE' did not produce an elaborated design."
     list_designs
-    error "Design does not exist: $TOP_MODULE"
+    error "Elaborated design does not exist for: $TOP_MODULE"
 }
 
-current_design $TOP_MODULE
+puts "ELABORATED_DESIGN = $ELABORATED_DESIGN"
+current_design $ELABORATED_DESIGN
 # Give shared subdesign instances independent copies before optimization,
 # then resolve references against the designs and libraries in link_library.
 uniquify

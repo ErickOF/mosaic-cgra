@@ -72,23 +72,17 @@ module bct #(
         ((ENABLE_MULTIPLIER === 0) || (ENABLE_MULTIPLIER === 1)) &&
         ((ENABLE_MAC === 0) || (ENABLE_MAC === 1)) &&
 
-        ((DATA_WIDTH >= 1 && DATA_WIDTH <= 65536) === 1'b1) && (^DATA_WIDTH !== 1'bx) &&
-        ((DATA_INPUT_PORTS >= 1 && DATA_INPUT_PORTS <= 65536) === 1'b1) && (^DATA_INPUT_PORTS
-            !== 1'bx) &&
-        ((DATA_OUTPUT_PORTS >= 1 && DATA_OUTPUT_PORTS <= 65536) === 1'b1) && (^DATA_OUTPUT_PORTS
-            !== 1'bx) &&
-        ((CONTEXT_DEPTH >= 1 && CONTEXT_DEPTH <= 65536) === 1'b1) && (^CONTEXT_DEPTH !== 1'bx) &&
-        ((RF_DEPTH >= 1 && RF_DEPTH <= 65536) === 1'b1) && (^RF_DEPTH !== 1'bx) &&
-        ((PREDICATE_DEPTH >= 1 && PREDICATE_DEPTH <= 65536) === 1'b1) && (^PREDICATE_DEPTH !==
-            1'bx) &&
-        ((IMMEDIATE_COUNT >= 1 && IMMEDIATE_COUNT <= 65536) === 1'b1) && (^IMMEDIATE_COUNT !==
-            1'bx) &&
-        ((RF_READ_PORTS >= 1 && RF_READ_PORTS <= 65536) === 1'b1) && (^RF_READ_PORTS !== 1'bx) &&
-        ((RF_WRITE_PORTS >= 1 && RF_WRITE_PORTS <= 65536) === 1'b1) && (^RF_WRITE_PORTS !== 1'bx) &&
+        ((DATA_WIDTH >= 1 && DATA_WIDTH <= 65536) === 1'b1) &&
+        ((DATA_INPUT_PORTS >= 1 && DATA_INPUT_PORTS <= 65536) === 1'b1) &&
+        ((DATA_OUTPUT_PORTS >= 1 && DATA_OUTPUT_PORTS <= 65536) === 1'b1) &&
+        ((CONTEXT_DEPTH >= 1 && CONTEXT_DEPTH <= 65536) === 1'b1) &&
+        ((RF_DEPTH >= 1 && RF_DEPTH <= 65536) === 1'b1) &&
+        ((PREDICATE_DEPTH >= 1 && PREDICATE_DEPTH <= 65536) === 1'b1) &&
+        ((IMMEDIATE_COUNT >= 1 && IMMEDIATE_COUNT <= 65536) === 1'b1) &&
+        ((RF_READ_PORTS >= 1 && RF_READ_PORTS <= 65536) === 1'b1) &&
+        ((RF_WRITE_PORTS >= 1 && RF_WRITE_PORTS <= 65536) === 1'b1) &&
         ((RESULT_QUEUE_DEPTH >= 1 && RESULT_QUEUE_DEPTH <= 65536) === 1'b1) &&
-            (^RESULT_QUEUE_DEPTH !== 1'bx) &&
         ((MULTIPLY_OPERAND_WIDTH >= 1 && MULTIPLY_OPERAND_WIDTH <= 65536) === 1'b1) &&
-            (^MULTIPLY_OPERAND_WIDTH !== 1'bx) &&
         ((REGISTER_BYPASS === 0) || (REGISTER_BYPASS === 1)) &&
         ((SUPPORT_SPATIAL_TEMPORAL === 0) || (SUPPORT_SPATIAL_TEMPORAL === 1)) &&
         ((SUPPORT_PREDICATED_TOKEN === 0) || (SUPPORT_PREDICATED_TOKEN === 1)) &&
@@ -102,7 +96,7 @@ module bct #(
             128'(RESULT_QUEUE_DEPTH) * (128'(DATA_WIDTH) + DATA_METADATA_WIDTH +
                 DATA_OUTPUT_PORTS + 256) < 128'd2147483647) === 1'b1) &&
         ((DATA_WIDTH >= 2) === 1'b1) &&
-        ((2 * 64'(MULTIPLY_OPERAND_WIDTH) <= DATA_WIDTH) === 1'b1) &&
+        ((2 * MULTIPLY_OPERAND_WIDTH <= DATA_WIDTH) === 1'b1) &&
         ((FU_PROFILE >= 0 && FU_PROFILE <= 2) === 1'b1) &&
         ((BYPASS_PROFILE >= 0 && BYPASS_PROFILE <= 2) === 1'b1) &&
         ((SYNC_PROFILE >= 0 && SYNC_PROFILE <= 2) === 1'b1) &&
