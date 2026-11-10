@@ -1900,10 +1900,9 @@ synth:
 		echo 'Set TECH_SETUP_TCL to a readable technology/library setup script.' >&2; exit 2; }
 	@command -v "$(DC_SHELL)" >/dev/null || { \
 		echo 'Design Compiler missing. Set DC_SHELL or add dc_shell to PATH.' >&2; exit 2; }
+	$(RM) -r -- "$(abspath $(SYNTH_BUILD))/work" "$(abspath $(SYNTH_BUILD))/reports" \
+		"$(abspath $(SYNTH_BUILD))/db" "$(abspath $(SYNTH_BUILD))/netlist"
 	@mkdir -p "$(abspath $(SYNTH_BUILD))"
-	$(RM) -- "$(abspath $(SYNTH_NETLIST))" "$(abspath $(SYNTH_SDF))" \
-		"$(abspath $(SYNTH_BUILD))/netlist/$(COCOTB_TOPLEVEL).sdc" \
-		"$(abspath $(SYNTH_BUILD))/db/$(COCOTB_TOPLEVEL).ddc"
 	@set -o pipefail; cd "$(abspath $(SYNTH_BUILD))" && \
 		"$(DC_SHELL)" $(DC_ARGS) -f "$(SYNTH_SCRIPT)" | tee dc.log
 	@for output in "$(abspath $(SYNTH_NETLIST))" "$(abspath $(SYNTH_SDF))" \

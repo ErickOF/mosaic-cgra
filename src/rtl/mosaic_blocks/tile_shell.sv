@@ -353,9 +353,9 @@ module tile_shell #(
             (CONFIG_ASYNC == 0 || i_cfg_rstb !== 1'b0);
         wire reset_known = (^i_rstb !== 1'bx) &&
             (CONFIG_ASYNC == 0 || (^i_cfg_rstb !== 1'bx));
-        wire interface_up = reset_b && reset_known;
         wire reset_b;
         wire cfg_reset_b;
+        wire interface_up = reset_b && reset_known;
 
         if (ASYNC_RESET == 1 || CONFIG_ASYNC == 1) begin : g_reset
             reset_synchronizer u_core_release (
@@ -530,6 +530,12 @@ module tile_shell #(
         wire power_command_ready;
         wire power_command_done;
         wire power_command_rejected;
+        wire healthy;
+        wire debug_fire;
+        wire debug_write_ok;
+        wire trace_drop;
+        logic error_event_valid;
+        wire [E-1:0] error_event_payload;
         wire safe_boundary = i_body_idle === 1'b1 && i_body_safe_point === 1'b1 && queues_empty;
         wire safe_mutation = safe_boundary &&!validation.valid &&!runtime_pending &&
             control.state != tile_shell_pkg::TILE_ACTIVE && control.state !=
@@ -565,7 +571,7 @@ module tile_shell #(
             (reset_b && i_body_power_good === 1'b0 && i_body_isolation_ack !== 1'b1);
         wire operational_controls_known = ^{i_test_enable, i_scan_enable, i_body_power_good,
             i_body_isolation_ack, i_body_save_done, i_body_restore_done} !== 1'bx;
-        wire healthy = interface_up && operational_controls_known &&
+        assign healthy = interface_up && operational_controls_known &&
             !first_error.fatal &&!fatal_live;
         wire cfg_fire = cfg_valid && cfg_ready;
         wire runtime_known = ^{i_runtime_request_command, i_runtime_request_owner_id,
@@ -1892,10 +1898,10 @@ module tile_shell #(
         wire debug_known = ^{i_debug_request_write, i_debug_request_owner_id,
             i_debug_request_privileged, i_debug_request_address,
             i_debug_request_write_data, i_debug_request_write_strobe} !== 1'bx;
-        wire debug_fire = i_debug_request_valid === 1'b1 && o_debug_request_ready;
+        assign debug_fire = i_debug_request_valid === 1'b1 && o_debug_request_ready;
         wire debug_authorized = i_debug_request_privileged === 1'b1 ||
             (control.allocated && i_debug_request_owner_id == control.owner);
-        wire debug_write_ok = debug_authorized && safe_mutation &&!first_error.fatal &&
+        assign debug_write_ok = debug_authorized && safe_mutation &&!first_error.fatal &&
             (i_debug_request_address == 8'h20 || i_debug_request_address == 8'h21) &&
             i_debug_request_write_strobe[0] &&!runtime_fire &&!cfg_valid;
         wire debug_bad = debug_fire && (i_debug_request_write &&!debug_write_ok ||
@@ -2024,8 +2030,7 @@ module tile_shell #(
             end
         end
 
-        logic error_event_valid;
-        wire [E-1:0] error_event_payload = (E'(first_error.code) << (CI + K + 3)) |
+        assign error_event_payload = (E'(first_error.code) << (CI + K + 3)) |
             (E'(first_error.kernel) << (CI + 3)) |
             (E'(first_error.context_id) << 3) |
             (first_error.fatal ? E'(tile_shell_pkg::EVENT_FATAL) : E'(tile_shell_pkg::EVENT_ERROR));
@@ -2039,11 +2044,10 @@ module tile_shell #(
             end
         end
 
-        wire trace_drop;
-
         if (SUPPORT_TRACE == 1) begin : g_trace
             localparam int SEQUENCE = TR - TI - O - K - CI - 4;
             wire [SEQUENCE-1:0] sequence_number;
+            wire trace_event = |counter_events[14:0];
 
             counter #(.WIDTH(SEQUENCE)) u_sequence (
                 .i_clk(i_clk),
@@ -2062,7 +2066,6 @@ module tile_shell #(
             wire queue_ready;
             wire queue_valid;
             wire [TR-1:0] trace_data;
-            wire trace_event = |counter_events[14:0];
             wire [3:0] event_class = detected_error != 0 ? 4'd12 : runtime_fire ? 4'd10 :
                 cfg_fire ? 4'd7 : wake_pending ? 4'd13 : 4'd0;
             wire [TR-1:0] trace_record = TR'({sequence_number, TILE_ID_WIDTH'(TILE_ID),
