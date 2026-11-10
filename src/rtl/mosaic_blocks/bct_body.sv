@@ -259,6 +259,7 @@ module bct_body #(
     wire [AC-1:0] clear_accumulator = ctx.clear_accumulator;
     wire [AC-1:0] accumulator_type_signed;
     wire [AC-1:0] accumulator_type_saturate;
+    wire [AC-1:0] accumulator_valid;
 
     function automatic bit legal_context(input logic [IM-1:0] image);
         context_t c;
@@ -505,7 +506,6 @@ module bct_body #(
     end
 
     wire [AC*D-1:0] accumulator_data;
-    wire [AC-1:0] accumulator_valid;
     wire [AC-1:0] accumulator_bad;
     wire [AC-1:0] accumulator_corrected;
     wire commit_accumulator_enable;

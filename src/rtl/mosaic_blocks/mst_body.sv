@@ -735,6 +735,16 @@ module mst_body #(
     localparam int COMPLETION = $bits(completion_t);
     localparam int KEY = O + J + DG;
     localparam int COUNTERS = 32 + 8 * H;
+    mst_body_control_t control;
+    mst_body_control_t control_next;
+    wire control_bad;
+    wire context_bad;
+    wire [H-1:0] queue_bad;
+    wire [31:0] completion_count;
+    wire completion_bad;
+    wire [31:0] terminal_event_count;
+    wire terminal_event_bad;
+    wire automatic_ready;
     wire run = i_rstb === 1'b1;
     wire active_execution = i_execution_state >= tile_shell_pkg::TILE_ACTIVE &&
         i_execution_state <= tile_shell_pkg::TILE_SYNC_STALL;
@@ -745,10 +755,6 @@ module mst_body #(
         i_flush === 1'b0 && o_body_flush === 1'b0 && i_drain === 1'b0 &&
         (!control.closing || control.automatic_pending) &&!control.flushing &&!o_mst_fatal_error;
     wire flushing_request = i_flush === 1'b1 || o_body_flush === 1'b1;
-    mst_body_control_t control;
-    mst_body_control_t control_next;
-    wire control_bad;
-    wire context_bad;
     context_t context_snapshot;
     context_t context_next;
     context_t live_context;
@@ -800,7 +806,6 @@ module mst_body #(
     logic [HCI-1:0] incoming_channel;
     wire incoming_valid = candidate_auto || i_descriptor_valid === 1'b1;
     wire incoming_fire = incoming_valid && (candidate_auto ? automatic_ready : o_descriptor_ready);
-    wire automatic_ready;
     wire [KEY-1:0] incoming_key = {O'(incoming.identity.owner), J'(incoming.identity.command),
         DG'(incoming.identity.generation)};
     identity_t cancel_identity;
@@ -814,7 +819,6 @@ module mst_body #(
     wire [H-1:0] queue_duplicate;
     wire [H-1:0] queue_canceled;
     wire [H-1:0] queue_cancel_match;
-    wire [H-1:0] queue_bad;
     logic [H-1:0] queue_pop;
     wire [DESC-1:0] queue_data [H];
     wire [H*OC-1:0] queue_count;
@@ -838,13 +842,9 @@ module mst_body #(
     completion_t completion_output;
     assign completion_output = completion_packet;
     wire completion_input_ready;
-    wire [31:0] completion_count;
-    wire completion_bad;
     wire terminal_event_input_ready;
     wire terminal_event_valid;
     wire [E-1:0] terminal_event_packet;
-    wire [31:0] terminal_event_count;
-    wire terminal_event_bad;
     wire completion_fire = o_completion_valid && i_completion_ready === 1'b1;
     wire terminal_event_fire = terminal_event_valid && o_body_event_out_ready[0] === 1'b1;
     logic [H-1:0] worker_launch;

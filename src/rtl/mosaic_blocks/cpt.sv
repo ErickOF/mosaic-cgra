@@ -84,6 +84,8 @@ module cpt #(
     parameter EVENT_PROTECTION = 0,
     parameter CONFIG_WORD_COUNT = (512 + MAX_LOOP_DEPTH *
         (3 * INDEX_WIDTH + TRIP_COUNT_WIDTH + 5) + 63) / 64,
+    parameter INPUT_ELASTIC_MASK = 2'b11,
+    parameter OUTPUT_ELASTIC_MASK = 1'b1,
     localparam bit CPT_GEOMETRY_VALID =
         ((ENABLE_PREDICATE === 0) || (ENABLE_PREDICATE === 1)) &&
         ((ENABLE_LOOP_CONTROLLER === 0) || (ENABLE_LOOP_CONTROLLER === 1)) &&
@@ -185,9 +187,7 @@ module cpt #(
     localparam int CI = C > 1 ? $clog2(C) : 1,
     localparam int WI = N > 1 ? $clog2(N) : 1,
     localparam int BY = W / 8 > 0 ? W / 8 : 1,
-    localparam int IM = W * N,
-    parameter INPUT_ELASTIC_MASK = 2'b11,
-    parameter OUTPUT_ELASTIC_MASK = 1'b1
+    localparam int IM = W * N
 ) (
     input logic i_clk,
     input logic i_rstb,
@@ -367,6 +367,7 @@ module cpt #(
         cpt_parameters_must_be_valid invalid_parameters ();
     end else begin : g_cpt
         wire body_debug_select = i_debug_request_address[7:5] === 3'b100;
+        wire body_debug_valid;
         wire shell_debug_request = i_debug_request_valid &&!body_debug_select &&!body_debug_valid;
         wire shell_debug_ready;
         wire shell_debug_response;
@@ -374,7 +375,6 @@ module cpt #(
         wire shell_debug_error;
         wire [31:0] body_counter_data;
         wire body_counter_available;
-        wire body_debug_valid;
         wire [W-1:0] body_debug_data;
         wire body_debug_error;
         wire body_debug_accept = i_debug_request_valid === 1'b1

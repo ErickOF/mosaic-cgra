@@ -22,7 +22,7 @@
     "system_clock_gating": false,
     "max_active_kernels": 1
   },
-  "array_manifest_sha256": "fc1336bc88cded333ca85a37bada11a6aee418feb58b95aa26f8b0254f94e22f",
+  "array_manifest_sha256": "8be6f7420c18e428ce5720a934ed540135150dc10ae7cc1a47eb43a730d549b6",
   "register_map": {
     "IDENTITY": {
       "offset": 0,
@@ -1642,7 +1642,7 @@
         "scratchpad_bank_words": 32,
         "noc_ingress": 2,
         "noc_egress": 1,
-        "manifest_sha256": "3daf2615120907044ff910017eaaef061edc49f2643dcf1dba859f7d8823ee13",
+        "manifest_sha256": "a21a440c6a32b60460177a4a0537d2ca8ed47a8d3b3a60c5ea6a069de77256d7",
         "tile_count": 4,
         "capacity": 512,
         "profile": "Cluster-MVP",
@@ -1661,7 +1661,7 @@
         "scratchpad_bank_words": 32,
         "noc_ingress": 2,
         "noc_egress": 1,
-        "manifest_sha256": "3f429e90d50668f0d731dd7b79fc265505e3bb1b67fed8110f792c177964645c",
+        "manifest_sha256": "31355f1bdc5953673dfaef7b9a26adb83c82adb674848cafdd6fff04b52bde5f",
         "tile_count": 4,
         "capacity": 512,
         "profile": "Cluster-MVP",
@@ -1741,11 +1741,11 @@
       "src/rtl/basic/performance_counters.sv": "4790d96341d466827b2f215f51c22557c753a0409a765ad614b3efff8ccac704",
       "src/rtl/building_blocks/event_barrier_state.sv": "0b04b66385ce678b62d08ad6b4db0a4b27f21f41c7affdb315fc855a3ff85a51",
       "src/rtl/building_blocks/event_barrier_queue.sv": "0c3c936f9aed20e76e8c84d983dff23fb4c64748c4aea7c09954eef0ad63aca9",
-      "src/rtl/building_blocks/tile_power_controller.sv": "bb017271a05fd1de8e194016f069cbf5814d54ce6ca231bf0c313c647f9d67b4",
+      "src/rtl/building_blocks/tile_power_controller.sv": "2588730f12c6a37985599530b40796dc18cad6802faede5f258ceeddd41650ca",
       "src/rtl/mosaic_blocks/tile_shell_codec.sv": "1b5168c1f58845865c7c2211e3f997ca6ffdd4584cf13c983a77ab63a3f02cf9",
       "src/rtl/mosaic_blocks/tile_shell_state.sv": "b93b8685f3deb50d39f01f28828fee60fbab91503984d9befea9475dd2983f4e",
       "src/rtl/mosaic_blocks/tile_shell_queue.sv": "6008d3817c7c5f117ab371b67d4b28401161d51d1ade28ee26032a49bb00ed49",
-      "src/rtl/mosaic_blocks/tile_shell.sv": "c7ec7e7bd6069578d0cee8d6ede47b73e5a98831795c7a7c03191c6f38076212",
+      "src/rtl/mosaic_blocks/tile_shell.sv": "5574f9fbc533d14d3287d08611707a220b4ed7a5838d139d66808cb9f30cf719",
       "src/rtl/common/write_gate.sv": "cd14228f0e72f10e674cf0ed274b01d0bd1b7f7417868ae9d9009420889299b7",
       "src/rtl/common/lane_mask.sv": "ff058d5364ced0ad56b963e8d6403b2fcb04697da1489c4dd60d8a5d3972ec61",
       "src/rtl/common/mux.sv": "4baec3ae2e53d24121c28f4012839ac6b488249baa4801530d0f5547af6602c5",
@@ -1759,8 +1759,8 @@
       "src/rtl/building_blocks/mac.sv": "c66aab429e7e003b077ec030b5bcba8b0cd8cf72e229dba8d7a138da052c7d68",
       "src/rtl/building_blocks/accumulator.sv": "8fef1ad83bcf950de5e0542446fc5b7ae240af4e4eaa689bcb9f4a504628bb0c",
       "src/rtl/building_blocks/predicate_unit.sv": "bab0eb80cd2ce054859e84387cfb6512c4f75a06415101411c5a5e2799c0fe9d",
-      "src/rtl/mosaic_blocks/bct_body.sv": "1ec95d1b3a94ee78d192c162127f67c3c12abca1265e4fc047e82a41fea5bbcf",
-      "src/rtl/mosaic_blocks/bct.sv": "4b673bfe8c8344a365d46412a1e421980751ee40981dda444e20267f5285aa23",
+      "src/rtl/mosaic_blocks/bct_body.sv": "458812f3d6ce9a078ef80e93b121f1fb89b6fff5feec9d8a3e98df4f9da0574b",
+      "src/rtl/mosaic_blocks/bct.sv": "892b19342712ce9ac06157f274b9d636fb965101a62a44adcea676f3bf9ddb73",
       "src/rtl/basic/data_aligner.sv": "a49bb28f1ee3873e6edd3b34b64ba9823e5fd4b29c4c08749b7c210a1d134384",
       "src/rtl/basic/packer.sv": "4be33b1a9e8f78e25aef0fc939ee207bb700a301e15e3237b013472169064f9a",
       "src/rtl/basic/register_slice.sv": "81bbd5a9bf527e6d5f2fb41f3e81de29e7321eb4a87fd2b988c49338e9f07523",
@@ -1775,13 +1775,13 @@
       "src/rtl/common/priority_encoder.sv": "78ae31ee0db47b901b7b3df785574cfe50436afdf7029b4aa4d3e1346ac58f4c",
       "src/rtl/mosaic_blocks/banked_scratchpad_counters.sv": "33a938045eb833774cfd42bbc8a8bfacdd76942dcf6d592f2eed3549adbbc98c",
       "src/rtl/mosaic_blocks/banked_scratchpad_state.sv": "f68d5d72219b43e6c13caa3756730c83cf0d4b1423eed6abd11c681faf8007d6",
-      "src/rtl/mosaic_blocks/mst_body.sv": "66a8027fa4a58475595bbc9ab987727e4aea80263414b2993304283aafbcb090",
+      "src/rtl/mosaic_blocks/mst_body.sv": "86ea63c5a1300e8132c54b2d8cd236d075efc2dd62a21d66fe5a668729330a06",
       "src/rtl/mosaic_blocks/mst_channel.sv": "ee995ed6cf1fa1d843ebbdbaa96a152bf68069499ea86ad4f8531ce400d6b861",
       "src/rtl/mosaic_blocks/mst_command_queue.sv": "416f536d049abdd71b284f7176a9741bd5822597571bfd1089ff27378ce46509",
       "src/rtl/mosaic_blocks/mst_element_converter.sv": "1ced1a3fd799cbf3d37e44b052d78a4fefba145ec06384ff6dc432b53626b5ab",
       "src/rtl/mosaic_blocks/mst_fragment_adapter.sv": "17525bfbd1bf4c77c5a35d2dc385de22b0883548c6fd46674157987137505e71",
       "src/rtl/mosaic_blocks/mst_validate.sv": "2b7d17367742336e3e4c3409f4068fa3da49182122c476aa199c75ca79856576",
-      "src/rtl/mosaic_blocks/mst.sv": "977a5d9de7809db11b40e2ce40b9db630116e64f35c330a06c07505b41674b63",
+      "src/rtl/mosaic_blocks/mst.sv": "6a1a3a08b9fd06c055025a73f1faf105e6069249e9b75ff749b3521298614310",
       "src/rtl/basic/skid_buffer.sv": "9a7aa4b79f426f3d22058ed0f8fade17be96d67cdffa4cb0c8d711318c0a68c6",
       "src/rtl/building_blocks/local_switch.sv": "b8ff5a5a77b3533b9605bc17d383018e6ae545c66f528c8e060ace550c6cf5f3",
       "src/rtl/mosaic_blocks/static_mesh_node.sv": "3347b8b44e5912e178581fb90f951a11048e92e5e6ca136cfa0075be87cea785",
@@ -1828,7 +1828,7 @@
       "src/rtl/mosaic_blocks/array_noc_gateway.sv": "d5dd11b4bbdb5e08db02ad3ded0c5d832db68d9ec8168fcf1975b43df2799618"
     },
     "generator_sha256": {
-      "src/gen/array/generate.py": "18980e44d20182910ffa6d06bd458072c629dc52837b96946f7e3f5062806f6e",
+      "src/gen/array/generate.py": "9abc8940ef715f05a969adcaf776f985cb934328a3a777f60ea873ed8bfb8e4f",
       "src/gen/cluster/generate.py": "5958f34c4eb5e51ee8c470295b01dac6c5f92e3819f7d85c2c4867b4d935fdc2",
       "src/gen/cluster/tile_parameters.py": "68e7b3f7f209a61f263461f321e8badb27cd01f2de168c9c0043be6ad1da7716",
       "src/gen/cluster/sources.py": "46d5c7a3d6bbc177f8b759b9aa2a0df88373add07843dd02b76e675b18c6dd77",
@@ -1863,8 +1863,8 @@
         "Cluster-MVP"
       ],
       "CLUSTER_MANIFEST_HASH_TABLE": [
-        "3daf2615120907044ff910017eaaef061edc49f2643dcf1dba859f7d8823ee13",
-        "3f429e90d50668f0d731dd7b79fc265505e3bb1b67fed8110f792c177964645c"
+        "a21a440c6a32b60460177a4a0537d2ca8ed47a8d3b3a60c5ea6a069de77256d7",
+        "31355f1bdc5953673dfaef7b9a26adb83c82adb674848cafdd6fff04b52bde5f"
       ],
       "CLUSTER_COORDINATE_TABLE": [
         [
@@ -2043,13 +2043,13 @@
         "always powered; native gate-safe clock enable only"
       ]
     },
-    "manifest_sha256": "fc1336bc88cded333ca85a37bada11a6aee418feb58b95aa26f8b0254f94e22f",
-    "generated_rtl_sha256": "2fbe4173835c1431700ab7f72c7b8b834e086aaab45b64199965b58b51806d66"
+    "manifest_sha256": "8be6f7420c18e428ce5720a934ed540135150dc10ae7cc1a47eb43a730d549b6",
+    "generated_rtl_sha256": "25bf14e07800782a4ead4eac309b0b555226ac78b2e23a8e252de322d0f3c6ef"
   },
   "dependency_sha256": {
     "src/rtl/common/crc_pkg.sv": "d876f4f2ab9c63e935eae6e9ca81222d4e0fe4648a974f62fd2263a0b5fb9b22",
     "src/rtl/mosaic_blocks/system_pkg.sv": "1720b9d85457b24021f26c009bc6e550bc2d64f13c4d20c79da10c233feda232",
-    "src/rtl/mosaic_blocks/system_core.sv": "d82095f834c68686782c1bc68beeaea674093a3b20d3fa2f189cb047592d6bf5"
+    "src/rtl/mosaic_blocks/system_core.sv": "fe99d828bb10edc24043779faaf192b573fceab986b4208168bb7b46bd3d98d8"
   },
   "generator_sha256": {
     "src/gen/system/generate.py": "0871f64ddf3b532bcb62f98180bf2eb016c282fe92cf3e25d4be845a230392ab"
@@ -2092,11 +2092,11 @@
     "formal": "NOT_RUN",
     "physical": "NOT_CHARACTERIZED"
   },
-  "manifest_sha256": "dea5df1ea270f4bfdac67fa549167cbd85a9b710364e4c01c2a9ca22be5838ef",
-  "generated_rtl_sha256": "bcb5922f1e812156aa5ef5e2862cead6030bbf1f7b228e974bc85ca0c4639659",
+  "manifest_sha256": "2daec9676eac247834387e357793c736be3c30d3a846bfb37dbf55bd3c7c417d",
+  "generated_rtl_sha256": "b63bc230435abd0f6eb0089205b5bc8ccc0498527c7a1e0b2468b43f236a0877",
   "artifact_sha256": {
     "system_registers_pkg.sv": "050cb3f6951979f4276236a01220f61a033ff7b8329055f962a34e12aa266686",
-    "system.h": "d5b60423851c8289d8527f57387365e7de062cfc92f5f9724d19ba6aed4d843f",
+    "system.h": "374e5e000766f40cbfe9850dcba1b748c19e2d0f9402a72a36a07718b2a05146",
     "registers.json": "9b80e10bfab8333984eb3bed19d38fa7115b94c2d83a845c05a835dae248345a",
     "descriptors.json": "c4701b4831f428fab9693f25890b45e73ef94721e4a970945e534f53e644df3e",
     "ports.json": "e037f98be248ddeb7e6ed3d4bda0a5607706c7fc086846eb20bfdc3e3b48a3ee"

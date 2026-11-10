@@ -633,6 +633,7 @@ module sft_body #(
     wire joined_valid;
     wire [NI:0] joined_ready;
     wire [NI:0] join_required = {ctx.predicate_mode == 1, required};
+    wire issue;
 
     stream_join #(
         .NUM_INPUTS(NI + 1),
@@ -708,7 +709,7 @@ module sft_body #(
     wire request_pop;
     wire request_bad;
     wire [31:0] request_count;
-    wire issue = executing && q.issued < ctx.steps && q.inflight < MAX_INFLIGHT &&
+    assign issue = executing && q.issued < ctx.steps && q.inflight < MAX_INFLIGHT &&
         operands_present && operands_known && request_ready &&!fatal_now;
     assign input_ready = joined_ready[0+:NI];
     assign predicate_ready = joined_ready[NI];

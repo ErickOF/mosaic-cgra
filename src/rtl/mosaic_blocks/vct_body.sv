@@ -546,6 +546,8 @@ module vct_body #(
     control_t control_next;
     wire control_bad;
     wire control_corrected;
+    logic [NI-1:0] required_inputs;
+    wire integrity_bad;
     wire reset_known = i_rstb === 1'b0 || i_rstb === 1'b1;
     wire private_reset = i_rstb !== 1'b0 && i_execution_state != 0;
     wire clear_private = !private_reset || (o_body_flush &&!i_isolate) ||
@@ -575,8 +577,6 @@ module vct_body #(
         ctx.opcode != 5 && ctx.opcode != 16 &&
         (ctx.opcode != 15 || (ctx.lane_mask & ~ctx.select_mask) != 0);
     wire use_c = ctx.fu == VCT_LANE && ctx.opcode == 21 || ctx.accumulate;
-    logic [NI-1:0] required_inputs;
-
     always @* begin
         required_inputs = '0;
 
@@ -1576,7 +1576,7 @@ module vct_body #(
         end
     end
 
-    wire integrity_bad = control_bad || validation_bad || bypass_bad || previous_bad ||
+    assign integrity_bad = control_bad || validation_bad || bypass_bad || previous_bad ||
         stored_bad || (|rf_bad) || (|pipeline_bad) || queue_bad || (|synchronizer_bad);
     wire corrected = control_corrected || validation_corrected || bypass_corrected ||
         previous_corrected || stored_corrected || (|rf_corrected) ||

@@ -188,6 +188,7 @@ module system_core #(
         wire program_bad;
         wire [103:0] program_head;
         wire [$clog2(COMMAND_DEPTH+1)-1:0] command_occupancy;
+        wire publish_kernel;
         wire program_pop = phase == SYS_IDLE && program_valid && !fatal &&
             i_test_mode === 1'b0 && o_boot_ready && !program_bad && !publish_kernel;
         logic [7:0] program_buffer;
@@ -258,7 +259,7 @@ module system_core #(
         logic event_ack;
         logic event_irq;
         logic output_ready;
-        wire publish_kernel = kernel_live && compute_done && !kernel_reported &&
+        assign publish_kernel = kernel_live && compute_done && !kernel_reported &&
             (output_ready || kernel_failed);
         logic native_identity_ok;
         logic [2:0] event_request;

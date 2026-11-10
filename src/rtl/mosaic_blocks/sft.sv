@@ -402,13 +402,13 @@ module sft #(
         sft_parameters_must_be_valid invalid_parameters ();
     end else begin : g_sft
         wire body_debug_select = i_debug_request_address[7:5] === 3'b100;
+        wire body_debug_valid;
         wire shell_debug_request = i_debug_request_valid &&!body_debug_select &&!body_debug_valid;
         wire shell_debug_ready;
         wire shell_debug_response;
         wire [W-1:0] shell_debug_data;
         wire shell_debug_error;
         wire [31:0] body_counter_data;
-        wire body_debug_valid;
         wire [W-1:0] body_debug_data;
         wire body_debug_error;
         wire body_debug_accept = i_debug_request_valid === 1'b1 && body_debug_select &&

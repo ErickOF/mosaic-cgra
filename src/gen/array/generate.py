@@ -177,6 +177,12 @@ def generate(descriptor, output, artifacts):
     b.instance('array_control', 'control', cp, control,
                dict(NUM_CLUSTERS=n, TIMEOUT_CYCLES=d['lifecycle_timeout'],
                     ARCHITECTURE_HASH="256'hMANIFEST"))
+    # One array root reserves a gateway until the last local response retires.
+    b.port('i_cfg_cluster_slot', 'input')
+    b.port('i_cfg_array_package_id', 'input', 32)
+    b.port('o_cfg_cluster_id', 'output', 8)
+    b.code += ['    logic cfg_busy;', '    logic cfg_slot;',
+               '    wire cfg_select = cfg_busy ? cfg_slot : i_cfg_cluster_slot;']
     maintenance = "!cfg_busy && (i_cfg_request_valid === 1'b0)"
     if n > 1: maintenance += " && (i_noc_cfg_valid === 1'b0) && !o_noc_cfg_response_valid"
     b.assign('runtime_valid_admit', 'i_runtime_valid && '+maintenance)
@@ -187,12 +193,6 @@ def generate(descriptor, output, artifacts):
             b.wire(f'c{c}_{name}', width) for name, (_, width) in catalog.items()}
         b.instance(f'array_cluster_{c}', f'cluster{c}', catalog, mapping)
         cmaps.append(mapping)
-    # One array root reserves a gateway until the last local response retires.
-    b.port('i_cfg_cluster_slot', 'input')
-    b.port('i_cfg_array_package_id', 'input', 32)
-    b.port('o_cfg_cluster_id', 'output', 8)
-    b.code += ['    logic cfg_busy;', '    logic cfg_slot;',
-               '    wire cfg_select = cfg_busy ? cfg_slot : i_cfg_cluster_slot;']
     req = [k for k in catalogs[0] if k.startswith('i_cfg_request_')]
     rsp = [k for k in catalogs[0] if k.startswith('o_cfg_response_')]
     for name in req + rsp + ['o_cfg_request_ready', 'i_cfg_response_ready']:

@@ -348,6 +348,14 @@ module cpt_body #(
     logic [31:0] committed_count;
     logic completed;
     logic fatal;
+    wire eb_fatal;
+    wire loop_fatal;
+    wire egress_fatal;
+    wire event_input_fatal;
+    wire command_admit;
+    logic command_legal;
+    wire ingress_ready;
+    logic loop_frame_active;
     wire fatal_now = fatal || eb_fatal || loop_fatal || egress_fatal || event_input_fatal;
     wire context_change = live && (active_context != o_body_context_id ||
         active_version != o_body_context_version ||!initialized);
@@ -407,7 +415,7 @@ module cpt_body #(
         .i_ready(command_admit)
     );
 
-    wire command_admit = running && started &&!o_body_start &&!fatal_now &&!completed
+    assign command_admit = running && started &&!o_body_start &&!fatal_now &&!completed
             && initialized && event_initialized && loop_initialized &&!context_change &&
             phase == CPT_IDLE && available_predicate &&
         inputs_known && auxiliary_known && (!need_external_predicate ||
@@ -573,18 +581,15 @@ module cpt_body #(
     wire [NUM_BARRIERS*MAX_PARTICIPANTS-1:0] eb_arrivals;
     wire [NUM_BARRIERS-1:0] eb_barrier_enabled;
     wire eb_idle;
-    wire eb_fatal;
     wire [4:0] egress_valid;
     wire [4:0] egress_ready;
     wire [1279:0] egress_records;
     wire egress_busy;
-    wire egress_fatal;
     wire egress_out_valid;
     wire [255:0] egress_out;
     cpt_record_t ingress;
     wire event_input_valid;
     wire [31:0] event_input_count;
-    wire event_input_fatal;
 
     tile_shell_queue #(
         .WIDTH(256),
@@ -643,7 +648,7 @@ module cpt_body #(
     wire command_arrive = effects && command_class == CPT_CMD_BARRIER && opcode == 1 &&
         object_id < NUM_BARRIERS && participant < MAX_PARTICIPANTS;
     wire action_response_ready;
-    wire ingress_ready = running &&!fatal_now && initialized
+    assign ingress_ready = running &&!fatal_now && initialized
             && event_initialized &&!context_change && (external_action ?
             action_response_ready && egress_ready[3] :
         external_post ? !command_post && eb_post_ready : egress_ready[3]);
@@ -827,7 +832,6 @@ module cpt_body #(
     wire loop_active;
     wire loop_suspended;
     wire loop_idle;
-    wire loop_fatal;
     wire explicit_loop_control = effects && command_class == CPT_CMD_LOOP_CONTROL &&
         opcode >= 1 && opcode <= 3;
     wire implicit_pause = o_body_suspend_request && loop_active &&!loop_suspended;
@@ -1074,7 +1078,6 @@ module cpt_body #(
     // A framed iteration consists of its linear header followed by selected
     // index/ordinal pairs. The native loop holds its state until FINAL DELIVERY
     // through the public shell output, not merely until admission to a queue.
-    logic loop_frame_active;
     logic loop_await_delivery;
     logic [3:0] loop_beat;
     logic [3:0] loop_beats;
@@ -1239,7 +1242,6 @@ module cpt_body #(
     logic native_ready;
     logic native_done;
     logic native_error;
-    logic command_legal;
 
     always @* begin
         native_ready = 1'b1;
