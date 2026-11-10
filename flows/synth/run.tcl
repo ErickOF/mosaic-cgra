@@ -192,6 +192,9 @@ report_timing -max_paths 10 > $PROJECT_HOME_SYN/reports/${DESIGN_NAME}_timing.rp
 report_power           > $PROJECT_HOME_SYN/reports/${DESIGN_NAME}_power.rpt
 report_resources       > $PROJECT_HOME_SYN/reports/${DESIGN_NAME}_resources.rpt
 report_constraint -all_violators > $PROJECT_HOME_SYN/reports/${DESIGN_NAME}_constraints.rpt
+if {[llength [info commands report_units]] > 0} {
+    report_units > $PROJECT_HOME_SYN/reports/${DESIGN_NAME}_units.rpt
+}
 
 # =============================================================
 # Outputs

@@ -39,7 +39,8 @@ PROFILES = (
         RF_DEPTH=(4, 8, 16)[sync], BYPASS_PROFILE=sync,
         REGISTER_BYPASS=sync % 2, ALU_LATENCY=sync % 2,
         MULTIPLY_LATENCY=sync * 2, MAC_LATENCY=4 - sync * 2)
-      for fu, width, narrow in ((0, 8, 4), (0, 16, 8), (0, 32, 16),
+      for fu, width, narrow in ((0, 2, 1), (1, 4, 2), (2, 6, 3), (0, 8, 4),
+                                (0, 16, 8), (0, 32, 16),
                                 (1, 16, 8), (1, 32, 16), (2, 32, 8), (2, 32, 16))
       for sync in (0, 1, 2)),
     *(profile(f'protection{rf}_{control}', RF_PROTECTION=rf, CONTROL_PROTECTION=control,
@@ -87,7 +88,7 @@ INVALID = (
         ('negative',-1),('x',"32'bx"),('z',"32'bz"))),
     ('metadata_flag',dict(DATA_METADATA_WIDTH=18)),
     ('storage_overflow',dict(DATA_WIDTH=65536, RF_DEPTH=65536)),
-    ('too_narrow',dict(DATA_WIDTH=7)), ('product_width',dict(MULTIPLY_OPERAND_WIDTH=17)),
+    ('too_narrow',dict(DATA_WIDTH=1)), ('product_width',dict(MULTIPLY_OPERAND_WIDTH=17)),
     ('alu_latency',dict(ALU_LATENCY=2)), ('multiply_latency',dict(MULTIPLY_LATENCY=5)),
     ('mac_latency',dict(MAC_LATENCY=5)), ('read_ports',dict(RF_READ_PORTS=1)),
     ('accumulators',dict(FU_PROFILE=2,ACCUMULATOR_COUNT=0)),

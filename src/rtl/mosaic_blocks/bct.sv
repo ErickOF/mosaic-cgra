@@ -101,7 +101,7 @@ module bct #(
             128'(RDU_TOTAL_DELAY_ENTRIES) * (128'(DATA_WIDTH) + DATA_METADATA_WIDTH) +
             128'(RESULT_QUEUE_DEPTH) * (128'(DATA_WIDTH) + DATA_METADATA_WIDTH +
                 DATA_OUTPUT_PORTS + 256) < 128'd2147483647) === 1'b1) &&
-        ((DATA_WIDTH >= 8) === 1'b1) &&
+        ((DATA_WIDTH >= 2) === 1'b1) &&
         ((2 * 64'(MULTIPLY_OPERAND_WIDTH) <= DATA_WIDTH) === 1'b1) &&
         ((FU_PROFILE >= 0 && FU_PROFILE <= 2) === 1'b1) &&
         ((BYPASS_PROFILE >= 0 && BYPASS_PROFILE <= 2) === 1'b1) &&

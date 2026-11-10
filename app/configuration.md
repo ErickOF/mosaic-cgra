@@ -70,7 +70,7 @@ Shared helpers required by another selected operation can remain present. For ex
 
 | Parameter | Default | Choices | Meaning and implications |
 | --- | ---: | --- | --- |
-| `MULTIPLY_OPERAND_WIDTH` | 16 | 4, 8, 16, 32 | Width of each BCT multiply/MAC multiplicand. A full product uses twice this width and must fit DATA_WIDTH. Wider operands increase multiplication resources and reduce the unused headroom for accumulation. Narrow operands must obey the native canonical zero/sign-extension rules. |
+| `MULTIPLY_OPERAND_WIDTH` | 16 | 1, 2, 3, 4, 8, 16, 32 | Width of each BCT multiply/MAC multiplicand. A full product uses twice this width and must fit DATA_WIDTH. Wider operands increase multiplication resources and reduce the unused headroom for accumulation. Narrow operands must obey the native canonical zero/sign-extension rules. |
 | `MULTIPLY_LATENCY` | 1 | 0–4 | Configured BCT multiplier response delay in enabled clock edges. More response stages add registers and enabled-cycle latency. The current BCT/VCT wrappers instantiate combinational arithmetic and delay aligned results; increasing this value does not itself split the arithmetic critical path or guarantee a higher frequency. Zero selects the combinational response mode where offered. Queueing, operand waits and output backpressure can add end-to-end time. |
 
 **ALU**
@@ -106,7 +106,7 @@ Shared helpers required by another selected operation can remain present. For ex
 
 | Parameter | Default | Choices | Meaning and implications |
 | --- | ---: | --- | --- |
-| `DATA_WIDTH` | 32 | 16, 32, 64 | Width of scalar payloads, ALU results and MAC accumulators. Wider values represent larger integers and accumulations but widen registers, arithmetic and local connections. This is integer width, not floating-point precision. Two multiply operand widths must fit this width. It can widen all grid links if it becomes the widest native tile payload. |
+| `DATA_WIDTH` | 32 | 2, 4, 6, 8, 16, 32, 64, 128 | Width of scalar payloads, ALU results and MAC accumulators. Wider values represent larger integers and accumulations but widen registers, arithmetic and local connections. This is integer width, not floating-point precision. Two multiply operand widths must fit this width. It can widen all grid links if it becomes the widest native tile payload. |
 
 **Arithmetic options**
 

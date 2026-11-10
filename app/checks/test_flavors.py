@@ -147,7 +147,8 @@ class DocumentTests(unittest.TestCase):
                     report = validate(candidate)
                     if not report["valid"]:
                         self.assertIn((name, value), (("SUPPORT_WIDTH_CONVERSION", 0), ("SUPPORT_CIRCULAR", 1),
-                            ("MULTIPLY_OPERAND_WIDTH", 32), ("DATA_WIDTH", 16)))
+                            ("MULTIPLY_OPERAND_WIDTH", 32), ("DATA_WIDTH", 2), ("DATA_WIDTH", 4),
+                            ("DATA_WIDTH", 6), ("DATA_WIDTH", 8), ("DATA_WIDTH", 16)))
 
     def test_rectangular_grids_and_all_tile_classes(self):
         classes = ("BCT", "MST", "VCT", "SFT", "CPT")

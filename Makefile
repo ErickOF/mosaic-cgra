@@ -570,6 +570,9 @@ SYNTH_CLOCK_PERIOD ?= 4.0
 SYNTH_CPUS ?= 4
 SYNTH_PARAMETERS ?=
 SYNTH_COMPILE_ARGS ?=
+SYNTH_CAMPAIGN_BUILD ?= $(PROJECT_ROOT)/build/synth/campaign
+SYNTH_CAMPAIGN_JOBS ?= 1
+SYNTH_CAMPAIGN_ARGS ?=
 SYNTH_NETLIST := $(SYNTH_BUILD)/netlist/$(COCOTB_TOPLEVEL)_syn.v
 SYNTH_SDF := $(SYNTH_BUILD)/netlist/$(COCOTB_TOPLEVEL).sdf
 
@@ -1910,6 +1913,28 @@ synth:
 	 done
 	@printf 'Synthesized netlist: %s\n' "$(abspath $(SYNTH_NETLIST))"
 
+.PHONY: synth-campaign-plan synth-campaign synth-campaign-collect synth-campaign-test
+synth-campaign-plan:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/flows/synth/campaign.py" plan \
+		--output "$(SYNTH_CAMPAIGN_BUILD)" $(SYNTH_CAMPAIGN_ARGS)
+
+synth-campaign:
+	@test -n "$(TECH_SETUP_TCL)" && test -r "$(TECH_SETUP_TCL)" || { \
+		echo 'Set TECH_SETUP_TCL to a readable technology/library setup script.' >&2; exit 2; }
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/flows/synth/campaign.py" run \
+		--output "$(SYNTH_CAMPAIGN_BUILD)" --tech-setup "$(TECH_SETUP_TCL)" \
+		$(if $(strip $(DC_SETUP_TCL)),--dc-setup "$(DC_SETUP_TCL)") \
+		--constraints "$(SYNTH_CONSTRAINTS)" --dc-shell "$(DC_SHELL)" \
+		--clock-period "$(SYNTH_CLOCK_PERIOD)" --synth-cpus "$(SYNTH_CPUS)" \
+		--jobs "$(SYNTH_CAMPAIGN_JOBS)" $(SYNTH_CAMPAIGN_ARGS)
+
+synth-campaign-collect:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/flows/synth/campaign.py" collect \
+		--output "$(SYNTH_CAMPAIGN_BUILD)"
+
+synth-campaign-test:
+	@cd "$(PROJECT_ROOT)/flows/synth" && "$(PYTHON_BIN)" -m unittest -v test_campaign.py
+
 # Accept an existing synthesized or post-route netlist without rerunning DC.
 gate-check:
 	@test -n "$(CELL_MODELS)" || { \
@@ -2010,6 +2035,10 @@ clean-power:
 
 help:
 	@printf '%s\n' \
+		'make synth-campaign-plan  Write and validate the complete PPA campaign' \
+		'make synth-campaign TECH_SETUP_TCL=path.tcl  Run and collect the campaign' \
+		'make synth-campaign-collect  Reparse timing, power, and area reports' \
+		'make synth-campaign-test  Test planning, report parsing, and orchestration' \
 		'make app             Open the local CGRA flavor editor at 127.0.0.1:8765' \
 		'make app-test        Check flavor documents, exports, HTTP and queued jobs' \
 		'make app-browser-check  Check the editor in Chromium (optional Playwright)' \

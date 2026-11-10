@@ -20,9 +20,9 @@ def add(kind, group, names):
             f"{name}: elaboration-time setting for this tile's {group.lower()}.")
 
 
-add("BCT", "ALU", {"DATA_WIDTH": (16, 32, 64), "ALU_LATENCY": range(2), "SUPPORT_SATURATION": range(2),
+add("BCT", "ALU", {"DATA_WIDTH": (2, 4, 6, 8, 16, 32, 64, 128), "ALU_LATENCY": range(2), "SUPPORT_SATURATION": range(2),
                   "SUPPORT_MINMAX": range(2)})
-add("BCT", "Multiplier", {"MULTIPLY_OPERAND_WIDTH": (4, 8, 16, 32),
+add("BCT", "Multiplier", {"MULTIPLY_OPERAND_WIDTH": (1, 2, 3, 4, 8, 16, 32),
                          "MULTIPLY_LATENCY": range(5)})
 add("BCT", "MAC", {"MAC_LATENCY": range(5), "ACCUMULATOR_COUNT": (1, 2, 4, 8)})
 add("MST", "Load engine", {"READ_DATA_FIFO_DEPTH": (2, 4, 8, 16)})
@@ -90,7 +90,8 @@ for kind, flags in UNIT_DEFAULTS.items():
     add(kind, "Functional units", {name: range(2) for name in flags})
 
 # Shared geometry stays editable even when the standalone ALU is disabled.
-PARAMETERS["BCT"]["DATA_WIDTH"] = Parameter("Data width", 32, (16, 32, 64), "Tile geometry",
+PARAMETERS["BCT"]["DATA_WIDTH"] = Parameter("Data width", 32,
+    (2, 4, 6, 8, 16, 32, 64, 128), "Tile geometry",
     "Payload and accumulator width shared by every selected BCT FU.")
 PARAMETERS["BCT"]["SUPPORT_SATURATION"] = Parameter("Saturation", 1, (0, 1), "Arithmetic options",
     "Saturation support shared by the ALU and MAC.")

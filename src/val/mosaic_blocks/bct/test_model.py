@@ -6,7 +6,7 @@ from bct.model import arithmetic, pack, unpack, layout, signed
 
 class ModelTests(unittest.TestCase):
     def test_context_roundtrip(self):
-        for width in (8, 16, 32, 64):
+        for width in (2, 4, 6, 8, 16, 32, 64, 128):
             p = DEFAULTS | dict(DATA_WIDTH=width)
             c = {name: (1 << bits) - 1 for name, (_, bits) in layout(p).items()}
             self.assertEqual(unpack(p, pack(p, c)), c)

@@ -54,6 +54,9 @@ per tile, including reciprocal without polynomial or RSQRT.
 
 ## Understand configuration implications
 
+The [bottom-to-top MOSAIC guide](../doc/mosaic/README.md) explains how reusable RTL,
+functional units, tile shells and shared memory form the flat CGRA grid.
+
 Grid, memory, identity and clock controls now include expandable explanations.
 The tile inspector explains each tile class and independent FU selection, then
 shows the meaning and trade-offs of every parameter. Where applicable, it also

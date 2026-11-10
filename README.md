@@ -1,5 +1,10 @@
 # Mosaic CGRA
 
+Start with the [MOSAIC guide, from bottom to top](doc/mosaic/README.md): common
+cells, reusable execution blocks, native tiles, the flat grid, hardware generation,
+runtime programming and platform integration. It includes diagrams, a complete
+[RTL module catalog](doc/mosaic/modules.md) and a [PDF atlas](doc/mosaic/mosaic-guide.pdf).
+
 Configure a CGRA visually with the [local Flavor Studio app](app/README.md):
 
 ```sh

@@ -46,6 +46,9 @@ class BctSequence(TileShellSequence):
 
     def context(self, **changes):
         s = sources(self.c.parameters)
+        if 'immediates' in changes:
+            bits = self.c.DATA_WIDTH * self.c.IMMEDIATE_COUNT
+            changes['immediates'] &= (1 << bits) - 1
         return dict(schema=1, source_a=0, source_b=s['one'], source_c=s['zero'],
             output_mask=1, iterations=4, terminal=1, monitor=1) | changes
 
@@ -96,7 +99,8 @@ class BctSequence(TileShellSequence):
             for port in ports:
                 if sent[port] < count:
                     valid |= 1 << port
-                    payload |= values[sent[port]][port] << (port * c.DATA_WIDTH)
+                    payload |= (values[sent[port]][port] & ((1 << c.DATA_WIDTH) - 1)) \
+                        << (port * c.DATA_WIDTH)
                     metas |= metadata << (port * c.DATA_METADATA_WIDTH)
             if self.c.parameters['INPUT_ELASTIC_MASK'] != (1 << c.DATA_INPUT_PORTS) - 1 and tick % 40 != 8:
                 valid = 0
@@ -267,7 +271,7 @@ class BctSequence(TileShellSequence):
                     await self.setup_case(ctx)
                     narrow = c.MULTIPLY_OPERAND_WIDTH
                     av = mask if sa else (1 << narrow) - 1
-                    bv = mask if sb else 3
+                    bv = mask if sb else min(3, (1 << narrow) - 1)
                     vals = [[av if p == 0 else bv for p in range(c.DATA_INPUT_PORTS)]] * 4
                     await self.traffic(ctx, vals)
                     assert not number(self.last['o_status_error']), self.last
@@ -347,7 +351,7 @@ class BctSequence(TileShellSequence):
         # Unknown reset pauses a live operation without impersonating reset.
         await self.setup_case(ctx)
         metadata = number(self.last['o_status_context_version']) << c.aliases['CI']
-        await self.cycle('before_unknown_reset', i_data_in_valid=1, i_data_in_payload=13,
+        await self.cycle('before_unknown_reset', i_data_in_valid=1, i_data_in_payload=13 & mask,
             i_data_in_metadata=metadata, i_data_out_ready=0)
         await self.idle(2, i_data_out_ready=0)
         await self.cycle('unknown_reset', i_rstb='x', i_data_out_ready=0)
@@ -362,7 +366,8 @@ class BctSequence(TileShellSequence):
         await self.setup_case(ctx)
         metadata = number(self.last['o_status_context_version']) << c.aliases['CI']
         for pending_tick in range(6):
-            await self.cycle('pending_reset', i_data_in_valid=int(pending_tick == 0), i_data_in_payload=11,
+            await self.cycle('pending_reset', i_data_in_valid=int(pending_tick == 0),
+                i_data_in_payload=11 & mask,
                 i_data_in_metadata=metadata, i_data_out_ready=0)
         await self.cycle('clock_stopped', core_edge=False, i_data_out_ready=0)
         await self.reset()
