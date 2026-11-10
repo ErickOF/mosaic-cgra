@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 
 import campaign
 
@@ -114,6 +115,23 @@ class CampaignReportTest(unittest.TestCase):
             self.assertEqual(state["returncode"], 0)
             changed = dict(plan["cases"][0], execution_id="different-synthesis-context")
             self.assertEqual(campaign.case_result(changed, output)["status"], "stale")
+
+    def test_log_excerpt_returns_only_nonempty_tail(self):
+        with tempfile.TemporaryDirectory() as directory:
+            log = Path(directory) / "run.log"
+            log.write_text("first\n\nsecond\nthird\n")
+            self.assertEqual(campaign.log_excerpt(log, line_count=2), ["second", "third"])
+
+    @patch("campaign.shutil.which", return_value=None)
+    def test_run_validation_rejects_missing_dc_shell(self, _which):
+        with tempfile.TemporaryDirectory() as directory:
+            technology = Path(directory) / "technology.tcl"
+            technology.write_text("# setup\n")
+            args = argparse.Namespace(
+                tech_setup=technology, dc_setup=None, constraints=None,
+                jobs=1, synth_cpus=1, clock_period=4.0, dc_shell="dc_shell")
+            with self.assertRaisesRegex(ValueError, "Design Compiler executable not found"):
+                campaign.validate_run_arguments(args)
 
 
 if __name__ == "__main__":

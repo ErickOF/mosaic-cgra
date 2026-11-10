@@ -235,8 +235,6 @@ module tile_power_controller #(
         wire policy_known = ^{i_config_auto_idle_enable, i_config_wake_enable,
             i_config_context_check, i_config_context_id} !== 1'bx;
         wire waking = WAKE_ON_EVENT == 1 && (|(pending_wakes & wake_mask));
-        wire base_quiescent = run && power_ready && service_state && !command_pending && !waking &&
-            i_tile_quiescent === 1'b1 && i_test_mode === 1'b0 && !fatal && controls_known;
         wire config_accept = o_config_ready && i_config_valid === 1'b1;
         wire config_good = config_accept && policy_known;
         wire config_bad = config_accept && !policy_known;
@@ -266,6 +264,8 @@ module tile_power_controller #(
         wire [POWER_RESIDENCY_WIDTH-1:0] residency;
         wire power_ready = synchronized_power === 1'b1 &&
             64'(qualification_count) >= 64'(POWER_STABLE_CYCLES) - 1;
+        wire base_quiescent = run && power_ready && service_state && !command_pending && !waking &&
+            i_tile_quiescent === 1'b1 && i_test_mode === 1'b0 && !fatal && controls_known;
         wire requested_wake = WAKE_ON_EVENT == 1 &&
             (|((pending_wakes | captured_wakes) & wake_mask));
         wire idle_qualify = run && functional && policy.valid && policy.auto_idle &&

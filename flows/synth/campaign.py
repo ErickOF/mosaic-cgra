@@ -12,6 +12,7 @@ import math
 from pathlib import Path
 import re
 import shlex
+import shutil
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -544,6 +545,16 @@ def run_case(case, args, output):
     return result
 
 
+def log_excerpt(path, line_count=12):
+    """Return the useful tail of a case log without flooding campaign output."""
+    path = Path(path)
+    if not path.is_file():
+        return []
+    lines = [line.rstrip() for line in path.read_text(errors="replace").splitlines()
+             if line.strip()]
+    return lines[-line_count:]
+
+
 def csv_value(value):
     if isinstance(value, (dict, list)):
         return json.dumps(value, sort_keys=True, separators=(",", ":"))
@@ -655,6 +666,11 @@ def validate_run_arguments(args):
             raise ValueError(f"{name.replace('_', ' ').title()} is not readable: {path}")
     if args.jobs < 1 or args.synth_cpus < 1 or args.clock_period <= 0:
         raise ValueError("jobs, synth-cpus, and clock-period must be positive")
+    if shutil.which(args.dc_shell) is None:
+        raise ValueError(
+            f"Design Compiler executable not found: {args.dc_shell}. "
+            "Load the Synopsys environment or pass --dc-shell/ DC_SHELL with its path."
+        )
 
 
 def main():
@@ -701,6 +717,11 @@ def main():
                     write_json(run_dir / "result.json", result)
                 results.append(result)
                 print(f"[{result['status']}] {case['id']}", flush=True)
+                if result["status"] != "success":
+                    log_path = output / "runs" / case["id"] / "run.log"
+                    print(f"  log: {log_path}", flush=True)
+                    for line in log_excerpt(log_path):
+                        print(f"  | {line}", flush=True)
         results = collect(plan, output)
         failures = [result for result in results if result["status"] != "success"]
         print(f"Collected {len(results)} cases into {output / 'results.csv'}")
