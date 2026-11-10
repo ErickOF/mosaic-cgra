@@ -378,6 +378,11 @@ module bct_body #(
     control_t control_next;
     wire control_bad;
     wire control_corrected;
+    logic [NI-1:0] required_inputs;
+    wire integrity_bad;
+    wire corrected;
+    wire hazard;
+    wire count_available;
     wire context_change = o_body_context_active &&!control_bad &&
         i_power_state != tile_shell_pkg::POWER_OFF && (!control.seen ||
         control.context_id != o_body_context_id || control.version != o_body_context_version);
@@ -598,7 +603,6 @@ module bct_body #(
     );
 
     // Synchronizers keep metadata with payload. No associative matching is used.
-    logic [NI-1:0] required_inputs;
     wire use_b = ctx.fu != 0 || (ctx.opcode != 5 && ctx.opcode != 16 &&
         (ctx.opcode != 15 ||!ctx.select_condition));
     wire use_a = ctx.fu != 0 || (ctx.opcode != 17 &&
@@ -1029,8 +1033,8 @@ module bct_body #(
         ctx.source_c >= RF0 && ctx.source_c < RF0 + 2 ||
         ctx.source_a >= ACC0 || ctx.source_b >= ACC0 || (use_c && ctx.source_c >= ACC0) ||
         ctx.predicate_mode == 2;
-    wire hazard = dependency && (!pipeline_empty ||!queue_empty);
-    wire count_available = ctx.iterations == 0 || control.issued < ctx.iterations;
+    assign hazard = dependency && (!pipeline_empty ||!queue_empty);
+    assign count_available = ctx.iterations == 0 || control.issued < ctx.iterations;
     wire fu_illegal = (ctx.fu == 0 && alu_illegal) || (ctx.fu == 2 && mac_illegal);
     wire overflow = ctx.fu == 0 ? alu_overflow : ctx.fu == 2 ? mac_overflow : 1'b0;
     wire trap = predicate_value && ctx.trap_overflow && overflow;
@@ -1179,10 +1183,10 @@ module bct_body #(
         .o_corrected(queue_corrected)
     );
 
-    wire integrity_bad = control_bad || validation_bad || bypass_bad || previous_bad ||
+    assign integrity_bad = control_bad || validation_bad || bypass_bad || previous_bad ||
         (|predicate_bad) || (|accumulator_bad) || (|pipeline_bad) || queue_bad ||
         (|synchronizer_bad) || (|(rf_bad & rf_read_enable));
-    wire corrected = control_corrected || validation_corrected || bypass_corrected ||
+    assign corrected = control_corrected || validation_corrected || bypass_corrected ||
         previous_corrected || (|predicate_corrected) || (|accumulator_corrected) ||
         (|pipeline_corrected) || queue_corrected || (|synchronizer_corrected) ||
         (|(rf_corrected & rf_read_enable));
