@@ -10,8 +10,8 @@ module context_sequencer #(
     parameter HAS_SUSPEND = 1,
     parameter HAS_EXTERNAL_SWITCH = 1,
     parameter ASYNC_RESET = 0,
-    localparam int unsigned STORAGE_DEPTH = CONTEXT_DEPTH >= 1 && (^CONTEXT_DEPTH !== 1'bx) ? CONTEXT_DEPTH : 1,
-    localparam int unsigned COUNT_WIDTH = LOOP_COUNT_WIDTH >= 1 && (^LOOP_COUNT_WIDTH !== 1'bx) ? LOOP_COUNT_WIDTH : 1,
+    localparam int unsigned STORAGE_DEPTH = ((CONTEXT_DEPTH >= 1) === 1'b1) ? CONTEXT_DEPTH : 1,
+    localparam int unsigned COUNT_WIDTH = ((LOOP_COUNT_WIDTH >= 1) === 1'b1) ? LOOP_COUNT_WIDTH : 1,
     localparam int unsigned ADDR_WIDTH = STORAGE_DEPTH > 1 ? $clog2(STORAGE_DEPTH) : 1,
     localparam int unsigned TRANSITION_MODE_WIDTH = context_sequencer_pkg::TRANSITION_MODE_WIDTH,
     localparam int unsigned ERROR_CODE_WIDTH = context_sequencer_pkg::ERROR_CODE_WIDTH,
@@ -69,8 +69,8 @@ module context_sequencer #(
 
     localparam bit PARAMETERS_VALID =
         INTERFACE_VERSION == 1 &&
-        (^CONTEXT_DEPTH !== 1'bx) && CONTEXT_DEPTH >= 1 &&
-        (^LOOP_COUNT_WIDTH !== 1'bx) && LOOP_COUNT_WIDTH >= 1 &&
+        ((CONTEXT_DEPTH >= 1) === 1'b1) &&
+        ((LOOP_COUNT_WIDTH >= 1) === 1'b1) &&
         (HAS_LOOP === 0 || HAS_LOOP === 1) &&
         (HAS_SUSPEND === 0 || HAS_SUSPEND === 1) &&
         (HAS_EXTERNAL_SWITCH === 0 || HAS_EXTERNAL_SWITCH === 1) &&

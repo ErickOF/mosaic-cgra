@@ -12,10 +12,10 @@ module performance_counters #(
     parameter HAS_THRESHOLD = 1,
     parameter ASYNC_RESET = 0,
     localparam bit PARAMETERS_VALID =
-        ((COUNTER_WIDTH >= 1) === 1'b1) && (^COUNTER_WIDTH !== 1'bx) &&
-        ((NUM_COUNTERS >= 1) === 1'b1) && (^NUM_COUNTERS !== 1'bx) &&
-        ((NUM_EVENTS >= 1) === 1'b1) && (^NUM_EVENTS !== 1'bx) &&
-        ((INCREMENT_WIDTH >= 1) === 1'b1) && (^INCREMENT_WIDTH !== 1'bx) &&
+        ((COUNTER_WIDTH >= 1) === 1'b1) &&
+        ((NUM_COUNTERS >= 1) === 1'b1) &&
+        ((NUM_EVENTS >= 1) === 1'b1) &&
+        ((INCREMENT_WIDTH >= 1) === 1'b1) &&
         ((SATURATE === 0) || (SATURATE === 1)) &&
         ((HAS_SNAPSHOT === 0) || (HAS_SNAPSHOT === 1)) &&
         ((HAS_THRESHOLD === 0) || (HAS_THRESHOLD === 1)) &&

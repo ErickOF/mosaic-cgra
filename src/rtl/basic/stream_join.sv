@@ -7,8 +7,8 @@ module stream_join #(
     parameter DATA_WIDTH = 32,
     parameter HAS_REQUIRED_MASK = 0,
     localparam bit PARAMETERS_VALID =
-        ((NUM_INPUTS >= 1) === 1'b1) && (^NUM_INPUTS !== 1'bx) &&
-        ((DATA_WIDTH >= 1) === 1'b1) && (^DATA_WIDTH !== 1'bx) &&
+        ((NUM_INPUTS >= 1) === 1'b1) &&
+        ((DATA_WIDTH >= 1) === 1'b1) &&
         ((HAS_REQUIRED_MASK === 0) || (HAS_REQUIRED_MASK === 1)),
     localparam int unsigned INPUTS = PARAMETERS_VALID ? NUM_INPUTS : 1,
     localparam int unsigned DATA_BITS = PARAMETERS_VALID ? DATA_WIDTH : 1,

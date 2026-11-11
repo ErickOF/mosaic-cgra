@@ -10,11 +10,11 @@ module context_memory #(
     parameter NUM_READ_PORTS = 2,
     parameter HAS_RAW_READBACK = 1,
     parameter ASYNC_RESET = 0,
-    localparam int unsigned WORD_WIDTH = CONTEXT_WIDTH >= 1 && (^CONTEXT_WIDTH !== 1'bx) ? CONTEXT_WIDTH : 1,
-    localparam int unsigned STORAGE_DEPTH = CONTEXT_DEPTH >= 1 && (^CONTEXT_DEPTH !== 1'bx) ? CONTEXT_DEPTH : 1,
-    localparam int unsigned READ_PORTS = NUM_READ_PORTS >= 1 && (^NUM_READ_PORTS !== 1'bx) ? NUM_READ_PORTS : 1,
-    localparam int unsigned NUM_WRITE_SLICES = WRITE_SLICE_WIDTH >= 1 && (^WRITE_SLICE_WIDTH !== 1'bx) &&
-        WORD_WIDTH >= WRITE_SLICE_WIDTH ? WORD_WIDTH / WRITE_SLICE_WIDTH : 1,
+    localparam int unsigned WORD_WIDTH = ((CONTEXT_WIDTH >= 1) === 1'b1) ? CONTEXT_WIDTH : 1,
+    localparam int unsigned STORAGE_DEPTH = ((CONTEXT_DEPTH >= 1) === 1'b1) ? CONTEXT_DEPTH : 1,
+    localparam int unsigned READ_PORTS = ((NUM_READ_PORTS >= 1) === 1'b1) ? NUM_READ_PORTS : 1,
+    localparam int unsigned NUM_WRITE_SLICES = ((WRITE_SLICE_WIDTH >= 1) === 1'b1) &&
+        ((WORD_WIDTH >= WRITE_SLICE_WIDTH) === 1'b1) ? WORD_WIDTH / WRITE_SLICE_WIDTH : 1,
     localparam int unsigned ADDR_WIDTH = STORAGE_DEPTH > 1 ? $clog2(STORAGE_DEPTH) : 1,
     localparam int unsigned READ_ADDR_WIDTH = READ_PORTS * ADDR_WIDTH,
     localparam int unsigned READ_DATA_WIDTH = READ_PORTS * WORD_WIDTH
@@ -36,11 +36,11 @@ module context_memory #(
     input  logic [ADDR_WIDTH-1:0] i_invalidate_address
 );
     localparam bit PARAMETERS_VALID =
-        (^CONTEXT_WIDTH !== 1'bx) && CONTEXT_WIDTH >= 1 &&
-        (^CONTEXT_DEPTH !== 1'bx) && CONTEXT_DEPTH >= 1 &&
-        (^WRITE_SLICE_WIDTH !== 1'bx) && WRITE_SLICE_WIDTH >= 1 &&
-        (^NUM_READ_PORTS !== 1'bx) && NUM_READ_PORTS >= 1 &&
-        (WRITE_SLICE_WIDTH > 0 && CONTEXT_WIDTH % WRITE_SLICE_WIDTH == 0) &&
+        ((CONTEXT_WIDTH >= 1) === 1'b1) &&
+        ((CONTEXT_DEPTH >= 1) === 1'b1) &&
+        ((WRITE_SLICE_WIDTH >= 1) === 1'b1) &&
+        ((NUM_READ_PORTS >= 1) === 1'b1) &&
+        ((WRITE_SLICE_WIDTH > 0 && CONTEXT_WIDTH % WRITE_SLICE_WIDTH == 0) === 1'b1) &&
         (HAS_RAW_READBACK === 0 || HAS_RAW_READBACK === 1) &&
         (ASYNC_RESET === 0 || ASYNC_RESET === 1);
 

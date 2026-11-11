@@ -8,10 +8,10 @@ module register_file #(
     parameter NUM_READ_PORTS = 2,
     parameter NUM_WRITE_PORTS = 1,
     localparam bit PARAMETERS_VALID =
-        ((DATA_WIDTH >= 1) === 1'b1) && (^DATA_WIDTH !== 1'bx) &&
-        ((DEPTH >= 1) === 1'b1) && (^DEPTH !== 1'bx) &&
-        ((NUM_READ_PORTS >= 1) === 1'b1) && (^NUM_READ_PORTS !== 1'bx) &&
-        ((NUM_WRITE_PORTS >= 1) === 1'b1) && (^NUM_WRITE_PORTS !== 1'bx),
+        ((DATA_WIDTH >= 1) === 1'b1) &&
+        ((DEPTH >= 1) === 1'b1) &&
+        ((NUM_READ_PORTS >= 1) === 1'b1) &&
+        ((NUM_WRITE_PORTS >= 1) === 1'b1),
     // Safe dimensions let invalid callers reach the named elaboration guard.
     localparam int unsigned WORD_WIDTH = PARAMETERS_VALID ? DATA_WIDTH : 1,
     localparam int unsigned STORAGE_DEPTH = PARAMETERS_VALID ? DEPTH : 1,

@@ -10,9 +10,9 @@ module rdu #(
     parameter CHANNEL_CAPACITY = (NUM_CHANNELS == 2 && TOTAL_DELAY_ENTRIES == 8) ? 8'h44 : 8'bx,
     parameter ASYNC_RESET = 0,
     localparam bit DIMENSIONS_VALID =
-        ((DATA_WIDTH >= 1) === 1'b1) && (^DATA_WIDTH !== 1'bx) &&
-        ((NUM_CHANNELS >= 1) === 1'b1) && (^NUM_CHANNELS !== 1'bx) &&
-        ((TOTAL_DELAY_ENTRIES >= 0) === 1'b1) && (^TOTAL_DELAY_ENTRIES !== 1'bx) &&
+        ((DATA_WIDTH >= 1) === 1'b1) &&
+        ((NUM_CHANNELS >= 1) === 1'b1) &&
+        ((TOTAL_DELAY_ENTRIES >= 0) === 1'b1) &&
         ((ASYNC_RESET === 0) || (ASYNC_RESET === 1)),
     localparam int unsigned DATA_BITS = DIMENSIONS_VALID ? DATA_WIDTH : 1,
     localparam int unsigned CHANNELS = DIMENSIONS_VALID ? NUM_CHANNELS : 1,
@@ -44,7 +44,8 @@ module rdu #(
         logic [63:0] total;
         total = '0;
         allocation_valid = 1'b0;
-        if ($bits(CHANNEL_CAPACITY) == CAPACITY_BUS_WIDTH && ^CHANNEL_CAPACITY !== 1'bx) begin
+        if ($bits(CHANNEL_CAPACITY) == CAPACITY_BUS_WIDTH &&
+                (((^CHANNEL_CAPACITY == 1'b0) || (^CHANNEL_CAPACITY == 1'b1)) === 1'b1)) begin
             allocation_valid = 1'b1;
             for (int c = 0; c < CHANNELS; c++) begin
                 if (64'(CHANNEL_CAPACITY[c*CAPACITY_WIDTH+:CAPACITY_WIDTH]) > 64'(ENTRIES))

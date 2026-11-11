@@ -10,8 +10,8 @@ module accumulator #(
     parameter ASYNC_RESET = 0,
     parameter COMMAND_WIDTH = 2,
     localparam bit PARAMETERS_VALID =
-        ((ACC_WIDTH >= 1) === 1'b1) && (^ACC_WIDTH !== 1'bx) &&
-        ((NUM_LANES >= 1) === 1'b1) && (^NUM_LANES !== 1'bx) &&
+        ((ACC_WIDTH >= 1) === 1'b1) &&
+        ((NUM_LANES >= 1) === 1'b1) &&
         ((SUPPORT_SUBTRACT === 0) || (SUPPORT_SUBTRACT === 1)) &&
         ((SUPPORT_SATURATION === 0) || (SUPPORT_SATURATION === 1)) &&
         ((ASYNC_RESET === 0) || (ASYNC_RESET === 1)) && (COMMAND_WIDTH === 2),

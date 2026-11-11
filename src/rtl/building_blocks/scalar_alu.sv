@@ -8,7 +8,7 @@ module scalar_alu #(
     parameter SUPPORT_MINMAX = 1,
     parameter OPCODE_WIDTH = 5,
     localparam bit PARAMETERS_VALID =
-        ((DATA_WIDTH >= 1) === 1'b1) && ( ^ DATA_WIDTH !== 1'bx) &&
+        ((DATA_WIDTH >= 1) === 1'b1) &&
         ((DATA_WIDTH <= 32'd536870903) === 1'b1) &&
         ((SUPPORT_SATURATION === 0) || (SUPPORT_SATURATION === 1)) &&
         ((SUPPORT_MINMAX === 0) || (SUPPORT_MINMAX === 1)) &&
