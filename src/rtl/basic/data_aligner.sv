@@ -10,11 +10,11 @@ module data_aligner #(
     parameter SUPPORT_SHIFT_HIGH = 1,
     parameter REGISTER_OUTPUTS = 0,
     parameter ASYNC_RESET = 0,
-    localparam int unsigned WORD_BYTES = (^DATA_WIDTH !== 1'bx) && DATA_WIDTH >= 8 && DATA_WIDTH % 8 == 0 ? DATA_WIDTH / 8 : 1,
+    localparam int unsigned WORD_BYTES = (((^DATA_WIDTH == 1'b0) || (^DATA_WIDTH == 1'b1)) === 1'b1) && DATA_WIDTH >= 8 && DATA_WIDTH % 8 == 0 ? DATA_WIDTH / 8 : 1,
     localparam int unsigned OFFSET_WIDTH = WORD_BYTES > 1 ? $clog2(WORD_BYTES) : 1,
     localparam int unsigned WINDOW_BYTES = 2 * WORD_BYTES,
     localparam int unsigned DATA_BITS = 8 * WORD_BYTES,
-    localparam int unsigned USER_BITS = (^USER_WIDTH !== 1'bx) && USER_WIDTH >= 1 ? USER_WIDTH : 1
+    localparam int unsigned USER_BITS = (((^USER_WIDTH == 1'b0) || (^USER_WIDTH == 1'b1)) === 1'b1) && USER_WIDTH >= 1 ? USER_WIDTH : 1
 ) (
     input  logic i_clk,
     input  logic i_rstb,
@@ -46,8 +46,8 @@ module data_aligner #(
     output logic o_busy
 );
     localparam bit PARAMETERS_VALID =
-        (^DATA_WIDTH !== 1'bx) && DATA_WIDTH >= 8 && DATA_WIDTH % 8 == 0 &&
-        (^USER_WIDTH !== 1'bx) && USER_WIDTH >= 1 &&
+        (((^DATA_WIDTH == 1'b0) || (^DATA_WIDTH == 1'b1)) === 1'b1) && DATA_WIDTH >= 8 && DATA_WIDTH % 8 == 0 &&
+        (((^USER_WIDTH == 1'b0) || (^USER_WIDTH == 1'b1)) === 1'b1) && USER_WIDTH >= 1 &&
         (SUPPORT_SHIFT_LOW === 0 || SUPPORT_SHIFT_LOW === 1) &&
         (SUPPORT_SHIFT_HIGH === 0 || SUPPORT_SHIFT_HIGH === 1) &&
         (SUPPORT_SHIFT_LOW === 1 || SUPPORT_SHIFT_HIGH === 1) &&

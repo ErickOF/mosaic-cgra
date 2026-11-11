@@ -15,7 +15,7 @@ module operand_isolation #(
         if (WIDTH < 1) begin : g_invalid_width
             operand_isolation_width_must_be_greater_than_zero invalid_width ();
         end
-        if (^CLAMP_VALUE === 1'bx) begin : g_invalid_clamp_value
+        if (((^CLAMP_VALUE == 1'b0) || (^CLAMP_VALUE == 1'b1)) !== 1'b1) begin : g_invalid_clamp_value
             operand_isolation_clamp_value_must_be_known invalid_clamp_value ();
         end
     endgenerate

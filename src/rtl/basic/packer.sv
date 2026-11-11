@@ -13,10 +13,10 @@ module packer #(
     parameter REGISTER_OUTPUTS = 0,
     parameter ASYNC_RESET = 0,
     localparam bit PARAMETERS_VALID =
-        ((NUM_ELEMENTS >= 1) === 1'b1) && (^NUM_ELEMENTS !== 1'bx) &&
-        ((SRC_ELEMENT_WIDTH >= 1) === 1'b1) && (^SRC_ELEMENT_WIDTH !== 1'bx) &&
-        ((DST_ELEMENT_WIDTH >= 1) === 1'b1) && (^DST_ELEMENT_WIDTH !== 1'bx) &&
-        ((USER_WIDTH >= 1) === 1'b1) && (^USER_WIDTH !== 1'bx) &&
+        ((NUM_ELEMENTS >= 1) === 1'b1) && (((^NUM_ELEMENTS == 1'b0) || (^NUM_ELEMENTS == 1'b1)) === 1'b1) &&
+        ((SRC_ELEMENT_WIDTH >= 1) === 1'b1) && (((^SRC_ELEMENT_WIDTH == 1'b0) || (^SRC_ELEMENT_WIDTH == 1'b1)) === 1'b1) &&
+        ((DST_ELEMENT_WIDTH >= 1) === 1'b1) && (((^DST_ELEMENT_WIDTH == 1'b0) || (^DST_ELEMENT_WIDTH == 1'b1)) === 1'b1) &&
+        ((USER_WIDTH >= 1) === 1'b1) && (((^USER_WIDTH == 1'b0) || (^USER_WIDTH == 1'b1)) === 1'b1) &&
         (SUPPORT_SIGNED === 0 || SUPPORT_SIGNED === 1) &&
         (SUPPORT_SATURATION === 0 || SUPPORT_SATURATION === 1) &&
         (SUPPORT_REVERSE === 0 || SUPPORT_REVERSE === 1) &&

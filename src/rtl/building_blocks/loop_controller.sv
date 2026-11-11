@@ -17,15 +17,15 @@ module loop_controller #(
     parameter PROTECT_STATE = 0,
     parameter ASYNC_RESET = 0,
     localparam bit PARAMETERS_VALID =
-        ((MAX_LOOP_DEPTH >= 1) === 1'b1) && ( ^ MAX_LOOP_DEPTH !== 1'bx) &&
-        ((INDEX_WIDTH >= 1) === 1'b1) && ( ^ INDEX_WIDTH !== 1'bx) &&
-        ((TRIP_COUNT_WIDTH >= 1) === 1'b1) && ( ^ TRIP_COUNT_WIDTH !== 1'bx) &&
-        ((LINEAR_COUNT_WIDTH >= 1) === 1'b1) && ( ^ LINEAR_COUNT_WIDTH !== 1'bx) &&
-        ((II_WIDTH >= 1) === 1'b1) && ( ^ II_WIDTH !== 1'bx) &&
-        ((CONTEXT_ID_WIDTH >= 1) === 1'b1) && ( ^ CONTEXT_ID_WIDTH !== 1'bx) &&
-        ((RUN_ID_WIDTH >= 1) === 1'b1) && ( ^ RUN_ID_WIDTH !== 1'bx) &&
-        ((NUM_EVENTS >= 1) === 1'b1) && ( ^ NUM_EVENTS !== 1'bx) &&
-        ((CONFIG_EPOCH_WIDTH >= 2) === 1'b1) && ( ^ CONFIG_EPOCH_WIDTH !== 1'bx) &&
+        ((MAX_LOOP_DEPTH >= 1) === 1'b1) && ( ((^MAX_LOOP_DEPTH == 1'b0) || (^MAX_LOOP_DEPTH == 1'b1)) === 1'b1) &&
+        ((INDEX_WIDTH >= 1) === 1'b1) && ( ((^INDEX_WIDTH == 1'b0) || (^INDEX_WIDTH == 1'b1)) === 1'b1) &&
+        ((TRIP_COUNT_WIDTH >= 1) === 1'b1) && ( ((^TRIP_COUNT_WIDTH == 1'b0) || (^TRIP_COUNT_WIDTH == 1'b1)) === 1'b1) &&
+        ((LINEAR_COUNT_WIDTH >= 1) === 1'b1) && ( ((^LINEAR_COUNT_WIDTH == 1'b0) || (^LINEAR_COUNT_WIDTH == 1'b1)) === 1'b1) &&
+        ((II_WIDTH >= 1) === 1'b1) && ( ((^II_WIDTH == 1'b0) || (^II_WIDTH == 1'b1)) === 1'b1) &&
+        ((CONTEXT_ID_WIDTH >= 1) === 1'b1) && ( ((^CONTEXT_ID_WIDTH == 1'b0) || (^CONTEXT_ID_WIDTH == 1'b1)) === 1'b1) &&
+        ((RUN_ID_WIDTH >= 1) === 1'b1) && ( ((^RUN_ID_WIDTH == 1'b0) || (^RUN_ID_WIDTH == 1'b1)) === 1'b1) &&
+        ((NUM_EVENTS >= 1) === 1'b1) && ( ((^NUM_EVENTS == 1'b0) || (^NUM_EVENTS == 1'b1)) === 1'b1) &&
+        ((CONFIG_EPOCH_WIDTH >= 2) === 1'b1) && ( ((^CONFIG_EPOCH_WIDTH == 1'b0) || (^CONFIG_EPOCH_WIDTH == 1'b1)) === 1'b1) &&
         ((SUPPORT_BOUNDED_MODE === 0) || (SUPPORT_BOUNDED_MODE === 1)) &&
         ((SUPPORT_SUSPEND === 0) || (SUPPORT_SUSPEND === 1)) &&
         ((SUPPORT_ABORT === 0) || (SUPPORT_ABORT === 1)) &&

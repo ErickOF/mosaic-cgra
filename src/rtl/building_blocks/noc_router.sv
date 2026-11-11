@@ -36,10 +36,10 @@ module noc_router #(
     localparam bit GEOMETRY_VALID =
         ((PACKET_CREDIT_RESERVATION >= 0 &&
             PACKET_CREDIT_RESERVATION <= OUTPUT_INITIAL_CREDITS) === 1'b1) &&
-        (^PACKET_CREDIT_RESERVATION !== 1'bx) &&
-        ((MESH_X >= 1) === 1'b1) && ( ^ MESH_X !== 1'bx) &&
-        ((MESH_Y >= 1) === 1'b1) && ( ^ MESH_Y !== 1'bx) &&
-        ((FLIT_DATA_WIDTH >= 1) === 1'b1) && ( ^ FLIT_DATA_WIDTH !== 1'bx) &&
+        (((^PACKET_CREDIT_RESERVATION == 1'b0) || (^PACKET_CREDIT_RESERVATION == 1'b1)) === 1'b1) &&
+        ((MESH_X >= 1) === 1'b1) && ( ((^MESH_X == 1'b0) || (^MESH_X == 1'b1)) === 1'b1) &&
+        ((MESH_Y >= 1) === 1'b1) && ( ((^MESH_Y == 1'b0) || (^MESH_Y == 1'b1)) === 1'b1) &&
+        ((FLIT_DATA_WIDTH >= 1) === 1'b1) && ( ((^FLIT_DATA_WIDTH == 1'b0) || (^FLIT_DATA_WIDTH == 1'b1)) === 1'b1) &&
         ((64'(MESH_X) < 64'd2147483647) === 1'b1) &&
         ((64'(MESH_Y) < 64'd2147483647) === 1'b1) &&
         ((64'(FLIT_DATA_WIDTH) < 64'd2147483647) === 1'b1) &&
@@ -58,25 +58,25 @@ module noc_router #(
         ((64'(ERROR_WIDTH) < 64'd2147483647) === 1'b1) &&
         ((64'(LINK_EPOCH_WIDTH) < 64'd2147483647) === 1'b1) &&
         ((64'(HIGH_SERVICE_BURST_LIMIT) < 64'd2147483647) === 1'b1) &&
-        ((NUM_VCS >= 1) === 1'b1) && ( ^ NUM_VCS !== 1'bx) &&
-        ((INPUT_VC_DEPTH >= 1) === 1'b1) && ( ^ INPUT_VC_DEPTH !== 1'bx) &&
-        ((OUTPUT_INITIAL_CREDITS >= 1) === 1'b1) && ( ^ OUTPUT_INITIAL_CREDITS !== 1'bx) &&
-        ((NUM_TRAFFIC_CLASSES >= 1) === 1'b1) && ( ^ NUM_TRAFFIC_CLASSES !== 1'bx) &&
+        ((NUM_VCS >= 1) === 1'b1) && ( ((^NUM_VCS == 1'b0) || (^NUM_VCS == 1'b1)) === 1'b1) &&
+        ((INPUT_VC_DEPTH >= 1) === 1'b1) && ( ((^INPUT_VC_DEPTH == 1'b0) || (^INPUT_VC_DEPTH == 1'b1)) === 1'b1) &&
+        ((OUTPUT_INITIAL_CREDITS >= 1) === 1'b1) && ( ((^OUTPUT_INITIAL_CREDITS == 1'b0) || (^OUTPUT_INITIAL_CREDITS == 1'b1)) === 1'b1) &&
+        ((NUM_TRAFFIC_CLASSES >= 1) === 1'b1) && ( ((^NUM_TRAFFIC_CLASSES == 1'b0) || (^NUM_TRAFFIC_CLASSES == 1'b1)) === 1'b1) &&
         (((HIGH_SERVICE_BURST_LIMIT >= 1) ||
             (ENABLE_QOS == 0 && HIGH_SERVICE_BURST_LIMIT == 0)) === 1'b1) &&
-            ( ^ HIGH_SERVICE_BURST_LIMIT !== 1'bx) &&
-        ((NODE_ID_WIDTH >= 1) === 1'b1) && ( ^ NODE_ID_WIDTH !== 1'bx) &&
-        ((ENDPOINT_ID_WIDTH >= 1) === 1'b1) && ( ^ ENDPOINT_ID_WIDTH !== 1'bx) &&
-        ((CONTEXT_ID_WIDTH >= 1) === 1'b1) && ( ^ CONTEXT_ID_WIDTH !== 1'bx) &&
-        ((MESSAGE_TYPE_WIDTH >= 1) === 1'b1) && ( ^ MESSAGE_TYPE_WIDTH !== 1'bx) &&
-        ((TRAFFIC_CLASS_WIDTH >= 1) === 1'b1) && ( ^ TRAFFIC_CLASS_WIDTH !== 1'bx) &&
-        ((PACKET_ID_WIDTH >= 1) === 1'b1) && ( ^ PACKET_ID_WIDTH !== 1'bx) &&
-        ((FRAGMENT_INDEX_WIDTH >= 1) === 1'b1) && ( ^ FRAGMENT_INDEX_WIDTH !== 1'bx) &&
-        ((USER_METADATA_WIDTH >= 1) === 1'b1) && ( ^ USER_METADATA_WIDTH !== 1'bx) &&
-        ((ERROR_WIDTH >= 1) === 1'b1) && ( ^ ERROR_WIDTH !== 1'bx) &&
-        ((LINK_EPOCH_WIDTH >= 1) === 1'b1) && ( ^ LINK_EPOCH_WIDTH !== 1'bx) &&
-        ((ROUTER_X >= 0 && ROUTER_X < MESH_X) === 1'b1) && ( ^ ROUTER_X !== 1'bx) &&
-        ((ROUTER_Y >= 0 && ROUTER_Y < MESH_Y) === 1'b1) && ( ^ ROUTER_Y !== 1'bx) &&
+            ( ((^HIGH_SERVICE_BURST_LIMIT == 1'b0) || (^HIGH_SERVICE_BURST_LIMIT == 1'b1)) === 1'b1) &&
+        ((NODE_ID_WIDTH >= 1) === 1'b1) && ( ((^NODE_ID_WIDTH == 1'b0) || (^NODE_ID_WIDTH == 1'b1)) === 1'b1) &&
+        ((ENDPOINT_ID_WIDTH >= 1) === 1'b1) && ( ((^ENDPOINT_ID_WIDTH == 1'b0) || (^ENDPOINT_ID_WIDTH == 1'b1)) === 1'b1) &&
+        ((CONTEXT_ID_WIDTH >= 1) === 1'b1) && ( ((^CONTEXT_ID_WIDTH == 1'b0) || (^CONTEXT_ID_WIDTH == 1'b1)) === 1'b1) &&
+        ((MESSAGE_TYPE_WIDTH >= 1) === 1'b1) && ( ((^MESSAGE_TYPE_WIDTH == 1'b0) || (^MESSAGE_TYPE_WIDTH == 1'b1)) === 1'b1) &&
+        ((TRAFFIC_CLASS_WIDTH >= 1) === 1'b1) && ( ((^TRAFFIC_CLASS_WIDTH == 1'b0) || (^TRAFFIC_CLASS_WIDTH == 1'b1)) === 1'b1) &&
+        ((PACKET_ID_WIDTH >= 1) === 1'b1) && ( ((^PACKET_ID_WIDTH == 1'b0) || (^PACKET_ID_WIDTH == 1'b1)) === 1'b1) &&
+        ((FRAGMENT_INDEX_WIDTH >= 1) === 1'b1) && ( ((^FRAGMENT_INDEX_WIDTH == 1'b0) || (^FRAGMENT_INDEX_WIDTH == 1'b1)) === 1'b1) &&
+        ((USER_METADATA_WIDTH >= 1) === 1'b1) && ( ((^USER_METADATA_WIDTH == 1'b0) || (^USER_METADATA_WIDTH == 1'b1)) === 1'b1) &&
+        ((ERROR_WIDTH >= 1) === 1'b1) && ( ((^ERROR_WIDTH == 1'b0) || (^ERROR_WIDTH == 1'b1)) === 1'b1) &&
+        ((LINK_EPOCH_WIDTH >= 1) === 1'b1) && ( ((^LINK_EPOCH_WIDTH == 1'b0) || (^LINK_EPOCH_WIDTH == 1'b1)) === 1'b1) &&
+        ((ROUTER_X >= 0 && ROUTER_X < MESH_X) === 1'b1) && ( ((^ROUTER_X == 1'b0) || (^ROUTER_X == 1'b1)) === 1'b1) &&
+        ((ROUTER_Y >= 0 && ROUTER_Y < MESH_Y) === 1'b1) && ( ((^ROUTER_Y == 1'b0) || (^ROUTER_Y == 1'b1)) === 1'b1) &&
         ((FLOW_CONTROL === 0) || (FLOW_CONTROL === 1)) &&
         ((ROUTING_ALGORITHM === 0) || (ROUTING_ALGORITHM === 1)) &&
         ((ENABLE_QOS === 0) || (ENABLE_QOS === 1)) &&
@@ -229,7 +229,8 @@ module noc_router #(
 
     function automatic bit maps_valid();
         bit legal;
-        legal = ( ^ {TRAFFIC_CLASS_TO_VC, TRAFFIC_CLASS_TO_SERVICE} !== 1'bx);
+        legal = (((^{TRAFFIC_CLASS_TO_VC, TRAFFIC_CLASS_TO_SERVICE} == 1'b0) ||
+            (^{TRAFFIC_CLASS_TO_VC, TRAFFIC_CLASS_TO_SERVICE} == 1'b1)) === 1'b1);
 
         for (int c = 0; c < CLASSES; c++)
             if (32'(TRAFFIC_CLASS_TO_VC[c*VW+:VW]) >= V) legal = 1'b0;

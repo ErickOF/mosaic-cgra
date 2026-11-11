@@ -13,8 +13,8 @@ module sram_wrapper #(
     localparam bit PARAMETERS_VALID =
         ((DATA_WIDTH >= 1 && DEPTH >= 1 && MASK_GRANULARITY >= 1 && TAG_WIDTH >= 1 &&
           READ_LATENCY >= 1 && MAX_OUTSTANDING_READS >= READ_LATENCY) === 1'b1) &&
-        (^DATA_WIDTH !== 1'bx) && (^DEPTH !== 1'bx) && (^MASK_GRANULARITY !== 1'bx) &&
-        (^TAG_WIDTH !== 1'bx) && (^READ_LATENCY !== 1'bx) && (^MAX_OUTSTANDING_READS !== 1'bx) &&
+        (((^DATA_WIDTH == 1'b0) || (^DATA_WIDTH == 1'b1)) === 1'b1) && (((^DEPTH == 1'b0) || (^DEPTH == 1'b1)) === 1'b1) && (((^MASK_GRANULARITY == 1'b0) || (^MASK_GRANULARITY == 1'b1)) === 1'b1) &&
+        (((^TAG_WIDTH == 1'b0) || (^TAG_WIDTH == 1'b1)) === 1'b1) && (((^READ_LATENCY == 1'b0) || (^READ_LATENCY == 1'b1)) === 1'b1) && (((^MAX_OUTSTANDING_READS == 1'b0) || (^MAX_OUTSTANDING_READS == 1'b1)) === 1'b1) &&
         ((MASK_GRANULARITY > 0 && DATA_WIDTH % MASK_GRANULARITY == 0) === 1'b1) &&
         ((ASYNC_RESET === 0) || (ASYNC_RESET === 1)),
     localparam int unsigned DATA_BITS = PARAMETERS_VALID ? DATA_WIDTH : 1,

@@ -23,20 +23,20 @@ module exp_unit #(
     parameter TABLE_PROTECTION = 0,
     parameter ASYNC_RESET = 0,
     localparam bit PARAMETERS_VALID =
-        ((INPUT_WIDTH >= 1) === 1'b1) && ( ^ INPUT_WIDTH !== 1'bx) &&
-        ((INPUT_FRACTION_WIDTH >= 1) === 1'b1) && ( ^ INPUT_FRACTION_WIDTH !== 1'bx) &&
-        ((RANGE_WIDTH >= 1) === 1'b1) && ( ^ RANGE_WIDTH !== 1'bx) &&
-        ((RANGE_FRACTION_WIDTH >= 1) === 1'b1) && ( ^ RANGE_FRACTION_WIDTH !== 1'bx) &&
-        ((LOG2E_FRACTION_WIDTH >= 1) === 1'b1) && ( ^ LOG2E_FRACTION_WIDTH !== 1'bx) &&
-        ((INTERNAL_WIDTH >= 1) === 1'b1) && ( ^ INTERNAL_WIDTH !== 1'bx) &&
-        ((INTERNAL_FRACTION_WIDTH >= 1) === 1'b1) && ( ^ INTERNAL_FRACTION_WIDTH !== 1'bx) &&
-        ((OUTPUT_WIDTH >= 1) === 1'b1) && ( ^ OUTPUT_WIDTH !== 1'bx) &&
-        ((OUTPUT_FRACTION_WIDTH >= 1) === 1'b1) && ( ^ OUTPUT_FRACTION_WIDTH !== 1'bx) &&
-        ((TABLE_ADDRESS_WIDTH >= 1) === 1'b1) && ( ^ TABLE_ADDRESS_WIDTH !== 1'bx) &&
-        ((PIPELINE_DEPTH >= 1) === 1'b1) && ( ^ PIPELINE_DEPTH !== 1'bx) &&
-        ((OUTPUT_QUEUE_DEPTH >= 1) === 1'b1) && ( ^ OUTPUT_QUEUE_DEPTH !== 1'bx) &&
-        ((CONTEXT_ID_WIDTH >= 1) === 1'b1) && ( ^ CONTEXT_ID_WIDTH !== 1'bx) &&
-        ((REQUEST_TAG_WIDTH >= 1) === 1'b1) && ( ^ REQUEST_TAG_WIDTH !== 1'bx) &&
+        ((INPUT_WIDTH >= 1) === 1'b1) && ( ((^INPUT_WIDTH == 1'b0) || (^INPUT_WIDTH == 1'b1)) === 1'b1) &&
+        ((INPUT_FRACTION_WIDTH >= 1) === 1'b1) && ( ((^INPUT_FRACTION_WIDTH == 1'b0) || (^INPUT_FRACTION_WIDTH == 1'b1)) === 1'b1) &&
+        ((RANGE_WIDTH >= 1) === 1'b1) && ( ((^RANGE_WIDTH == 1'b0) || (^RANGE_WIDTH == 1'b1)) === 1'b1) &&
+        ((RANGE_FRACTION_WIDTH >= 1) === 1'b1) && ( ((^RANGE_FRACTION_WIDTH == 1'b0) || (^RANGE_FRACTION_WIDTH == 1'b1)) === 1'b1) &&
+        ((LOG2E_FRACTION_WIDTH >= 1) === 1'b1) && ( ((^LOG2E_FRACTION_WIDTH == 1'b0) || (^LOG2E_FRACTION_WIDTH == 1'b1)) === 1'b1) &&
+        ((INTERNAL_WIDTH >= 1) === 1'b1) && ( ((^INTERNAL_WIDTH == 1'b0) || (^INTERNAL_WIDTH == 1'b1)) === 1'b1) &&
+        ((INTERNAL_FRACTION_WIDTH >= 1) === 1'b1) && ( ((^INTERNAL_FRACTION_WIDTH == 1'b0) || (^INTERNAL_FRACTION_WIDTH == 1'b1)) === 1'b1) &&
+        ((OUTPUT_WIDTH >= 1) === 1'b1) && ( ((^OUTPUT_WIDTH == 1'b0) || (^OUTPUT_WIDTH == 1'b1)) === 1'b1) &&
+        ((OUTPUT_FRACTION_WIDTH >= 1) === 1'b1) && ( ((^OUTPUT_FRACTION_WIDTH == 1'b0) || (^OUTPUT_FRACTION_WIDTH == 1'b1)) === 1'b1) &&
+        ((TABLE_ADDRESS_WIDTH >= 1) === 1'b1) && ( ((^TABLE_ADDRESS_WIDTH == 1'b0) || (^TABLE_ADDRESS_WIDTH == 1'b1)) === 1'b1) &&
+        ((PIPELINE_DEPTH >= 1) === 1'b1) && ( ((^PIPELINE_DEPTH == 1'b0) || (^PIPELINE_DEPTH == 1'b1)) === 1'b1) &&
+        ((OUTPUT_QUEUE_DEPTH >= 1) === 1'b1) && ( ((^OUTPUT_QUEUE_DEPTH == 1'b0) || (^OUTPUT_QUEUE_DEPTH == 1'b1)) === 1'b1) &&
+        ((CONTEXT_ID_WIDTH >= 1) === 1'b1) && ( ((^CONTEXT_ID_WIDTH == 1'b0) || (^CONTEXT_ID_WIDTH == 1'b1)) === 1'b1) &&
+        ((REQUEST_TAG_WIDTH >= 1) === 1'b1) && ( ((^REQUEST_TAG_WIDTH == 1'b0) || (^REQUEST_TAG_WIDTH == 1'b1)) === 1'b1) &&
         ((SUPPORT_EXP_E === 0) || (SUPPORT_EXP_E === 1)) &&
         ((SUPPORT_EXP2 === 0) || (SUPPORT_EXP2 === 1)) &&
         ((SUPPORT_INTERPOLATION === 0) || (SUPPORT_INTERPOLATION === 1)) &&

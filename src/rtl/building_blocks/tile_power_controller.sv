@@ -22,21 +22,20 @@ module tile_power_controller #(
     parameter WAKE_ON_EVENT = 1,
     parameter ASYNC_RESET = 0,
     localparam bit GEOMETRY_VALID =
-        ((NUM_CLOCK_GROUPS > 0) === 1'b1) && (^NUM_CLOCK_GROUPS !== 1'bx) &&
-        ((NUM_WAKE_SOURCES > 0) === 1'b1) && (^NUM_WAKE_SOURCES !== 1'bx) &&
-        ((NUM_STALL_REASONS > 0) === 1'b1) && (^NUM_STALL_REASONS !== 1'bx) &&
-        ((CONTEXT_ID_WIDTH > 0) === 1'b1) && (^CONTEXT_ID_WIDTH !== 1'bx) &&
-        ((IDLE_ENTRY_CYCLES > 0) === 1'b1) && (^IDLE_ENTRY_CYCLES !== 1'bx) &&
-        ((MIN_IDLE_RESIDENCY_CYCLES > 0) === 1'b1) && (^MIN_IDLE_RESIDENCY_CYCLES !== 1'bx) &&
-        ((WAKEUP_STABILIZE_CYCLES > 0) === 1'b1) && (^WAKEUP_STABILIZE_CYCLES !== 1'bx) &&
-        ((ISOLATION_SETUP_CYCLES > 0) === 1'b1) && (^ISOLATION_SETUP_CYCLES !== 1'bx) &&
-        ((POWER_STABLE_CYCLES > 0) === 1'b1) && (^POWER_STABLE_CYCLES !== 1'bx) &&
-        ((RESET_HOLD_CYCLES > 0) === 1'b1) && (^RESET_HOLD_CYCLES !== 1'bx) &&
-        ((DRAIN_TIMEOUT_CYCLES > 0) === 1'b1) && (^DRAIN_TIMEOUT_CYCLES !== 1'bx) &&
-        ((ACK_TIMEOUT_CYCLES > 0) === 1'b1) && (^ACK_TIMEOUT_CYCLES !== 1'bx) &&
-        ((POWER_TIMEOUT_CYCLES > 0) === 1'b1) && (^POWER_TIMEOUT_CYCLES !== 1'bx) &&
+        ((NUM_CLOCK_GROUPS > 0) === 1'b1) &&
+        ((NUM_WAKE_SOURCES > 0) === 1'b1) &&
+        ((NUM_STALL_REASONS > 0) === 1'b1) &&
+        ((CONTEXT_ID_WIDTH > 0) === 1'b1) &&
+        ((IDLE_ENTRY_CYCLES > 0) === 1'b1) &&
+        ((MIN_IDLE_RESIDENCY_CYCLES > 0) === 1'b1) &&
+        ((WAKEUP_STABILIZE_CYCLES > 0) === 1'b1) &&
+        ((ISOLATION_SETUP_CYCLES > 0) === 1'b1) &&
+        ((POWER_STABLE_CYCLES > 0) === 1'b1) &&
+        ((RESET_HOLD_CYCLES > 0) === 1'b1) &&
+        ((DRAIN_TIMEOUT_CYCLES > 0) === 1'b1) &&
+        ((ACK_TIMEOUT_CYCLES > 0) === 1'b1) &&
+        ((POWER_TIMEOUT_CYCLES > 0) === 1'b1) &&
         ((POWER_GOOD_SYNC_STAGES >= 2) === 1'b1) &&
-        (^POWER_GOOD_SYNC_STAGES !== 1'bx) &&
         ((SUPPORT_RETENTION === 0) || (SUPPORT_RETENTION === 1)) &&
         ((SUPPORT_POWER_GATING === 0) || (SUPPORT_POWER_GATING === 1)) &&
         ((WAKE_ON_EVENT === 0) || (WAKE_ON_EVENT === 1)) &&
@@ -64,7 +63,10 @@ module tile_power_controller #(
     localparam bit PARAMETERS_VALID = GEOMETRY_VALID &&
         ($bits(CLOCK_GROUP_ALWAYS_ON_MASK) == G) &&
         ($bits(WAKEUP_CLOCK_GROUP_MASK) == G) &&
-        (^CLOCK_GROUP_ALWAYS_ON_MASK !== 1'bx) && (^WAKEUP_CLOCK_GROUP_MASK !== 1'bx)
+        (((^CLOCK_GROUP_ALWAYS_ON_MASK == 1'b0) ||
+            (^CLOCK_GROUP_ALWAYS_ON_MASK == 1'b1)) === 1'b1) &&
+        (((^WAKEUP_CLOCK_GROUP_MASK == 1'b0) ||
+            (^WAKEUP_CLOCK_GROUP_MASK == 1'b1)) === 1'b1)
 ) (
     input logic i_aon_clk,
     input logic i_aon_rstb,

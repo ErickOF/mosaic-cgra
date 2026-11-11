@@ -20,27 +20,27 @@ module rsqrt_unit #(
     parameter ASYNC_RESET = 0,
     localparam bit PARAMETERS_VALID =
         ((INPUT_WIDTH >= 1 && INPUT_WIDTH < 2147483647) === 1'b1) &&
-        ( ^ INPUT_WIDTH !== 1'bx) &&
+        ( ((^INPUT_WIDTH == 1'b0) || (^INPUT_WIDTH == 1'b1)) === 1'b1) &&
         ((INPUT_FRACTION_WIDTH >= 1 && INPUT_FRACTION_WIDTH < 2147483647) === 1'b1) &&
-        ( ^ INPUT_FRACTION_WIDTH !== 1'bx) &&
+        ( ((^INPUT_FRACTION_WIDTH == 1'b0) || (^INPUT_FRACTION_WIDTH == 1'b1)) === 1'b1) &&
         ((INTERNAL_WIDTH >= 1 && INTERNAL_WIDTH < 2147483647) === 1'b1) &&
-        ( ^ INTERNAL_WIDTH !== 1'bx) &&
+        ( ((^INTERNAL_WIDTH == 1'b0) || (^INTERNAL_WIDTH == 1'b1)) === 1'b1) &&
         ((INTERNAL_FRACTION_WIDTH >= 1 && INTERNAL_FRACTION_WIDTH < 2147483647) === 1'b1) &&
-        ( ^ INTERNAL_FRACTION_WIDTH !== 1'bx) &&
+        ( ((^INTERNAL_FRACTION_WIDTH == 1'b0) || (^INTERNAL_FRACTION_WIDTH == 1'b1)) === 1'b1) &&
         ((OUTPUT_WIDTH >= 1 && OUTPUT_WIDTH < 2147483647) === 1'b1) &&
-        ( ^ OUTPUT_WIDTH !== 1'bx) &&
+        ( ((^OUTPUT_WIDTH == 1'b0) || (^OUTPUT_WIDTH == 1'b1)) === 1'b1) &&
         ((OUTPUT_FRACTION_WIDTH >= 1 && OUTPUT_FRACTION_WIDTH < 2147483647) === 1'b1) &&
-        ( ^ OUTPUT_FRACTION_WIDTH !== 1'bx) &&
+        ( ((^OUTPUT_FRACTION_WIDTH == 1'b0) || (^OUTPUT_FRACTION_WIDTH == 1'b1)) === 1'b1) &&
         ((SEED_MANTISSA_ADDRESS_WIDTH >= 1 && SEED_MANTISSA_ADDRESS_WIDTH < 2147483647) === 1'b1) &&
-        ( ^ SEED_MANTISSA_ADDRESS_WIDTH !== 1'bx) &&
+        ( ((^SEED_MANTISSA_ADDRESS_WIDTH == 1'b0) || (^SEED_MANTISSA_ADDRESS_WIDTH == 1'b1)) === 1'b1) &&
         ((OUTPUT_QUEUE_DEPTH >= 1 && OUTPUT_QUEUE_DEPTH < 2147483647) === 1'b1) &&
-        ( ^ OUTPUT_QUEUE_DEPTH !== 1'bx) &&
+        ( ((^OUTPUT_QUEUE_DEPTH == 1'b0) || (^OUTPUT_QUEUE_DEPTH == 1'b1)) === 1'b1) &&
         ((CONTEXT_ID_WIDTH >= 1 && CONTEXT_ID_WIDTH < 2147483647) === 1'b1) &&
-        ( ^ CONTEXT_ID_WIDTH !== 1'bx) &&
+        ( ((^CONTEXT_ID_WIDTH == 1'b0) || (^CONTEXT_ID_WIDTH == 1'b1)) === 1'b1) &&
         ((REQUEST_TAG_WIDTH >= 1 && REQUEST_TAG_WIDTH < 2147483647) === 1'b1) &&
-        ( ^ REQUEST_TAG_WIDTH !== 1'bx) &&
+        ( ((^REQUEST_TAG_WIDTH == 1'b0) || (^REQUEST_TAG_WIDTH == 1'b1)) === 1'b1) &&
         ((MAX_ITERATIONS >= 0 && MAX_ITERATIONS < 1073741823) === 1'b1) &&
-        ( ^ MAX_ITERATIONS !== 1'bx) &&
+        ( ((^MAX_ITERATIONS == 1'b0) || (^MAX_ITERATIONS == 1'b1)) === 1'b1) &&
         ((EVALUATION_ARCH === 0) || (EVALUATION_ARCH === 1)) &&
         ((ZERO_RESULT_MODE === 0) || (ZERO_RESULT_MODE === 1)) &&
         ((SEED_PROTECTION === 0) || (SEED_PROTECTION === 1) ||

@@ -13,12 +13,12 @@ module dot_product #(
     parameter MAX_LATENCY = 8,
     parameter ASYNC_RESET = 0,
     localparam bit PARAMETERS_VALID =
-        ((ELEMENT_WIDTH >= 1) === 1'b1) && ( ^ ELEMENT_WIDTH !== 1'bx) &&
-        ((NUM_TERMS >= 1) === 1'b1) && ( ^ NUM_TERMS !== 1'bx) &&
-        ((ACC_WIDTH >= 1) === 1'b1) && ( ^ ACC_WIDTH !== 1'bx) &&
-        ((MAX_LATENCY >= 1) === 1'b1) && ( ^ MAX_LATENCY !== 1'bx) &&
+        ((ELEMENT_WIDTH >= 1) === 1'b1) && ( ((^ELEMENT_WIDTH == 1'b0) || (^ELEMENT_WIDTH == 1'b1)) === 1'b1) &&
+        ((NUM_TERMS >= 1) === 1'b1) && ( ((^NUM_TERMS == 1'b0) || (^NUM_TERMS == 1'b1)) === 1'b1) &&
+        ((ACC_WIDTH >= 1) === 1'b1) && ( ((^ACC_WIDTH == 1'b0) || (^ACC_WIDTH == 1'b1)) === 1'b1) &&
+        ((MAX_LATENCY >= 1) === 1'b1) && ( ((^MAX_LATENCY == 1'b0) || (^MAX_LATENCY == 1'b1)) === 1'b1) &&
         ((LATENCY >= 0) === 1'b1) && ((LATENCY <= MAX_LATENCY) === 1'b1) &&
-        ( ^ LATENCY !== 1'bx) &&
+        ( ((^LATENCY == 1'b0) || (^LATENCY == 1'b1)) === 1'b1) &&
         ((SUPPORT_ACCUMULATE === 0) || (SUPPORT_ACCUMULATE === 1)) &&
         ((SUPPORT_SATURATION === 0) || (SUPPORT_SATURATION === 1)) &&
         ((ASYNC_RESET === 0) || (ASYNC_RESET === 1)) &&

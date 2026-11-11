@@ -14,15 +14,15 @@ module stream_formatter #(
     parameter ASYNC_RESET = 0,
     parameter MODE_WIDTH = 1,
     localparam bit PARAMETERS_VALID =
-        ((DATA_WIDTH >= 8) === 1'b1) && (^DATA_WIDTH !== 1'bx) &&
-        ((NUM_LANES >= 1) === 1'b1) && (^NUM_LANES !== 1'bx) &&
+        ((DATA_WIDTH >= 8) === 1'b1) && (((^DATA_WIDTH == 1'b0) || (^DATA_WIDTH == 1'b1)) === 1'b1) &&
+        ((NUM_LANES >= 1) === 1'b1) && (((^NUM_LANES == 1'b0) || (^NUM_LANES == 1'b1)) === 1'b1) &&
         ((DATA_WIDTH % 8 == 0) === 1'b1) &&
         ((DATA_WIDTH % (NUM_LANES > 0 ? NUM_LANES : 1) == 0) === 1'b1) &&
         (((DATA_WIDTH / (NUM_LANES > 0 ? NUM_LANES : 1)) % 8 == 0) === 1'b1) &&
-        ((COUNT_WIDTH >= 1) === 1'b1) && (^COUNT_WIDTH !== 1'bx) &&
-        ((DATATYPE_WIDTH >= 1) === 1'b1) && (^DATATYPE_WIDTH !== 1'bx) &&
-        ((CHANNEL_ID_WIDTH >= 1) === 1'b1) && (^CHANNEL_ID_WIDTH !== 1'bx) &&
-        ((CONTEXT_ID_WIDTH >= 1) === 1'b1) && (^CONTEXT_ID_WIDTH !== 1'bx) &&
+        ((COUNT_WIDTH >= 1) === 1'b1) && (((^COUNT_WIDTH == 1'b0) || (^COUNT_WIDTH == 1'b1)) === 1'b1) &&
+        ((DATATYPE_WIDTH >= 1) === 1'b1) && (((^DATATYPE_WIDTH == 1'b0) || (^DATATYPE_WIDTH == 1'b1)) === 1'b1) &&
+        ((CHANNEL_ID_WIDTH >= 1) === 1'b1) && (((^CHANNEL_ID_WIDTH == 1'b0) || (^CHANNEL_ID_WIDTH == 1'b1)) === 1'b1) &&
+        ((CONTEXT_ID_WIDTH >= 1) === 1'b1) && (((^CONTEXT_ID_WIDTH == 1'b0) || (^CONTEXT_ID_WIDTH == 1'b1)) === 1'b1) &&
         ((REGISTER_OUTPUTS === 0) || (REGISTER_OUTPUTS === 1)) &&
         ((ASYNC_RESET === 0) || (ASYNC_RESET === 1)) && (MODE_WIDTH === 1) &&
         ((128'(DATA_WIDTH) + 128'(DATA_WIDTH) / 8 + 128'(NUM_LANES) +

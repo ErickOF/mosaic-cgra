@@ -22,27 +22,27 @@ module event_barrier #(
     parameter ASYNC_RESET = 0,
     localparam bit PARAMETERS_VALID =
         ((NUM_EVENTS >= 1) === 1'b1) &&
-        ( ^ NUM_EVENTS !== 1'bx) &&
+        ( ((^NUM_EVENTS == 1'b0) || (^NUM_EVENTS == 1'b1)) === 1'b1) &&
         ((EVENT_COUNT_WIDTH >= 1) === 1'b1) &&
-        ( ^ EVENT_COUNT_WIDTH !== 1'bx) &&
+        ( ((^EVENT_COUNT_WIDTH == 1'b0) || (^EVENT_COUNT_WIDTH == 1'b1)) === 1'b1) &&
         ((NUM_WAIT_SLOTS >= 1) === 1'b1) &&
-        ( ^ NUM_WAIT_SLOTS !== 1'bx) &&
+        ( ((^NUM_WAIT_SLOTS == 1'b0) || (^NUM_WAIT_SLOTS == 1'b1)) === 1'b1) &&
         ((WAIT_RESULT_QUEUE_DEPTH >= 1) === 1'b1) &&
-        ( ^ WAIT_RESULT_QUEUE_DEPTH !== 1'bx) &&
+        ( ((^WAIT_RESULT_QUEUE_DEPTH == 1'b0) || (^WAIT_RESULT_QUEUE_DEPTH == 1'b1)) === 1'b1) &&
         ((NUM_BARRIERS >= 1) === 1'b1) &&
-        ( ^ NUM_BARRIERS !== 1'bx) &&
+        ( ((^NUM_BARRIERS == 1'b0) || (^NUM_BARRIERS == 1'b1)) === 1'b1) &&
         ((MAX_PARTICIPANTS >= 1) === 1'b1) &&
-        ( ^ MAX_PARTICIPANTS !== 1'bx) &&
+        ( ((^MAX_PARTICIPANTS == 1'b0) || (^MAX_PARTICIPANTS == 1'b1)) === 1'b1) &&
         ((BARRIER_RELEASE_QUEUE_DEPTH >= 1) === 1'b1) &&
-        ( ^ BARRIER_RELEASE_QUEUE_DEPTH !== 1'bx) &&
+        ( ((^BARRIER_RELEASE_QUEUE_DEPTH == 1'b0) || (^BARRIER_RELEASE_QUEUE_DEPTH == 1'b1)) === 1'b1) &&
         ((GENERATION_WIDTH >= 2) === 1'b1) &&
-        ( ^ GENERATION_WIDTH !== 1'bx) &&
+        ( ((^GENERATION_WIDTH == 1'b0) || (^GENERATION_WIDTH == 1'b1)) === 1'b1) &&
         ((CONTEXT_ID_WIDTH >= 1) === 1'b1) &&
-        ( ^ CONTEXT_ID_WIDTH !== 1'bx) &&
+        ( ((^CONTEXT_ID_WIDTH == 1'b0) || (^CONTEXT_ID_WIDTH == 1'b1)) === 1'b1) &&
         ((WAITER_TAG_WIDTH >= 1) === 1'b1) &&
-        ( ^ WAITER_TAG_WIDTH !== 1'bx) &&
+        ( ((^WAITER_TAG_WIDTH == 1'b0) || (^WAITER_TAG_WIDTH == 1'b1)) === 1'b1) &&
         ((BARRIER_TAG_WIDTH >= 1) === 1'b1) &&
-        ( ^ BARRIER_TAG_WIDTH !== 1'bx) &&
+        ( ((^BARRIER_TAG_WIDTH == 1'b0) || (^BARRIER_TAG_WIDTH == 1'b1)) === 1'b1) &&
         ((SUPPORT_WAIT_CONSUME === 0) || (SUPPORT_WAIT_CONSUME === 1)) &&
         ((SUPPORT_WAIT_CANCEL === 0) || (SUPPORT_WAIT_CANCEL === 1)) &&
         ((SUPPORT_BARRIER_EVENTS === 0) || (SUPPORT_BARRIER_EVENTS === 1)) &&

@@ -1912,12 +1912,19 @@ synth:
 	 done
 	@printf 'Synthesized netlist: %s\n' "$(abspath $(SYNTH_NETLIST))"
 
-.PHONY: rtl-forward-reference-check rtl-forward-reference-test
+.PHONY: rtl-forward-reference-check rtl-forward-reference-test \
+	rtl-presto-parameter-check rtl-presto-parameter-test
 rtl-forward-reference-check:
 	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/flows/lint/forward_references.py"
 
 rtl-forward-reference-test:
 	@cd "$(PROJECT_ROOT)/flows/lint" && "$(PYTHON_BIN)" -m unittest -v test_forward_references.py
+
+rtl-presto-parameter-check:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/flows/lint/presto_parameter_guards.py"
+
+rtl-presto-parameter-test:
+	@cd "$(PROJECT_ROOT)/flows/lint" && "$(PYTHON_BIN)" -m unittest -v test_presto_parameter_guards.py
 
 .PHONY: synth-campaign-plan synth-campaign synth-campaign-collect synth-campaign-test
 synth-campaign-plan:
@@ -2043,6 +2050,8 @@ help:
 	@printf '%s\n' \
 		'make rtl-forward-reference-check  Reject declaration-order and unresolved-symbol errors' \
 		'make rtl-forward-reference-test  Test the RTL symbol-reference checker' \
+		'make rtl-presto-parameter-check  Reject PRESTO-incompatible parameter X comparisons' \
+		'make rtl-presto-parameter-test  Test the PRESTO parameter-guard checker' \
 		'make synth-campaign-plan  Write and validate the complete PPA campaign' \
 		'make synth-campaign TECH_SETUP_TCL=path.tcl  Run and collect the campaign' \
 		'make synth-campaign-collect  Reparse timing, power, and area reports' \

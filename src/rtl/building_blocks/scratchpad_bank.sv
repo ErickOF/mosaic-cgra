@@ -15,17 +15,17 @@ module scratchpad_bank #(
     parameter SCRUB_ON_CORRECT = 1,
     parameter ASYNC_RESET = 0,
     localparam bit PARAMETERS_VALID =
-        ((DATA_WIDTH >= 8) === 1'b1) && (^DATA_WIDTH !== 1'bx) &&
+        ((DATA_WIDTH >= 8) === 1'b1) && (((^DATA_WIDTH == 1'b0) || (^DATA_WIDTH == 1'b1)) === 1'b1) &&
         ((DATA_WIDTH % 8 == 0) === 1'b1) &&
         ((((DATA_WIDTH / 8) & ((DATA_WIDTH / 8) - 1)) == 0) === 1'b1) &&
-        ((DEPTH_WORDS >= 1) === 1'b1) && (^DEPTH_WORDS !== 1'bx) &&
-        ((TAG_WIDTH >= 1) === 1'b1) && (^TAG_WIDTH !== 1'bx) &&
-        ((MAX_OUTSTANDING >= 1) === 1'b1) && (^MAX_OUTSTANDING !== 1'bx) &&
-        ((BACKEND_READ_LATENCY >= 1) === 1'b1) && (^BACKEND_READ_LATENCY !== 1'bx) &&
+        ((DEPTH_WORDS >= 1) === 1'b1) && (((^DEPTH_WORDS == 1'b0) || (^DEPTH_WORDS == 1'b1)) === 1'b1) &&
+        ((TAG_WIDTH >= 1) === 1'b1) && (((^TAG_WIDTH == 1'b0) || (^TAG_WIDTH == 1'b1)) === 1'b1) &&
+        ((MAX_OUTSTANDING >= 1) === 1'b1) && (((^MAX_OUTSTANDING == 1'b0) || (^MAX_OUTSTANDING == 1'b1)) === 1'b1) &&
+        ((BACKEND_READ_LATENCY >= 1) === 1'b1) && (((^BACKEND_READ_LATENCY == 1'b0) || (^BACKEND_READ_LATENCY == 1'b1)) === 1'b1) &&
         ((MAX_OUTSTANDING >= BACKEND_READ_LATENCY) === 1'b1) &&
         ((PROTECTION_MODE === 0) || (PROTECTION_MODE === 1) || (PROTECTION_MODE === 2)) &&
         ((PROTECTION_MODE != 2 || DATA_WIDTH <= 256) === 1'b1) &&
-        ((PARITY_GRANULARITY >= 8) === 1'b1) && (^PARITY_GRANULARITY !== 1'bx) &&
+        ((PARITY_GRANULARITY >= 8) === 1'b1) && (((^PARITY_GRANULARITY == 1'b0) || (^PARITY_GRANULARITY == 1'b1)) === 1'b1) &&
         ((PARITY_GRANULARITY % 8 == 0) === 1'b1) &&
         ((DATA_WIDTH % (PARITY_GRANULARITY > 0 ? PARITY_GRANULARITY : 1) == 0) === 1'b1) &&
         ((SCRUB_ON_CORRECT === 0) || (SCRUB_ON_CORRECT === 1)) &&

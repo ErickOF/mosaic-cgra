@@ -64,24 +64,24 @@ module global_noc #(
     parameter [8*VW-1:0] TRAFFIC_CLASS_TO_VC = default_vc_map(),
     parameter [7:0] TRAFFIC_CLASS_TO_SERVICE = 8'h30,
     localparam bit GEOMETRY_VALID =
-        ((NOC_X > 0) === 1'b1) && (^NOC_X !== 1'bx) &&
-        ((NOC_Y > 0) === 1'b1) && (^NOC_Y !== 1'bx) &&
-        ((FLIT_DATA_WIDTH > 0) === 1'b1) && (^FLIT_DATA_WIDTH !== 1'bx) &&
-        ((ENDPOINT_DATA_WIDTH > 0) === 1'b1) && (^ENDPOINT_DATA_WIDTH !== 1'bx) &&
-        ((NUM_VCS > 0) === 1'b1) && (^NUM_VCS !== 1'bx) &&
-        ((INPUT_VC_DEPTH > 0) === 1'b1) && (^INPUT_VC_DEPTH !== 1'bx) &&
-        ((NUM_TX_CHANNELS_PER_ENDPOINT > 0) === 1'b1) && (^NUM_TX_CHANNELS_PER_ENDPOINT !== 1'bx) &&
-        ((NUM_RX_CHANNELS_PER_ENDPOINT > 0) === 1'b1) && (^NUM_RX_CHANNELS_PER_ENDPOINT !== 1'bx) &&
-        ((ENDPOINT_TX_QUEUE_DEPTH > 0) === 1'b1) && (^ENDPOINT_TX_QUEUE_DEPTH !== 1'bx) &&
-        ((ENDPOINT_RX_VC_DEPTH > 0) === 1'b1) && (^ENDPOINT_RX_VC_DEPTH !== 1'bx) &&
-        ((ENDPOINT_RX_QUEUE_DEPTH > 0) === 1'b1) && (^ENDPOINT_RX_QUEUE_DEPTH !== 1'bx) &&
-        ((MAX_ACTIVE_FLOWS > 0) === 1'b1) && (^MAX_ACTIVE_FLOWS !== 1'bx) &&
-        ((MAX_PACKET_FLITS > 0) === 1'b1) && (^MAX_PACKET_FLITS !== 1'bx) &&
-        ((FRAGMENT_INDEX_WIDTH > 0) === 1'b1) && (^FRAGMENT_INDEX_WIDTH !== 1'bx) &&
-        ((LINK_EPOCH_WIDTH > 0) === 1'b1) && (^LINK_EPOCH_WIDTH !== 1'bx) &&
+        ((NOC_X > 0) === 1'b1) && (((^NOC_X == 1'b0) || (^NOC_X == 1'b1)) === 1'b1) &&
+        ((NOC_Y > 0) === 1'b1) && (((^NOC_Y == 1'b0) || (^NOC_Y == 1'b1)) === 1'b1) &&
+        ((FLIT_DATA_WIDTH > 0) === 1'b1) && (((^FLIT_DATA_WIDTH == 1'b0) || (^FLIT_DATA_WIDTH == 1'b1)) === 1'b1) &&
+        ((ENDPOINT_DATA_WIDTH > 0) === 1'b1) && (((^ENDPOINT_DATA_WIDTH == 1'b0) || (^ENDPOINT_DATA_WIDTH == 1'b1)) === 1'b1) &&
+        ((NUM_VCS > 0) === 1'b1) && (((^NUM_VCS == 1'b0) || (^NUM_VCS == 1'b1)) === 1'b1) &&
+        ((INPUT_VC_DEPTH > 0) === 1'b1) && (((^INPUT_VC_DEPTH == 1'b0) || (^INPUT_VC_DEPTH == 1'b1)) === 1'b1) &&
+        ((NUM_TX_CHANNELS_PER_ENDPOINT > 0) === 1'b1) && (((^NUM_TX_CHANNELS_PER_ENDPOINT == 1'b0) || (^NUM_TX_CHANNELS_PER_ENDPOINT == 1'b1)) === 1'b1) &&
+        ((NUM_RX_CHANNELS_PER_ENDPOINT > 0) === 1'b1) && (((^NUM_RX_CHANNELS_PER_ENDPOINT == 1'b0) || (^NUM_RX_CHANNELS_PER_ENDPOINT == 1'b1)) === 1'b1) &&
+        ((ENDPOINT_TX_QUEUE_DEPTH > 0) === 1'b1) && (((^ENDPOINT_TX_QUEUE_DEPTH == 1'b0) || (^ENDPOINT_TX_QUEUE_DEPTH == 1'b1)) === 1'b1) &&
+        ((ENDPOINT_RX_VC_DEPTH > 0) === 1'b1) && (((^ENDPOINT_RX_VC_DEPTH == 1'b0) || (^ENDPOINT_RX_VC_DEPTH == 1'b1)) === 1'b1) &&
+        ((ENDPOINT_RX_QUEUE_DEPTH > 0) === 1'b1) && (((^ENDPOINT_RX_QUEUE_DEPTH == 1'b0) || (^ENDPOINT_RX_QUEUE_DEPTH == 1'b1)) === 1'b1) &&
+        ((MAX_ACTIVE_FLOWS > 0) === 1'b1) && (((^MAX_ACTIVE_FLOWS == 1'b0) || (^MAX_ACTIVE_FLOWS == 1'b1)) === 1'b1) &&
+        ((MAX_PACKET_FLITS > 0) === 1'b1) && (((^MAX_PACKET_FLITS == 1'b0) || (^MAX_PACKET_FLITS == 1'b1)) === 1'b1) &&
+        ((FRAGMENT_INDEX_WIDTH > 0) === 1'b1) && (((^FRAGMENT_INDEX_WIDTH == 1'b0) || (^FRAGMENT_INDEX_WIDTH == 1'b1)) === 1'b1) &&
+        ((LINK_EPOCH_WIDTH > 0) === 1'b1) && (((^LINK_EPOCH_WIDTH == 1'b0) || (^LINK_EPOCH_WIDTH == 1'b1)) === 1'b1) &&
         ((64'(DRAIN_TIMEOUT_CYCLES) <= 64'hffffffff) === 1'b1) &&
-        ((DRAIN_TIMEOUT_CYCLES > 0) === 1'b1) && (^DRAIN_TIMEOUT_CYCLES !== 1'bx) &&
-        ((HIGH_SERVICE_BURST_LIMIT > 0) === 1'b1) && (^HIGH_SERVICE_BURST_LIMIT !== 1'bx) &&
+        ((DRAIN_TIMEOUT_CYCLES > 0) === 1'b1) && (((^DRAIN_TIMEOUT_CYCLES == 1'b0) || (^DRAIN_TIMEOUT_CYCLES == 1'b1)) === 1'b1) &&
+        ((HIGH_SERVICE_BURST_LIMIT > 0) === 1'b1) && (((^HIGH_SERVICE_BURST_LIMIT == 1'b0) || (^HIGH_SERVICE_BURST_LIMIT == 1'b1)) === 1'b1) &&
         ((NOC_X <= 8 && NOC_Y <= 8) === 1'b1) &&
         ((NUM_ROUTERS == NOC_X * NOC_Y) === 1'b1) &&
         ((NUM_ENDPOINTS == NUM_ROUTERS) === 1'b1) &&
@@ -285,8 +285,8 @@ module global_noc #(
     endfunction
     function automatic bit maps_valid();
         bit legal;
-        legal = (^TRAFFIC_CLASS_TO_VC !== 1'bx) &&
-            (^TRAFFIC_CLASS_TO_SERVICE !== 1'bx);
+        legal = (((^TRAFFIC_CLASS_TO_VC == 1'b0) || (^TRAFFIC_CLASS_TO_VC == 1'b1)) === 1'b1) &&
+            (((^TRAFFIC_CLASS_TO_SERVICE == 1'b0) || (^TRAFFIC_CLASS_TO_SERVICE == 1'b1)) === 1'b1);
 
         for (int c = 0; c < 8; c++)
             if (32'(TRAFFIC_CLASS_TO_VC[c*VW+:VW]) >= NUM_VCS) legal = 1'b0;

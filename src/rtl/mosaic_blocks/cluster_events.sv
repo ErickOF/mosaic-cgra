@@ -7,7 +7,7 @@ module cluster_events #(
     parameter EVENT_DEPTH = NUM_TILES + 8,
     parameter PROTECT_EVENTS = 1,
     localparam bit GEOMETRY_VALID = ((NUM_TILES >= 1 && NUM_TILES <= 64) === 1'b1) &&
-        (^NUM_TILES !== 1'bx),
+        (((^NUM_TILES == 1'b0) || (^NUM_TILES == 1'b1)) === 1'b1),
     localparam int N = GEOMETRY_VALID ? NUM_TILES : 1,
     parameter logic [N*8-1:0] TILE_ID_TABLE = default_tile_ids(),
     localparam int INDEX = N > 1 ? $clog2(N) : 1,
@@ -57,7 +57,7 @@ module cluster_events #(
     endfunction
 
     function automatic bit identities_valid();
-        identities_valid = ^TILE_ID_TABLE !== 1'bx;
+        identities_valid = ((^TILE_ID_TABLE == 1'b0) || (^TILE_ID_TABLE == 1'b1)) === 1'b1;
 
         for (int t = 0; t < N; t++) begin
             if (TILE_ID_TABLE[t*8+:8] >= 240) identities_valid = 0;
@@ -69,7 +69,7 @@ module cluster_events #(
     endfunction
 
     localparam bit PARAMETERS_VALID = GEOMETRY_VALID &&
-        ((EVENT_DEPTH >= 1 && EVENT_DEPTH <= 128) === 1'b1) && (^EVENT_DEPTH !== 1'bx) &&
+        ((EVENT_DEPTH >= 1 && EVENT_DEPTH <= 128) === 1'b1) && (((^EVENT_DEPTH == 1'b0) || (^EVENT_DEPTH == 1'b1)) === 1'b1) &&
         (PROTECT_EVENTS === 0 || PROTECT_EVENTS === 1) && identities_valid();
 
     if (!PARAMETERS_VALID) begin : g_invalid_parameters

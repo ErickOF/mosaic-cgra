@@ -19,15 +19,15 @@ module vector_lane #(
     parameter OPCODE_WIDTH = 5,
     parameter RESULT_FORMAT_WIDTH = 2,
     localparam bit PARAMETERS_VALID =
-        ((ELEMENT_WIDTH >= 1) === 1'b1) && ( ^ ELEMENT_WIDTH !== 1'bx) &&
+        ((ELEMENT_WIDTH >= 1) === 1'b1) && ( ((^ELEMENT_WIDTH == 1'b0) || (^ELEMENT_WIDTH == 1'b1)) === 1'b1) &&
         ((ELEMENT_WIDTH <= 32'd268435400) === 1'b1) &&
-        ((ACC_WIDTH >= 1) === 1'b1) && ( ^ ACC_WIDTH !== 1'bx) &&
+        ((ACC_WIDTH >= 1) === 1'b1) && ( ((^ACC_WIDTH == 1'b0) || (^ACC_WIDTH == 1'b1)) === 1'b1) &&
         ((ACC_WIDTH <= 32'd536870800) === 1'b1) &&
         ((64'(ACC_WIDTH) >= 2 * 64'(ELEMENT_WIDTH)) === 1'b1) &&
-        ((MAX_LANE_LATENCY >= 1) === 1'b1) && ( ^ MAX_LANE_LATENCY !== 1'bx) &&
+        ((MAX_LANE_LATENCY >= 1) === 1'b1) && ( ((^MAX_LANE_LATENCY == 1'b0) || (^MAX_LANE_LATENCY == 1'b1)) === 1'b1) &&
         ((MAX_LANE_LATENCY <= 32'd2147483646) === 1'b1) &&
         ((LANE_LATENCY >= 0 && LANE_LATENCY <= MAX_LANE_LATENCY) === 1'b1) &&
-        ( ^ LANE_LATENCY !== 1'bx) &&
+        ( ((^LANE_LATENCY == 1'b0) || (^LANE_LATENCY == 1'b1)) === 1'b1) &&
         ((ENABLE_ALU === 0) || (ENABLE_ALU === 1)) &&
         ((SUPPORT_MUL === 0) || (SUPPORT_MUL === 1)) &&
         ((SUPPORT_MAC === 0) || (SUPPORT_MAC === 1)) &&
@@ -36,10 +36,10 @@ module vector_lane #(
         ((ASYNC_RESET === 0) || (ASYNC_RESET === 1)) &&
         ((SUPPORT_MUL === 0) ||
             ((MUL_LATENCY >= 0 && MUL_LATENCY <= LANE_LATENCY) === 1'b1 &&
-                ( ^ MUL_LATENCY !== 1'bx))) &&
+                ( ((^MUL_LATENCY == 1'b0) || (^MUL_LATENCY == 1'b1)) === 1'b1))) &&
         ((SUPPORT_MAC === 0) ||
             ((MAC_LATENCY >= 0 && MAC_LATENCY <= LANE_LATENCY) === 1'b1 &&
-                ( ^ MAC_LATENCY !== 1'bx))) &&
+                ( ((^MAC_LATENCY == 1'b0) || (^MAC_LATENCY == 1'b1)) === 1'b1))) &&
         (OPCODE_WIDTH === 5) && (RESULT_FORMAT_WIDTH === 2) &&
         (((128'(ACC_WIDTH) + 4 * 128'(ELEMENT_WIDTH) + 64) *
             (128'(LANE_LATENCY) + 1) * 8 < 128'd2147483647) === 1'b1),

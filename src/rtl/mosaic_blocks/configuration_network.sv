@@ -518,18 +518,18 @@ module configuration_network #(
         (NUM_TILE_ENDPOINTS + NUM_INFRA_ENDPOINTS == NUM_ENDPOINTS) &&
         D % 8 == 0 && F % 8 == 0 && BY == D / 8 &&
         (64'd1 << EI) >= NE && (64'd1 << TI) >= NS &&
-        $bits(ENDPOINT_PRESENT_MASK) == (NE) && (^ENDPOINT_PRESENT_MASK !== 1'bx) &&
-        $bits(ENDPOINT_TYPE_TABLE) == (NE*ET) && (^ENDPOINT_TYPE_TABLE !== 1'bx) &&
-        $bits(ENDPOINT_ID_TABLE) == (NE*EI) && (^ENDPOINT_ID_TABLE !== 1'bx) &&
-        $bits(ENDPOINT_CAPABILITY_TABLE) == (NE*CAP) && (^ENDPOINT_CAPABILITY_TABLE !== 1'bx) &&
-        $bits(ENDPOINT_PERMISSION_TABLE) == (NE*(OW+4)) && (^ENDPOINT_PERMISSION_TABLE !== 1'bx) &&
-        $bits(ENDPOINT_CLOCK_DOMAIN_TABLE) == (NE) && (^ENDPOINT_CLOCK_DOMAIN_TABLE !== 1'bx) &&
-        $bits(ENDPOINT_WORD_COUNT_TABLE) == (NE*32) && (^ENDPOINT_WORD_COUNT_TABLE !== 1'bx) &&
+        $bits(ENDPOINT_PRESENT_MASK) == (NE) && (((^ENDPOINT_PRESENT_MASK == 1'b0) || (^ENDPOINT_PRESENT_MASK == 1'b1)) === 1'b1) &&
+        $bits(ENDPOINT_TYPE_TABLE) == (NE*ET) && (((^ENDPOINT_TYPE_TABLE == 1'b0) || (^ENDPOINT_TYPE_TABLE == 1'b1)) === 1'b1) &&
+        $bits(ENDPOINT_ID_TABLE) == (NE*EI) && (((^ENDPOINT_ID_TABLE == 1'b0) || (^ENDPOINT_ID_TABLE == 1'b1)) === 1'b1) &&
+        $bits(ENDPOINT_CAPABILITY_TABLE) == (NE*CAP) && (((^ENDPOINT_CAPABILITY_TABLE == 1'b0) || (^ENDPOINT_CAPABILITY_TABLE == 1'b1)) === 1'b1) &&
+        $bits(ENDPOINT_PERMISSION_TABLE) == (NE*(OW+4)) && (((^ENDPOINT_PERMISSION_TABLE == 1'b0) || (^ENDPOINT_PERMISSION_TABLE == 1'b1)) === 1'b1) &&
+        $bits(ENDPOINT_CLOCK_DOMAIN_TABLE) == (NE) && (((^ENDPOINT_CLOCK_DOMAIN_TABLE == 1'b0) || (^ENDPOINT_CLOCK_DOMAIN_TABLE == 1'b1)) === 1'b1) &&
+        $bits(ENDPOINT_WORD_COUNT_TABLE) == (NE*32) && (((^ENDPOINT_WORD_COUNT_TABLE == 1'b0) || (^ENDPOINT_WORD_COUNT_TABLE == 1'b1)) === 1'b1) &&
         $bits(ENDPOINT_CONTEXT_DEPTH_TABLE) == (NE*32)
-            && (^ENDPOINT_CONTEXT_DEPTH_TABLE !== 1'bx) &&
-        $bits(ENDPOINT_SCHEMA_TABLE) == (NE*32) && (^ENDPOINT_SCHEMA_TABLE !== 1'bx) &&
-        $bits(MULTICAST_GROUP_TABLE) == (NE*NE) && (^MULTICAST_GROUP_TABLE !== 1'bx) &&
-        $bits(COMMIT_DOMAIN_TABLE) == (NE) && (^COMMIT_DOMAIN_TABLE !== 1'bx) &&
+            && (((^ENDPOINT_CONTEXT_DEPTH_TABLE == 1'b0) || (^ENDPOINT_CONTEXT_DEPTH_TABLE == 1'b1)) === 1'b1) &&
+        $bits(ENDPOINT_SCHEMA_TABLE) == (NE*32) && (((^ENDPOINT_SCHEMA_TABLE == 1'b0) || (^ENDPOINT_SCHEMA_TABLE == 1'b1)) === 1'b1) &&
+        $bits(MULTICAST_GROUP_TABLE) == (NE*NE) && (((^MULTICAST_GROUP_TABLE == 1'b0) || (^MULTICAST_GROUP_TABLE == 1'b1)) === 1'b1) &&
+        $bits(COMMIT_DOMAIN_TABLE) == (NE) && (((^COMMIT_DOMAIN_TABLE == 1'b0) || (^COMMIT_DOMAIN_TABLE == 1'b1)) === 1'b1) &&
         descriptors_valid();
 
     if (!PARAMETERS_VALID) begin : g_invalid_parameters

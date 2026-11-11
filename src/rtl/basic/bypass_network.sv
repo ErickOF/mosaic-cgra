@@ -35,7 +35,7 @@ module bypass_network #(
         // reject them instead of silently selecting a static implementation.
         bypass_network_invalid_parameters invalid_parameters ();
     end
-    if (^CONNECTIVITY_MASK === 1'bx) begin : g_unknown_connectivity
+    if (((^CONNECTIVITY_MASK == 1'b0) || (^CONNECTIVITY_MASK == 1'b1)) !== 1'b1) begin : g_unknown_connectivity
         bypass_network_connectivity_must_be_known invalid_connectivity ();
     end
 

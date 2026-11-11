@@ -31,37 +31,37 @@ module static_mesh #(
     parameter CONTROL_PROTECTION = 0,
     parameter SUPPORT_LINK_EXCLUSION = 1,
     parameter ASYNC_RESET = 0,
-    localparam int R = MESH_ROWS > 0 && MESH_ROWS <= 8 && (^MESH_ROWS !== 1'bx) ? MESH_ROWS : 1,
-    localparam int C = MESH_COLS > 0 && MESH_COLS <= 8 && (^MESH_COLS !== 1'bx) ? MESH_COLS : 1,
+    localparam int R = MESH_ROWS > 0 && MESH_ROWS <= 8 && (((^MESH_ROWS == 1'b0) || (^MESH_ROWS == 1'b1)) === 1'b1) ? MESH_ROWS : 1,
+    localparam int C = MESH_COLS > 0 && MESH_COLS <= 8 && (((^MESH_COLS == 1'b0) || (^MESH_COLS == 1'b1)) === 1'b1) ? MESH_COLS : 1,
     localparam int H = CHANNELS_PER_DIRECTION > 0 && CHANNELS_PER_DIRECTION <= 4 &&
-        (^CHANNELS_PER_DIRECTION !== 1'bx) ? CHANNELS_PER_DIRECTION : 1,
+        (((^CHANNELS_PER_DIRECTION == 1'b0) || (^CHANNELS_PER_DIRECTION == 1'b1)) === 1'b1) ? CHANNELS_PER_DIRECTION : 1,
     localparam int TX = LOCAL_TX_PORTS > 0 && LOCAL_TX_PORTS <= 8 &&
-        (^LOCAL_TX_PORTS !== 1'bx) ? LOCAL_TX_PORTS : 1,
+        (((^LOCAL_TX_PORTS == 1'b0) || (^LOCAL_TX_PORTS == 1'b1)) === 1'b1) ? LOCAL_TX_PORTS : 1,
     localparam int RX = LOCAL_RX_PORTS > 0 && LOCAL_RX_PORTS <= 8 &&
-        (^LOCAL_RX_PORTS !== 1'bx) ? LOCAL_RX_PORTS : 1,
+        (((^LOCAL_RX_PORTS == 1'b0) || (^LOCAL_RX_PORTS == 1'b1)) === 1'b1) ? LOCAL_RX_PORTS : 1,
     localparam int N = R * C,
     localparam int I = TX + 4 * H,
     localparam int O = RX + 4 * H,
     localparam int D = LINK_DATA_WIDTH >= 16 && LINK_DATA_WIDTH <= 128 &&
-        (^LINK_DATA_WIDTH !== 1'bx) ? LINK_DATA_WIDTH : 16,
+        (((^LINK_DATA_WIDTH == 1'b0) || (^LINK_DATA_WIDTH == 1'b1)) === 1'b1) ? LINK_DATA_WIDTH : 16,
     localparam int M = LINK_METADATA_WIDTH >= 8 && LINK_METADATA_WIDTH <= 512 &&
-        (^LINK_METADATA_WIDTH !== 1'bx) ? LINK_METADATA_WIDTH : 64,
+        (((^LINK_METADATA_WIDTH == 1'b0) || (^LINK_METADATA_WIDTH == 1'b1)) === 1'b1) ? LINK_METADATA_WIDTH : 64,
     localparam int CD = CONTEXT_DEPTH > 0 && CONTEXT_DEPTH <= 16 &&
-        (^CONTEXT_DEPTH !== 1'bx) ? CONTEXT_DEPTH : 1,
+        (((^CONTEXT_DEPTH == 1'b0) || (^CONTEXT_DEPTH == 1'b1)) === 1'b1) ? CONTEXT_DEPTH : 1,
     localparam int W = CONFIG_DATA_WIDTH >= 8 && CONFIG_DATA_WIDTH <= 256 &&
-        (^CONFIG_DATA_WIDTH !== 1'bx) ? CONFIG_DATA_WIDTH : 8,
+        (((^CONFIG_DATA_WIDTH == 1'b0) || (^CONFIG_DATA_WIDTH == 1'b1)) === 1'b1) ? CONFIG_DATA_WIDTH : 8,
     localparam int CI = CONTEXT_ID_WIDTH > 0 && CONTEXT_ID_WIDTH <= 32 &&
-        (^CONTEXT_ID_WIDTH !== 1'bx) ? CONTEXT_ID_WIDTH : 1,
+        (((^CONTEXT_ID_WIDTH == 1'b0) || (^CONTEXT_ID_WIDTH == 1'b1)) === 1'b1) ? CONTEXT_ID_WIDTH : 1,
     localparam int V = CONTEXT_VERSION_WIDTH > 0 && CONTEXT_VERSION_WIDTH <= 32 &&
-        (^CONTEXT_VERSION_WIDTH !== 1'bx) ? CONTEXT_VERSION_WIDTH : 1,
+        (((^CONTEXT_VERSION_WIDTH == 1'b0) || (^CONTEXT_VERSION_WIDTH == 1'b1)) === 1'b1) ? CONTEXT_VERSION_WIDTH : 1,
     localparam int K = KERNEL_ID_WIDTH > 0 && KERNEL_ID_WIDTH <= 32 &&
-        (^KERNEL_ID_WIDTH !== 1'bx) ? KERNEL_ID_WIDTH : 1,
+        (((^KERNEL_ID_WIDTH == 1'b0) || (^KERNEL_ID_WIDTH == 1'b1)) === 1'b1) ? KERNEL_ID_WIDTH : 1,
     localparam int EP = LINK_EPOCH_WIDTH > 0 && LINK_EPOCH_WIDTH <= 32 &&
-        (^LINK_EPOCH_WIDTH !== 1'bx) ? LINK_EPOCH_WIDTH : 1,
+        (((^LINK_EPOCH_WIDTH == 1'b0) || (^LINK_EPOCH_WIDTH == 1'b1)) === 1'b1) ? LINK_EPOCH_WIDTH : 1,
     localparam int P = ROUTE_PROOF_ID_WIDTH >= 32 && ROUTE_PROOF_ID_WIDTH <= 64 &&
-        (^ROUTE_PROOF_ID_WIDTH !== 1'bx) ? ROUTE_PROOF_ID_WIDTH : 32,
+        (((^ROUTE_PROOF_ID_WIDTH == 1'b0) || (^ROUTE_PROOF_ID_WIDTH == 1'b1)) === 1'b1) ? ROUTE_PROOF_ID_WIDTH : 32,
     localparam int PM = SCHEDULE_PERIOD_MAX > 0 && SCHEDULE_PERIOD_MAX <= 256 &&
-        (^SCHEDULE_PERIOD_MAX !== 1'bx) ? SCHEDULE_PERIOD_MAX : 1,
+        (((^SCHEDULE_PERIOD_MAX == 1'b0) || (^SCHEDULE_PERIOD_MAX == 1'b1)) === 1'b1) ? SCHEDULE_PERIOD_MAX : 1,
     localparam int B = 2 * H * (R + C),
     localparam int IL = 2 * H * (R * (C - 1) + (R - 1) * C),
     localparam int L = IL + (EXPOSE_BOUNDARY_PORTS === 1 ? 2 * B : 0),
@@ -456,25 +456,25 @@ module static_mesh #(
     endfunction
 
     localparam bit PARAMETERS_VALID =
-        ((MESH_ROWS > 0) === 1'b1) && (^MESH_ROWS !== 1'bx) &&
-        ((MESH_COLS > 0) === 1'b1) && (^MESH_COLS !== 1'bx) &&
-        ((CHANNELS_PER_DIRECTION > 0) === 1'b1) && (^CHANNELS_PER_DIRECTION !== 1'bx) &&
-        ((LOCAL_TX_PORTS > 0) === 1'b1) && (^LOCAL_TX_PORTS !== 1'bx) &&
-        ((LOCAL_RX_PORTS > 0) === 1'b1) && (^LOCAL_RX_PORTS !== 1'bx) &&
-        ((LINK_DATA_WIDTH > 0) === 1'b1) && (^LINK_DATA_WIDTH !== 1'bx) &&
-        ((LINK_METADATA_WIDTH > 0) === 1'b1) && (^LINK_METADATA_WIDTH !== 1'bx) &&
-        ((CONTEXT_DEPTH > 0) === 1'b1) && (^CONTEXT_DEPTH !== 1'bx) &&
-        ((CONFIG_DATA_WIDTH > 0) === 1'b1) && (^CONFIG_DATA_WIDTH !== 1'bx) &&
-        ((CONTEXT_ID_WIDTH > 0) === 1'b1) && (^CONTEXT_ID_WIDTH !== 1'bx) &&
-        ((CONTEXT_VERSION_WIDTH > 0) === 1'b1) && (^CONTEXT_VERSION_WIDTH !== 1'bx) &&
-        ((CONTEXT_CHECKSUM_WIDTH > 0) === 1'b1) && (^CONTEXT_CHECKSUM_WIDTH !== 1'bx) &&
-        ((KERNEL_ID_WIDTH > 0) === 1'b1) && (^KERNEL_ID_WIDTH !== 1'bx) &&
-        ((LINK_EPOCH_WIDTH > 0) === 1'b1) && (^LINK_EPOCH_WIDTH !== 1'bx) &&
-        ((ROUTE_PROOF_ID_WIDTH > 0) === 1'b1) && (^ROUTE_PROOF_ID_WIDTH !== 1'bx) &&
-        ((MAX_MULTICAST_FANOUT > 0) === 1'b1) && (^MAX_MULTICAST_FANOUT !== 1'bx) &&
+        ((MESH_ROWS > 0) === 1'b1) && (((^MESH_ROWS == 1'b0) || (^MESH_ROWS == 1'b1)) === 1'b1) &&
+        ((MESH_COLS > 0) === 1'b1) && (((^MESH_COLS == 1'b0) || (^MESH_COLS == 1'b1)) === 1'b1) &&
+        ((CHANNELS_PER_DIRECTION > 0) === 1'b1) && (((^CHANNELS_PER_DIRECTION == 1'b0) || (^CHANNELS_PER_DIRECTION == 1'b1)) === 1'b1) &&
+        ((LOCAL_TX_PORTS > 0) === 1'b1) && (((^LOCAL_TX_PORTS == 1'b0) || (^LOCAL_TX_PORTS == 1'b1)) === 1'b1) &&
+        ((LOCAL_RX_PORTS > 0) === 1'b1) && (((^LOCAL_RX_PORTS == 1'b0) || (^LOCAL_RX_PORTS == 1'b1)) === 1'b1) &&
+        ((LINK_DATA_WIDTH > 0) === 1'b1) && (((^LINK_DATA_WIDTH == 1'b0) || (^LINK_DATA_WIDTH == 1'b1)) === 1'b1) &&
+        ((LINK_METADATA_WIDTH > 0) === 1'b1) && (((^LINK_METADATA_WIDTH == 1'b0) || (^LINK_METADATA_WIDTH == 1'b1)) === 1'b1) &&
+        ((CONTEXT_DEPTH > 0) === 1'b1) && (((^CONTEXT_DEPTH == 1'b0) || (^CONTEXT_DEPTH == 1'b1)) === 1'b1) &&
+        ((CONFIG_DATA_WIDTH > 0) === 1'b1) && (((^CONFIG_DATA_WIDTH == 1'b0) || (^CONFIG_DATA_WIDTH == 1'b1)) === 1'b1) &&
+        ((CONTEXT_ID_WIDTH > 0) === 1'b1) && (((^CONTEXT_ID_WIDTH == 1'b0) || (^CONTEXT_ID_WIDTH == 1'b1)) === 1'b1) &&
+        ((CONTEXT_VERSION_WIDTH > 0) === 1'b1) && (((^CONTEXT_VERSION_WIDTH == 1'b0) || (^CONTEXT_VERSION_WIDTH == 1'b1)) === 1'b1) &&
+        ((CONTEXT_CHECKSUM_WIDTH > 0) === 1'b1) && (((^CONTEXT_CHECKSUM_WIDTH == 1'b0) || (^CONTEXT_CHECKSUM_WIDTH == 1'b1)) === 1'b1) &&
+        ((KERNEL_ID_WIDTH > 0) === 1'b1) && (((^KERNEL_ID_WIDTH == 1'b0) || (^KERNEL_ID_WIDTH == 1'b1)) === 1'b1) &&
+        ((LINK_EPOCH_WIDTH > 0) === 1'b1) && (((^LINK_EPOCH_WIDTH == 1'b0) || (^LINK_EPOCH_WIDTH == 1'b1)) === 1'b1) &&
+        ((ROUTE_PROOF_ID_WIDTH > 0) === 1'b1) && (((^ROUTE_PROOF_ID_WIDTH == 1'b0) || (^ROUTE_PROOF_ID_WIDTH == 1'b1)) === 1'b1) &&
+        ((MAX_MULTICAST_FANOUT > 0) === 1'b1) && (((^MAX_MULTICAST_FANOUT == 1'b0) || (^MAX_MULTICAST_FANOUT == 1'b1)) === 1'b1) &&
         ((MAX_READY_COMBINATIONAL_NODES > 0) === 1'b1) &&
-        (^MAX_READY_COMBINATIONAL_NODES !== 1'bx) &&
-        ((SCHEDULE_PERIOD_MAX > 0) === 1'b1) && (^SCHEDULE_PERIOD_MAX !== 1'bx) &&
+        (((^MAX_READY_COMBINATIONAL_NODES == 1'b0) || (^MAX_READY_COMBINATIONAL_NODES == 1'b1)) === 1'b1) &&
+        ((SCHEDULE_PERIOD_MAX > 0) === 1'b1) && (((^SCHEDULE_PERIOD_MAX == 1'b0) || (^SCHEDULE_PERIOD_MAX == 1'b1)) === 1'b1) &&
         (EXPOSE_BOUNDARY_PORTS === 0 || EXPOSE_BOUNDARY_PORTS === 1) &&
         (SUPPORT_MULTICAST === 0 || SUPPORT_MULTICAST === 1) &&
         (CHECK_CONTEXT === 0 || CHECK_CONTEXT === 1) &&
@@ -495,13 +495,13 @@ module static_mesh #(
         (FLOW_PROFILE === 0 || FLOW_PROFILE === 1) &&
         (CONTROL_PROTECTION === 0 || CONTROL_PROTECTION === 1 || CONTROL_PROTECTION === 2) &&
         BOUNDARY_BUFFER_DEPTH >= 0 && BOUNDARY_BUFFER_DEPTH <= 8 &&
-        (^BOUNDARY_BUFFER_DEPTH !== 1'bx) &&
+        (((^BOUNDARY_BUFFER_DEPTH == 1'b0) || (^BOUNDARY_BUFFER_DEPTH == 1'b1)) === 1'b1) &&
         (BOUNDARY_BUFFER_DEPTH != 0 || FLOW_PROFILE == 1) &&
         (MAX_COMBINATIONAL_HOPS === 0) &&
         MAX_MULTICAST_FANOUT <= O &&
-        $bits(NODE_PRESENT_MASK) == N && (^NODE_PRESENT_MASK !== 1'bx) &&
-        $bits(LINK_PRESENT_MASK) == LB && (^LINK_PRESENT_MASK !== 1'bx) &&
-        $bits(NODE_CONNECTIVITY_MASKS) == N * O * I && (^NODE_CONNECTIVITY_MASKS !== 1'bx) &&
+        $bits(NODE_PRESENT_MASK) == N && (((^NODE_PRESENT_MASK == 1'b0) || (^NODE_PRESENT_MASK == 1'b1)) === 1'b1) &&
+        $bits(LINK_PRESENT_MASK) == LB && (((^LINK_PRESENT_MASK == 1'b0) || (^LINK_PRESENT_MASK == 1'b1)) === 1'b1) &&
+        $bits(NODE_CONNECTIVITY_MASKS) == N * O * I && (((^NODE_CONNECTIVITY_MASKS == 1'b0) || (^NODE_CONNECTIVITY_MASKS == 1'b1)) === 1'b1) &&
         topology_valid();
 
     if (!PARAMETERS_VALID) begin : g_invalid_parameters

@@ -20,7 +20,7 @@ module retention_register #(
     if (WIDTH < 1) begin : gen_invalid_width
         retention_register_width_must_be_greater_than_zero invalid_width ();
     end
-    if (^RESET_VALUE === 1'bx) begin : gen_invalid_reset_value
+    if (((^RESET_VALUE == 1'b0) || (^RESET_VALUE == 1'b1)) !== 1'b1) begin : gen_invalid_reset_value
         retention_register_reset_value_must_be_known invalid_reset_value ();
     end
     // Preserve caller values so non-Boolean and X/Z literals are checked
@@ -42,7 +42,7 @@ module retention_register #(
         assign functional_enable = 1'b1;
     end
 
-    if (WIDTH >= 1 && (^RESET_VALUE !== 1'bx) &&
+    if (WIDTH >= 1 && (((^RESET_VALUE == 1'b0) || (^RESET_VALUE == 1'b1)) === 1'b1) &&
         (ASYNC_RESET === 0 || ASYNC_RESET === 1) &&
         (HAS_ENABLE === 0 || HAS_ENABLE === 1)) begin : gen_model
         if (ASYNC_RESET == 1) begin : gen_async_reset

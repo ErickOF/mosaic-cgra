@@ -32,32 +32,32 @@ module tile_network_interface #(
     localparam bit GEOMETRY_VALID =
         ((PACKET_CREDIT_RESERVATION >= 0 &&
             PACKET_CREDIT_RESERVATION <= TX_INITIAL_CREDITS_PER_VC) === 1'b1) &&
-        (^PACKET_CREDIT_RESERVATION !== 1'bx) &&
-        ((NUM_TX_CHANNELS > 0) === 1'b1) && (^NUM_TX_CHANNELS !== 1'bx) &&
-        ((NUM_RX_CHANNELS > 0) === 1'b1) && (^NUM_RX_CHANNELS !== 1'bx) &&
-        ((TILE_DATA_WIDTH > 0) === 1'b1) && (^TILE_DATA_WIDTH !== 1'bx) &&
-        ((NOC_FLIT_DATA_WIDTH > 0) === 1'b1) && (^NOC_FLIT_DATA_WIDTH !== 1'bx) &&
-        ((TX_QUEUE_DEPTH > 0) === 1'b1) && (^TX_QUEUE_DEPTH !== 1'bx) &&
-        ((RX_VC_DEPTH > 0) === 1'b1) && (^RX_VC_DEPTH !== 1'bx) &&
-        ((RX_QUEUE_DEPTH > 0) === 1'b1) && (^RX_QUEUE_DEPTH !== 1'bx) &&
-        ((NUM_VCS > 0) === 1'b1) && (^NUM_VCS !== 1'bx) &&
-        ((NUM_TRAFFIC_CLASSES > 0) === 1'b1) && (^NUM_TRAFFIC_CLASSES !== 1'bx) &&
-        ((NODE_ID_WIDTH > 0) === 1'b1) && (^NODE_ID_WIDTH !== 1'bx) &&
-        ((ENDPOINT_ID_WIDTH > 0) === 1'b1) && (^ENDPOINT_ID_WIDTH !== 1'bx) &&
-        ((CONTEXT_ID_WIDTH > 0) === 1'b1) && (^CONTEXT_ID_WIDTH !== 1'bx) &&
-        ((MESSAGE_TYPE_WIDTH > 0) === 1'b1) && (^MESSAGE_TYPE_WIDTH !== 1'bx) &&
-        ((PACKET_ID_WIDTH > 0) === 1'b1) && (^PACKET_ID_WIDTH !== 1'bx) &&
-        ((USER_METADATA_WIDTH > 0) === 1'b1) && (^USER_METADATA_WIDTH !== 1'bx) &&
-        ((ERROR_WIDTH > 0) === 1'b1) && (^ERROR_WIDTH !== 1'bx) &&
-        ((LINK_EPOCH_WIDTH > 0) === 1'b1) && (^LINK_EPOCH_WIDTH !== 1'bx) &&
+        (((^PACKET_CREDIT_RESERVATION == 1'b0) || (^PACKET_CREDIT_RESERVATION == 1'b1)) === 1'b1) &&
+        ((NUM_TX_CHANNELS > 0) === 1'b1) && (((^NUM_TX_CHANNELS == 1'b0) || (^NUM_TX_CHANNELS == 1'b1)) === 1'b1) &&
+        ((NUM_RX_CHANNELS > 0) === 1'b1) && (((^NUM_RX_CHANNELS == 1'b0) || (^NUM_RX_CHANNELS == 1'b1)) === 1'b1) &&
+        ((TILE_DATA_WIDTH > 0) === 1'b1) && (((^TILE_DATA_WIDTH == 1'b0) || (^TILE_DATA_WIDTH == 1'b1)) === 1'b1) &&
+        ((NOC_FLIT_DATA_WIDTH > 0) === 1'b1) && (((^NOC_FLIT_DATA_WIDTH == 1'b0) || (^NOC_FLIT_DATA_WIDTH == 1'b1)) === 1'b1) &&
+        ((TX_QUEUE_DEPTH > 0) === 1'b1) && (((^TX_QUEUE_DEPTH == 1'b0) || (^TX_QUEUE_DEPTH == 1'b1)) === 1'b1) &&
+        ((RX_VC_DEPTH > 0) === 1'b1) && (((^RX_VC_DEPTH == 1'b0) || (^RX_VC_DEPTH == 1'b1)) === 1'b1) &&
+        ((RX_QUEUE_DEPTH > 0) === 1'b1) && (((^RX_QUEUE_DEPTH == 1'b0) || (^RX_QUEUE_DEPTH == 1'b1)) === 1'b1) &&
+        ((NUM_VCS > 0) === 1'b1) && (((^NUM_VCS == 1'b0) || (^NUM_VCS == 1'b1)) === 1'b1) &&
+        ((NUM_TRAFFIC_CLASSES > 0) === 1'b1) && (((^NUM_TRAFFIC_CLASSES == 1'b0) || (^NUM_TRAFFIC_CLASSES == 1'b1)) === 1'b1) &&
+        ((NODE_ID_WIDTH > 0) === 1'b1) && (((^NODE_ID_WIDTH == 1'b0) || (^NODE_ID_WIDTH == 1'b1)) === 1'b1) &&
+        ((ENDPOINT_ID_WIDTH > 0) === 1'b1) && (((^ENDPOINT_ID_WIDTH == 1'b0) || (^ENDPOINT_ID_WIDTH == 1'b1)) === 1'b1) &&
+        ((CONTEXT_ID_WIDTH > 0) === 1'b1) && (((^CONTEXT_ID_WIDTH == 1'b0) || (^CONTEXT_ID_WIDTH == 1'b1)) === 1'b1) &&
+        ((MESSAGE_TYPE_WIDTH > 0) === 1'b1) && (((^MESSAGE_TYPE_WIDTH == 1'b0) || (^MESSAGE_TYPE_WIDTH == 1'b1)) === 1'b1) &&
+        ((PACKET_ID_WIDTH > 0) === 1'b1) && (((^PACKET_ID_WIDTH == 1'b0) || (^PACKET_ID_WIDTH == 1'b1)) === 1'b1) &&
+        ((USER_METADATA_WIDTH > 0) === 1'b1) && (((^USER_METADATA_WIDTH == 1'b0) || (^USER_METADATA_WIDTH == 1'b1)) === 1'b1) &&
+        ((ERROR_WIDTH > 0) === 1'b1) && (((^ERROR_WIDTH == 1'b0) || (^ERROR_WIDTH == 1'b1)) === 1'b1) &&
+        ((LINK_EPOCH_WIDTH > 0) === 1'b1) && (((^LINK_EPOCH_WIDTH == 1'b0) || (^LINK_EPOCH_WIDTH == 1'b1)) === 1'b1) &&
         ((TX_INITIAL_CREDITS_PER_VC >= 0) === 1'b1) &&
-        (^TX_INITIAL_CREDITS_PER_VC !== 1'bx) &&
+        (((^TX_INITIAL_CREDITS_PER_VC == 1'b0) || (^TX_INITIAL_CREDITS_PER_VC == 1'b1)) === 1'b1) &&
         ((NOC_FLOW_CONTROL != 1 || TX_INITIAL_CREDITS_PER_VC > 0) === 1'b1) &&
         ((TILE_DATA_WIDTH % 8 == 0 && NOC_FLIT_DATA_WIDTH % 8 == 0) === 1'b1) &&
         ((NOC_FLOW_CONTROL === 0) || (NOC_FLOW_CONTROL === 1)) &&
         ((ENABLE_LINK_PARITY === 0) || (ENABLE_LINK_PARITY === 1)) &&
         ((ASYNC_RESET === 0) || (ASYNC_RESET === 1)) &&
-        ((LOCAL_NODE_ID >= 0) === 1'b1) && (^LOCAL_NODE_ID !== 1'bx) &&
+        ((LOCAL_NODE_ID >= 0) === 1'b1) && (((^LOCAL_NODE_ID == 1'b0) || (^LOCAL_NODE_ID == 1'b1)) === 1'b1) &&
         ((ENDPOINT_ID_WIDTH >= 32 ||
             (128'(NUM_TX_CHANNELS) <= (128'd1 << ENDPOINT_ID_WIDTH) &&
              128'(NUM_RX_CHANNELS) <= (128'd1 << ENDPOINT_ID_WIDTH))) === 1'b1) &&
@@ -223,7 +223,7 @@ module tile_network_interface #(
     function automatic bit maps_valid();
         bit valid;
         valid = $bits(TRAFFIC_CLASS_TO_VC) == CLASSES * VW &&
-            (^TRAFFIC_CLASS_TO_VC !== 1'bx);
+            (((^TRAFFIC_CLASS_TO_VC == 1'b0) || (^TRAFFIC_CLASS_TO_VC == 1'b1)) === 1'b1);
 
         for (int c = 0; c < CLASSES; c++)
             if (32'(TRAFFIC_CLASS_TO_VC[c*VW+:VW]) >= V) valid = 1'b0;

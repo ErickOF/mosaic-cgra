@@ -11,12 +11,12 @@ module mac #(
     parameter MAX_LATENCY = 4,
     parameter ASYNC_RESET = 0,
     localparam bit PARAMETERS_VALID =
-        ((OPERAND_WIDTH >= 1) === 1'b1) && (^OPERAND_WIDTH !== 1'bx) &&
-        ((ACC_WIDTH >= 1) === 1'b1) && (^ACC_WIDTH !== 1'bx) &&
+        ((OPERAND_WIDTH >= 1) === 1'b1) && (((^OPERAND_WIDTH == 1'b0) || (^OPERAND_WIDTH == 1'b1)) === 1'b1) &&
+        ((ACC_WIDTH >= 1) === 1'b1) && (((^ACC_WIDTH == 1'b0) || (^ACC_WIDTH == 1'b1)) === 1'b1) &&
         ((64'(ACC_WIDTH) >= 2 * 64'(OPERAND_WIDTH)) === 1'b1) &&
-        ((MAX_LATENCY >= 1) === 1'b1) && (^MAX_LATENCY !== 1'bx) &&
+        ((MAX_LATENCY >= 1) === 1'b1) && (((^MAX_LATENCY == 1'b0) || (^MAX_LATENCY == 1'b1)) === 1'b1) &&
         ((LATENCY >= 0) === 1'b1) && ((LATENCY <= MAX_LATENCY) === 1'b1) &&
-        (^LATENCY !== 1'bx) &&
+        (((^LATENCY == 1'b0) || (^LATENCY == 1'b1)) === 1'b1) &&
         ((SUPPORT_SATURATION === 0) || (SUPPORT_SATURATION === 1)) &&
         ((ASYNC_RESET === 0) || (ASYNC_RESET === 1)) &&
         ((64'(ACC_WIDTH) * (64'(LATENCY) + 1) < 64'd2147483647) === 1'b1),

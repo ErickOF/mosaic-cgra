@@ -17,15 +17,15 @@ module vector_reduction #(
     parameter RESULT_FORMAT_WIDTH = 2,
     localparam bit PARAMETERS_VALID =
         ((ELEMENT_WIDTH >= 1 && ELEMENT_WIDTH <= 536870800) === 1'b1) &&
-        ( ^ ELEMENT_WIDTH !== 1'bx) &&
+        ( ((^ELEMENT_WIDTH == 1'b0) || (^ELEMENT_WIDTH == 1'b1)) === 1'b1) &&
         ((NUM_ELEMENTS >= 1 && NUM_ELEMENTS <= 536870911) === 1'b1) &&
-        ( ^ NUM_ELEMENTS !== 1'bx) &&
+        ( ((^NUM_ELEMENTS == 1'b0) || (^NUM_ELEMENTS == 1'b1)) === 1'b1) &&
         ((ACC_WIDTH >= 1 && ACC_WIDTH <= 2147483600) === 1'b1) &&
-        ( ^ ACC_WIDTH !== 1'bx) &&
+        ( ((^ACC_WIDTH == 1'b0) || (^ACC_WIDTH == 1'b1)) === 1'b1) &&
         ((128'(ACC_WIDTH) >= 128'(ELEMENT_WIDTH) + 128'($clog2(NUM_ELEMENTS))) === 1'b1) &&
         ((MAX_LATENCY >= 1 && MAX_LATENCY <= 2147483646) === 1'b1) &&
-        ( ^ MAX_LATENCY !== 1'bx) &&
-        ((LATENCY >= 0 && LATENCY <= MAX_LATENCY) === 1'b1) && ( ^ LATENCY !== 1'bx) &&
+        ( ((^MAX_LATENCY == 1'b0) || (^MAX_LATENCY == 1'b1)) === 1'b1) &&
+        ((LATENCY >= 0 && LATENCY <= MAX_LATENCY) === 1'b1) && ( ((^LATENCY == 1'b0) || (^LATENCY == 1'b1)) === 1'b1) &&
         ((SUPPORT_SUM === 0) || (SUPPORT_SUM === 1)) &&
         ((SUPPORT_MINMAX === 0) || (SUPPORT_MINMAX === 1)) &&
         ((SUPPORT_LOGICAL === 0) || (SUPPORT_LOGICAL === 1)) &&

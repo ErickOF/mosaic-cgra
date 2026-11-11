@@ -34,39 +34,39 @@ module predicate_network #(
     parameter CONTROL_PROTECTION = 0,
     parameter ASYNC_RESET = 0,
     localparam int R = (NETWORK_ROWS >= 1 && NETWORK_ROWS <= 8 &&
-        (^NETWORK_ROWS !== 1'bx)) ? NETWORK_ROWS : 1,
+        (((^NETWORK_ROWS == 1'b0) || (^NETWORK_ROWS == 1'b1)) === 1'b1)) ? NETWORK_ROWS : 1,
     localparam int C = (NETWORK_COLS >= 1 && NETWORK_COLS <= 8 &&
-        (^NETWORK_COLS !== 1'bx)) ? NETWORK_COLS : 1,
+        (((^NETWORK_COLS == 1'b0) || (^NETWORK_COLS == 1'b1)) === 1'b1)) ? NETWORK_COLS : 1,
     localparam int H = (CHANNELS_PER_DIRECTION >= 1 && CHANNELS_PER_DIRECTION <= 2 &&
-        (^CHANNELS_PER_DIRECTION !== 1'bx)) ? CHANNELS_PER_DIRECTION : 1,
+        (((^CHANNELS_PER_DIRECTION == 1'b0) || (^CHANNELS_PER_DIRECTION == 1'b1)) === 1'b1)) ? CHANNELS_PER_DIRECTION : 1,
     localparam int TX = (LOCAL_TX_PORTS >= 1 && LOCAL_TX_PORTS <= 4 &&
-        (^LOCAL_TX_PORTS !== 1'bx)) ? LOCAL_TX_PORTS : 1,
+        (((^LOCAL_TX_PORTS == 1'b0) || (^LOCAL_TX_PORTS == 1'b1)) === 1'b1)) ? LOCAL_TX_PORTS : 1,
     localparam int RX = (LOCAL_RX_PORTS >= 1 && LOCAL_RX_PORTS <= 4 &&
-        (^LOCAL_RX_PORTS !== 1'bx)) ? LOCAL_RX_PORTS : 1,
+        (((^LOCAL_RX_PORTS == 1'b0) || (^LOCAL_RX_PORTS == 1'b1)) === 1'b1)) ? LOCAL_RX_PORTS : 1,
     localparam int PV = (PREDICATE_WIDTH >= 1 && PREDICATE_WIDTH <= 16 &&
-        (^PREDICATE_WIDTH !== 1'bx)) ? PREDICATE_WIDTH : 1,
+        (((^PREDICATE_WIDTH == 1'b0) || (^PREDICATE_WIDTH == 1'b1)) === 1'b1)) ? PREDICATE_WIDTH : 1,
     localparam int M = (PREDICATE_METADATA_WIDTH >= 8 && PREDICATE_METADATA_WIDTH <= 512 &&
-        (^PREDICATE_METADATA_WIDTH !== 1'bx)) ? PREDICATE_METADATA_WIDTH : 64,
+        (((^PREDICATE_METADATA_WIDTH == 1'b0) || (^PREDICATE_METADATA_WIDTH == 1'b1)) === 1'b1)) ? PREDICATE_METADATA_WIDTH : 64,
     localparam int CI = (CONTEXT_ID_WIDTH >= 1 && CONTEXT_ID_WIDTH <= 32 &&
-        (^CONTEXT_ID_WIDTH !== 1'bx)) ? CONTEXT_ID_WIDTH : 1,
+        (((^CONTEXT_ID_WIDTH == 1'b0) || (^CONTEXT_ID_WIDTH == 1'b1)) === 1'b1)) ? CONTEXT_ID_WIDTH : 1,
     localparam int V = (CONTEXT_VERSION_WIDTH >= 1 && CONTEXT_VERSION_WIDTH <= 32 &&
-        (^CONTEXT_VERSION_WIDTH !== 1'bx)) ? CONTEXT_VERSION_WIDTH : 1,
+        (((^CONTEXT_VERSION_WIDTH == 1'b0) || (^CONTEXT_VERSION_WIDTH == 1'b1)) === 1'b1)) ? CONTEXT_VERSION_WIDTH : 1,
     localparam int K = (KERNEL_ID_WIDTH >= 1 && KERNEL_ID_WIDTH <= 32 &&
-        (^KERNEL_ID_WIDTH !== 1'bx)) ? KERNEL_ID_WIDTH : 1,
+        (((^KERNEL_ID_WIDTH == 1'b0) || (^KERNEL_ID_WIDTH == 1'b1)) === 1'b1)) ? KERNEL_ID_WIDTH : 1,
     localparam int T = (ASSOCIATION_TAG_WIDTH >= 1 && ASSOCIATION_TAG_WIDTH <= 16 &&
-        (^ASSOCIATION_TAG_WIDTH !== 1'bx)) ? ASSOCIATION_TAG_WIDTH : 1,
+        (((^ASSOCIATION_TAG_WIDTH == 1'b0) || (^ASSOCIATION_TAG_WIDTH == 1'b1)) === 1'b1)) ? ASSOCIATION_TAG_WIDTH : 1,
     localparam int PR = (PRODUCER_ID_WIDTH >= 1 && PRODUCER_ID_WIDTH <= 16 &&
-        (^PRODUCER_ID_WIDTH !== 1'bx)) ? PRODUCER_ID_WIDTH : 1,
+        (((^PRODUCER_ID_WIDTH == 1'b0) || (^PRODUCER_ID_WIDTH == 1'b1)) === 1'b1)) ? PRODUCER_ID_WIDTH : 1,
     localparam int EP = (PREDICATE_EPOCH_WIDTH >= 1 && PREDICATE_EPOCH_WIDTH <= 32 &&
-        (^PREDICATE_EPOCH_WIDTH !== 1'bx)) ? PREDICATE_EPOCH_WIDTH : 1,
+        (((^PREDICATE_EPOCH_WIDTH == 1'b0) || (^PREDICATE_EPOCH_WIDTH == 1'b1)) === 1'b1)) ? PREDICATE_EPOCH_WIDTH : 1,
     localparam int CL = (PREDICATE_CLASS_WIDTH >= 2 && PREDICATE_CLASS_WIDTH <= 8 &&
-        (^PREDICATE_CLASS_WIDTH !== 1'bx)) ? PREDICATE_CLASS_WIDTH : 2,
+        (((^PREDICATE_CLASS_WIDTH == 1'b0) || (^PREDICATE_CLASS_WIDTH == 1'b1)) === 1'b1)) ? PREDICATE_CLASS_WIDTH : 2,
     localparam int ER = (PREDICATE_ERROR_WIDTH >= 1 && PREDICATE_ERROR_WIDTH <= 8 &&
-        (^PREDICATE_ERROR_WIDTH !== 1'bx)) ? PREDICATE_ERROR_WIDTH : 1,
+        (((^PREDICATE_ERROR_WIDTH == 1'b0) || (^PREDICATE_ERROR_WIDTH == 1'b1)) === 1'b1)) ? PREDICATE_ERROR_WIDTH : 1,
     localparam int P = (ROUTE_PROOF_ID_WIDTH >= 32 && ROUTE_PROOF_ID_WIDTH <= 64 &&
-        (^ROUTE_PROOF_ID_WIDTH !== 1'bx)) ? ROUTE_PROOF_ID_WIDTH : 32,
+        (((^ROUTE_PROOF_ID_WIDTH == 1'b0) || (^ROUTE_PROOF_ID_WIDTH == 1'b1)) === 1'b1)) ? ROUTE_PROOF_ID_WIDTH : 32,
     localparam int PM = (SCHEDULE_PERIOD_MAX >= 1 && SCHEDULE_PERIOD_MAX <= 256 &&
-        (^SCHEDULE_PERIOD_MAX !== 1'bx)) ? SCHEDULE_PERIOD_MAX : 1,
+        (((^SCHEDULE_PERIOD_MAX == 1'b0) || (^SCHEDULE_PERIOD_MAX == 1'b1)) === 1'b1)) ? SCHEDULE_PERIOD_MAX : 1,
     localparam int N = R * C,
     localparam int I = TX + 4 * H,
     localparam int O = RX + 4 * H,
@@ -498,34 +498,34 @@ module predicate_network #(
     localparam logic [31:0] TOPOLOGY_ID = fingerprint();
     assign o_topology_id = TOPOLOGY_ID;
     localparam bit PARAMETERS_VALID =
-        ((NETWORK_ROWS >= 1 && NETWORK_ROWS <= 8) === 1'b1) && (^NETWORK_ROWS !== 1'bx) &&
-        ((NETWORK_COLS >= 1 && NETWORK_COLS <= 8) === 1'b1) && (^NETWORK_COLS !== 1'bx) &&
+        ((NETWORK_ROWS >= 1 && NETWORK_ROWS <= 8) === 1'b1) && (((^NETWORK_ROWS == 1'b0) || (^NETWORK_ROWS == 1'b1)) === 1'b1) &&
+        ((NETWORK_COLS >= 1 && NETWORK_COLS <= 8) === 1'b1) && (((^NETWORK_COLS == 1'b0) || (^NETWORK_COLS == 1'b1)) === 1'b1) &&
         ((CHANNELS_PER_DIRECTION >= 1 && CHANNELS_PER_DIRECTION <= 2) === 1'b1) &&
-            (^CHANNELS_PER_DIRECTION !== 1'bx) &&
-        ((LOCAL_TX_PORTS >= 1 && LOCAL_TX_PORTS <= 4) === 1'b1) && (^LOCAL_TX_PORTS !== 1'bx) &&
-        ((LOCAL_RX_PORTS >= 1 && LOCAL_RX_PORTS <= 4) === 1'b1) && (^LOCAL_RX_PORTS !== 1'bx) &&
-        ((PREDICATE_WIDTH >= 1 && PREDICATE_WIDTH <= 16) === 1'b1) && (^PREDICATE_WIDTH !== 1'bx) &&
+            (((^CHANNELS_PER_DIRECTION == 1'b0) || (^CHANNELS_PER_DIRECTION == 1'b1)) === 1'b1) &&
+        ((LOCAL_TX_PORTS >= 1 && LOCAL_TX_PORTS <= 4) === 1'b1) && (((^LOCAL_TX_PORTS == 1'b0) || (^LOCAL_TX_PORTS == 1'b1)) === 1'b1) &&
+        ((LOCAL_RX_PORTS >= 1 && LOCAL_RX_PORTS <= 4) === 1'b1) && (((^LOCAL_RX_PORTS == 1'b0) || (^LOCAL_RX_PORTS == 1'b1)) === 1'b1) &&
+        ((PREDICATE_WIDTH >= 1 && PREDICATE_WIDTH <= 16) === 1'b1) && (((^PREDICATE_WIDTH == 1'b0) || (^PREDICATE_WIDTH == 1'b1)) === 1'b1) &&
         ((PREDICATE_METADATA_WIDTH >= 8 && PREDICATE_METADATA_WIDTH <= 512) === 1'b1) &&
-            (^PREDICATE_METADATA_WIDTH !== 1'bx) &&
+            (((^PREDICATE_METADATA_WIDTH == 1'b0) || (^PREDICATE_METADATA_WIDTH == 1'b1)) === 1'b1) &&
         ((CONTEXT_ID_WIDTH >= 1 && CONTEXT_ID_WIDTH <= 32) === 1'b1) &&
-            (^CONTEXT_ID_WIDTH !== 1'bx) &&
+            (((^CONTEXT_ID_WIDTH == 1'b0) || (^CONTEXT_ID_WIDTH == 1'b1)) === 1'b1) &&
         ((CONTEXT_VERSION_WIDTH >= 1 && CONTEXT_VERSION_WIDTH <= 32) === 1'b1) &&
-            (^CONTEXT_VERSION_WIDTH !== 1'bx) &&
-        ((KERNEL_ID_WIDTH >= 1 && KERNEL_ID_WIDTH <= 32) === 1'b1) && (^KERNEL_ID_WIDTH !== 1'bx) &&
+            (((^CONTEXT_VERSION_WIDTH == 1'b0) || (^CONTEXT_VERSION_WIDTH == 1'b1)) === 1'b1) &&
+        ((KERNEL_ID_WIDTH >= 1 && KERNEL_ID_WIDTH <= 32) === 1'b1) && (((^KERNEL_ID_WIDTH == 1'b0) || (^KERNEL_ID_WIDTH == 1'b1)) === 1'b1) &&
         ((ASSOCIATION_TAG_WIDTH >= 1 && ASSOCIATION_TAG_WIDTH <= 16) === 1'b1) &&
-            (^ASSOCIATION_TAG_WIDTH !== 1'bx) &&
+            (((^ASSOCIATION_TAG_WIDTH == 1'b0) || (^ASSOCIATION_TAG_WIDTH == 1'b1)) === 1'b1) &&
         ((PRODUCER_ID_WIDTH >= 1 && PRODUCER_ID_WIDTH <= 16) === 1'b1) &&
-            (^PRODUCER_ID_WIDTH !== 1'bx) &&
+            (((^PRODUCER_ID_WIDTH == 1'b0) || (^PRODUCER_ID_WIDTH == 1'b1)) === 1'b1) &&
         ((PREDICATE_EPOCH_WIDTH >= 1 && PREDICATE_EPOCH_WIDTH <= 32) === 1'b1) &&
-            (^PREDICATE_EPOCH_WIDTH !== 1'bx) &&
+            (((^PREDICATE_EPOCH_WIDTH == 1'b0) || (^PREDICATE_EPOCH_WIDTH == 1'b1)) === 1'b1) &&
         ((PREDICATE_CLASS_WIDTH >= 2 && PREDICATE_CLASS_WIDTH <= 8) === 1'b1) &&
-            (^PREDICATE_CLASS_WIDTH !== 1'bx) &&
+            (((^PREDICATE_CLASS_WIDTH == 1'b0) || (^PREDICATE_CLASS_WIDTH == 1'b1)) === 1'b1) &&
         ((PREDICATE_ERROR_WIDTH >= 1 && PREDICATE_ERROR_WIDTH <= 8) === 1'b1) &&
-            (^PREDICATE_ERROR_WIDTH !== 1'bx) &&
+            (((^PREDICATE_ERROR_WIDTH == 1'b0) || (^PREDICATE_ERROR_WIDTH == 1'b1)) === 1'b1) &&
         ((ROUTE_PROOF_ID_WIDTH >= 32 && ROUTE_PROOF_ID_WIDTH <= 64) === 1'b1) &&
-            (^ROUTE_PROOF_ID_WIDTH !== 1'bx) &&
+            (((^ROUTE_PROOF_ID_WIDTH == 1'b0) || (^ROUTE_PROOF_ID_WIDTH == 1'b1)) === 1'b1) &&
         ((SCHEDULE_PERIOD_MAX >= 1 && SCHEDULE_PERIOD_MAX <= 256) === 1'b1) &&
-            (^SCHEDULE_PERIOD_MAX !== 1'bx) &&
+            (((^SCHEDULE_PERIOD_MAX == 1'b0) || (^SCHEDULE_PERIOD_MAX == 1'b1)) === 1'b1) &&
         (EXPOSE_BOUNDARY_PORTS === 0 || EXPOSE_BOUNDARY_PORTS === 1) &&
         (SUPPORT_MULTICAST === 0 || SUPPORT_MULTICAST === 1) &&
         (SUPPORT_SCHEDULE_CHECK === 0 || SUPPORT_SCHEDULE_CHECK === 1) &&
@@ -539,11 +539,11 @@ module predicate_network #(
         M % 8 == 0 && M >= REQ &&
         MAX_MULTICAST_FANOUT > 0 && MAX_MULTICAST_FANOUT <= O &&
         MAX_TREE_DESTINATIONS > 0 && MAX_TREE_DESTINATIONS <= N * RX &&
-        (^MAX_MULTICAST_FANOUT !== 1'bx) && (^MAX_TREE_DESTINATIONS !== 1'bx) &&
+        (((^MAX_MULTICAST_FANOUT == 1'b0) || (^MAX_MULTICAST_FANOUT == 1'b1)) === 1'b1) && (((^MAX_TREE_DESTINATIONS == 1'b0) || (^MAX_TREE_DESTINATIONS == 1'b1)) === 1'b1) &&
         (64'd1 << PR) >= 64'(N * TX + (EXPOSE_BOUNDARY_PORTS ? B : 0)) &&
-        $bits(NODE_PRESENT_MASK) == N && (^NODE_PRESENT_MASK !== 1'bx) &&
-        $bits(LINK_PRESENT_MASK) == LB && (^LINK_PRESENT_MASK !== 1'bx) &&
-        $bits(NODE_CONNECTIVITY_MASKS) == N * O * I && (^NODE_CONNECTIVITY_MASKS !== 1'bx) &&
+        $bits(NODE_PRESENT_MASK) == N && (((^NODE_PRESENT_MASK == 1'b0) || (^NODE_PRESENT_MASK == 1'b1)) === 1'b1) &&
+        $bits(LINK_PRESENT_MASK) == LB && (((^LINK_PRESENT_MASK == 1'b0) || (^LINK_PRESENT_MASK == 1'b1)) === 1'b1) &&
+        $bits(NODE_CONNECTIVITY_MASKS) == N * O * I && (((^NODE_CONNECTIVITY_MASKS == 1'b0) || (^NODE_CONNECTIVITY_MASKS == 1'b1)) === 1'b1) &&
         topology_valid();
 
     if (!PARAMETERS_VALID) begin : g_invalid_parameters

@@ -29,24 +29,24 @@ module dma_engine #(
     parameter PROTECT_COMMAND_FIFO = 0,
     parameter ASYNC_RESET = 0,
     localparam bit PARAMETERS_VALID =
-        ((NUM_CHANNELS >= 1) === 1'b1) && ( ^ NUM_CHANNELS !== 1'bx) &&
-        ((COMMAND_QUEUE_DEPTH >= 1) === 1'b1) && ( ^ COMMAND_QUEUE_DEPTH !== 1'bx) &&
-        ((DATA_FIFO_DEPTH >= 1) === 1'b1) && ( ^ DATA_FIFO_DEPTH !== 1'bx) &&
-        ((COMPLETION_QUEUE_DEPTH >= 1) === 1'b1) && ( ^ COMPLETION_QUEUE_DEPTH !== 1'bx) &&
-        ((EVENT_QUEUE_DEPTH >= 1) === 1'b1) && ( ^ EVENT_QUEUE_DEPTH !== 1'bx) &&
-        ((DATA_WIDTH >= 1) === 1'b1) && ( ^ DATA_WIDTH !== 1'bx) &&
-        ((ADDR_WIDTH >= 1) === 1'b1) && ( ^ ADDR_WIDTH !== 1'bx) &&
-        ((COUNT_WIDTH >= 1) === 1'b1) && ( ^ COUNT_WIDTH !== 1'bx) &&
-        ((SPACE_ID_WIDTH >= 1) === 1'b1) && ( ^ SPACE_ID_WIDTH !== 1'bx) &&
-        ((STREAM_ID_WIDTH >= 1) === 1'b1) && ( ^ STREAM_ID_WIDTH !== 1'bx) &&
-        ((CONTEXT_ID_WIDTH >= 1) === 1'b1) && ( ^ CONTEXT_ID_WIDTH !== 1'bx) &&
-        ((COMMAND_ID_WIDTH >= 1) === 1'b1) && ( ^ COMMAND_ID_WIDTH !== 1'bx) &&
-        ((PRIORITY_WIDTH >= 1) === 1'b1) && ( ^ PRIORITY_WIDTH !== 1'bx) &&
-        ((NUM_EVENTS >= 1) === 1'b1) && ( ^ NUM_EVENTS !== 1'bx) &&
-        ((NUM_PROTECTION_REGIONS >= 1) === 1'b1) && ( ^ NUM_PROTECTION_REGIONS !== 1'bx) &&
-        ((MAX_BURST_BEATS >= 1) === 1'b1) && ( ^ MAX_BURST_BEATS !== 1'bx) &&
-        ((TRANSFER_TIMEOUT_CYCLES >= 1) === 1'b1) && ( ^ TRANSFER_TIMEOUT_CYCLES !== 1'bx) &&
-        ((CANCEL_TIMEOUT_CYCLES >= 1) === 1'b1) && ( ^ CANCEL_TIMEOUT_CYCLES !== 1'bx) &&
+        ((NUM_CHANNELS >= 1) === 1'b1) && ( ((^NUM_CHANNELS == 1'b0) || (^NUM_CHANNELS == 1'b1)) === 1'b1) &&
+        ((COMMAND_QUEUE_DEPTH >= 1) === 1'b1) && ( ((^COMMAND_QUEUE_DEPTH == 1'b0) || (^COMMAND_QUEUE_DEPTH == 1'b1)) === 1'b1) &&
+        ((DATA_FIFO_DEPTH >= 1) === 1'b1) && ( ((^DATA_FIFO_DEPTH == 1'b0) || (^DATA_FIFO_DEPTH == 1'b1)) === 1'b1) &&
+        ((COMPLETION_QUEUE_DEPTH >= 1) === 1'b1) && ( ((^COMPLETION_QUEUE_DEPTH == 1'b0) || (^COMPLETION_QUEUE_DEPTH == 1'b1)) === 1'b1) &&
+        ((EVENT_QUEUE_DEPTH >= 1) === 1'b1) && ( ((^EVENT_QUEUE_DEPTH == 1'b0) || (^EVENT_QUEUE_DEPTH == 1'b1)) === 1'b1) &&
+        ((DATA_WIDTH >= 1) === 1'b1) && ( ((^DATA_WIDTH == 1'b0) || (^DATA_WIDTH == 1'b1)) === 1'b1) &&
+        ((ADDR_WIDTH >= 1) === 1'b1) && ( ((^ADDR_WIDTH == 1'b0) || (^ADDR_WIDTH == 1'b1)) === 1'b1) &&
+        ((COUNT_WIDTH >= 1) === 1'b1) && ( ((^COUNT_WIDTH == 1'b0) || (^COUNT_WIDTH == 1'b1)) === 1'b1) &&
+        ((SPACE_ID_WIDTH >= 1) === 1'b1) && ( ((^SPACE_ID_WIDTH == 1'b0) || (^SPACE_ID_WIDTH == 1'b1)) === 1'b1) &&
+        ((STREAM_ID_WIDTH >= 1) === 1'b1) && ( ((^STREAM_ID_WIDTH == 1'b0) || (^STREAM_ID_WIDTH == 1'b1)) === 1'b1) &&
+        ((CONTEXT_ID_WIDTH >= 1) === 1'b1) && ( ((^CONTEXT_ID_WIDTH == 1'b0) || (^CONTEXT_ID_WIDTH == 1'b1)) === 1'b1) &&
+        ((COMMAND_ID_WIDTH >= 1) === 1'b1) && ( ((^COMMAND_ID_WIDTH == 1'b0) || (^COMMAND_ID_WIDTH == 1'b1)) === 1'b1) &&
+        ((PRIORITY_WIDTH >= 1) === 1'b1) && ( ((^PRIORITY_WIDTH == 1'b0) || (^PRIORITY_WIDTH == 1'b1)) === 1'b1) &&
+        ((NUM_EVENTS >= 1) === 1'b1) && ( ((^NUM_EVENTS == 1'b0) || (^NUM_EVENTS == 1'b1)) === 1'b1) &&
+        ((NUM_PROTECTION_REGIONS >= 1) === 1'b1) && ( ((^NUM_PROTECTION_REGIONS == 1'b0) || (^NUM_PROTECTION_REGIONS == 1'b1)) === 1'b1) &&
+        ((MAX_BURST_BEATS >= 1) === 1'b1) && ( ((^MAX_BURST_BEATS == 1'b0) || (^MAX_BURST_BEATS == 1'b1)) === 1'b1) &&
+        ((TRANSFER_TIMEOUT_CYCLES >= 1) === 1'b1) && ( ((^TRANSFER_TIMEOUT_CYCLES == 1'b0) || (^TRANSFER_TIMEOUT_CYCLES == 1'b1)) === 1'b1) &&
+        ((CANCEL_TIMEOUT_CYCLES >= 1) === 1'b1) && ( ((^CANCEL_TIMEOUT_CYCLES == 1'b0) || (^CANCEL_TIMEOUT_CYCLES == 1'b1)) === 1'b1) &&
         ((SUPPORT_EVENT_START === 0) || (SUPPORT_EVENT_START === 1)) &&
         ((SUPPORT_CANCELLATION === 0) || (SUPPORT_CANCELLATION === 1)) &&
         ((PROTECT_COMMAND_FIFO === 0) || (PROTECT_COMMAND_FIFO === 1)) &&
@@ -64,7 +64,7 @@ module dma_engine #(
         ((64'(NUM_PROTECTION_REGIONS) * (2 * 64'(ADDR_WIDTH) + 64'(CONTEXT_ID_WIDTH) +
             64'(SPACE_ID_WIDTH) + 4) < 64'd2147483647) === 1'b1) &&
         (MODE_WIDTH === 2) &&
-        ((DESCRIPTOR_EPOCH_WIDTH >= 2) === 1'b1) && ( ^ DESCRIPTOR_EPOCH_WIDTH !== 1'bx) &&
+        ((DESCRIPTOR_EPOCH_WIDTH >= 2) === 1'b1) && ( ((^DESCRIPTOR_EPOCH_WIDTH == 1'b0) || (^DESCRIPTOR_EPOCH_WIDTH == 1'b1)) === 1'b1) &&
         ((DATA_WIDTH % 8 == 0) === 1'b1) &&
         (((DATA_WIDTH / 8 & ((DATA_WIDTH / 8) - 1)) == 0) === 1'b1) &&
         ((64'(NUM_CHANNELS) * (64'(DATA_WIDTH) + 64'(ADDR_WIDTH) * 6 + 64'(COUNT_WIDTH) * 4 +

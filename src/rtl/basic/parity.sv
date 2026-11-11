@@ -6,8 +6,8 @@ module parity #(
     parameter PARITY_GRANULE_WIDTH = 8,
     // Preserve invalid arguments for an elaboration guard without bad slices.
     localparam bit PARAMETERS_VALID =
-        ((DATA_WIDTH >= 1) === 1'b1) && (^DATA_WIDTH !== 1'bx) &&
-        ((PARITY_GRANULE_WIDTH >= 1) === 1'b1) && (^PARITY_GRANULE_WIDTH !== 1'bx) &&
+        ((DATA_WIDTH >= 1) === 1'b1) && (((^DATA_WIDTH == 1'b0) || (^DATA_WIDTH == 1'b1)) === 1'b1) &&
+        ((PARITY_GRANULE_WIDTH >= 1) === 1'b1) && (((^PARITY_GRANULE_WIDTH == 1'b0) || (^PARITY_GRANULE_WIDTH == 1'b1)) === 1'b1) &&
         (((PARITY_GRANULE_WIDTH >= 1) === 1'b1) ?
             ((DATA_WIDTH % PARITY_GRANULE_WIDTH == 0) === 1'b1) : 1'b0),
     localparam int unsigned DATA_BITS = PARAMETERS_VALID ? DATA_WIDTH : 1,

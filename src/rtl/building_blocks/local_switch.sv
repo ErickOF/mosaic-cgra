@@ -16,12 +16,12 @@ module local_switch #(
     parameter SUPPORT_MULTICAST = 1,
     parameter ASYNC_RESET = 0,
     localparam bit PARAMETERS_VALID =
-        ((NUM_INPUTS >= 1) === 1'b1) && ( ^ NUM_INPUTS !== 1'bx) &&
-        ((NUM_OUTPUTS >= 1) === 1'b1) && ( ^ NUM_OUTPUTS !== 1'bx) &&
-        ((DATA_WIDTH >= 1) === 1'b1) && ( ^ DATA_WIDTH !== 1'bx) &&
-        ((METADATA_WIDTH >= 1) === 1'b1) && ( ^ METADATA_WIDTH !== 1'bx) &&
-        ((CONTEXT_ID_WIDTH >= 1) === 1'b1) && ( ^ CONTEXT_ID_WIDTH !== 1'bx) &&
-        ($bits(CONNECTIVITY_MASK) == DEFAULT_MASK_BITS) && ( ^ CONNECTIVITY_MASK !== 1'bx) &&
+        ((NUM_INPUTS >= 1) === 1'b1) && ( ((^NUM_INPUTS == 1'b0) || (^NUM_INPUTS == 1'b1)) === 1'b1) &&
+        ((NUM_OUTPUTS >= 1) === 1'b1) && ( ((^NUM_OUTPUTS == 1'b0) || (^NUM_OUTPUTS == 1'b1)) === 1'b1) &&
+        ((DATA_WIDTH >= 1) === 1'b1) && ( ((^DATA_WIDTH == 1'b0) || (^DATA_WIDTH == 1'b1)) === 1'b1) &&
+        ((METADATA_WIDTH >= 1) === 1'b1) && ( ((^METADATA_WIDTH == 1'b0) || (^METADATA_WIDTH == 1'b1)) === 1'b1) &&
+        ((CONTEXT_ID_WIDTH >= 1) === 1'b1) && ( ((^CONTEXT_ID_WIDTH == 1'b0) || (^CONTEXT_ID_WIDTH == 1'b1)) === 1'b1) &&
+        ($bits(CONNECTIVITY_MASK) == DEFAULT_MASK_BITS) && ( ((^CONNECTIVITY_MASK == 1'b0) || (^CONNECTIVITY_MASK == 1'b1)) === 1'b1) &&
         ((SUPPORT_MULTICAST === 0) || (SUPPORT_MULTICAST === 1)) &&
         ((ASYNC_RESET === 0) || (ASYNC_RESET === 1)) &&
         ((64'(NUM_INPUTS) * 64'(NUM_OUTPUTS) < 64'd2147483647) === 1'b1) &&

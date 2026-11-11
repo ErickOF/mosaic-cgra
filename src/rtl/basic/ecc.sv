@@ -7,7 +7,7 @@ module ecc #(
     // Preserve negative, oversized and X/Z arguments until the guard rejects them.
     parameter DATA_WIDTH = 32,
     localparam int unsigned MAX_DATA_WIDTH = 256,
-    localparam int unsigned DATA_BITS = (^DATA_WIDTH !== 1'bx) && DATA_WIDTH >= 1 && DATA_WIDTH <= MAX_DATA_WIDTH ? DATA_WIDTH : 1,
+    localparam int unsigned DATA_BITS = (((^DATA_WIDTH == 1'b0) || (^DATA_WIDTH == 1'b1)) === 1'b1) && DATA_WIDTH >= 1 && DATA_WIDTH <= MAX_DATA_WIDTH ? DATA_WIDTH : 1,
     localparam int unsigned HAMMING_PARITY_BITS = ecc_pkg::hamming_bits(DATA_BITS),
     localparam int unsigned HAMMING_WIDTH = DATA_BITS + HAMMING_PARITY_BITS,
     localparam int unsigned CODE_WIDTH = HAMMING_WIDTH + 1,
@@ -42,7 +42,7 @@ module ecc #(
         coverage_mask = mask;
     endfunction
 
-    if ((^DATA_WIDTH === 1'bx) || DATA_WIDTH < 1 || DATA_WIDTH > MAX_DATA_WIDTH) begin : g_invalid_parameters
+    if ((((^DATA_WIDTH == 1'b0) || (^DATA_WIDTH == 1'b1)) !== 1'b1) || DATA_WIDTH < 1 || DATA_WIDTH > MAX_DATA_WIDTH) begin : g_invalid_parameters
         ecc_data_width_must_be_between_1_and_256 invalid_parameters ();
     end else begin : g_codec
         wire [HAMMING_WIDTH-1:0] placed_data;

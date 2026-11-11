@@ -93,60 +93,60 @@ module mst_channel #(
     parameter EVENT_WIDTH = 256,
     parameter DATA_METADATA_WIDTH = 256,
     localparam bit PARAMETERS_VALID =
-        ((ADDR_WIDTH > 0) === 1'b1) && (^ADDR_WIDTH !== 1'bx) &&
-        ((SHELL_DATA_WIDTH > 0) === 1'b1) && (^SHELL_DATA_WIDTH !== 1'bx) &&
-        ((MEMORY_DATA_WIDTH > 0) === 1'b1) && (^MEMORY_DATA_WIDTH !== 1'bx) &&
-        ((NUM_STREAM_INPUTS > 0) === 1'b1) && (^NUM_STREAM_INPUTS !== 1'bx) &&
-        ((NUM_STREAM_OUTPUTS > 0) === 1'b1) && (^NUM_STREAM_OUTPUTS !== 1'bx) &&
-        ((NUM_LOAD_CHANNELS > 0) === 1'b1) && (^NUM_LOAD_CHANNELS !== 1'bx) &&
-        ((NUM_STORE_CHANNELS > 0) === 1'b1) && (^NUM_STORE_CHANNELS !== 1'bx) &&
-        ((NUM_SCRATCHPAD_CLIENTS > 0) === 1'b1) && (^NUM_SCRATCHPAD_CLIENTS !== 1'bx) &&
-        ((NUM_DMA_INGRESS_CHANNELS > 0) === 1'b1) && (^NUM_DMA_INGRESS_CHANNELS !== 1'bx) &&
-        ((NUM_DMA_EGRESS_CHANNELS > 0) === 1'b1) && (^NUM_DMA_EGRESS_CHANNELS !== 1'bx) &&
-        ((CONTEXT_DEPTH > 0) === 1'b1) && (^CONTEXT_DEPTH !== 1'bx) &&
-        ((CONFIG_WORD_COUNT > 0) === 1'b1) && (^CONFIG_WORD_COUNT !== 1'bx) &&
-        ((COMMAND_QUEUE_DEPTH > 0) === 1'b1) && (^COMMAND_QUEUE_DEPTH !== 1'bx) &&
-        ((READ_DATA_FIFO_DEPTH > 0) === 1'b1) && (^READ_DATA_FIFO_DEPTH !== 1'bx) &&
-        ((WRITE_DATA_FIFO_DEPTH > 0) === 1'b1) && (^WRITE_DATA_FIFO_DEPTH !== 1'bx) &&
-        ((COMPLETION_QUEUE_DEPTH > 0) === 1'b1) && (^COMPLETION_QUEUE_DEPTH !== 1'bx) &&
-        ((EVENT_QUEUE_DEPTH > 0) === 1'b1) && (^EVENT_QUEUE_DEPTH !== 1'bx) &&
-        ((MAX_OUTSTANDING_READS > 0) === 1'b1) && (^MAX_OUTSTANDING_READS !== 1'bx) &&
-        ((MAX_OUTSTANDING_WRITES > 0) === 1'b1) && (^MAX_OUTSTANDING_WRITES !== 1'bx) &&
-        ((COUNT_WIDTH > 0) === 1'b1) && (^COUNT_WIDTH !== 1'bx) &&
-        ((MAX_ELEMENT_BYTES > 0) === 1'b1) && (^MAX_ELEMENT_BYTES !== 1'bx) &&
-        ((NUM_PROTECTION_REGIONS > 0) === 1'b1) && (^NUM_PROTECTION_REGIONS !== 1'bx) &&
-        ((NUM_BUFFER_ROLES > 0) === 1'b1) && (^NUM_BUFFER_ROLES !== 1'bx) &&
-        ((NUM_EVENTS > 0) === 1'b1) && (^NUM_EVENTS !== 1'bx) &&
-        ((OWNER_ID_WIDTH > 0) === 1'b1) && (^OWNER_ID_WIDTH !== 1'bx) &&
-        ((KERNEL_ID_WIDTH > 0) === 1'b1) && (^KERNEL_ID_WIDTH !== 1'bx) &&
-        ((PACKAGE_ID_WIDTH > 0) === 1'b1) && (^PACKAGE_ID_WIDTH !== 1'bx) &&
-        ((CONTEXT_VERSION_WIDTH > 0) === 1'b1) && (^CONTEXT_VERSION_WIDTH !== 1'bx) &&
-        ((COMMAND_ID_WIDTH > 0) === 1'b1) && (^COMMAND_ID_WIDTH !== 1'bx) &&
-        ((DESCRIPTOR_GENERATION_WIDTH > 0) === 1'b1) && (^DESCRIPTOR_GENERATION_WIDTH !== 1'bx) &&
-        ((ALLOCATION_GENERATION_WIDTH > 0) === 1'b1) && (^ALLOCATION_GENERATION_WIDTH !== 1'bx) &&
-        ((EXECUTION_EPOCH_WIDTH > 0) === 1'b1) && (^EXECUTION_EPOCH_WIDTH !== 1'bx) &&
-        ((SPACE_ID_WIDTH > 0) === 1'b1) && (^SPACE_ID_WIDTH !== 1'bx) &&
-        ((STREAM_ID_WIDTH > 0) === 1'b1) && (^STREAM_ID_WIDTH !== 1'bx) &&
-        ((REGION_ID_WIDTH > 0) === 1'b1) && (^REGION_ID_WIDTH !== 1'bx) &&
-        ((BUFFER_ID_WIDTH > 0) === 1'b1) && (^BUFFER_ID_WIDTH !== 1'bx) &&
-        ((DATATYPE_WIDTH > 0) === 1'b1) && (^DATATYPE_WIDTH !== 1'bx) &&
-        ((PRIORITY_WIDTH > 0) === 1'b1) && (^PRIORITY_WIDTH !== 1'bx) &&
-        ((TRANSFER_TIMEOUT_CYCLES > 0) === 1'b1) && (^TRANSFER_TIMEOUT_CYCLES !== 1'bx) &&
-        ((CANCEL_TIMEOUT_CYCLES > 0) === 1'b1) && (^CANCEL_TIMEOUT_CYCLES !== 1'bx) &&
-        ((TILE_ID_WIDTH > 0) === 1'b1) && (^TILE_ID_WIDTH !== 1'bx) &&
-        ((ARCH_VERSION_WIDTH > 0) === 1'b1) && (^ARCH_VERSION_WIDTH !== 1'bx) &&
-        ((CAPABILITY_ID_WIDTH > 0) === 1'b1) && (^CAPABILITY_ID_WIDTH !== 1'bx) &&
-        ((PREDICATE_WIDTH > 0) === 1'b1) && (^PREDICATE_WIDTH !== 1'bx) &&
-        ((PREDICATE_METADATA_WIDTH > 0) === 1'b1) && (^PREDICATE_METADATA_WIDTH !== 1'bx) &&
-        ((CONFIG_DATA_WIDTH > 0) === 1'b1) && (^CONFIG_DATA_WIDTH !== 1'bx) &&
-        ((CONTEXT_CHECKSUM_WIDTH > 0) === 1'b1) && (^CONTEXT_CHECKSUM_WIDTH !== 1'bx) &&
-        ((CONFIG_QUEUE_DEPTH > 0) === 1'b1) && (^CONFIG_QUEUE_DEPTH !== 1'bx) &&
-        ((RUNTIME_TAG_WIDTH > 0) === 1'b1) && (^RUNTIME_TAG_WIDTH !== 1'bx) &&
-        ((STALL_REASON_WIDTH > 0) === 1'b1) && (^STALL_REASON_WIDTH !== 1'bx) &&
-        ((ERROR_CODE_WIDTH > 0) === 1'b1) && (^ERROR_CODE_WIDTH !== 1'bx) &&
-        ((TRACE_WIDTH > 0) === 1'b1) && (^TRACE_WIDTH !== 1'bx) &&
-        ((EVENT_WIDTH > 0) === 1'b1) && (^EVENT_WIDTH !== 1'bx) &&
-        ((DATA_METADATA_WIDTH > 0) === 1'b1) && (^DATA_METADATA_WIDTH !== 1'bx) &&
+        ((ADDR_WIDTH > 0) === 1'b1) && (((^ADDR_WIDTH == 1'b0) || (^ADDR_WIDTH == 1'b1)) === 1'b1) &&
+        ((SHELL_DATA_WIDTH > 0) === 1'b1) && (((^SHELL_DATA_WIDTH == 1'b0) || (^SHELL_DATA_WIDTH == 1'b1)) === 1'b1) &&
+        ((MEMORY_DATA_WIDTH > 0) === 1'b1) && (((^MEMORY_DATA_WIDTH == 1'b0) || (^MEMORY_DATA_WIDTH == 1'b1)) === 1'b1) &&
+        ((NUM_STREAM_INPUTS > 0) === 1'b1) && (((^NUM_STREAM_INPUTS == 1'b0) || (^NUM_STREAM_INPUTS == 1'b1)) === 1'b1) &&
+        ((NUM_STREAM_OUTPUTS > 0) === 1'b1) && (((^NUM_STREAM_OUTPUTS == 1'b0) || (^NUM_STREAM_OUTPUTS == 1'b1)) === 1'b1) &&
+        ((NUM_LOAD_CHANNELS > 0) === 1'b1) && (((^NUM_LOAD_CHANNELS == 1'b0) || (^NUM_LOAD_CHANNELS == 1'b1)) === 1'b1) &&
+        ((NUM_STORE_CHANNELS > 0) === 1'b1) && (((^NUM_STORE_CHANNELS == 1'b0) || (^NUM_STORE_CHANNELS == 1'b1)) === 1'b1) &&
+        ((NUM_SCRATCHPAD_CLIENTS > 0) === 1'b1) && (((^NUM_SCRATCHPAD_CLIENTS == 1'b0) || (^NUM_SCRATCHPAD_CLIENTS == 1'b1)) === 1'b1) &&
+        ((NUM_DMA_INGRESS_CHANNELS > 0) === 1'b1) && (((^NUM_DMA_INGRESS_CHANNELS == 1'b0) || (^NUM_DMA_INGRESS_CHANNELS == 1'b1)) === 1'b1) &&
+        ((NUM_DMA_EGRESS_CHANNELS > 0) === 1'b1) && (((^NUM_DMA_EGRESS_CHANNELS == 1'b0) || (^NUM_DMA_EGRESS_CHANNELS == 1'b1)) === 1'b1) &&
+        ((CONTEXT_DEPTH > 0) === 1'b1) && (((^CONTEXT_DEPTH == 1'b0) || (^CONTEXT_DEPTH == 1'b1)) === 1'b1) &&
+        ((CONFIG_WORD_COUNT > 0) === 1'b1) && (((^CONFIG_WORD_COUNT == 1'b0) || (^CONFIG_WORD_COUNT == 1'b1)) === 1'b1) &&
+        ((COMMAND_QUEUE_DEPTH > 0) === 1'b1) && (((^COMMAND_QUEUE_DEPTH == 1'b0) || (^COMMAND_QUEUE_DEPTH == 1'b1)) === 1'b1) &&
+        ((READ_DATA_FIFO_DEPTH > 0) === 1'b1) && (((^READ_DATA_FIFO_DEPTH == 1'b0) || (^READ_DATA_FIFO_DEPTH == 1'b1)) === 1'b1) &&
+        ((WRITE_DATA_FIFO_DEPTH > 0) === 1'b1) && (((^WRITE_DATA_FIFO_DEPTH == 1'b0) || (^WRITE_DATA_FIFO_DEPTH == 1'b1)) === 1'b1) &&
+        ((COMPLETION_QUEUE_DEPTH > 0) === 1'b1) && (((^COMPLETION_QUEUE_DEPTH == 1'b0) || (^COMPLETION_QUEUE_DEPTH == 1'b1)) === 1'b1) &&
+        ((EVENT_QUEUE_DEPTH > 0) === 1'b1) && (((^EVENT_QUEUE_DEPTH == 1'b0) || (^EVENT_QUEUE_DEPTH == 1'b1)) === 1'b1) &&
+        ((MAX_OUTSTANDING_READS > 0) === 1'b1) && (((^MAX_OUTSTANDING_READS == 1'b0) || (^MAX_OUTSTANDING_READS == 1'b1)) === 1'b1) &&
+        ((MAX_OUTSTANDING_WRITES > 0) === 1'b1) && (((^MAX_OUTSTANDING_WRITES == 1'b0) || (^MAX_OUTSTANDING_WRITES == 1'b1)) === 1'b1) &&
+        ((COUNT_WIDTH > 0) === 1'b1) && (((^COUNT_WIDTH == 1'b0) || (^COUNT_WIDTH == 1'b1)) === 1'b1) &&
+        ((MAX_ELEMENT_BYTES > 0) === 1'b1) && (((^MAX_ELEMENT_BYTES == 1'b0) || (^MAX_ELEMENT_BYTES == 1'b1)) === 1'b1) &&
+        ((NUM_PROTECTION_REGIONS > 0) === 1'b1) && (((^NUM_PROTECTION_REGIONS == 1'b0) || (^NUM_PROTECTION_REGIONS == 1'b1)) === 1'b1) &&
+        ((NUM_BUFFER_ROLES > 0) === 1'b1) && (((^NUM_BUFFER_ROLES == 1'b0) || (^NUM_BUFFER_ROLES == 1'b1)) === 1'b1) &&
+        ((NUM_EVENTS > 0) === 1'b1) && (((^NUM_EVENTS == 1'b0) || (^NUM_EVENTS == 1'b1)) === 1'b1) &&
+        ((OWNER_ID_WIDTH > 0) === 1'b1) && (((^OWNER_ID_WIDTH == 1'b0) || (^OWNER_ID_WIDTH == 1'b1)) === 1'b1) &&
+        ((KERNEL_ID_WIDTH > 0) === 1'b1) && (((^KERNEL_ID_WIDTH == 1'b0) || (^KERNEL_ID_WIDTH == 1'b1)) === 1'b1) &&
+        ((PACKAGE_ID_WIDTH > 0) === 1'b1) && (((^PACKAGE_ID_WIDTH == 1'b0) || (^PACKAGE_ID_WIDTH == 1'b1)) === 1'b1) &&
+        ((CONTEXT_VERSION_WIDTH > 0) === 1'b1) && (((^CONTEXT_VERSION_WIDTH == 1'b0) || (^CONTEXT_VERSION_WIDTH == 1'b1)) === 1'b1) &&
+        ((COMMAND_ID_WIDTH > 0) === 1'b1) && (((^COMMAND_ID_WIDTH == 1'b0) || (^COMMAND_ID_WIDTH == 1'b1)) === 1'b1) &&
+        ((DESCRIPTOR_GENERATION_WIDTH > 0) === 1'b1) && (((^DESCRIPTOR_GENERATION_WIDTH == 1'b0) || (^DESCRIPTOR_GENERATION_WIDTH == 1'b1)) === 1'b1) &&
+        ((ALLOCATION_GENERATION_WIDTH > 0) === 1'b1) && (((^ALLOCATION_GENERATION_WIDTH == 1'b0) || (^ALLOCATION_GENERATION_WIDTH == 1'b1)) === 1'b1) &&
+        ((EXECUTION_EPOCH_WIDTH > 0) === 1'b1) && (((^EXECUTION_EPOCH_WIDTH == 1'b0) || (^EXECUTION_EPOCH_WIDTH == 1'b1)) === 1'b1) &&
+        ((SPACE_ID_WIDTH > 0) === 1'b1) && (((^SPACE_ID_WIDTH == 1'b0) || (^SPACE_ID_WIDTH == 1'b1)) === 1'b1) &&
+        ((STREAM_ID_WIDTH > 0) === 1'b1) && (((^STREAM_ID_WIDTH == 1'b0) || (^STREAM_ID_WIDTH == 1'b1)) === 1'b1) &&
+        ((REGION_ID_WIDTH > 0) === 1'b1) && (((^REGION_ID_WIDTH == 1'b0) || (^REGION_ID_WIDTH == 1'b1)) === 1'b1) &&
+        ((BUFFER_ID_WIDTH > 0) === 1'b1) && (((^BUFFER_ID_WIDTH == 1'b0) || (^BUFFER_ID_WIDTH == 1'b1)) === 1'b1) &&
+        ((DATATYPE_WIDTH > 0) === 1'b1) && (((^DATATYPE_WIDTH == 1'b0) || (^DATATYPE_WIDTH == 1'b1)) === 1'b1) &&
+        ((PRIORITY_WIDTH > 0) === 1'b1) && (((^PRIORITY_WIDTH == 1'b0) || (^PRIORITY_WIDTH == 1'b1)) === 1'b1) &&
+        ((TRANSFER_TIMEOUT_CYCLES > 0) === 1'b1) && (((^TRANSFER_TIMEOUT_CYCLES == 1'b0) || (^TRANSFER_TIMEOUT_CYCLES == 1'b1)) === 1'b1) &&
+        ((CANCEL_TIMEOUT_CYCLES > 0) === 1'b1) && (((^CANCEL_TIMEOUT_CYCLES == 1'b0) || (^CANCEL_TIMEOUT_CYCLES == 1'b1)) === 1'b1) &&
+        ((TILE_ID_WIDTH > 0) === 1'b1) && (((^TILE_ID_WIDTH == 1'b0) || (^TILE_ID_WIDTH == 1'b1)) === 1'b1) &&
+        ((ARCH_VERSION_WIDTH > 0) === 1'b1) && (((^ARCH_VERSION_WIDTH == 1'b0) || (^ARCH_VERSION_WIDTH == 1'b1)) === 1'b1) &&
+        ((CAPABILITY_ID_WIDTH > 0) === 1'b1) && (((^CAPABILITY_ID_WIDTH == 1'b0) || (^CAPABILITY_ID_WIDTH == 1'b1)) === 1'b1) &&
+        ((PREDICATE_WIDTH > 0) === 1'b1) && (((^PREDICATE_WIDTH == 1'b0) || (^PREDICATE_WIDTH == 1'b1)) === 1'b1) &&
+        ((PREDICATE_METADATA_WIDTH > 0) === 1'b1) && (((^PREDICATE_METADATA_WIDTH == 1'b0) || (^PREDICATE_METADATA_WIDTH == 1'b1)) === 1'b1) &&
+        ((CONFIG_DATA_WIDTH > 0) === 1'b1) && (((^CONFIG_DATA_WIDTH == 1'b0) || (^CONFIG_DATA_WIDTH == 1'b1)) === 1'b1) &&
+        ((CONTEXT_CHECKSUM_WIDTH > 0) === 1'b1) && (((^CONTEXT_CHECKSUM_WIDTH == 1'b0) || (^CONTEXT_CHECKSUM_WIDTH == 1'b1)) === 1'b1) &&
+        ((CONFIG_QUEUE_DEPTH > 0) === 1'b1) && (((^CONFIG_QUEUE_DEPTH == 1'b0) || (^CONFIG_QUEUE_DEPTH == 1'b1)) === 1'b1) &&
+        ((RUNTIME_TAG_WIDTH > 0) === 1'b1) && (((^RUNTIME_TAG_WIDTH == 1'b0) || (^RUNTIME_TAG_WIDTH == 1'b1)) === 1'b1) &&
+        ((STALL_REASON_WIDTH > 0) === 1'b1) && (((^STALL_REASON_WIDTH == 1'b0) || (^STALL_REASON_WIDTH == 1'b1)) === 1'b1) &&
+        ((ERROR_CODE_WIDTH > 0) === 1'b1) && (((^ERROR_CODE_WIDTH == 1'b0) || (^ERROR_CODE_WIDTH == 1'b1)) === 1'b1) &&
+        ((TRACE_WIDTH > 0) === 1'b1) && (((^TRACE_WIDTH == 1'b0) || (^TRACE_WIDTH == 1'b1)) === 1'b1) &&
+        ((EVENT_WIDTH > 0) === 1'b1) && (((^EVENT_WIDTH == 1'b0) || (^EVENT_WIDTH == 1'b1)) === 1'b1) &&
+        ((DATA_METADATA_WIDTH > 0) === 1'b1) && (((^DATA_METADATA_WIDTH == 1'b0) || (^DATA_METADATA_WIDTH == 1'b1)) === 1'b1) &&
         ((SUPPORT_2D === 0) || (SUPPORT_2D === 1)) &&
         ((SUPPORT_3D === 0) || (SUPPORT_3D === 1)) &&
         ((SUPPORT_CIRCULAR === 0) || (SUPPORT_CIRCULAR === 1)) &&
@@ -191,9 +191,9 @@ module mst_channel #(
         ((NUM_DMA_EGRESS_CHANNELS <= 8) === 1'b1) &&
         ((NUM_STREAM_INPUTS <= 8) === 1'b1) &&
         ((NUM_STREAM_OUTPUTS <= 8) === 1'b1) &&
-        ((TILE_ID >= 0) === 1'b1) && (^TILE_ID !== 1'bx) &&
-        ((INPUT_BUFFER_DEPTH >= 0) === 1'b1) && (^INPUT_BUFFER_DEPTH !== 1'bx) &&
-        ((OUTPUT_BUFFER_DEPTH >= 0) === 1'b1) && (^OUTPUT_BUFFER_DEPTH !== 1'bx) &&
+        ((TILE_ID >= 0) === 1'b1) && (((^TILE_ID == 1'b0) || (^TILE_ID == 1'b1)) === 1'b1) &&
+        ((INPUT_BUFFER_DEPTH >= 0) === 1'b1) && (((^INPUT_BUFFER_DEPTH == 1'b0) || (^INPUT_BUFFER_DEPTH == 1'b1)) === 1'b1) &&
+        ((OUTPUT_BUFFER_DEPTH >= 0) === 1'b1) && (((^OUTPUT_BUFFER_DEPTH == 1'b0) || (^OUTPUT_BUFFER_DEPTH == 1'b1)) === 1'b1) &&
         ((SUPPORT_WIDTH_CONVERSION == 1 || SHELL_DATA_WIDTH == MEMORY_DATA_WIDTH) === 1'b1) &&
         (((MAX_ELEMENT_BYTES & (MAX_ELEMENT_BYTES - 1)) == 0) === 1'b1) &&
         ((MAX_ELEMENT_BYTES <= (SHELL_DATA_WIDTH > MEMORY_DATA_WIDTH ?

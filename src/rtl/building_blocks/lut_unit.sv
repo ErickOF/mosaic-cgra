@@ -19,22 +19,22 @@ module lut_unit #(
     parameter BUFFER_PROTECTION = 0,
     parameter ASYNC_RESET = 0,
     localparam bit PARAMETERS_VALID =
-        ((ADDRESS_WIDTH >= 1) === 1'b1) && ( ^ ADDRESS_WIDTH !== 1'bx) &&
-        ((OUTPUT_WIDTH >= 1) === 1'b1) && ( ^ OUTPUT_WIDTH !== 1'bx) &&
-        ((INDEX_FRACTION_WIDTH >= 1) === 1'b1) && ( ^ INDEX_FRACTION_WIDTH !== 1'bx) &&
-        ((NUM_BANKS >= 1) === 1'b1) && ( ^ NUM_BANKS !== 1'bx) &&
+        ((ADDRESS_WIDTH >= 1) === 1'b1) && ( ((^ADDRESS_WIDTH == 1'b0) || (^ADDRESS_WIDTH == 1'b1)) === 1'b1) &&
+        ((OUTPUT_WIDTH >= 1) === 1'b1) && ( ((^OUTPUT_WIDTH == 1'b0) || (^OUTPUT_WIDTH == 1'b1)) === 1'b1) &&
+        ((INDEX_FRACTION_WIDTH >= 1) === 1'b1) && ( ((^INDEX_FRACTION_WIDTH == 1'b0) || (^INDEX_FRACTION_WIDTH == 1'b1)) === 1'b1) &&
+        ((NUM_BANKS >= 1) === 1'b1) && ( ((^NUM_BANKS == 1'b0) || (^NUM_BANKS == 1'b1)) === 1'b1) &&
         ((SUPPORT_INTERPOLATION === 0) || (SUPPORT_INTERPOLATION === 1)) &&
-        ((LOOKUP_PIPELINE_DEPTH >= 1) === 1'b1) && ( ^ LOOKUP_PIPELINE_DEPTH !== 1'bx) &&
-        ((LOOKUP_RESPONSE_DEPTH >= 1) === 1'b1) && ( ^ LOOKUP_RESPONSE_DEPTH !== 1'bx) &&
-        ((PROGRAM_RESPONSE_DEPTH >= 1) === 1'b1) && ( ^ PROGRAM_RESPONSE_DEPTH !== 1'bx) &&
+        ((LOOKUP_PIPELINE_DEPTH >= 1) === 1'b1) && ( ((^LOOKUP_PIPELINE_DEPTH == 1'b0) || (^LOOKUP_PIPELINE_DEPTH == 1'b1)) === 1'b1) &&
+        ((LOOKUP_RESPONSE_DEPTH >= 1) === 1'b1) && ( ((^LOOKUP_RESPONSE_DEPTH == 1'b0) || (^LOOKUP_RESPONSE_DEPTH == 1'b1)) === 1'b1) &&
+        ((PROGRAM_RESPONSE_DEPTH >= 1) === 1'b1) && ( ((^PROGRAM_RESPONSE_DEPTH == 1'b0) || (^PROGRAM_RESPONSE_DEPTH == 1'b1)) === 1'b1) &&
         ((TRACK_PROGRAM_COVERAGE === 0) || (TRACK_PROGRAM_COVERAGE === 1)) &&
-        ((TABLE_VERSION_WIDTH >= 2) === 1'b1) && ( ^ TABLE_VERSION_WIDTH !== 1'bx) &&
-        ((TABLE_ID_WIDTH >= 1) === 1'b1) && ( ^ TABLE_ID_WIDTH !== 1'bx) &&
-        ((QUALITY_ID_WIDTH >= 1) === 1'b1) && ( ^ QUALITY_ID_WIDTH !== 1'bx) &&
-        ((CONTEXT_ID_WIDTH >= 1) === 1'b1) && ( ^ CONTEXT_ID_WIDTH !== 1'bx) &&
-        ((LOOKUP_TAG_WIDTH >= 1) === 1'b1) && ( ^ LOOKUP_TAG_WIDTH !== 1'bx) &&
+        ((TABLE_VERSION_WIDTH >= 2) === 1'b1) && ( ((^TABLE_VERSION_WIDTH == 1'b0) || (^TABLE_VERSION_WIDTH == 1'b1)) === 1'b1) &&
+        ((TABLE_ID_WIDTH >= 1) === 1'b1) && ( ((^TABLE_ID_WIDTH == 1'b0) || (^TABLE_ID_WIDTH == 1'b1)) === 1'b1) &&
+        ((QUALITY_ID_WIDTH >= 1) === 1'b1) && ( ((^QUALITY_ID_WIDTH == 1'b0) || (^QUALITY_ID_WIDTH == 1'b1)) === 1'b1) &&
+        ((CONTEXT_ID_WIDTH >= 1) === 1'b1) && ( ((^CONTEXT_ID_WIDTH == 1'b0) || (^CONTEXT_ID_WIDTH == 1'b1)) === 1'b1) &&
+        ((LOOKUP_TAG_WIDTH >= 1) === 1'b1) && ( ((^LOOKUP_TAG_WIDTH == 1'b0) || (^LOOKUP_TAG_WIDTH == 1'b1)) === 1'b1) &&
         ((BUFFER_PROTECTION >= 0 && BUFFER_PROTECTION <= 2) === 1'b1) &&
-        ( ^ BUFFER_PROTECTION !== 1'bx) &&
+        ( ((^BUFFER_PROTECTION == 1'b0) || (^BUFFER_PROTECTION == 1'b1)) === 1'b1) &&
         ((ASYNC_RESET === 0) || (ASYNC_RESET === 1)) &&
         ((ADDRESS_WIDTH < 31) === 1'b1) &&
         ((64'(NUM_BANKS) * (64'd1 << ADDRESS_WIDTH) * (64'(OUTPUT_WIDTH) * 2 + 4) +

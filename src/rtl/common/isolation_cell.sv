@@ -13,7 +13,7 @@ module isolation_cell #(
     if (WIDTH < 1) begin : gen_invalid_width
         initial $fatal(1, "WIDTH must be greater than or equal to one");
     end
-    if (^CLAMP_VALUE === 1'bx) begin : gen_invalid_clamp
+    if (((^CLAMP_VALUE == 1'b0) || (^CLAMP_VALUE == 1'b1)) !== 1'b1) begin : gen_invalid_clamp
         initial $fatal(1, "CLAMP_VALUE must contain only zero and one bits");
     end
 

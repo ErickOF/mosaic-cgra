@@ -45,7 +45,7 @@ module array_events #(
     output wire o_error
 );
     function automatic bit ids_valid();
-        ids_valid = ^CLUSTER_IDS !== 1'bx;
+        ids_valid = ((^CLUSTER_IDS == 1'b0) || (^CLUSTER_IDS == 1'b1)) === 1'b1;
 
         for (int c = 0; c < N; c++) begin
             if (CLUSTER_IDS[c*8+:8] >= 240) ids_valid = 1'b0;

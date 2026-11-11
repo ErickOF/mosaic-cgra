@@ -29,20 +29,20 @@ module banked_scratchpad #(
     parameter CONTROL_PROTECTION = 0,
     parameter ASYNC_RESET = 0,
     localparam bit PARAMETERS_VALID =
-        ((DATA_WIDTH > 0) === 1'b1) && (^DATA_WIDTH !== 1'bx) &&
-        ((NUM_BANKS > 0) === 1'b1) && (^NUM_BANKS !== 1'bx) &&
-        ((BANK_DEPTH_WORDS > 0) === 1'b1) && (^BANK_DEPTH_WORDS !== 1'bx) &&
-        ((NUM_CLIENTS > 0) === 1'b1) && (^NUM_CLIENTS !== 1'bx) &&
-        ((CLIENT_TAG_WIDTH > 0) === 1'b1) && (^CLIENT_TAG_WIDTH !== 1'bx) &&
-        ((MAX_OUTSTANDING_PER_CLIENT > 0) === 1'b1) && (^MAX_OUTSTANDING_PER_CLIENT !== 1'bx) &&
-        ((INTERLEAVE_BYTES > 0) === 1'b1) && (^INTERLEAVE_BYTES !== 1'bx) &&
-        ((BACKEND_READ_LATENCY > 0) === 1'b1) && (^BACKEND_READ_LATENCY !== 1'bx) &&
-        ((NUM_REGIONS > 0) === 1'b1) && (^NUM_REGIONS !== 1'bx) &&
-        ((OWNER_ID_WIDTH > 0) === 1'b1) && (^OWNER_ID_WIDTH !== 1'bx) &&
-        ((KERNEL_ID_WIDTH > 0) === 1'b1) && (^KERNEL_ID_WIDTH !== 1'bx) &&
-        ((REGION_GENERATION_WIDTH > 0) === 1'b1) && (^REGION_GENERATION_WIDTH !== 1'bx) &&
-        ((BUFFER_GROUP_WIDTH > 0) === 1'b1) && (^BUFFER_GROUP_WIDTH !== 1'bx) &&
-        ((PARITY_GRANULARITY > 0) === 1'b1) && (^PARITY_GRANULARITY !== 1'bx) &&
+        ((DATA_WIDTH > 0) === 1'b1) && (((^DATA_WIDTH == 1'b0) || (^DATA_WIDTH == 1'b1)) === 1'b1) &&
+        ((NUM_BANKS > 0) === 1'b1) && (((^NUM_BANKS == 1'b0) || (^NUM_BANKS == 1'b1)) === 1'b1) &&
+        ((BANK_DEPTH_WORDS > 0) === 1'b1) && (((^BANK_DEPTH_WORDS == 1'b0) || (^BANK_DEPTH_WORDS == 1'b1)) === 1'b1) &&
+        ((NUM_CLIENTS > 0) === 1'b1) && (((^NUM_CLIENTS == 1'b0) || (^NUM_CLIENTS == 1'b1)) === 1'b1) &&
+        ((CLIENT_TAG_WIDTH > 0) === 1'b1) && (((^CLIENT_TAG_WIDTH == 1'b0) || (^CLIENT_TAG_WIDTH == 1'b1)) === 1'b1) &&
+        ((MAX_OUTSTANDING_PER_CLIENT > 0) === 1'b1) && (((^MAX_OUTSTANDING_PER_CLIENT == 1'b0) || (^MAX_OUTSTANDING_PER_CLIENT == 1'b1)) === 1'b1) &&
+        ((INTERLEAVE_BYTES > 0) === 1'b1) && (((^INTERLEAVE_BYTES == 1'b0) || (^INTERLEAVE_BYTES == 1'b1)) === 1'b1) &&
+        ((BACKEND_READ_LATENCY > 0) === 1'b1) && (((^BACKEND_READ_LATENCY == 1'b0) || (^BACKEND_READ_LATENCY == 1'b1)) === 1'b1) &&
+        ((NUM_REGIONS > 0) === 1'b1) && (((^NUM_REGIONS == 1'b0) || (^NUM_REGIONS == 1'b1)) === 1'b1) &&
+        ((OWNER_ID_WIDTH > 0) === 1'b1) && (((^OWNER_ID_WIDTH == 1'b0) || (^OWNER_ID_WIDTH == 1'b1)) === 1'b1) &&
+        ((KERNEL_ID_WIDTH > 0) === 1'b1) && (((^KERNEL_ID_WIDTH == 1'b0) || (^KERNEL_ID_WIDTH == 1'b1)) === 1'b1) &&
+        ((REGION_GENERATION_WIDTH > 0) === 1'b1) && (((^REGION_GENERATION_WIDTH == 1'b0) || (^REGION_GENERATION_WIDTH == 1'b1)) === 1'b1) &&
+        ((BUFFER_GROUP_WIDTH > 0) === 1'b1) && (((^BUFFER_GROUP_WIDTH == 1'b0) || (^BUFFER_GROUP_WIDTH == 1'b1)) === 1'b1) &&
+        ((PARITY_GRANULARITY > 0) === 1'b1) && (((^PARITY_GRANULARITY == 1'b0) || (^PARITY_GRANULARITY == 1'b1)) === 1'b1) &&
         ((ENFORCE_REGIONS === 0) || (ENFORCE_REGIONS === 1)) &&
         ((ENFORCE_BANK_PERMISSIONS === 0) || (ENFORCE_BANK_PERMISSIONS === 1)) &&
         ((DEFAULT_ALLOW === 0) || (DEFAULT_ALLOW === 1)) &&

@@ -11,13 +11,13 @@ module vector_register_file #(
     parameter NUM_WRITE_PORTS = 1,
     parameter HAS_BROADCAST = 1,
     localparam bit PARAMETERS_VALID =
-        ((LANE_WIDTH >= 1) === 1'b1) && (^LANE_WIDTH !== 1'bx) &&
-        ((NUM_LANES >= 1) === 1'b1) && (^NUM_LANES !== 1'bx) &&
-        ((WRITE_SLICE_WIDTH >= 1) === 1'b1) && (^WRITE_SLICE_WIDTH !== 1'bx) &&
+        ((LANE_WIDTH >= 1) === 1'b1) && (((^LANE_WIDTH == 1'b0) || (^LANE_WIDTH == 1'b1)) === 1'b1) &&
+        ((NUM_LANES >= 1) === 1'b1) && (((^NUM_LANES == 1'b0) || (^NUM_LANES == 1'b1)) === 1'b1) &&
+        ((WRITE_SLICE_WIDTH >= 1) === 1'b1) && (((^WRITE_SLICE_WIDTH == 1'b0) || (^WRITE_SLICE_WIDTH == 1'b1)) === 1'b1) &&
         (((LANE_WIDTH % WRITE_SLICE_WIDTH) == 0) === 1'b1) &&
-        ((DEPTH >= 1) === 1'b1) && (^DEPTH !== 1'bx) &&
-        ((NUM_READ_PORTS >= 1) === 1'b1) && (^NUM_READ_PORTS !== 1'bx) &&
-        ((NUM_WRITE_PORTS >= 1) === 1'b1) && (^NUM_WRITE_PORTS !== 1'bx) &&
+        ((DEPTH >= 1) === 1'b1) && (((^DEPTH == 1'b0) || (^DEPTH == 1'b1)) === 1'b1) &&
+        ((NUM_READ_PORTS >= 1) === 1'b1) && (((^NUM_READ_PORTS == 1'b0) || (^NUM_READ_PORTS == 1'b1)) === 1'b1) &&
+        ((NUM_WRITE_PORTS >= 1) === 1'b1) && (((^NUM_WRITE_PORTS == 1'b0) || (^NUM_WRITE_PORTS == 1'b1)) === 1'b1) &&
         ((HAS_BROADCAST === 0) || (HAS_BROADCAST === 1)),
     localparam int unsigned LANE_BITS = PARAMETERS_VALID ? LANE_WIDTH : 1,
     localparam int unsigned LANES = PARAMETERS_VALID ? NUM_LANES : 1,

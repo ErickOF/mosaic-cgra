@@ -11,10 +11,10 @@ module width_converter #(
     parameter LSB_FIRST = 1,
     parameter ASYNC_RESET = 0,
     localparam bit PARAMETERS_VALID =
-        ((IN_WIDTH >= 1) === 1'b1) && (^IN_WIDTH !== 1'bx) &&
-        ((OUT_WIDTH >= 1) === 1'b1) && (^OUT_WIDTH !== 1'bx) &&
-        ((UNIT_WIDTH >= 1) === 1'b1) && (^UNIT_WIDTH !== 1'bx) &&
-        ((USER_WIDTH >= 1) === 1'b1) && (^USER_WIDTH !== 1'bx) &&
+        ((IN_WIDTH >= 1) === 1'b1) && (((^IN_WIDTH == 1'b0) || (^IN_WIDTH == 1'b1)) === 1'b1) &&
+        ((OUT_WIDTH >= 1) === 1'b1) && (((^OUT_WIDTH == 1'b0) || (^OUT_WIDTH == 1'b1)) === 1'b1) &&
+        ((UNIT_WIDTH >= 1) === 1'b1) && (((^UNIT_WIDTH == 1'b0) || (^UNIT_WIDTH == 1'b1)) === 1'b1) &&
+        ((USER_WIDTH >= 1) === 1'b1) && (((^USER_WIDTH == 1'b0) || (^USER_WIDTH == 1'b1)) === 1'b1) &&
         ((IN_WIDTH % UNIT_WIDTH == 0) === 1'b1) &&
         ((OUT_WIDTH % UNIT_WIDTH == 0) === 1'b1) &&
         (((IN_WIDTH >= OUT_WIDTH ? IN_WIDTH % OUT_WIDTH : OUT_WIDTH % IN_WIDTH) == 0) === 1'b1) &&

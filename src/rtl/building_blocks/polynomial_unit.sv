@@ -23,37 +23,37 @@ module polynomial_unit #(
     parameter ASYNC_RESET = 0,
     localparam bit PARAMETERS_VALID =
         ((INPUT_WIDTH >= 1 && INPUT_WIDTH < 2147483647) === 1'b1) &&
-        ( ^ INPUT_WIDTH !== 1'bx) &&
+        ( ((^INPUT_WIDTH == 1'b0) || (^INPUT_WIDTH == 1'b1)) === 1'b1) &&
         ((COEFFICIENT_WIDTH >= 1 && COEFFICIENT_WIDTH < 2147483647) === 1'b1) &&
-        ( ^ COEFFICIENT_WIDTH !== 1'bx) &&
+        ( ((^COEFFICIENT_WIDTH == 1'b0) || (^COEFFICIENT_WIDTH == 1'b1)) === 1'b1) &&
         ((ACCUMULATOR_WIDTH >= 1 && ACCUMULATOR_WIDTH < 2147483647) === 1'b1) &&
-        ( ^ ACCUMULATOR_WIDTH !== 1'bx) &&
+        ( ((^ACCUMULATOR_WIDTH == 1'b0) || (^ACCUMULATOR_WIDTH == 1'b1)) === 1'b1) &&
         ((OUTPUT_WIDTH >= 1 && OUTPUT_WIDTH < 2147483647) === 1'b1) &&
-        ( ^ OUTPUT_WIDTH !== 1'bx) &&
+        ( ((^OUTPUT_WIDTH == 1'b0) || (^OUTPUT_WIDTH == 1'b1)) === 1'b1) &&
         ((FRACTION_WIDTH >= 1 && FRACTION_WIDTH < 2147483647) === 1'b1) &&
-        ( ^ FRACTION_WIDTH !== 1'bx) &&
+        ( ((^FRACTION_WIDTH == 1'b0) || (^FRACTION_WIDTH == 1'b1)) === 1'b1) &&
         ((MAX_DEGREE >= 1 && MAX_DEGREE < 2147483647) === 1'b1) &&
-        ( ^ MAX_DEGREE !== 1'bx) &&
+        ( ((^MAX_DEGREE == 1'b0) || (^MAX_DEGREE == 1'b1)) === 1'b1) &&
         ((NUM_BANKS >= 1 && NUM_BANKS < 2147483647) === 1'b1) &&
-        ( ^ NUM_BANKS !== 1'bx) &&
+        ( ((^NUM_BANKS == 1'b0) || (^NUM_BANKS == 1'b1)) === 1'b1) &&
         ((EVALUATION_ARCH === 0) || (EVALUATION_ARCH === 1)) &&
         ((OUTPUT_QUEUE_DEPTH >= 1 && OUTPUT_QUEUE_DEPTH < 2147483647) === 1'b1) &&
-        ( ^ OUTPUT_QUEUE_DEPTH !== 1'bx) &&
+        ( ((^OUTPUT_QUEUE_DEPTH == 1'b0) || (^OUTPUT_QUEUE_DEPTH == 1'b1)) === 1'b1) &&
         ((PROGRAM_RESPONSE_DEPTH >= 1 && PROGRAM_RESPONSE_DEPTH < 2147483647) === 1'b1) &&
-        ( ^ PROGRAM_RESPONSE_DEPTH !== 1'bx) &&
+        ( ((^PROGRAM_RESPONSE_DEPTH == 1'b0) || (^PROGRAM_RESPONSE_DEPTH == 1'b1)) === 1'b1) &&
         ((TRACK_COEFFICIENT_COVERAGE === 0) || (TRACK_COEFFICIENT_COVERAGE === 1)) &&
         ((RESULT_SHIFT_WIDTH >= 1 && RESULT_SHIFT_WIDTH < 2147483647) === 1'b1) &&
-        ( ^ RESULT_SHIFT_WIDTH !== 1'bx) &&
+        ( ((^RESULT_SHIFT_WIDTH == 1'b0) || (^RESULT_SHIFT_WIDTH == 1'b1)) === 1'b1) &&
         ((BANK_VERSION_WIDTH >= 2 && BANK_VERSION_WIDTH < 2147483647) === 1'b1) &&
-        ( ^ BANK_VERSION_WIDTH !== 1'bx) &&
+        ( ((^BANK_VERSION_WIDTH == 1'b0) || (^BANK_VERSION_WIDTH == 1'b1)) === 1'b1) &&
         ((POLYNOMIAL_ID_WIDTH >= 1 && POLYNOMIAL_ID_WIDTH < 2147483647) === 1'b1) &&
-        ( ^ POLYNOMIAL_ID_WIDTH !== 1'bx) &&
+        ( ((^POLYNOMIAL_ID_WIDTH == 1'b0) || (^POLYNOMIAL_ID_WIDTH == 1'b1)) === 1'b1) &&
         ((QUALITY_ID_WIDTH >= 1 && QUALITY_ID_WIDTH < 2147483647) === 1'b1) &&
-        ( ^ QUALITY_ID_WIDTH !== 1'bx) &&
+        ( ((^QUALITY_ID_WIDTH == 1'b0) || (^QUALITY_ID_WIDTH == 1'b1)) === 1'b1) &&
         ((CONTEXT_ID_WIDTH >= 1 && CONTEXT_ID_WIDTH < 2147483647) === 1'b1) &&
-        ( ^ CONTEXT_ID_WIDTH !== 1'bx) &&
+        ( ((^CONTEXT_ID_WIDTH == 1'b0) || (^CONTEXT_ID_WIDTH == 1'b1)) === 1'b1) &&
         ((REQUEST_TAG_WIDTH >= 1 && REQUEST_TAG_WIDTH < 2147483647) === 1'b1) &&
-        ( ^ REQUEST_TAG_WIDTH !== 1'bx) &&
+        ( ((^REQUEST_TAG_WIDTH == 1'b0) || (^REQUEST_TAG_WIDTH == 1'b1)) === 1'b1) &&
         ((COEFFICIENT_PROTECTION === 0) || (COEFFICIENT_PROTECTION === 1) ||
             (COEFFICIENT_PROTECTION === 2)) &&
         ((ASYNC_RESET === 0) || (ASYNC_RESET === 1)) &&

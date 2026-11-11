@@ -8,8 +8,8 @@ module stream_fork #(
     parameter HAS_DESTINATION_MASK = 0,
     parameter ASYNC_RESET = 0,
     localparam bit PARAMETERS_VALID =
-        ((NUM_OUTPUTS >= 1) === 1'b1) && (^NUM_OUTPUTS !== 1'bx) &&
-        ((DATA_WIDTH >= 1) === 1'b1) && (^DATA_WIDTH !== 1'bx) &&
+        ((NUM_OUTPUTS >= 1) === 1'b1) && (((^NUM_OUTPUTS == 1'b0) || (^NUM_OUTPUTS == 1'b1)) === 1'b1) &&
+        ((DATA_WIDTH >= 1) === 1'b1) && (((^DATA_WIDTH == 1'b0) || (^DATA_WIDTH == 1'b1)) === 1'b1) &&
         ((HAS_DESTINATION_MASK === 0) || (HAS_DESTINATION_MASK === 1)) &&
         ((ASYNC_RESET === 0) || (ASYNC_RESET === 1)),
     localparam int unsigned OUTPUTS = PARAMETERS_VALID ? NUM_OUTPUTS : 1,

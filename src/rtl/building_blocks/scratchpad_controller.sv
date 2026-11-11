@@ -17,16 +17,16 @@ module scratchpad_controller #(
     parameter DEFAULT_ALLOW = 0,
     parameter ASYNC_RESET = 0,
     localparam bit PARAMETERS_VALID =
-        ((DATA_WIDTH >= 8) === 1'b1) && (^DATA_WIDTH !== 1'bx) &&
+        ((DATA_WIDTH >= 8) === 1'b1) && (((^DATA_WIDTH == 1'b0) || (^DATA_WIDTH == 1'b1)) === 1'b1) &&
         ((DATA_WIDTH % 8 == 0) === 1'b1) &&
         ((((DATA_WIDTH / 8) & ((DATA_WIDTH / 8) - 1)) == 0) === 1'b1) &&
-        ((NUM_BANKS > 0) === 1'b1) && (^NUM_BANKS !== 1'bx) &&
-        ((BANK_DEPTH_WORDS > 0) === 1'b1) && (^BANK_DEPTH_WORDS !== 1'bx) &&
-        ((NUM_CLIENTS > 0) === 1'b1) && (^NUM_CLIENTS !== 1'bx) &&
-        ((CLIENT_TAG_WIDTH > 0) === 1'b1) && (^CLIENT_TAG_WIDTH !== 1'bx) &&
+        ((NUM_BANKS > 0) === 1'b1) && (((^NUM_BANKS == 1'b0) || (^NUM_BANKS == 1'b1)) === 1'b1) &&
+        ((BANK_DEPTH_WORDS > 0) === 1'b1) && (((^BANK_DEPTH_WORDS == 1'b0) || (^BANK_DEPTH_WORDS == 1'b1)) === 1'b1) &&
+        ((NUM_CLIENTS > 0) === 1'b1) && (((^NUM_CLIENTS == 1'b0) || (^NUM_CLIENTS == 1'b1)) === 1'b1) &&
+        ((CLIENT_TAG_WIDTH > 0) === 1'b1) && (((^CLIENT_TAG_WIDTH == 1'b0) || (^CLIENT_TAG_WIDTH == 1'b1)) === 1'b1) &&
         ((MAX_OUTSTANDING_PER_CLIENT > 0) === 1'b1) &&
-        (^MAX_OUTSTANDING_PER_CLIENT !== 1'bx) &&
-        ((INTERLEAVE_BYTES > 0) === 1'b1) && (^INTERLEAVE_BYTES !== 1'bx) &&
+        (((^MAX_OUTSTANDING_PER_CLIENT == 1'b0) || (^MAX_OUTSTANDING_PER_CLIENT == 1'b1)) === 1'b1) &&
+        ((INTERLEAVE_BYTES > 0) === 1'b1) && (((^INTERLEAVE_BYTES == 1'b0) || (^INTERLEAVE_BYTES == 1'b1)) === 1'b1) &&
         (((INTERLEAVE_BYTES & (INTERLEAVE_BYTES - 1)) == 0) === 1'b1) &&
         ((INTERLEAVE_BYTES >= DATA_WIDTH / 8) === 1'b1) &&
         ((128'(INTERLEAVE_BYTES) <= 128'(BANK_DEPTH_WORDS) * 128'(DATA_WIDTH / 8))

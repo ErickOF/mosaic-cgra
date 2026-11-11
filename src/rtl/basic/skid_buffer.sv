@@ -6,7 +6,7 @@ module skid_buffer #(
     parameter DATA_WIDTH = 32,
     parameter ASYNC_RESET = 0,
     localparam bit PARAMETERS_VALID =
-        ((DATA_WIDTH >= 1) === 1'b1) && (^DATA_WIDTH !== 1'bx) &&
+        ((DATA_WIDTH >= 1) === 1'b1) && (((^DATA_WIDTH == 1'b0) || (^DATA_WIDTH == 1'b1)) === 1'b1) &&
         ((ASYNC_RESET === 0) || (ASYNC_RESET === 1)),
     localparam int unsigned DATA_BITS = PARAMETERS_VALID ? DATA_WIDTH : 1
 ) (

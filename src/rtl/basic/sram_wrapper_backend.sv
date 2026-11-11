@@ -9,8 +9,8 @@ module sram_wrapper_backend #(
     parameter READ_LATENCY = 1,
     localparam bit PARAMETERS_VALID =
         ((DATA_WIDTH >= 1 && DEPTH >= 1 && MASK_GRANULARITY >= 1 && READ_LATENCY >= 1) === 1'b1) &&
-        (^DATA_WIDTH !== 1'bx) && (^DEPTH !== 1'bx) &&
-        (^MASK_GRANULARITY !== 1'bx) && (^READ_LATENCY !== 1'bx) &&
+        (((^DATA_WIDTH == 1'b0) || (^DATA_WIDTH == 1'b1)) === 1'b1) && (((^DEPTH == 1'b0) || (^DEPTH == 1'b1)) === 1'b1) &&
+        (((^MASK_GRANULARITY == 1'b0) || (^MASK_GRANULARITY == 1'b1)) === 1'b1) && (((^READ_LATENCY == 1'b0) || (^READ_LATENCY == 1'b1)) === 1'b1) &&
         ((MASK_GRANULARITY > 0 && DATA_WIDTH % MASK_GRANULARITY == 0) === 1'b1),
     localparam int unsigned DATA_BITS = PARAMETERS_VALID ? DATA_WIDTH : 1,
     localparam int unsigned WORDS = PARAMETERS_VALID ? DEPTH : 1,

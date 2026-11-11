@@ -215,7 +215,7 @@ module runtime_controller #(
         for (int o = 0; o < MAX_OWNERS; o++) default_owners[o*16+:16] = 16'(o + 1);
     endfunction
     function automatic bit owners_valid();
-        owners_valid = ^OWNER_ID_TABLE !== 1'bx;
+        owners_valid = ((^OWNER_ID_TABLE == 1'b0) || (^OWNER_ID_TABLE == 1'b1)) === 1'b1;
         for (int a = 0; a < MAX_OWNERS; a++) begin
             if (OWNER_ID_TABLE[a*16+:16] == 0) owners_valid = 0;
             for (int b = 0; b < a; b++)
@@ -224,83 +224,83 @@ module runtime_controller #(
     endfunction
     localparam bit PARAMETERS_VALID =
         ((64'(RUNTIME_PROFILE) >= 64'd0 && 64'(RUNTIME_PROFILE) <= 64'd1) === 1'b1) &&
-        (^RUNTIME_PROFILE !== 1'bx) &&
+        (((^RUNTIME_PROFILE == 1'b0) || (^RUNTIME_PROFILE == 1'b1)) === 1'b1) &&
         ((64'(NUM_CLUSTERS) >= 64'd1 && 64'(NUM_CLUSTERS) <= 64'd16) === 1'b1) &&
-        (^NUM_CLUSTERS !== 1'bx) &&
+        (((^NUM_CLUSTERS == 1'b0) || (^NUM_CLUSTERS == 1'b1)) === 1'b1) &&
         ((64'(MAX_PENDING_KERNELS) >= 64'd1 && 64'(MAX_PENDING_KERNELS) <= 64'd16) === 1'b1) &&
-        (^MAX_PENDING_KERNELS !== 1'bx) &&
+        (((^MAX_PENDING_KERNELS == 1'b0) || (^MAX_PENDING_KERNELS == 1'b1)) === 1'b1) &&
         ((64'(MAX_ACTIVE_KERNELS) >= 64'd1 && 64'(MAX_ACTIVE_KERNELS) <= 64'd4) === 1'b1) &&
-        (^MAX_ACTIVE_KERNELS !== 1'bx) &&
+        (((^MAX_ACTIVE_KERNELS == 1'b0) || (^MAX_ACTIVE_KERNELS == 1'b1)) === 1'b1) &&
         ((64'(MAX_OWNERS) >= 64'd1 && 64'(MAX_OWNERS) <= 64'd16) === 1'b1) &&
-        (^MAX_OWNERS !== 1'bx) &&
+        (((^MAX_OWNERS == 1'b0) || (^MAX_OWNERS == 1'b1)) === 1'b1) &&
         ((64'(MAX_PACKAGE_VARIANTS) >= 64'd1 && 64'(MAX_PACKAGE_VARIANTS) <= 64'd4) === 1'b1) &&
-        (^MAX_PACKAGE_VARIANTS !== 1'bx) &&
+        (((^MAX_PACKAGE_VARIANTS == 1'b0) || (^MAX_PACKAGE_VARIANTS == 1'b1)) === 1'b1) &&
         ((64'(MAX_CLUSTERS_PER_KERNEL) >= 64'd1 && 64'(MAX_CLUSTERS_PER_KERNEL) <= 64'd16) === 1'b1)
             &&
-        (^MAX_CLUSTERS_PER_KERNEL !== 1'bx) &&
+        (((^MAX_CLUSTERS_PER_KERNEL == 1'b0) || (^MAX_CLUSTERS_PER_KERNEL == 1'b1)) === 1'b1) &&
         ((64'(MAX_DMA_CHANNELS) >= 64'd1 && 64'(MAX_DMA_CHANNELS) <= 64'd16) === 1'b1) &&
-        (^MAX_DMA_CHANNELS !== 1'bx) &&
+        (((^MAX_DMA_CHANNELS == 1'b0) || (^MAX_DMA_CHANNELS == 1'b1)) === 1'b1) &&
         ((64'(MAX_MEMORY_PORTS) >= 64'd1 && 64'(MAX_MEMORY_PORTS) <= 64'd16) === 1'b1) &&
-        (^MAX_MEMORY_PORTS !== 1'bx) &&
+        (((^MAX_MEMORY_PORTS == 1'b0) || (^MAX_MEMORY_PORTS == 1'b1)) === 1'b1) &&
         ((64'(MAX_SCRATCHPAD_REGIONS) >= 64'd1 && 64'(MAX_SCRATCHPAD_REGIONS) <= 64'd32) === 1'b1)
             &&
-        (^MAX_SCRATCHPAD_REGIONS !== 1'bx) &&
+        (((^MAX_SCRATCHPAD_REGIONS == 1'b0) || (^MAX_SCRATCHPAD_REGIONS == 1'b1)) === 1'b1) &&
         ((64'(MAX_EVENT_NAMESPACES) >= 64'd1 && 64'(MAX_EVENT_NAMESPACES) <= 64'd32) === 1'b1) &&
-        (^MAX_EVENT_NAMESPACES !== 1'bx) &&
+        (((^MAX_EVENT_NAMESPACES == 1'b0) || (^MAX_EVENT_NAMESPACES == 1'b1)) === 1'b1) &&
         ((64'(MAX_NOC_QOS_PROFILES) >= 64'd1 && 64'(MAX_NOC_QOS_PROFILES) <= 64'd16) === 1'b1) &&
-        (^MAX_NOC_QOS_PROFILES !== 1'bx) &&
+        (((^MAX_NOC_QOS_PROFILES == 1'b0) || (^MAX_NOC_QOS_PROFILES == 1'b1)) === 1'b1) &&
         ((64'(MAX_MEMORY_QOS_PROFILES) >= 64'd1 && 64'(MAX_MEMORY_QOS_PROFILES) <= 64'd16) === 1'b1)
             &&
-        (^MAX_MEMORY_QOS_PROFILES !== 1'bx) &&
+        (((^MAX_MEMORY_QOS_PROFILES == 1'b0) || (^MAX_MEMORY_QOS_PROFILES == 1'b1)) === 1'b1) &&
         ((64'(MAX_POWER_PROFILES) >= 64'd1 && 64'(MAX_POWER_PROFILES) <= 64'd16) === 1'b1) &&
-        (^MAX_POWER_PROFILES !== 1'bx) &&
+        (((^MAX_POWER_PROFILES == 1'b0) || (^MAX_POWER_PROFILES == 1'b1)) === 1'b1) &&
         ((64'(NUM_PRIORITY_LEVELS) >= 64'd1 && 64'(NUM_PRIORITY_LEVELS) <= 64'd16) === 1'b1) &&
-        (^NUM_PRIORITY_LEVELS !== 1'bx) &&
+        (((^NUM_PRIORITY_LEVELS == 1'b0) || (^NUM_PRIORITY_LEVELS == 1'b1)) === 1'b1) &&
         ((64'(SUBMISSION_QUEUE_DEPTH) >= 64'd2 && 64'(SUBMISSION_QUEUE_DEPTH) <= 64'd32) === 1'b1)
             &&
-        (^SUBMISSION_QUEUE_DEPTH !== 1'bx) &&
+        (((^SUBMISSION_QUEUE_DEPTH == 1'b0) || (^SUBMISSION_QUEUE_DEPTH == 1'b1)) === 1'b1) &&
         ((64'(ACTION_QUEUE_DEPTH) >= 64'd2 && 64'(ACTION_QUEUE_DEPTH) <= 64'd32) === 1'b1) &&
-        (^ACTION_QUEUE_DEPTH !== 1'bx) &&
+        (((^ACTION_QUEUE_DEPTH == 1'b0) || (^ACTION_QUEUE_DEPTH == 1'b1)) === 1'b1) &&
         ((64'(RESPONSE_QUEUE_DEPTH) >= 64'd2 && 64'(RESPONSE_QUEUE_DEPTH) <= 64'd32) === 1'b1) &&
-        (^RESPONSE_QUEUE_DEPTH !== 1'bx) &&
+        (((^RESPONSE_QUEUE_DEPTH == 1'b0) || (^RESPONSE_QUEUE_DEPTH == 1'b1)) === 1'b1) &&
         ((64'(EVENT_QUEUE_DEPTH) >= 64'd2 && 64'(EVENT_QUEUE_DEPTH) <= 64'd64) === 1'b1) &&
-        (^EVENT_QUEUE_DEPTH !== 1'bx) &&
+        (((^EVENT_QUEUE_DEPTH == 1'b0) || (^EVENT_QUEUE_DEPTH == 1'b1)) === 1'b1) &&
         ((64'(COUNTER_SNAPSHOT_SLOTS) >= 64'd2 && 64'(COUNTER_SNAPSHOT_SLOTS) <= 64'd16) === 1'b1)
             &&
-        (^COUNTER_SNAPSHOT_SLOTS !== 1'bx) &&
+        (((^COUNTER_SNAPSHOT_SLOTS == 1'b0) || (^COUNTER_SNAPSHOT_SLOTS == 1'b1)) === 1'b1) &&
         ((64'(AGE_COUNTER_WIDTH) >= 64'd1 && 64'(AGE_COUNTER_WIDTH) <= 64'd32) === 1'b1) &&
-        (^AGE_COUNTER_WIDTH !== 1'bx) &&
+        (((^AGE_COUNTER_WIDTH == 1'b0) || (^AGE_COUNTER_WIDTH == 1'b1)) === 1'b1) &&
         ((64'(HIGH_PRIORITY_BURST_LIMIT) >= 64'd1 && 64'(HIGH_PRIORITY_BURST_LIMIT) <= 64'd65535)
             === 1'b1) &&
-        (^HIGH_PRIORITY_BURST_LIMIT !== 1'bx) &&
+        (((^HIGH_PRIORITY_BURST_LIMIT == 1'b0) || (^HIGH_PRIORITY_BURST_LIMIT == 1'b1)) === 1'b1) &&
         ((64'(AGE_ESCALATION_CYCLES) >= 64'd1 && 64'(AGE_ESCALATION_CYCLES) <= 64'd4294967295) ===
             1'b1) &&
-        (^AGE_ESCALATION_CYCLES !== 1'bx) &&
+        (((^AGE_ESCALATION_CYCLES == 1'b0) || (^AGE_ESCALATION_CYCLES == 1'b1)) === 1'b1) &&
         ((64'(POLICY_SAMPLE_INTERVAL) >= 64'd1 && 64'(POLICY_SAMPLE_INTERVAL) <= 64'd4294967295) ===
             1'b1) &&
-        (^POLICY_SAMPLE_INTERVAL !== 1'bx) &&
+        (((^POLICY_SAMPLE_INTERVAL == 1'b0) || (^POLICY_SAMPLE_INTERVAL == 1'b1)) === 1'b1) &&
         ((64'(ACTION_TIMEOUT_CYCLES) >= 64'd1 && 64'(ACTION_TIMEOUT_CYCLES) <= 64'd4294967295) ===
             1'b1) &&
-        (^ACTION_TIMEOUT_CYCLES !== 1'bx) &&
+        (((^ACTION_TIMEOUT_CYCLES == 1'b0) || (^ACTION_TIMEOUT_CYCLES == 1'b1)) === 1'b1) &&
         ((64'(KERNEL_TIMEOUT_CYCLES) >= 64'd0 && 64'(KERNEL_TIMEOUT_CYCLES) <= 64'd4294967295) ===
             1'b1) &&
-        (^KERNEL_TIMEOUT_CYCLES !== 1'bx) &&
+        (((^KERNEL_TIMEOUT_CYCLES == 1'b0) || (^KERNEL_TIMEOUT_CYCLES == 1'b1)) === 1'b1) &&
         ((64'(CONTROL_PROTECTION) >= 64'd0 && 64'(CONTROL_PROTECTION) <= 64'd2) === 1'b1) &&
-        (^CONTROL_PROTECTION !== 1'bx) &&
+        (((^CONTROL_PROTECTION == 1'b0) || (^CONTROL_PROTECTION == 1'b1)) === 1'b1) &&
         ((64'(MEMORY_BANDWIDTH_CAPACITY) >= 64'd1 && 64'(MEMORY_BANDWIDTH_CAPACITY) <=
             64'd4294967295) === 1'b1) &&
-        (^MEMORY_BANDWIDTH_CAPACITY !== 1'bx) &&
+        (((^MEMORY_BANDWIDTH_CAPACITY == 1'b0) || (^MEMORY_BANDWIDTH_CAPACITY == 1'b1)) === 1'b1) &&
         ((64'(NOC_BANDWIDTH_CAPACITY) >= 64'd1 && 64'(NOC_BANDWIDTH_CAPACITY) <= 64'd4294967295) ===
             1'b1) &&
-        (^NOC_BANDWIDTH_CAPACITY !== 1'bx) &&
+        (((^NOC_BANDWIDTH_CAPACITY == 1'b0) || (^NOC_BANDWIDTH_CAPACITY == 1'b1)) === 1'b1) &&
         ((64'(POWER_CAPACITY) >= 64'd1 && 64'(POWER_CAPACITY) <= 64'd4294967295) === 1'b1) &&
-        (^POWER_CAPACITY !== 1'bx) &&
+        (((^POWER_CAPACITY == 1'b0) || (^POWER_CAPACITY == 1'b1)) === 1'b1) &&
         ((64'(ENFORCED_SERVICE_MASK) >= 64'd0 && 64'(ENFORCED_SERVICE_MASK) <= 64'd63) === 1'b1) &&
-        (^ENFORCED_SERVICE_MASK !== 1'bx) &&
+        (((^ENFORCED_SERVICE_MASK == 1'b0) || (^ENFORCED_SERVICE_MASK == 1'b1)) === 1'b1) &&
         ((64'(ARCHITECTURE_ID) >= 64'd1 && 64'(ARCHITECTURE_ID) <= 64'd4294967295) === 1'b1) &&
-        (^ARCHITECTURE_ID !== 1'bx) &&
+        (((^ARCHITECTURE_ID == 1'b0) || (^ARCHITECTURE_ID == 1'b1)) === 1'b1) &&
         ((64'(PROTOCOL_PROOF_ID) >= 64'd1 && 64'(PROTOCOL_PROOF_ID) <= 64'd4294967295) === 1'b1) &&
-        (^PROTOCOL_PROOF_ID !== 1'bx) &&
+        (((^PROTOCOL_PROOF_ID == 1'b0) || (^PROTOCOL_PROOF_ID == 1'b1)) === 1'b1) &&
         (ENABLE_RESOURCE_RESIZING === 0) &&
         (ENABLE_MIGRATION === 0) &&
         (ENABLE_TRACE === 0) &&
@@ -319,11 +319,11 @@ module runtime_controller #(
         ((MAX_CLUSTERS_PER_KERNEL <= NUM_CLUSTERS) === 1'b1) &&
         ((RUNTIME_PROFILE != 0 || (MAX_ACTIVE_KERNELS == 1 &&
             MAX_PACKAGE_VARIANTS == 1)) === 1'b1) &&
-        (^CLUSTER_PRESENT_MASK !== 1'bx) &&
-        (^CLUSTER_CAPABILITY_TABLE !== 1'bx) &&
-        (^CLUSTER_COMPATIBILITY_TABLE !== 1'bx) &&
-        (^CLUSTER_MEMORY_PORT_TABLE !== 1'bx) &&
-        (^CLUSTER_SCRATCHPAD_REGION_TABLE !== 1'bx) &&
+        (((^CLUSTER_PRESENT_MASK == 1'b0) || (^CLUSTER_PRESENT_MASK == 1'b1)) === 1'b1) &&
+        (((^CLUSTER_CAPABILITY_TABLE == 1'b0) || (^CLUSTER_CAPABILITY_TABLE == 1'b1)) === 1'b1) &&
+        (((^CLUSTER_COMPATIBILITY_TABLE == 1'b0) || (^CLUSTER_COMPATIBILITY_TABLE == 1'b1)) === 1'b1) &&
+        (((^CLUSTER_MEMORY_PORT_TABLE == 1'b0) || (^CLUSTER_MEMORY_PORT_TABLE == 1'b1)) === 1'b1) &&
+        (((^CLUSTER_SCRATCHPAD_REGION_TABLE == 1'b0) || (^CLUSTER_SCRATCHPAD_REGION_TABLE == 1'b1)) === 1'b1) &&
         (OWNER_ID_WIDTH === 16) &&
         (KERNEL_ID_WIDTH === 16) &&
         (DESCRIPTOR_ID_WIDTH === 16) &&

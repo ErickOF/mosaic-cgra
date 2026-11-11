@@ -6,7 +6,7 @@ module array_control #(
     parameter TIMEOUT_CYCLES = 65535,
     parameter logic [255:0] ARCHITECTURE_HASH = '0,
     localparam bit VALID = ((NUM_CLUSTERS >= 1 && NUM_CLUSTERS <= 4) === 1'b1) &&
-        (^NUM_CLUSTERS !== 1'bx) && (^ARCHITECTURE_HASH !== 1'bx) &&
+        (((^NUM_CLUSTERS == 1'b0) || (^NUM_CLUSTERS == 1'b1)) === 1'b1) && (((^ARCHITECTURE_HASH == 1'b0) || (^ARCHITECTURE_HASH == 1'b1)) === 1'b1) &&
         ((TIMEOUT_CYCLES >= 16) === 1'b1) &&
         ((64'(TIMEOUT_CYCLES) <= 64'hffffff) === 1'b1),
     localparam int N = VALID ? NUM_CLUSTERS : 1

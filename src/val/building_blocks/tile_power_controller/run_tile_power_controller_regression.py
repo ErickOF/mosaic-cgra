@@ -51,6 +51,12 @@ def profile(label, **overrides):
 PROFILES = (
     profile('default'),
     profile('default_async', ASYNC_RESET=1),
+    profile('tile_shell', NUM_CLOCK_GROUPS=1, NUM_WAKE_SOURCES=1,
+        NUM_STALL_REASONS=8, CONTEXT_ID_WIDTH=2, IDLE_ENTRY_CYCLES=2,
+        MIN_IDLE_RESIDENCY_CYCLES=1, WAKEUP_STABILIZE_CYCLES=1,
+        ISOLATION_SETUP_CYCLES=2, POWER_STABLE_CYCLES=2,
+        RESET_HOLD_CYCLES=2, DRAIN_TIMEOUT_CYCLES=64,
+        ACK_TIMEOUT_CYCLES=32, POWER_TIMEOUT_CYCLES=64),
     *(
         profile(
             f'g{groups}_w{wakes}_feature{feature}_r{reset}',

@@ -17,18 +17,18 @@ module store_engine #(
     localparam bit PARAMETERS_VALID =
         ((128'(ADDR_WIDTH) * 2 + 128'(COUNT_WIDTH) * 2 + 128'(SPACE_ID_WIDTH) +
             128'(CHANNEL_ID_WIDTH) + 128'(CONTEXT_ID_WIDTH) + 64 < 128'd2147483647) === 1'b1) &&
-        ((ADDR_WIDTH >= 1) === 1'b1) && ( ^ ADDR_WIDTH !== 1'bx) &&
-        ((DATA_WIDTH >= 8) === 1'b1) && ( ^ DATA_WIDTH !== 1'bx) &&
+        ((ADDR_WIDTH >= 1) === 1'b1) && ( ((^ADDR_WIDTH == 1'b0) || (^ADDR_WIDTH == 1'b1)) === 1'b1) &&
+        ((DATA_WIDTH >= 8) === 1'b1) && ( ((^DATA_WIDTH == 1'b0) || (^DATA_WIDTH == 1'b1)) === 1'b1) &&
         ((DATA_WIDTH % 8 == 0) === 1'b1) &&
-        ((COUNT_WIDTH >= 1) === 1'b1) && ( ^ COUNT_WIDTH !== 1'bx) &&
-        ((MAX_ELEMENT_BYTES >= 1) === 1'b1) && ( ^ MAX_ELEMENT_BYTES !== 1'bx) &&
+        ((COUNT_WIDTH >= 1) === 1'b1) && ( ((^COUNT_WIDTH == 1'b0) || (^COUNT_WIDTH == 1'b1)) === 1'b1) &&
+        ((MAX_ELEMENT_BYTES >= 1) === 1'b1) && ( ((^MAX_ELEMENT_BYTES == 1'b0) || (^MAX_ELEMENT_BYTES == 1'b1)) === 1'b1) &&
         (((MAX_ELEMENT_BYTES & (MAX_ELEMENT_BYTES - 1)) == 0) === 1'b1) &&
         ((MAX_ELEMENT_BYTES <= DATA_WIDTH / 8) === 1'b1) &&
         ((ADDR_WIDTH >= $clog2(MAX_ELEMENT_BYTES)) === 1'b1) &&
-        ((MAX_OUTSTANDING >= 1) === 1'b1) && ( ^ MAX_OUTSTANDING !== 1'bx) &&
-        ((SPACE_ID_WIDTH >= 1) === 1'b1) && ( ^ SPACE_ID_WIDTH !== 1'bx) &&
-        ((CHANNEL_ID_WIDTH >= 1) === 1'b1) && ( ^ CHANNEL_ID_WIDTH !== 1'bx) &&
-        ((CONTEXT_ID_WIDTH >= 1) === 1'b1) && ( ^ CONTEXT_ID_WIDTH !== 1'bx) &&
+        ((MAX_OUTSTANDING >= 1) === 1'b1) && ( ((^MAX_OUTSTANDING == 1'b0) || (^MAX_OUTSTANDING == 1'b1)) === 1'b1) &&
+        ((SPACE_ID_WIDTH >= 1) === 1'b1) && ( ((^SPACE_ID_WIDTH == 1'b0) || (^SPACE_ID_WIDTH == 1'b1)) === 1'b1) &&
+        ((CHANNEL_ID_WIDTH >= 1) === 1'b1) && ( ((^CHANNEL_ID_WIDTH == 1'b0) || (^CHANNEL_ID_WIDTH == 1'b1)) === 1'b1) &&
+        ((CONTEXT_ID_WIDTH >= 1) === 1'b1) && ( ((^CONTEXT_ID_WIDTH == 1'b0) || (^CONTEXT_ID_WIDTH == 1'b1)) === 1'b1) &&
         ((ASYNC_RESET === 0) || (ASYNC_RESET === 1)) && (MODE_WIDTH === 2) &&
         ((64'(ADDR_WIDTH) + 64'(COUNT_WIDTH) + 3 < 64'd2147483647) === 1'b1) &&
         ((64'(MAX_OUTSTANDING) * (64'(DATA_WIDTH) + 64'(DATA_WIDTH) / 8 +

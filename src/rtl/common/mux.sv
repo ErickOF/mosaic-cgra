@@ -25,7 +25,7 @@ module mux #(
         if (SEL_WIDTH != ExpectedSelWidth) begin : g_invalid_sel_width
             mux_sel_width_must_match_num_inputs invalid_sel_width ();
         end
-        if (^DEFAULT_VALUE === 1'bx) begin : g_invalid_default_value
+        if (((^DEFAULT_VALUE == 1'b0) || (^DEFAULT_VALUE == 1'b1)) !== 1'b1) begin : g_invalid_default_value
             mux_default_value_must_be_known invalid_default_value ();
         end
     endgenerate

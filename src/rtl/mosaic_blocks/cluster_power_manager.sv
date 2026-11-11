@@ -266,7 +266,8 @@ module cluster_power_manager #(
             default_isolation[e*IG+:IG] = IG'(e % NUM_ISOLATION_GROUPS);
     endfunction
     function automatic bit tables_valid();
-        tables_valid = ^{TILE_CLOCK_GROUP_TABLE, BOUNDARY_ISOLATION_TABLE} !== 1'bx;
+        tables_valid = (((^{TILE_CLOCK_GROUP_TABLE, BOUNDARY_ISOLATION_TABLE} == 1'b0) ||
+            (^{TILE_CLOCK_GROUP_TABLE, BOUNDARY_ISOLATION_TABLE} == 1'b1)) === 1'b1);
         for (int t = 0; t < NUM_TILES; t++)
             if (TILE_CLOCK_GROUP_TABLE[t*TG+:TG] >= NUM_CLOCK_GROUPS) tables_valid = 0;
         for (int e = 0; e < NUM_BOUNDARY_ENDPOINTS; e++)
@@ -274,123 +275,123 @@ module cluster_power_manager #(
     endfunction
     localparam bit PARAMETERS_VALID =
         ((64'(NUM_TILES) >= 64'd1 && 64'(NUM_TILES) <= 64'd32) === 1'b1) &&
-        (^NUM_TILES !== 1'bx) &&
+        (((^NUM_TILES == 1'b0) || (^NUM_TILES == 1'b1)) === 1'b1) &&
         ((64'(NUM_CLOCK_GROUPS) >= 64'd1 && 64'(NUM_CLOCK_GROUPS) <= 64'd32) === 1'b1) &&
-        (^NUM_CLOCK_GROUPS !== 1'bx) &&
+        (((^NUM_CLOCK_GROUPS == 1'b0) || (^NUM_CLOCK_GROUPS == 1'b1)) === 1'b1) &&
         ((64'(NUM_WAKE_SOURCES) >= 64'd1 && 64'(NUM_WAKE_SOURCES) <= 64'd32) === 1'b1) &&
-        (^NUM_WAKE_SOURCES !== 1'bx) &&
+        (((^NUM_WAKE_SOURCES == 1'b0) || (^NUM_WAKE_SOURCES == 1'b1)) === 1'b1) &&
         ((64'(NUM_STALL_REASONS) >= 64'd1 && 64'(NUM_STALL_REASONS) <= 64'd32) === 1'b1) &&
-        (^NUM_STALL_REASONS !== 1'bx) &&
+        (((^NUM_STALL_REASONS == 1'b0) || (^NUM_STALL_REASONS == 1'b1)) === 1'b1) &&
         ((64'(NUM_ISOLATION_GROUPS) >= 64'd1 && 64'(NUM_ISOLATION_GROUPS) <= 64'd32) === 1'b1) &&
-        (^NUM_ISOLATION_GROUPS !== 1'bx) &&
+        (((^NUM_ISOLATION_GROUPS == 1'b0) || (^NUM_ISOLATION_GROUPS == 1'b1)) === 1'b1) &&
         ((64'(NUM_RETENTION_GROUPS) >= 64'd1 && 64'(NUM_RETENTION_GROUPS) <= 64'd32) === 1'b1) &&
-        (^NUM_RETENTION_GROUPS !== 1'bx) &&
+        (((^NUM_RETENTION_GROUPS == 1'b0) || (^NUM_RETENTION_GROUPS == 1'b1)) === 1'b1) &&
         ((64'(NUM_RESET_GROUPS) >= 64'd1 && 64'(NUM_RESET_GROUPS) <= 64'd32) === 1'b1) &&
-        (^NUM_RESET_GROUPS !== 1'bx) &&
+        (((^NUM_RESET_GROUPS == 1'b0) || (^NUM_RESET_GROUPS == 1'b1)) === 1'b1) &&
         ((64'(NUM_BOUNDARY_ENDPOINTS) >= 64'd1 && 64'(NUM_BOUNDARY_ENDPOINTS) <= 64'd32) === 1'b1)
             &&
-        (^NUM_BOUNDARY_ENDPOINTS !== 1'bx) &&
+        (((^NUM_BOUNDARY_ENDPOINTS == 1'b0) || (^NUM_BOUNDARY_ENDPOINTS == 1'b1)) === 1'b1) &&
         ((64'(NUM_POWER_SWITCH_GROUPS) >= 64'd1 && 64'(NUM_POWER_SWITCH_GROUPS) <= 64'd8) === 1'b1)
             &&
-        (^NUM_POWER_SWITCH_GROUPS !== 1'bx) &&
+        (((^NUM_POWER_SWITCH_GROUPS == 1'b0) || (^NUM_POWER_SWITCH_GROUPS == 1'b1)) === 1'b1) &&
         ((64'(NUM_SRAM_POWER_GROUPS) >= 64'd1 && 64'(NUM_SRAM_POWER_GROUPS) <= 64'd8) === 1'b1) &&
-        (^NUM_SRAM_POWER_GROUPS !== 1'bx) &&
+        (((^NUM_SRAM_POWER_GROUPS == 1'b0) || (^NUM_SRAM_POWER_GROUPS == 1'b1)) === 1'b1) &&
         ((64'(NUM_OPERATING_POINTS) >= 64'd1 && 64'(NUM_OPERATING_POINTS) <= 64'd1) === 1'b1) &&
-        (^NUM_OPERATING_POINTS !== 1'bx) &&
+        (((^NUM_OPERATING_POINTS == 1'b0) || (^NUM_OPERATING_POINTS == 1'b1)) === 1'b1) &&
         ((64'(POWER_PROFILE) >= 64'd0 && 64'(POWER_PROFILE) <= 64'd4) === 1'b1) &&
-        (^POWER_PROFILE !== 1'bx) &&
+        (((^POWER_PROFILE == 1'b0) || (^POWER_PROFILE == 1'b1)) === 1'b1) &&
         ((64'(CLUSTER_ID) >= 64'd0 && 64'(CLUSTER_ID) <= 64'd255) === 1'b1) &&
-        (^CLUSTER_ID !== 1'bx) &&
+        (((^CLUSTER_ID == 1'b0) || (^CLUSTER_ID == 1'b1)) === 1'b1) &&
         ((64'(CONTROL_PROTECTION) >= 64'd0 && 64'(CONTROL_PROTECTION) <= 64'd2) === 1'b1) &&
-        (^CONTROL_PROTECTION !== 1'bx) &&
+        (((^CONTROL_PROTECTION == 1'b0) || (^CONTROL_PROTECTION == 1'b1)) === 1'b1) &&
         ((64'(EVENT_QUEUE_DEPTH) >= 64'd2 && 64'(EVENT_QUEUE_DEPTH) <= 64'd32) === 1'b1) &&
-        (^EVENT_QUEUE_DEPTH !== 1'bx) &&
+        (((^EVENT_QUEUE_DEPTH == 1'b0) || (^EVENT_QUEUE_DEPTH == 1'b1)) === 1'b1) &&
         ((64'(IDLE_ENTRY_CYCLES) >= 64'd1 && 64'(IDLE_ENTRY_CYCLES) <= 64'd4294967295) === 1'b1) &&
-        (^IDLE_ENTRY_CYCLES !== 1'bx) &&
+        (((^IDLE_ENTRY_CYCLES == 1'b0) || (^IDLE_ENTRY_CYCLES == 1'b1)) === 1'b1) &&
         ((64'(MIN_GATED_RESIDENCY_CYCLES) >= 64'd1 && 64'(MIN_GATED_RESIDENCY_CYCLES) <=
             64'd4294967295) === 1'b1) &&
-        (^MIN_GATED_RESIDENCY_CYCLES !== 1'bx) &&
+        (((^MIN_GATED_RESIDENCY_CYCLES == 1'b0) || (^MIN_GATED_RESIDENCY_CYCLES == 1'b1)) === 1'b1) &&
         ((64'(MIN_RETENTION_RESIDENCY_CYCLES) >= 64'd1 && 64'(MIN_RETENTION_RESIDENCY_CYCLES) <=
             64'd4294967295) === 1'b1) &&
-        (^MIN_RETENTION_RESIDENCY_CYCLES !== 1'bx) &&
+        (((^MIN_RETENTION_RESIDENCY_CYCLES == 1'b0) || (^MIN_RETENTION_RESIDENCY_CYCLES == 1'b1)) === 1'b1) &&
         ((64'(MIN_OFF_RESIDENCY_CYCLES) >= 64'd1 && 64'(MIN_OFF_RESIDENCY_CYCLES) <= 64'd4294967295)
             === 1'b1) &&
-        (^MIN_OFF_RESIDENCY_CYCLES !== 1'bx) &&
+        (((^MIN_OFF_RESIDENCY_CYCLES == 1'b0) || (^MIN_OFF_RESIDENCY_CYCLES == 1'b1)) === 1'b1) &&
         ((64'(CLOCK_STABLE_CYCLES) >= 64'd1 && 64'(CLOCK_STABLE_CYCLES) <= 64'd4294967295) === 1'b1)
             &&
-        (^CLOCK_STABLE_CYCLES !== 1'bx) &&
+        (((^CLOCK_STABLE_CYCLES == 1'b0) || (^CLOCK_STABLE_CYCLES == 1'b1)) === 1'b1) &&
         ((64'(POWER_STABLE_CYCLES) >= 64'd1 && 64'(POWER_STABLE_CYCLES) <= 64'd4294967295) === 1'b1)
             &&
-        (^POWER_STABLE_CYCLES !== 1'bx) &&
+        (((^POWER_STABLE_CYCLES == 1'b0) || (^POWER_STABLE_CYCLES == 1'b1)) === 1'b1) &&
         ((64'(ISOLATION_SETUP_CYCLES) >= 64'd1 && 64'(ISOLATION_SETUP_CYCLES) <= 64'd4294967295) ===
             1'b1) &&
-        (^ISOLATION_SETUP_CYCLES !== 1'bx) &&
+        (((^ISOLATION_SETUP_CYCLES == 1'b0) || (^ISOLATION_SETUP_CYCLES == 1'b1)) === 1'b1) &&
         ((64'(ISOLATION_HOLD_CYCLES) >= 64'd1 && 64'(ISOLATION_HOLD_CYCLES) <= 64'd4294967295) ===
             1'b1) &&
-        (^ISOLATION_HOLD_CYCLES !== 1'bx) &&
+        (((^ISOLATION_HOLD_CYCLES == 1'b0) || (^ISOLATION_HOLD_CYCLES == 1'b1)) === 1'b1) &&
         ((64'(RESET_HOLD_CYCLES) >= 64'd1 && 64'(RESET_HOLD_CYCLES) <= 64'd4294967295) === 1'b1) &&
-        (^RESET_HOLD_CYCLES !== 1'bx) &&
+        (((^RESET_HOLD_CYCLES == 1'b0) || (^RESET_HOLD_CYCLES == 1'b1)) === 1'b1) &&
         ((64'(WAKEUP_STABILIZE_CYCLES) >= 64'd1 && 64'(WAKEUP_STABILIZE_CYCLES) <= 64'd4294967295)
             === 1'b1) &&
-        (^WAKEUP_STABILIZE_CYCLES !== 1'bx) &&
+        (((^WAKEUP_STABILIZE_CYCLES == 1'b0) || (^WAKEUP_STABILIZE_CYCLES == 1'b1)) === 1'b1) &&
         ((64'(DRAIN_TIMEOUT_CYCLES) >= 64'd1 && 64'(DRAIN_TIMEOUT_CYCLES) <= 64'd4294967295) ===
             1'b1) &&
-        (^DRAIN_TIMEOUT_CYCLES !== 1'bx) &&
+        (((^DRAIN_TIMEOUT_CYCLES == 1'b0) || (^DRAIN_TIMEOUT_CYCLES == 1'b1)) === 1'b1) &&
         ((64'(TILE_ACK_TIMEOUT_CYCLES) >= 64'd1 && 64'(TILE_ACK_TIMEOUT_CYCLES) <= 64'd4294967295)
             === 1'b1) &&
-        (^TILE_ACK_TIMEOUT_CYCLES !== 1'bx) &&
+        (((^TILE_ACK_TIMEOUT_CYCLES == 1'b0) || (^TILE_ACK_TIMEOUT_CYCLES == 1'b1)) === 1'b1) &&
         ((64'(RETENTION_TIMEOUT_CYCLES) >= 64'd1 && 64'(RETENTION_TIMEOUT_CYCLES) <= 64'd4294967295)
             === 1'b1) &&
-        (^RETENTION_TIMEOUT_CYCLES !== 1'bx) &&
+        (((^RETENTION_TIMEOUT_CYCLES == 1'b0) || (^RETENTION_TIMEOUT_CYCLES == 1'b1)) === 1'b1) &&
         ((64'(POWER_TIMEOUT_CYCLES) >= 64'd1 && 64'(POWER_TIMEOUT_CYCLES) <= 64'd4294967295) ===
             1'b1) &&
-        (^POWER_TIMEOUT_CYCLES !== 1'bx) &&
+        (((^POWER_TIMEOUT_CYCLES == 1'b0) || (^POWER_TIMEOUT_CYCLES == 1'b1)) === 1'b1) &&
         ((64'(CLOCK_TIMEOUT_CYCLES) >= 64'd1 && 64'(CLOCK_TIMEOUT_CYCLES) <= 64'd4294967295) ===
             1'b1) &&
-        (^CLOCK_TIMEOUT_CYCLES !== 1'bx) &&
+        (((^CLOCK_TIMEOUT_CYCLES == 1'b0) || (^CLOCK_TIMEOUT_CYCLES == 1'b1)) === 1'b1) &&
         ((64'(VOLTAGE_TIMEOUT_CYCLES) >= 64'd1 && 64'(VOLTAGE_TIMEOUT_CYCLES) <= 64'd4294967295) ===
             1'b1) &&
-        (^VOLTAGE_TIMEOUT_CYCLES !== 1'bx) &&
+        (((^VOLTAGE_TIMEOUT_CYCLES == 1'b0) || (^VOLTAGE_TIMEOUT_CYCLES == 1'b1)) === 1'b1) &&
         ((64'(RELOAD_TIMEOUT_CYCLES) >= 64'd1 && 64'(RELOAD_TIMEOUT_CYCLES) <= 64'd4294967295) ===
             1'b1) &&
-        (^RELOAD_TIMEOUT_CYCLES !== 1'bx) &&
+        (((^RELOAD_TIMEOUT_CYCLES == 1'b0) || (^RELOAD_TIMEOUT_CYCLES == 1'b1)) === 1'b1) &&
         ((64'(POWER_GOOD_SYNC_STAGES) >= 64'd2 && 64'(POWER_GOOD_SYNC_STAGES) <= 64'd4) === 1'b1) &&
-        (^POWER_GOOD_SYNC_STAGES !== 1'bx) &&
+        (((^POWER_GOOD_SYNC_STAGES == 1'b0) || (^POWER_GOOD_SYNC_STAGES == 1'b1)) === 1'b1) &&
         ((64'(CLOCK_STATUS_SYNC_STAGES) >= 64'd2 && 64'(CLOCK_STATUS_SYNC_STAGES) <= 64'd4) ===
             1'b1) &&
-        (^CLOCK_STATUS_SYNC_STAGES !== 1'bx) &&
+        (((^CLOCK_STATUS_SYNC_STAGES == 1'b0) || (^CLOCK_STATUS_SYNC_STAGES == 1'b1)) === 1'b1) &&
         ((64'(VOLTAGE_STATUS_SYNC_STAGES) >= 64'd2 && 64'(VOLTAGE_STATUS_SYNC_STAGES) <= 64'd4) ===
             1'b1) &&
-        (^VOLTAGE_STATUS_SYNC_STAGES !== 1'bx) &&
+        (((^VOLTAGE_STATUS_SYNC_STAGES == 1'b0) || (^VOLTAGE_STATUS_SYNC_STAGES == 1'b1)) === 1'b1) &&
         ((64'(PHYSICAL_ACK_STABLE_CYCLES) >= 64'd1 && 64'(PHYSICAL_ACK_STABLE_CYCLES) <=
             64'd4294967295) === 1'b1) &&
-        (^PHYSICAL_ACK_STABLE_CYCLES !== 1'bx) &&
+        (((^PHYSICAL_ACK_STABLE_CYCLES == 1'b0) || (^PHYSICAL_ACK_STABLE_CYCLES == 1'b1)) === 1'b1) &&
         ((64'(CLUSTER_ID_WIDTH) >= 64'd8 && 64'(CLUSTER_ID_WIDTH) <= 64'd8) === 1'b1) &&
-        (^CLUSTER_ID_WIDTH !== 1'bx) &&
+        (((^CLUSTER_ID_WIDTH == 1'b0) || (^CLUSTER_ID_WIDTH == 1'b1)) === 1'b1) &&
         ((64'(OWNER_ID_WIDTH) >= 64'd16 && 64'(OWNER_ID_WIDTH) <= 64'd16) === 1'b1) &&
-        (^OWNER_ID_WIDTH !== 1'bx) &&
+        (((^OWNER_ID_WIDTH == 1'b0) || (^OWNER_ID_WIDTH == 1'b1)) === 1'b1) &&
         ((64'(KERNEL_ID_WIDTH) >= 64'd16 && 64'(KERNEL_ID_WIDTH) <= 64'd16) === 1'b1) &&
-        (^KERNEL_ID_WIDTH !== 1'bx) &&
+        (((^KERNEL_ID_WIDTH == 1'b0) || (^KERNEL_ID_WIDTH == 1'b1)) === 1'b1) &&
         ((64'(PACKAGE_ID_WIDTH) >= 64'd32 && 64'(PACKAGE_ID_WIDTH) <= 64'd32) === 1'b1) &&
-        (^PACKAGE_ID_WIDTH !== 1'bx) &&
+        (((^PACKAGE_ID_WIDTH == 1'b0) || (^PACKAGE_ID_WIDTH == 1'b1)) === 1'b1) &&
         ((64'(ALLOCATION_GENERATION_WIDTH) >= 64'd16 && 64'(ALLOCATION_GENERATION_WIDTH) <= 64'd16)
             === 1'b1) &&
-        (^ALLOCATION_GENERATION_WIDTH !== 1'bx) &&
+        (((^ALLOCATION_GENERATION_WIDTH == 1'b0) || (^ALLOCATION_GENERATION_WIDTH == 1'b1)) === 1'b1) &&
         ((64'(EXECUTION_EPOCH_WIDTH) >= 64'd8 && 64'(EXECUTION_EPOCH_WIDTH) <= 64'd8) === 1'b1) &&
-        (^EXECUTION_EPOCH_WIDTH !== 1'bx) &&
+        (((^EXECUTION_EPOCH_WIDTH == 1'b0) || (^EXECUTION_EPOCH_WIDTH == 1'b1)) === 1'b1) &&
         ((64'(POWER_TAG_WIDTH) >= 64'd16 && 64'(POWER_TAG_WIDTH) <= 64'd16) === 1'b1) &&
-        (^POWER_TAG_WIDTH !== 1'bx) &&
+        (((^POWER_TAG_WIDTH == 1'b0) || (^POWER_TAG_WIDTH == 1'b1)) === 1'b1) &&
         ((64'(POWER_SEQUENCE_WIDTH) >= 64'd16 && 64'(POWER_SEQUENCE_WIDTH) <= 64'd16) === 1'b1) &&
-        (^POWER_SEQUENCE_WIDTH !== 1'bx) &&
+        (((^POWER_SEQUENCE_WIDTH == 1'b0) || (^POWER_SEQUENCE_WIDTH == 1'b1)) === 1'b1) &&
         ((64'(STATE_POLICY_ID_WIDTH) >= 64'd8 && 64'(STATE_POLICY_ID_WIDTH) <= 64'd8) === 1'b1) &&
-        (^STATE_POLICY_ID_WIDTH !== 1'bx) &&
+        (((^STATE_POLICY_ID_WIDTH == 1'b0) || (^STATE_POLICY_ID_WIDTH == 1'b1)) === 1'b1) &&
         ((64'(OPERATING_POINT_ID_WIDTH) >= 64'd4 && 64'(OPERATING_POINT_ID_WIDTH) <= 64'd4) ===
             1'b1) &&
-        (^OPERATING_POINT_ID_WIDTH !== 1'bx) &&
+        (((^OPERATING_POINT_ID_WIDTH == 1'b0) || (^OPERATING_POINT_ID_WIDTH == 1'b1)) === 1'b1) &&
         ((64'(EXPECTED_IDLE_WIDTH) >= 64'd48 && 64'(EXPECTED_IDLE_WIDTH) <= 64'd48) === 1'b1) &&
-        (^EXPECTED_IDLE_WIDTH !== 1'bx) &&
+        (((^EXPECTED_IDLE_WIDTH == 1'b0) || (^EXPECTED_IDLE_WIDTH == 1'b1)) === 1'b1) &&
         ((64'(TIMESTAMP_WIDTH) >= 64'd64 && 64'(TIMESTAMP_WIDTH) <= 64'd64) === 1'b1) &&
-        (^TIMESTAMP_WIDTH !== 1'bx) &&
+        (((^TIMESTAMP_WIDTH == 1'b0) || (^TIMESTAMP_WIDTH == 1'b1)) === 1'b1) &&
         (AUTO_CLOCK_GATE_ENABLE === 0 || AUTO_CLOCK_GATE_ENABLE === 1) &&
         (SUPPORT_RETENTION === 0 || SUPPORT_RETENTION === 1) &&
         (SUPPORT_POWER_GATING === 0 || SUPPORT_POWER_GATING === 1) &&

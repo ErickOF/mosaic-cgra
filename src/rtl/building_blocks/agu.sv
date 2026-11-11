@@ -13,14 +13,14 @@ module agu #(
     parameter ASYNC_RESET = 0,
     parameter MODE_WIDTH = 2,
     localparam bit PARAMETERS_VALID =
-        ((ADDR_WIDTH >= 1) === 1'b1) && (^ADDR_WIDTH !== 1'bx) &&
-        ((COUNT_WIDTH >= 1) === 1'b1) && (^COUNT_WIDTH !== 1'bx) &&
-        ((MAX_ELEMENT_BYTES >= 1) === 1'b1) && (^MAX_ELEMENT_BYTES !== 1'bx) &&
+        ((ADDR_WIDTH >= 1) === 1'b1) && (((^ADDR_WIDTH == 1'b0) || (^ADDR_WIDTH == 1'b1)) === 1'b1) &&
+        ((COUNT_WIDTH >= 1) === 1'b1) && (((^COUNT_WIDTH == 1'b0) || (^COUNT_WIDTH == 1'b1)) === 1'b1) &&
+        ((MAX_ELEMENT_BYTES >= 1) === 1'b1) && (((^MAX_ELEMENT_BYTES == 1'b0) || (^MAX_ELEMENT_BYTES == 1'b1)) === 1'b1) &&
         (((MAX_ELEMENT_BYTES & (MAX_ELEMENT_BYTES - 1)) == 0) === 1'b1) &&
         ((ADDR_WIDTH >= $clog2(MAX_ELEMENT_BYTES)) === 1'b1) &&
-        ((SPACE_ID_WIDTH >= 1) === 1'b1) && (^SPACE_ID_WIDTH !== 1'bx) &&
-        ((CHANNEL_ID_WIDTH >= 1) === 1'b1) && (^CHANNEL_ID_WIDTH !== 1'bx) &&
-        ((CONTEXT_ID_WIDTH >= 1) === 1'b1) && (^CONTEXT_ID_WIDTH !== 1'bx) &&
+        ((SPACE_ID_WIDTH >= 1) === 1'b1) && (((^SPACE_ID_WIDTH == 1'b0) || (^SPACE_ID_WIDTH == 1'b1)) === 1'b1) &&
+        ((CHANNEL_ID_WIDTH >= 1) === 1'b1) && (((^CHANNEL_ID_WIDTH == 1'b0) || (^CHANNEL_ID_WIDTH == 1'b1)) === 1'b1) &&
+        ((CONTEXT_ID_WIDTH >= 1) === 1'b1) && (((^CONTEXT_ID_WIDTH == 1'b0) || (^CONTEXT_ID_WIDTH == 1'b1)) === 1'b1) &&
         ((ASYNC_RESET === 0) || (ASYNC_RESET === 1)) && (MODE_WIDTH === 2),
     localparam int W = PARAMETERS_VALID ? ADDR_WIDTH : 1,
     localparam int C = PARAMETERS_VALID ? COUNT_WIDTH : 1,

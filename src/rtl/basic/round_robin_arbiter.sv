@@ -11,9 +11,9 @@ module round_robin_arbiter #(
     // Stream arbitration retains its original registered pending-grant policy.
     parameter HOLD_PENDING = 1,
     localparam bit PARAMETERS_VALID =
-        ((NUM_REQUESTERS >= 1) === 1'b1) && (^NUM_REQUESTERS !== 1'bx) &&
+        ((NUM_REQUESTERS >= 1) === 1'b1) && (((^NUM_REQUESTERS == 1'b0) || (^NUM_REQUESTERS == 1'b1)) === 1'b1) &&
         ((INITIAL_PRIORITY >= 0 && INITIAL_PRIORITY < NUM_REQUESTERS) === 1'b1) &&
-        (^INITIAL_PRIORITY !== 1'bx) &&
+        (((^INITIAL_PRIORITY == 1'b0) || (^INITIAL_PRIORITY == 1'b1)) === 1'b1) &&
         ((HAS_LOCK === 0) || (HAS_LOCK === 1)) &&
         ((HOLD_PENDING === 0) || (HOLD_PENDING === 1)) &&
         ((ASYNC_RESET === 0) || (ASYNC_RESET === 1)),
