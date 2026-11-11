@@ -48,41 +48,41 @@ module tile_shell #(
     localparam bit GEOMETRY_VALID =
         ((BODY_CONTEXT_ADVANCE === 0) || (BODY_CONTEXT_ADVANCE === 1)) &&
         ((BODY_DRAIN_EVENTS === 0) || (BODY_DRAIN_EVENTS === 1)) &&
-        ((TILE_ID_WIDTH >= 1) === 1'b1) && (^ TILE_ID_WIDTH !== 1'bx) &&
-        ((ARCH_VERSION_WIDTH >= 1) === 1'b1) && (^ ARCH_VERSION_WIDTH !== 1'bx) &&
-        ((CAPABILITY_ID_WIDTH >= 1) === 1'b1) && (^ CAPABILITY_ID_WIDTH !== 1'bx) &&
-        ((DATA_WIDTH >= 1) === 1'b1) && (^ DATA_WIDTH !== 1'bx) &&
-        ((DATA_METADATA_WIDTH >= 1) === 1'b1) && (^ DATA_METADATA_WIDTH !== 1'bx) &&
-        ((DATA_INPUT_PORTS >= 1) === 1'b1) && (^ DATA_INPUT_PORTS !== 1'bx) &&
-        ((DATA_OUTPUT_PORTS >= 1) === 1'b1) && (^ DATA_OUTPUT_PORTS !== 1'bx) &&
-        ((PREDICATE_WIDTH >= 1) === 1'b1) && (^ PREDICATE_WIDTH !== 1'bx) &&
-        ((PREDICATE_METADATA_WIDTH >= 1) === 1'b1) && (^ PREDICATE_METADATA_WIDTH !== 1'bx) &&
-        ((PREDICATE_INPUT_PORTS >= 1) === 1'b1) && (^ PREDICATE_INPUT_PORTS !== 1'bx) &&
-        ((PREDICATE_OUTPUT_PORTS >= 1) === 1'b1) && (^ PREDICATE_OUTPUT_PORTS !== 1'bx) &&
-        ((EVENT_WIDTH >= 1) === 1'b1) && (^ EVENT_WIDTH !== 1'bx) &&
-        ((EVENT_INPUT_PORTS >= 1) === 1'b1) && (^ EVENT_INPUT_PORTS !== 1'bx) &&
-        ((EVENT_OUTPUT_PORTS >= 1) === 1'b1) && (^ EVENT_OUTPUT_PORTS !== 1'bx) &&
-        ((CONTEXT_DEPTH >= 1) === 1'b1) && (^ CONTEXT_DEPTH !== 1'bx) &&
-        ((CONFIG_DATA_WIDTH >= 1) === 1'b1) && (^ CONFIG_DATA_WIDTH !== 1'bx) &&
-        ((CONFIG_WORD_COUNT >= 1) === 1'b1) && (^ CONFIG_WORD_COUNT !== 1'bx) &&
-        ((CONTEXT_CHECKSUM_WIDTH >= 1) === 1'b1) && (^ CONTEXT_CHECKSUM_WIDTH !== 1'bx) &&
-        ((CONFIG_QUEUE_DEPTH >= 1) === 1'b1) && (^ CONFIG_QUEUE_DEPTH !== 1'bx) &&
-        ((OWNER_ID_WIDTH >= 1) === 1'b1) && (^ OWNER_ID_WIDTH !== 1'bx) &&
-        ((KERNEL_ID_WIDTH >= 1) === 1'b1) && (^ KERNEL_ID_WIDTH !== 1'bx) &&
-        ((CONTEXT_VERSION_WIDTH >= 1) === 1'b1) && (^ CONTEXT_VERSION_WIDTH !== 1'bx) &&
-        ((RUNTIME_TAG_WIDTH >= 1) === 1'b1) && (^ RUNTIME_TAG_WIDTH !== 1'bx) &&
-        ((STALL_REASON_WIDTH >= 1) === 1'b1) && (^ STALL_REASON_WIDTH !== 1'bx) &&
-        ((ERROR_CODE_WIDTH >= 1) === 1'b1) && (^ ERROR_CODE_WIDTH !== 1'bx) &&
-        ((TRACE_WIDTH >= 1) === 1'b1) && (^ TRACE_WIDTH !== 1'bx) &&
+        ((TILE_ID_WIDTH >= 1) === 1'b1) &&
+        ((ARCH_VERSION_WIDTH >= 1) === 1'b1) &&
+        ((CAPABILITY_ID_WIDTH >= 1) === 1'b1) &&
+        ((DATA_WIDTH >= 1) === 1'b1) &&
+        ((DATA_METADATA_WIDTH >= 1) === 1'b1) &&
+        ((DATA_INPUT_PORTS >= 1) === 1'b1) &&
+        ((DATA_OUTPUT_PORTS >= 1) === 1'b1) &&
+        ((PREDICATE_WIDTH >= 1) === 1'b1) &&
+        ((PREDICATE_METADATA_WIDTH >= 1) === 1'b1) &&
+        ((PREDICATE_INPUT_PORTS >= 1) === 1'b1) &&
+        ((PREDICATE_OUTPUT_PORTS >= 1) === 1'b1) &&
+        ((EVENT_WIDTH >= 1) === 1'b1) &&
+        ((EVENT_INPUT_PORTS >= 1) === 1'b1) &&
+        ((EVENT_OUTPUT_PORTS >= 1) === 1'b1) &&
+        ((CONTEXT_DEPTH >= 1) === 1'b1) &&
+        ((CONFIG_DATA_WIDTH >= 1) === 1'b1) &&
+        ((CONFIG_WORD_COUNT >= 1) === 1'b1) &&
+        ((CONTEXT_CHECKSUM_WIDTH >= 1) === 1'b1) &&
+        ((CONFIG_QUEUE_DEPTH >= 1) === 1'b1) &&
+        ((OWNER_ID_WIDTH >= 1) === 1'b1) &&
+        ((KERNEL_ID_WIDTH >= 1) === 1'b1) &&
+        ((CONTEXT_VERSION_WIDTH >= 1) === 1'b1) &&
+        ((RUNTIME_TAG_WIDTH >= 1) === 1'b1) &&
+        ((STALL_REASON_WIDTH >= 1) === 1'b1) &&
+        ((ERROR_CODE_WIDTH >= 1) === 1'b1) &&
+        ((TRACE_WIDTH >= 1) === 1'b1) &&
         ((SUPPORT_CONTEXT_CHECKSUM === 0) || (SUPPORT_CONTEXT_CHECKSUM === 1)) &&
         ((CONFIG_ASYNC === 0) || (CONFIG_ASYNC === 1)) &&
         ((SUPPORT_TRACE === 0) || (SUPPORT_TRACE === 1)) &&
         ((SUPPORT_RETENTION === 0) || (SUPPORT_RETENTION === 1)) &&
         ((SUPPORT_POWER_OFF === 0) || (SUPPORT_POWER_OFF === 1)) &&
         ((ASYNC_RESET === 0) || (ASYNC_RESET === 1)) &&
-        ((TILE_ID >= 0) === 1'b1) && (^ TILE_ID !== 1'bx) &&
-        ((INPUT_BUFFER_DEPTH >= 0) === 1'b1) && (^ INPUT_BUFFER_DEPTH !== 1'bx) &&
-        ((OUTPUT_BUFFER_DEPTH >= 0) === 1'b1) && (^ OUTPUT_BUFFER_DEPTH !== 1'bx) &&
+        ((TILE_ID >= 0) === 1'b1) &&
+        ((INPUT_BUFFER_DEPTH >= 0) === 1'b1) &&
+        ((OUTPUT_BUFFER_DEPTH >= 0) === 1'b1) &&
         ((TILE_CLASS >= 0 && TILE_CLASS <= 4) === 1'b1) &&
         ((CONTEXT_PROTECTION >= 0 && CONTEXT_PROTECTION <= 2) === 1'b1) &&
         ((CONTROL_PROTECTION >= 0 && CONTROL_PROTECTION <= 2) === 1'b1) &&
@@ -165,7 +165,8 @@ module tile_shell #(
     parameter OUTPUT_ELASTIC_MASK = {NO{1'b1}},
     localparam bit PARAMETERS_VALID = GEOMETRY_VALID &&
         ($bits(INPUT_ELASTIC_MASK) == NI) && ($bits(OUTPUT_ELASTIC_MASK) == NO) &&
-        (^ INPUT_ELASTIC_MASK !== 1'bx) && (^ OUTPUT_ELASTIC_MASK !== 1'bx)
+        (((^INPUT_ELASTIC_MASK == 1'b0) || (^INPUT_ELASTIC_MASK == 1'b1)) === 1'b1) &&
+        (((^OUTPUT_ELASTIC_MASK == 1'b0) || (^OUTPUT_ELASTIC_MASK == 1'b1)) === 1'b1)
 ) (
     input logic i_clk,
     input logic i_rstb,

@@ -31,6 +31,7 @@ def profile(label, **overrides):
 
 PROFILES = (
     profile('default'), profile('default_async', CONFIG_ASYNC=1, ASYNC_RESET=1),
+    profile('bct_width2', TILE_CLASS=0, DATA_WIDTH=2),
     *(profile(f'class{cls}', TILE_CLASS=cls, DATA_WIDTH=width,
         DATA_INPUT_PORTS=ports, DATA_OUTPUT_PORTS=ports, INPUT_BUFFER_DEPTH=depth,
         OUTPUT_BUFFER_DEPTH=depth, CONTEXT_DEPTH=contexts, CONFIG_WORD_COUNT=words,
