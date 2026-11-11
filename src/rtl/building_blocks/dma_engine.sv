@@ -1317,25 +1317,9 @@ module dma_engine #(
             // State is reset explicitly. Descriptor payload is written only when
             // a FIFO head starts; holding phases never recapture live input ports.
             task automatic channel_update;
-                if (!i_rstb) begin
-                    phase[c] <= DMA_IDLE;
-                    load_armed[c] <= 0;
-                    store_armed[c] <= 0;
-                    load_finished[c] <= 0;
-                    store_finished[c] <= 0;
-                    source_count <= '0;
-                    destination_count <= '0;
-                    bytes_read[c] <= '0;
-                    bytes_written[c] <= '0;
-                    command_error[c] <= DMA_ERR_NONE;
-                    result_status[c] <= DMA_SUCCESS;
-                    o_event_command_start[c] <= 0;
-                    o_event_command_complete[c] <= 0;
-                    o_event_timeout[c] <= 0;
-                end else begin
-                    o_event_command_start[c] <= 0;
-                    o_event_command_complete[c] <= 0;
-                    o_event_timeout[c] <= 0;
+                o_event_command_start[c] <= 0;
+                o_event_command_complete[c] <= 0;
+                o_event_timeout[c] <= 0;
 
                     if (load_config_take) load_armed[c] <= 1;
                     if (store_config_take) store_armed[c] <= 1;
@@ -1429,19 +1413,52 @@ module dma_engine #(
                             else phase[c] <= DMA_RUN;
                         end else if (phase[c] == DMA_ARM_LOAD && load_config_take)
                             phase[c] <= DMA_RUN;
-                    end else if (retire[c]) begin
-                        phase[c] <= DMA_IDLE;
-                        load_armed[c] <= 0;
-                        store_armed[c] <= 0;
-                        o_event_command_complete[c] <= 1;
-                    end
+                end else if (retire[c]) begin
+                    phase[c] <= DMA_IDLE;
+                    load_armed[c] <= 0;
+                    store_armed[c] <= 0;
+                    o_event_command_complete[c] <= 1;
                 end
             endtask
 
             if (ASYNC_RESET == 1) begin : g_async
-                always_ff @(posedge i_clk or negedge i_rstb) channel_update();
+                always_ff @(posedge i_clk or negedge i_rstb) begin
+                    if (!i_rstb) begin
+                        phase[c] <= DMA_IDLE;
+                        load_armed[c] <= 0;
+                        store_armed[c] <= 0;
+                        load_finished[c] <= 0;
+                        store_finished[c] <= 0;
+                        source_count <= '0;
+                        destination_count <= '0;
+                        bytes_read[c] <= '0;
+                        bytes_written[c] <= '0;
+                        command_error[c] <= DMA_ERR_NONE;
+                        result_status[c] <= DMA_SUCCESS;
+                        o_event_command_start[c] <= 0;
+                        o_event_command_complete[c] <= 0;
+                        o_event_timeout[c] <= 0;
+                    end else channel_update();
+                end
             end else begin : g_sync
-                always_ff @(posedge i_clk) channel_update();
+                always_ff @(posedge i_clk) begin
+                    if (!i_rstb) begin
+                        phase[c] <= DMA_IDLE;
+                        load_armed[c] <= 0;
+                        store_armed[c] <= 0;
+                        load_finished[c] <= 0;
+                        store_finished[c] <= 0;
+                        source_count <= '0;
+                        destination_count <= '0;
+                        bytes_read[c] <= '0;
+                        bytes_written[c] <= '0;
+                        command_error[c] <= DMA_ERR_NONE;
+                        result_status[c] <= DMA_SUCCESS;
+                        o_event_command_start[c] <= 0;
+                        o_event_command_complete[c] <= 0;
+                        o_event_timeout[c] <= 0;
+                    end else channel_update();
+                end
             end
 
 `ifdef MOSAIC_DMA_ENGINE_ASSERTIONS
@@ -1566,30 +1583,13 @@ module dma_engine #(
         end
 
         task automatic engine_update;
-            if (!i_rstb) begin
-                region_enabled <= '0;
-                region_read <= '0;
-                region_write <= '0;
-                engine_error <= DMA_ERR_NONE;
-                fatal_error <= 0;
-                flushing <= 0;
-                flush_seen <= 0;
-                epoch <= '0;
-                o_region_updated <= 0;
-                o_region_rejected <= 0;
-                o_command_accepted <= 0;
-                o_command_rejected <= 0;
-                o_cancel_accepted <= 0;
-                o_cancel_not_found <= 0;
-                o_flushed <= 0;
-            end else begin
-                o_region_updated <= 0;
-                o_region_rejected <= 0;
-                o_command_accepted <= 0;
-                o_command_rejected <= 0;
-                o_cancel_accepted <= 0;
-                o_cancel_not_found <= 0;
-                o_flushed <= 0;
+            o_region_updated <= 0;
+            o_region_rejected <= 0;
+            o_command_accepted <= 0;
+            o_command_rejected <= 0;
+            o_cancel_accepted <= 0;
+            o_cancel_not_found <= 0;
+            o_flushed <= 0;
 
                 if (i_flush === 1'b0) flush_seen <= 0;
                 if (flush_start) begin
@@ -1626,19 +1626,54 @@ module dma_engine #(
                     o_command_rejected <= validation_error != DMA_ERR_NONE;
                 end
 
-                if (cancel_accept) begin
-                    o_cancel_accepted <= active_cancel[i_cancel_channel] ||
-                        queue_cancel_match[i_cancel_channel];
-                    o_cancel_not_found <=!(active_cancel[i_cancel_channel] ||
-                        queue_cancel_match[i_cancel_channel]);
-                end
+            if (cancel_accept) begin
+                o_cancel_accepted <= active_cancel[i_cancel_channel] ||
+                    queue_cancel_match[i_cancel_channel];
+                o_cancel_not_found <=!(active_cancel[i_cancel_channel] ||
+                    queue_cancel_match[i_cancel_channel]);
             end
         endtask
 
         if (ASYNC_RESET == 1) begin : g_async
-            always_ff @(posedge i_clk or negedge i_rstb) engine_update();
+            always_ff @(posedge i_clk or negedge i_rstb) begin
+                if (!i_rstb) begin
+                    region_enabled <= '0;
+                    region_read <= '0;
+                    region_write <= '0;
+                    engine_error <= DMA_ERR_NONE;
+                    fatal_error <= 0;
+                    flushing <= 0;
+                    flush_seen <= 0;
+                    epoch <= '0;
+                    o_region_updated <= 0;
+                    o_region_rejected <= 0;
+                    o_command_accepted <= 0;
+                    o_command_rejected <= 0;
+                    o_cancel_accepted <= 0;
+                    o_cancel_not_found <= 0;
+                    o_flushed <= 0;
+                end else engine_update();
+            end
         end else begin : g_sync
-            always_ff @(posedge i_clk) engine_update();
+            always_ff @(posedge i_clk) begin
+                if (!i_rstb) begin
+                    region_enabled <= '0;
+                    region_read <= '0;
+                    region_write <= '0;
+                    engine_error <= DMA_ERR_NONE;
+                    fatal_error <= 0;
+                    flushing <= 0;
+                    flush_seen <= 0;
+                    epoch <= '0;
+                    o_region_updated <= 0;
+                    o_region_rejected <= 0;
+                    o_command_accepted <= 0;
+                    o_command_rejected <= 0;
+                    o_cancel_accepted <= 0;
+                    o_cancel_not_found <= 0;
+                    o_flushed <= 0;
+                end else engine_update();
+            end
         end
 
         always_ff @(posedge i_clk)

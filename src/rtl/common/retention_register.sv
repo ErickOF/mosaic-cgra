@@ -47,36 +47,32 @@ module retention_register #(
         (HAS_ENABLE === 0 || HAS_ENABLE === 1)) begin : gen_model
         if (ASYNC_RESET == 1) begin : gen_async_reset
             always_ff @(posedge i_clk or negedge i_rstb) begin
-                case (i_rstb)
-                    1'b0: begin
-                        o_q <= RESET_VALUE;
-                        retained_image <= RESET_VALUE;
-                    end
-                    1'b1: begin
-                        // Unknown power-management controls invalidate the
-                        // portable context instead of silently choosing hold.
-                        if (^{i_save, i_restore} === 1'bx) begin
-                            o_q <= 'x;
-                            retained_image <= 'x;
-                        end else if (i_restore) begin
-                            o_q <= retained_image;
-                        end else if (i_save) begin
-                            retained_image <= o_q;
-                        end else begin
-                            case (functional_enable)
-                                1'b1: o_q <= i_d;
-                                1'b0: begin end
-                                // Unknown functional enable cannot modify
-                                // the saved image, only visible state.
-                                default: o_q <= 'x;
-                            endcase
-                        end
-                    end
-                    default: begin
+                if (!i_rstb) begin
+                    o_q <= RESET_VALUE;
+                    retained_image <= RESET_VALUE;
+                end else if (i_rstb !== 1'b1) begin
+                    o_q <= 'x;
+                    retained_image <= 'x;
+                end else begin
+                    // Unknown power-management controls invalidate the
+                    // portable context instead of silently choosing hold.
+                    if (^{i_save, i_restore} === 1'bx) begin
                         o_q <= 'x;
                         retained_image <= 'x;
+                    end else if (i_restore) begin
+                        o_q <= retained_image;
+                    end else if (i_save) begin
+                        retained_image <= o_q;
+                    end else begin
+                        case (functional_enable)
+                            1'b1: o_q <= i_d;
+                            1'b0: begin end
+                            // Unknown functional enable cannot modify
+                            // the saved image, only visible state.
+                            default: o_q <= 'x;
+                        endcase
                     end
-                endcase
+                end
             end
         end else begin : gen_sync_reset
             always_ff @(posedge i_clk) begin

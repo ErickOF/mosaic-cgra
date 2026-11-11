@@ -160,34 +160,41 @@ module dma_engine_command_queue #(
     // Explicit reset variants keep all state in i_clk's reset domain. The ID
     // payload needs no reset; occupied masks it before any comparison is used.
     task automatic update_directory;
-        if (!i_rstb) begin
-            occupied <= '0;
-            canceled <= '0;
-            read_pointer <= '0;
-            write_pointer <= '0;
-        end else begin
-            if (i_cancel)
-                for (int k = 0; k < DEPTH; k ++ )
-                if (occupied[k] && ids[k] === i_cancel_id && contexts[k] === i_cancel_context)
-                    canceled[k] <= 1'b1;
+        if (i_cancel)
+            for (int k = 0; k < DEPTH; k ++ )
+            if (occupied[k] && ids[k] === i_cancel_id && contexts[k] === i_cancel_context)
+                canceled[k] <= 1'b1;
 
-            if (pop) begin
-                occupied[read_pointer] <= 1'b0;
-                canceled[read_pointer] <= 1'b0;
-                read_pointer <= read_pointer == PTR_BITS'(DEPTH - 1) ? '0 : read_pointer + 1'b1;
-            end
+        if (pop) begin
+            occupied[read_pointer] <= 1'b0;
+            canceled[read_pointer] <= 1'b0;
+            read_pointer <= read_pointer == PTR_BITS'(DEPTH - 1) ? '0 : read_pointer + 1'b1;
+        end
 
-            if (push) begin
-                occupied[write_pointer] <= 1'b1;
-                canceled[write_pointer] <= 1'b0;
-                write_pointer <= write_pointer == PTR_BITS'(DEPTH - 1) ? '0 : write_pointer + 1'b1;
-            end
+        if (push) begin
+            occupied[write_pointer] <= 1'b1;
+            canceled[write_pointer] <= 1'b0;
+            write_pointer <= write_pointer == PTR_BITS'(DEPTH - 1) ? '0 : write_pointer + 1'b1;
         end
     endtask
 
     if (ASYNC_RESET == 1) begin : g_async
-        always_ff @(posedge i_clk or negedge i_rstb) update_directory();
+        always_ff @(posedge i_clk or negedge i_rstb) begin
+            if (!i_rstb) begin
+                occupied <= '0;
+                canceled <= '0;
+                read_pointer <= '0;
+                write_pointer <= '0;
+            end else update_directory();
+        end
     end else begin : g_sync
-        always_ff @(posedge i_clk) update_directory();
+        always_ff @(posedge i_clk) begin
+            if (!i_rstb) begin
+                occupied <= '0;
+                canceled <= '0;
+                read_pointer <= '0;
+                write_pointer <= '0;
+            end else update_directory();
+        end
     end
 endmodule

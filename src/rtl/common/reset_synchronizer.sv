@@ -21,11 +21,9 @@ module reset_synchronizer #(
         always_ff @(posedge i_clk or negedge i_async_rstb) begin
             // X/Z reset is illegal. Expose it instead of treating an unknown
             // reset as deasserted and clocking known ones through the chain.
-            case (i_async_rstb)
-                1'b0: sync_stages <= '0;
-                1'b1: sync_stages <= {sync_stages[STAGES-2:0], 1'b1};
-                default: sync_stages <= 'x;
-            endcase
+            if (!i_async_rstb) sync_stages <= '0;
+            else if (i_async_rstb !== 1'b1) sync_stages <= 'x;
+            else sync_stages <= {sync_stages[STAGES-2:0], 1'b1};
         end
 
         assign o_rstb = sync_stages[STAGES-1];
