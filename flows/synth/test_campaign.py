@@ -8,6 +8,7 @@ import unittest
 from unittest.mock import patch
 
 import campaign
+import prepare_build
 
 
 class CampaignPlanTest(unittest.TestCase):
@@ -128,6 +129,42 @@ class CampaignReportTest(unittest.TestCase):
             log = Path(directory) / "run.log"
             log.write_text("first\n\nsecond\nthird\n")
             self.assertEqual(campaign.log_excerpt(log, line_count=2), ["second", "third"])
+
+    def test_build_cleanup_preserves_campaign_metadata(self):
+        with tempfile.TemporaryDirectory() as directory:
+            run = Path(directory)
+            metadata = run / "case.json"
+            metadata.write_text("{}\n")
+            for name in prepare_build.OUTPUT_DIRECTORIES:
+                output = run / name
+                output.mkdir()
+                (output / "stale").write_text("old output\n")
+
+            prepare_build.prepare_build(run)
+
+            self.assertTrue(metadata.is_file())
+            for name in prepare_build.OUTPUT_DIRECTORIES:
+                self.assertFalse((run / name).exists())
+
+    @patch("prepare_build.time.sleep")
+    @patch("prepare_build.shutil.rmtree")
+    def test_build_cleanup_retries_transient_nfs_failure(self, remove, sleep):
+        remove.side_effect = [
+            OSError(39, "Directory not empty"),
+            None,
+        ]
+        prepare_build.remove_output("stale", attempts=2, initial_delay=0.25)
+        self.assertEqual(remove.call_count, 2)
+        sleep.assert_called_once_with(0.25)
+
+    @patch("prepare_build.time.sleep")
+    @patch("prepare_build.shutil.rmtree")
+    def test_build_cleanup_reports_persistent_nfs_failure(self, remove, sleep):
+        remove.side_effect = OSError(39, "Directory not empty")
+        with self.assertRaisesRegex(OSError, "Directory not empty"):
+            prepare_build.remove_output("stale", attempts=3, initial_delay=0.1)
+        self.assertEqual(remove.call_count, 3)
+        self.assertEqual(sleep.call_count, 2)
 
     @patch("campaign.shutil.which", return_value=None)
     def test_run_validation_rejects_missing_dc_shell(self, _which):
