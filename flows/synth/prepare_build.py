@@ -5,10 +5,13 @@ import argparse
 import errno
 from pathlib import Path
 import shutil
+import sys
 import time
+import uuid
 
 
 OUTPUT_DIRECTORIES = ("work", "reports", "db", "netlist")
+QUARANTINE_DIRECTORY = ".stale-synthesis"
 RETRYABLE_ERRNOS = {errno.EBUSY, errno.ENOTEMPTY, errno.ESTALE}
 
 
@@ -29,11 +32,35 @@ def remove_output(path, attempts=6, initial_delay=0.1):
             time.sleep(initial_delay * (2 ** attempt))
 
 
+def quarantine_output(path, quarantine_root):
+    path = Path(path)
+    quarantine_root = Path(quarantine_root)
+    quarantine_root.mkdir(parents=True, exist_ok=True)
+    destination = quarantine_root / f"{path.name}-{uuid.uuid4().hex}"
+    path.rename(destination)
+    try:
+        remove_output(destination, attempts=2)
+    except OSError as error:
+        if error.errno not in RETRYABLE_ERRNOS:
+            raise
+        print(
+            f"Warning: retained busy synthesis output at {destination}: {error}",
+            file=sys.stderr,
+        )
+    return destination
+
+
 def prepare_build(build_dir):
     build_dir = Path(build_dir)
     build_dir.mkdir(parents=True, exist_ok=True)
     for name in OUTPUT_DIRECTORIES:
-        remove_output(build_dir / name)
+        output = build_dir / name
+        try:
+            remove_output(output)
+        except OSError as error:
+            if error.errno not in RETRYABLE_ERRNOS:
+                raise
+            quarantine_output(output, build_dir / QUARANTINE_DIRECTORY)
 
 
 def main():

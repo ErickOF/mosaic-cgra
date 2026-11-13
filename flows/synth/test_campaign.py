@@ -1,6 +1,7 @@
 """Self-contained checks for the MOSAIC synthesis campaign driver."""
 
 import argparse
+import errno
 import json
 from pathlib import Path
 import tempfile
@@ -130,6 +131,18 @@ class CampaignReportTest(unittest.TestCase):
             log.write_text("first\n\nsecond\nthird\n")
             self.assertEqual(campaign.log_excerpt(log, line_count=2), ["second", "third"])
 
+    def test_log_excerpt_prioritizes_root_diagnostics(self):
+        with tempfile.TemporaryDirectory() as directory:
+            log = Path(directory) / "run.log"
+            log.write_text(
+                "header\nError: undefined symbol at design.sv:42\n" +
+                "\n".join(f"ordinary output {index}" for index in range(20)) +
+                "\nError: Cannot recover from previous errors.\nfinal line\n"
+            )
+            excerpt = campaign.log_excerpt(log, line_count=6)
+        self.assertIn("Error: undefined symbol at design.sv:42", excerpt)
+        self.assertIn("final line", excerpt)
+
     def test_build_cleanup_preserves_campaign_metadata(self):
         with tempfile.TemporaryDirectory() as directory:
             run = Path(directory)
@@ -165,6 +178,22 @@ class CampaignReportTest(unittest.TestCase):
             prepare_build.remove_output("stale", attempts=3, initial_delay=0.1)
         self.assertEqual(remove.call_count, 3)
         self.assertEqual(sleep.call_count, 2)
+
+    def test_build_cleanup_quarantines_persistent_busy_output(self):
+        with tempfile.TemporaryDirectory() as directory:
+            run = Path(directory)
+            output = run / "db"
+            output.mkdir()
+            (output / "open.nfs").write_text("busy\n")
+            busy = OSError(errno.EBUSY, "Device or resource busy")
+            with patch.object(prepare_build, "OUTPUT_DIRECTORIES", ("db",)), \
+                    patch("prepare_build.remove_output", side_effect=busy):
+                prepare_build.prepare_build(run)
+
+            self.assertFalse(output.exists())
+            quarantined = list((run / prepare_build.QUARANTINE_DIRECTORY).iterdir())
+            self.assertEqual(len(quarantined), 1)
+            self.assertTrue((quarantined[0] / "open.nfs").is_file())
 
     @patch("campaign.shutil.which", return_value=None)
     def test_run_validation_rejects_missing_dc_shell(self, _which):

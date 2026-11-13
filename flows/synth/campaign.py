@@ -545,14 +545,29 @@ def run_case(case, args, output):
     return result
 
 
+LOG_DIAGNOSTIC = re.compile(
+    r"(?:^|\s)(?:error|fatal):|synthesis failed|presto compilation terminated|cleanup failed",
+    re.IGNORECASE,
+)
+
+
 def log_excerpt(path, line_count=12):
-    """Return the useful tail of a case log without flooding campaign output."""
+    """Return root diagnostics plus a short log tail without flooding output."""
     path = Path(path)
     if not path.is_file():
         return []
     lines = [line.rstrip() for line in path.read_text(errors="replace").splitlines()
              if line.strip()]
-    return lines[-line_count:]
+    diagnostics = [line for line in lines if LOG_DIAGNOSTIC.search(line)]
+    if not diagnostics:
+        return lines[-line_count:]
+    tail_count = min(4, line_count)
+    selected = diagnostics[:max(0, line_count - tail_count)] + lines[-tail_count:]
+    excerpt = []
+    for line in selected:
+        if line not in excerpt:
+            excerpt.append(line)
+    return excerpt[:line_count]
 
 
 def csv_value(value):
