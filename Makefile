@@ -1913,7 +1913,8 @@ synth:
 
 .PHONY: rtl-forward-reference-check rtl-forward-reference-test \
 	rtl-presto-parameter-check rtl-presto-parameter-test \
-	rtl-presto-async-reset-check rtl-presto-async-reset-test rtl-presto-check rtl-presto-test
+	rtl-presto-async-reset-check rtl-presto-async-reset-test \
+	rtl-presto-declaration-check rtl-presto-declaration-test rtl-presto-check rtl-presto-test
 rtl-forward-reference-check:
 	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/flows/lint/forward_references.py"
 
@@ -1932,9 +1933,17 @@ rtl-presto-async-reset-check:
 rtl-presto-async-reset-test:
 	@cd "$(PROJECT_ROOT)/flows/lint" && "$(PYTHON_BIN)" -m unittest -v test_presto_async_reset.py
 
-rtl-presto-check: rtl-presto-parameter-check rtl-presto-async-reset-check
+rtl-presto-declaration-check:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/flows/lint/presto_declarations.py"
 
-rtl-presto-test: rtl-presto-parameter-test rtl-presto-async-reset-test
+rtl-presto-declaration-test:
+	@cd "$(PROJECT_ROOT)/flows/lint" && "$(PYTHON_BIN)" -m unittest -v test_presto_declarations.py
+
+rtl-presto-check: rtl-presto-parameter-check rtl-presto-async-reset-check \
+	rtl-presto-declaration-check
+
+rtl-presto-test: rtl-presto-parameter-test rtl-presto-async-reset-test \
+	rtl-presto-declaration-test
 
 .PHONY: synth-campaign-plan synth-campaign synth-campaign-collect synth-campaign-test
 synth-campaign-plan:
@@ -2066,6 +2075,8 @@ help:
 		'make rtl-presto-parameter-test  Test the PRESTO parameter-guard checker' \
 		'make rtl-presto-async-reset-check  Require a top-level reset if in asynchronous processes' \
 		'make rtl-presto-async-reset-test  Test the PRESTO asynchronous-reset checker' \
+		'make rtl-presto-declaration-check  Reject PRESTO declaration-order and genvar collisions' \
+		'make rtl-presto-declaration-test  Test the PRESTO declaration checker' \
 		'make synth-campaign-plan  Write and validate the complete PPA campaign' \
 		'make synth-campaign TECH_SETUP_TCL=path.tcl  Run and collect the campaign' \
 		'make synth-campaign-collect  Reparse timing, power, and area reports' \

@@ -886,7 +886,7 @@ module vct_body #(
     wire [SCALAR_ACC_DEPTH-1:0] sacc_bad;
     wire [SCALAR_ACC_DEPTH-1:0] sacc_corrected;
 
-    for (genvar a = 0; a < VECTOR_ACC_DEPTH; a++) begin : g_vacc
+    for (genvar vacc_index = 0; vacc_index < VECTOR_ACC_DEPTH; vacc_index++) begin : g_vacc
         vct_accumulator #(
             .LANES(LN),
             .WIDTH(A),
@@ -895,24 +895,24 @@ module vct_body #(
         ) u_entry (
             .i_clk(i_clk),
             .i_rstb(!clear_private),
-            .i_invalidate(context_change ? ctx.invalidate_vacc[a*LN+:LN] : {LN{1'b0}}),
-            .i_clear(context_change ? ctx.clear_vacc[a*LN+:LN] : {LN{1'b0}}),
+            .i_invalidate(context_change ? ctx.invalidate_vacc[vacc_index*LN+:LN] : {LN{1'b0}}),
+            .i_clear(context_change ? ctx.clear_vacc[vacc_index*LN+:LN] : {LN{1'b0}}),
             .i_write({LN{commit_local && destination.write_vacc &&
-                destination.vacc_write == a}} & commit_mask),
+                destination.vacc_write == vacc_index}} & commit_mask),
             .i_data(head.data),
             .i_signed(ctx.signed_mode),
             .i_saturate(ctx.saturate),
-            .o_data(vacc_data[a]),
-            .o_valid(vacc_valid[a]),
-            .o_signed(vacc_signed[a]),
-            .o_saturate(vacc_saturate[a]),
-            .o_bad(vacc_bad[a]),
-            .o_corrected(vacc_corrected[a])
+            .o_data(vacc_data[vacc_index]),
+            .o_valid(vacc_valid[vacc_index]),
+            .o_signed(vacc_signed[vacc_index]),
+            .o_saturate(vacc_saturate[vacc_index]),
+            .o_bad(vacc_bad[vacc_index]),
+            .o_corrected(vacc_corrected[vacc_index])
         );
     end
 
     if (ENABLE_REDUCTION || ENABLE_DOT_PRODUCT) begin : g_sacc
-        for (genvar a = 0; a < SCALAR_ACC_DEPTH; a++) begin : g_entry
+        for (genvar sacc_index = 0; sacc_index < SCALAR_ACC_DEPTH; sacc_index++) begin : g_entry
             vct_accumulator #(
                 .LANES(1),
                 .WIDTH(A),
@@ -921,18 +921,19 @@ module vct_body #(
             ) u_value (
                 .i_clk(i_clk),
                 .i_rstb(!clear_private),
-                .i_invalidate(context_change && ctx.invalidate_sacc[a]),
-                .i_clear(context_change && ctx.clear_sacc[a]),
-                .i_write(commit_local && destination.write_sacc && destination.sacc_write == a),
+                .i_invalidate(context_change && ctx.invalidate_sacc[sacc_index]),
+                .i_clear(context_change && ctx.clear_sacc[sacc_index]),
+                .i_write(commit_local && destination.write_sacc &&
+                    destination.sacc_write == sacc_index),
                 .i_data(commit_data[A-1:0]),
                 .i_signed(ctx.signed_mode),
                 .i_saturate(ctx.saturate),
-                .o_data(sacc_data[a*A+:A]),
-                .o_valid(sacc_valid[a]),
-                .o_signed(sacc_signed[a]),
-                .o_saturate(sacc_saturate[a]),
-                .o_bad(sacc_bad[a]),
-                .o_corrected(sacc_corrected[a])
+                .o_data(sacc_data[sacc_index*A+:A]),
+                .o_valid(sacc_valid[sacc_index]),
+                .o_signed(sacc_signed[sacc_index]),
+                .o_saturate(sacc_saturate[sacc_index]),
+                .o_bad(sacc_bad[sacc_index]),
+                .o_corrected(sacc_corrected[sacc_index])
             );
         end
     end else begin : g_no_sacc

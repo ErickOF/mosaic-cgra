@@ -248,11 +248,11 @@ module reciprocal_unit #(
         // masking. A newly detected fault flushes all queues at this edge and
         // suppresses the public response, without creating a reverse-ready loop.
         wire result_pop = active_clock && (i_result_ready === 1'b1);
+        wire [ITERATION_WIDTH-1:0] request_iterations;
+        token_t iterative_packet;
         wire finish = stage_move[LANES-1] &&
             (UNROLLED ||
             32'(phase[0]) == 2 + 2 * 32'(request_iterations));
-        wire [ITERATION_WIDTH-1:0] request_iterations;
-        token_t iterative_packet;
         assign iterative_packet = packet[0];
         assign request_iterations = iterative_packet.iterations;
         wire request_take = o_request_ready && i_request_valid === 1'b1;
