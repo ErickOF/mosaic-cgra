@@ -1185,6 +1185,7 @@ module sft_body #(
             .MAX_DEGREE(POLY_MAX_DEGREE),
             .NUM_BANKS(C * PB),
             .EVALUATION_ARCH(POLY_EVALUATION_ARCH),
+            .RESULT_SHIFT_WIDTH(8),
             .CONTEXT_ID_WIDTH(8),
             .REQUEST_TAG_WIDTH(16),
             .COEFFICIENT_PROTECTION(COEFFICIENT_PROTECTION)
@@ -1212,7 +1213,7 @@ module sft_body #(
             .i_program_x_max(programming_context.x_max[0+:INPUT_WIDTH]),
             .i_program_range_policy(programming_context.range_error),
             .i_program_round_mode(programming_context.rounding),
-            .i_program_result_shift(programming_context.shift[0+:6]),
+            .i_program_result_shift(programming_context.shift),
             .i_program_polynomial_id(programming_context.polynomial_id),
             .i_program_quality_id(4'(programming_context.quality)),
             .i_program_response_ready(reset_known && program_phase == PROGRAM_RESPONSE),

@@ -243,6 +243,12 @@ def tile_cases(families):
                     companions["MULTIPLY_OPERAND_WIDTH"] = value // 2
                 if family == "vct" and parameter == "ELEMENT_WIDTH" and value == 4:
                     companions["WRITE_SLICE_WIDTH"] = 4
+                # Depth 64 expands the VCT context image to 2,397 bits.
+                if family == "vct" and parameter == "VRF_DEPTH" and value == 64:
+                    companions["CONFIG_WORD_COUNT"] = 38
+                # Eight default 16-bit reduction elements require a 128-bit beat.
+                if family == "sft" and parameter == "REDUCTION_LANES" and value == 8:
+                    companions["SHELL_DATA_WIDTH"] = 128
                 if family == "cpt" and parameter == "PREDICATE_LANES":
                     companions["PREDICATE_WIDTH"] = value
                 parameters.update(companions)

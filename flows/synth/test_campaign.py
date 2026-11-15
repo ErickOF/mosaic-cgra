@@ -28,7 +28,9 @@ class CampaignPlanTest(unittest.TestCase):
         self.assertEqual({case["rows"] for case in arrays}, set(campaign.DEFAULT_SIZES))
 
     def test_dependent_parameter_sweeps_remain_legal(self):
-        plan = campaign.make_plan(self.args(families="bct,vct,cpt", applications="ai", sizes="2"))
+        plan = campaign.make_plan(
+            self.args(families="bct,vct,sft,cpt", applications="ai", sizes="2")
+        )
         cases = {case["id"]: case for case in plan["cases"]}
         self.assertEqual(cases["tile-bct-data-width-2"]["parameters"],
                          {"DATA_WIDTH": 2, "MULTIPLY_OPERAND_WIDTH": 1})
@@ -38,6 +40,10 @@ class CampaignPlanTest(unittest.TestCase):
                          {"DATA_WIDTH": 16, "MULTIPLY_OPERAND_WIDTH": 8})
         self.assertEqual(cases["tile-vct-element-width-4"]["parameters"],
                          {"ELEMENT_WIDTH": 4, "WRITE_SLICE_WIDTH": 4})
+        self.assertEqual(cases["tile-vct-vrf-depth-64"]["parameters"],
+                         {"VRF_DEPTH": 64, "CONFIG_WORD_COUNT": 38})
+        self.assertEqual(cases["tile-sft-reduction-lanes-8"]["parameters"],
+                         {"REDUCTION_LANES": 8, "SHELL_DATA_WIDTH": 128})
         self.assertEqual(cases["tile-cpt-predicate-lanes-16"]["parameters"],
                          {"PREDICATE_LANES": 16, "PREDICATE_WIDTH": 16})
         document = campaign.flavor_document("balanced", 2)
