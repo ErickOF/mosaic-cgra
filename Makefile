@@ -2086,6 +2086,10 @@ help:
 		'make app-browser-check  Check the editor in Chromium (optional Playwright)' \
 		'make app-flavor-regression SIM=icarus  Run exported RTL through Python/PyUVM' \
 		'make flavor-generate FLAVOR=path.toml  Generate an isolated RTL bundle' \
+		'make thesis-plan     Write the E0–E10 inventory and frozen thesis inputs' \
+		'make thesis-run SIM=icarus  Execute flat-grid kernels and modeled domains' \
+		'make thesis-report   Regenerate thesis CSV, tables and domain timelines' \
+		'make thesis-test     Check references, evidence and composition selection' \
 		'make setup           Install pinned PyUVM and cocotb into .venv' \
 		'make [pyuvm|sim]     Run PyUVM with VCS (default: counter)' \
 		'make counter-regression  Run the counter specification matrix with PyUVM' \
@@ -2491,3 +2495,17 @@ flavor-validate:
 flavor-generate:
 	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/src/gen/flavor/generate.py" \
 		--flavor "$(FLAVOR)" --output-root "$(APP_OUTPUT_ROOT)"
+
+# Thesis E0–E10 inventory, native flat-grid kernels and modeled power domains.
+THESIS_BUILD ?= $(PROJECT_ROOT)/build/thesis
+THESIS_ARGS ?=
+.PHONY: thesis-plan thesis-run thesis-report thesis-test
+thesis-plan:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/experiments/thesis/run.py" plan --output "$(THESIS_BUILD)"
+thesis-run:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/experiments/thesis/run.py" run --output "$(THESIS_BUILD)" \
+		--sim "$(SIM)" $(THESIS_ARGS)
+thesis-report:
+	@"$(PYTHON_BIN)" "$(PROJECT_ROOT)/experiments/thesis/run.py" report --output "$(THESIS_BUILD)"
+thesis-test:
+	@"$(PYTHON_BIN)" -m unittest discover -s "$(PROJECT_ROOT)/experiments/thesis/checks" -v

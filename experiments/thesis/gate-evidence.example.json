@@ -1,0 +1,26 @@
+{
+  "schema": "mosaic-thesis-gate-evidence-v1",
+  "build_id": "COPY_FROM_RUN_SUMMARY",
+  "input_sha256": "COPY_FROM_RUN_SUMMARY",
+  "scenario_id": "COPY_FROM_RUN_SUMMARY",
+  "operating_point": {
+    "technology": "SET_TECHNOLOGY_AND_LIBRARY_REVISION",
+    "library_corner": "SET_PROCESS_TEMPERATURE_AND_PARASITIC_CORNER",
+    "voltage_v": null,
+    "clock_period_ns": null,
+    "memory_model": "SET_MACRO_OR_MAPPED_MEMORY_TREATMENT",
+    "simulator_version": "SET_VCS_VERSION",
+    "power_tool_version": "SET_PRIMETIME_VERSION"
+  },
+  "timing": {"status": "NOT_RUN", "worst_slack_ns": null},
+  "artifacts": {
+    "netlist": {"path": "design.v", "sha256": "SET_SHA256"},
+    "sdc": {"path": "design.sdc", "sha256": "SET_SHA256"},
+    "saif": {"path": "kernel.saif", "sha256": "SET_SHA256"},
+    "power_summary": {"path": "power/summary.json", "sha256": "SET_SHA256"},
+    "gate_functional": {"path": "gate/functional.json", "sha256": "SET_SHA256"},
+    "timing_report": {"path": "timing.rpt", "sha256": "SET_SHA256"},
+    "activity_report": {"path": "power/reports/activity.rpt", "sha256": "SET_SHA256"},
+    "unannotated_report": {"path": "power/reports/activity_unannotated.rpt", "sha256": "SET_SHA256"}
+  }
+}

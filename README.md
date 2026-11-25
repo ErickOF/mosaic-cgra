@@ -1,5 +1,10 @@
 # Mosaic CGRA
 
+Run the [thesis experiment campaign](experiments/thesis/README.md) with
+`make thesis-plan`, `make thesis-run SIM=icarus` and `make thesis-report`.
+It records E0–E10, end-to-end native kernels, modeled power-domain scheduling,
+reproducible artifacts and explicit quantitative prerequisites.
+
 Start with the [MOSAIC guide, from bottom to top](doc/mosaic/README.md): common
 cells, reusable execution blocks, native tiles, the flat grid, hardware generation,
 runtime programming and platform integration. It includes diagrams, a complete

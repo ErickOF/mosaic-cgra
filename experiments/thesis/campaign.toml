@@ -1,0 +1,134 @@
+schema = "mosaic-thesis-campaign-v1"
+seed = 20261124
+clock_period_ns = 10
+rows = 4
+cols = 4
+scratchpad_banks = 8
+scratchpad_bank_words = 32
+mst_positions = [[0, 1], [3, 2]]
+candidate_vct_counts = [2, 4, 6]
+candidate_placements = ["near", "far"]
+
+[workloads.axpy]
+coefficient = -3
+element_width = 8
+accumulator_width = 32
+signed = true
+overflow = "wrap"
+characterization_sizes = [8, 9]
+reserved_sizes = [12, 13]
+
+[workloads.copy]
+element_bytes = 4
+characterization_sizes = [8]
+reserved_sizes = [13]
+source_stride = 8
+destination_stride = 12
+
+[workloads.dot]
+element_width = 8
+accumulator_width = 32
+signed = true
+overflow = "wrap"
+characterization_sizes = [8]
+reserved_sizes = [13]
+
+[workloads.fir]
+element_width = 8
+accumulator_width = 32
+signed = true
+overflow = "wrap"
+coefficients = [2, -1, 3]
+characterization_sizes = [8]
+reserved_sizes = [13]
+
+[[experiments]]
+id = "E0"
+title = "End-to-end flat-grid kernels"
+contrasts = ["H/M", "full/tail", "unpaused/backpressure"]
+metrics = ["verified_outputs", "kernel_cycles", "committed_bytes", "transfers"]
+executor = "rtl"
+
+[[experiments]]
+id = "D0"
+title = "Two domains and two scheduling scenarios"
+contrasts = ["always_on/phase_aware", "copy/axpy", "idle/pending_work"]
+metrics = ["verified_outputs", "wake_cycles", "off_cycles", "drain_cycles"]
+executor = "rtl_power_model"
+
+[[experiments]]
+id = "E1"
+title = "Composition by activity mechanisms"
+contrasts = ["H0/H1/M0/M1", "difference_of_differences"]
+metrics = ["energy_kernel_j", "kernel_time_s", "area"]
+executor = "pending"
+requires = ["Defined, independently controllable activity profiles", "Common mapped netlists and operating point", "Windowed kernel activity and licensed power analysis"]
+
+[[experiments]]
+id = "E2"
+title = "RTL activity ablations"
+contrasts = ["clock", "operand_isolation", "write_suppression", "continuous/bursty/waiting"]
+metrics = ["resume_cycles", "energy_kernel_j", "kernel_time_s", "area"]
+executor = "pending"
+requires = ["Independent RTL controls for each mechanism; current native suppression is structural", "Gate-level mechanism verification and transaction equivalence"]
+
+[[experiments]]
+id = "E3"
+title = "Vector occupancy"
+contrasts = ["full/partial_tail"]
+metrics = ["active_lanes", "masked_lanes", "energy_per_output_j", "kernel_time_s"]
+executor = "E0"
+requires = ["Matched, validated kernel-window power reports for energy"]
+
+[[experiments]]
+id = "E4"
+title = "Scratchpad bank access patterns"
+contrasts = ["distributed/concentrated"]
+metrics = ["bank_accesses", "bank_conflicts", "wait_cycles", "energy_kernel_j", "kernel_time_s"]
+executor = "rtl"
+
+[[experiments]]
+id = "E5"
+title = "Legal route lengths"
+contrasts = ["short/detour"]
+metrics = ["hops", "transfers", "wait_cycles", "energy_kernel_j", "kernel_time_s"]
+executor = "rtl"
+
+[[experiments]]
+id = "E6"
+title = "Instrumentation updates"
+contrasts = ["body_counters_on/body_counters_off"]
+metrics = ["observed_body_retirements", "counter_retirements", "energy_kernel_j", "kernel_time_s"]
+executor = "rtl"
+scope = "Body context monitor bit only; shell and memory accounting remain enabled."
+
+[[experiments]]
+id = "E7"
+title = "Configuration residency"
+contrasts = ["reload/resident"]
+metrics = ["configuration_cycles", "kernel_cycles", "reuses", "energy_config_j", "amortized_energy_j"]
+executor = "rtl"
+
+[[experiments]]
+id = "E8"
+title = "Mapping criterion"
+contrasts = ["estimated_time/estimated_energy"]
+metrics = ["search_time_s", "candidate_count", "same_selection", "energy_kernel_j", "kernel_time_s"]
+executor = "pending"
+requires = ["Calibrated operation, memory, link and idle costs", "One frozen legal candidate set and search budget", "Execution of both selected mappings on the same netlist"]
+
+[[experiments]]
+id = "E9"
+title = "Held-out joint evaluation"
+contrasts = ["H1_performance/M1star_energy", "M1star_performance/M1star_energy"]
+metrics = ["mapping_coverage", "energy_kernel_j", "kernel_time_s", "area", "utilization"]
+executor = "pending"
+requires = ["Complete characterization energy for all six candidates", "Frozen composition, cost model and mapping rules before reserved cases"]
+
+[[experiments]]
+id = "E10"
+title = "REVAMP/HyCUBE external comparison"
+contrasts = ["MOSAIC/external"]
+metrics = ["verified_outputs", "energy_kernel_j", "kernel_time_s"]
+executor = "pending"
+requires = ["Versioned external artifact and shared kernel", "Comparable precision, technology, voltage, timing and memory treatment"]

@@ -165,8 +165,10 @@ class Fabric(legacy.Wrapper):
     port_catalog = staticmethod(ports)
 
 
-def build(d, geometry):
-    w = Fabric()
+def build(d, geometry, *, wrapper=None):
+    # Experiments may supply an explicitly recorded boundary adapter. The editor
+    # and ordinary exports keep the same opaque-payload wiring by default.
+    w = Fabric() if wrapper is None else wrapper
     for name in ("i_clk", "i_rstb", "i_enable", "i_test_mode", "i_scan_enable"):
         w.port(name, "input")
     w.port("o_cluster_id", "output", 16)
